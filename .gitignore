@@ -1,0 +1,8 @@
+build
+Drivers
+
+Makefile
+Core/Inc/rom_info.h
+roms/nes/loaded_nes_rom.c
+
+.mxproject
