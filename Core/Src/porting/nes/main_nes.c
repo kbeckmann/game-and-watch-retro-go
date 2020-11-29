@@ -21,6 +21,11 @@
 #define AUDIO_SAMPLE_RATE   (48000)
 #define AUDIO_BUFFER_LENGTH (AUDIO_SAMPLE_RATE / 60)
 
+typedef enum {
+    DMA_TRANSFER_STATE_HF = 0x00,
+    DMA_TRANSFER_STATE_TC = 0x01,
+} dma_transfer_state_t;
+
 static uint32_t audioBuffer[AUDIO_BUFFER_LENGTH];
 
 extern unsigned char cart_rom[];
@@ -33,7 +38,7 @@ static uint romCRC32;
 static int16_t pendingSamples = 0;
 static int16_t audiobuffer_emulator[AUDIO_BUFFER_LENGTH] __attribute__((section (".audio")));
 static int16_t audiobuffer_dma[AUDIO_BUFFER_LENGTH * 2] __attribute__((section (".audio")));
-static uint32_t dma_state;
+static dma_transfer_state_t dma_state;
 
 extern SAI_HandleTypeDef hsai_BlockA1;
 extern DMA_HandleTypeDef hdma_sai1_a;
@@ -113,27 +118,23 @@ void osd_wait_for_vsync()
     nes_getptr()->drawframe = (skipFrames == 0);
 
     // Wait until the audio buffer has been transmitted
-    static last_dma_state = 1;
+    static dma_transfer_state_t last_dma_state = DMA_TRANSFER_STATE_HF;
     while (dma_state != last_dma_state) {
-    __NOP();
+        __NOP();
     }
 
     lastSyncTime = get_elapsed_time();
 }
 
-
 void HAL_SAI_TxHalfCpltCallback(SAI_HandleTypeDef *hsai)
 {
-    dma_state = 1;
+    dma_state = DMA_TRANSFER_STATE_HF;
 }
 
 void HAL_SAI_TxCpltCallback(SAI_HandleTypeDef *hsai)
 {
-    dma_state = 2;
+    dma_state = DMA_TRANSFER_STATE_TC;
 }
-
-uint32_t g_freq = 440;
-uint32_t g_vol = -1;
 
 void osd_audioframe(int audioSamples)
 {
@@ -142,14 +143,13 @@ void osd_audioframe(int audioSamples)
 
     apu_process(audiobuffer_emulator, audioSamples); //get audio data
 
-    size_t offset = (dma_state == 1) ? 0 : audioSamples;
+    size_t offset = (dma_state == DMA_TRANSFER_STATE_HF) ? 0 : audioSamples;
 
     // Write to DMA buffer and lower the volume to 1/4
     for (int i = 0; i < audioSamples; i++) {
         audiobuffer_dma[i + offset] = audiobuffer_emulator[i] >> 1;
     }
 }
-
 
 void osd_blitscreen(bitmap_t *bmp)
 {
@@ -163,7 +163,7 @@ void osd_blitscreen(bitmap_t *bmp)
 
     if (delta >= 1000) {
         int fps = (10000 * frames) / delta;
-        printf("FPS: %d.%d, frames %d, skipped %d\n", fps / 10, fps % 10, frames, skippedFrames);
+        printf("FPS: %d.%d, frames %d, delta %d ms, skipped %d\n", fps / 10, fps % 10, delta, frames, skippedFrames);
         frames = 0;
         skippedFrames = 0;
         lastFPSTime = currentTime;
@@ -184,7 +184,7 @@ void osd_blitscreen(bitmap_t *bmp)
 
 void osd_getinput(void)
 {
-    uint16 pad0 = 0, pad1 = 0;
+    uint16 pad0 = 0;
 
     uint32_t buttons = buttons_get();
     if(buttons & B_GAME) pad0 |= INP_PAD_START;
@@ -196,11 +196,15 @@ void osd_getinput(void)
     if(buttons & B_A)   pad0 |= INP_PAD_A;
     if(buttons & B_B)   pad0 |= INP_PAD_B;
 
+    // Enable to log button presses
+#if 0
     static old_pad0;
     if (pad0 != old_pad0) {
         printf("pad0=%02x\n", pad0);
         old_pad0 = pad0;
     }
+#endif
+
     input_update(INP_JOYPAD0, pad0);
 }
 
