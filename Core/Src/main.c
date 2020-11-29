@@ -159,7 +159,7 @@ int main(void)
   // Initialize the external flash
 
   // SPI_MODE or QUAD_MODE
-  quad_mode_t quad_mode = SPI_MODE;
+  quad_mode_t quad_mode = QUAD_MODE;
 
   // VENDOR_MX:   MX25U8035F, Nintendo Stock Flash
   // VENDOR_ISSI: IS25WP128F, 128Mb large flash
