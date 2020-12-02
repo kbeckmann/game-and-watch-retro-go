@@ -24,7 +24,7 @@
 /* USER CODE BEGIN Includes */
 #include "buttons.h"
 #include "flash.h"
-#include "lcd.h"
+#include "gw_lcd.h"
 #include <string.h>
 /* USER CODE END Includes */
 
@@ -340,7 +340,11 @@ static void MX_LTDC_Init(void)
   pLayerCfg.WindowX1 = 320;
   pLayerCfg.WindowY0 = 0;
   pLayerCfg.WindowY1 = 240;
+#ifdef GW_LCD_MODE_LUT8
   pLayerCfg.PixelFormat = LTDC_PIXEL_FORMAT_L8;
+#else
+  pLayerCfg.PixelFormat = LTDC_PIXEL_FORMAT_RGB565;
+#endif
   pLayerCfg.Alpha = 255;
   pLayerCfg.Alpha0 = 255;
   pLayerCfg.BlendingFactor1 = LTDC_BLENDING_FACTOR1_CA;

@@ -9,7 +9,7 @@
 #include <nes_input.h>
 #include <osd.h>
 #include "buttons.h"
-#include "lcd.h"
+#include "gw_lcd.h"
 #include "rom_info.h"
 
 #define WIDTH  320

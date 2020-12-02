@@ -1,9 +1,14 @@
-#include "lcd.h"
+#include "gw_lcd.h"
 #include "stm32h7xx_hal.h"
 #include "main.h"
 
+#if GW_LCD_MODE_LUT8
 uint8_t framebuffer1[320 * 240];
 // uint8_t framebuffer2[320 * 240];
+#else
+uint16_t framebuffer1[320 * 240]  __attribute__((section (".lcd")));
+// extern uint16_t framebuffer2[320 * 240]  __attribute__((section (".lcd")));
+#endif // GW_LCD_MODE_LUT8
 
 void lcd_backlight_off() {
   HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, GPIO_PIN_RESET);

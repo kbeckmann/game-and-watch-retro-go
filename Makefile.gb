@@ -3,7 +3,7 @@
 ##########################################################################################################################
 
 # ------------------------------------------------
-# Generic Makefile.nes (based on gcc)
+# Generic Makefile.gb (based on gcc)
 #
 # ChangeLog :
 #	2017-02-10 - Several enhancements + project update mode
@@ -13,14 +13,14 @@
 ######################################
 # target
 ######################################
-TARGET = gw_retrogo_nes
+TARGET = gw_retrogo_gb
 
 
 ######################################
 # building variables
 ######################################
 # debug build?
-DEBUG = 1
+DEBUG = 0
 # optimization
 OPT = -O2 -ggdb
 
@@ -36,11 +36,12 @@ BUILD_DIR = build
 ######################################
 # C sources
 C_SOURCES =  \
-roms/nes/loaded_nes_rom.c \
+roms/gb/loaded_gb_rom.c \
 Core/Src/gw_flash.c \
 Core/Src/gw_lcd.c \
 Core/Src/gw_buttons.c \
 Core/Src/main.c \
+Core/Src/porting/gb/main_gb.c \
 Core/Src/stm32h7xx_it.c \
 Core/Src/stm32h7xx_hal_msp.c \
 Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_cortex.c \
@@ -77,62 +78,16 @@ Core/Src/porting/odroid_system.c \
 Core/Src/porting/odroid_display.c \
 Core/Src/porting/odroid_audio.c \
 Core/Src/porting/crc32.c \
-Core/Src/porting/nes/main_nes.c \
-Core/Src/porting/nes/nofrendo_stm32.c \
-retro-go-stm32/nofrendo-go/components/nofrendo/bitmap.c \
-retro-go-stm32/nofrendo-go/components/nofrendo/cpu/dis6502.c \
-retro-go-stm32/nofrendo-go/components/nofrendo/cpu/nes6502.c \
-retro-go-stm32/nofrendo-go/components/nofrendo/mappers/map000.c \
-retro-go-stm32/nofrendo-go/components/nofrendo/mappers/map001.c \
-retro-go-stm32/nofrendo-go/components/nofrendo/mappers/map002.c \
-retro-go-stm32/nofrendo-go/components/nofrendo/mappers/map003.c \
-retro-go-stm32/nofrendo-go/components/nofrendo/mappers/map004.c \
-retro-go-stm32/nofrendo-go/components/nofrendo/mappers/map005.c \
-retro-go-stm32/nofrendo-go/components/nofrendo/mappers/map007.c \
-retro-go-stm32/nofrendo-go/components/nofrendo/mappers/map008.c \
-retro-go-stm32/nofrendo-go/components/nofrendo/mappers/map009.c \
-retro-go-stm32/nofrendo-go/components/nofrendo/mappers/map010.c \
-retro-go-stm32/nofrendo-go/components/nofrendo/mappers/map011.c \
-retro-go-stm32/nofrendo-go/components/nofrendo/mappers/map015.c \
-retro-go-stm32/nofrendo-go/components/nofrendo/mappers/map016.c \
-retro-go-stm32/nofrendo-go/components/nofrendo/mappers/map018.c \
-retro-go-stm32/nofrendo-go/components/nofrendo/mappers/map019.c \
-retro-go-stm32/nofrendo-go/components/nofrendo/mappers/map024.c \
-retro-go-stm32/nofrendo-go/components/nofrendo/mappers/map032.c \
-retro-go-stm32/nofrendo-go/components/nofrendo/mappers/map033.c \
-retro-go-stm32/nofrendo-go/components/nofrendo/mappers/map034.c \
-retro-go-stm32/nofrendo-go/components/nofrendo/mappers/map040.c \
-retro-go-stm32/nofrendo-go/components/nofrendo/mappers/map041.c \
-retro-go-stm32/nofrendo-go/components/nofrendo/mappers/map042.c \
-retro-go-stm32/nofrendo-go/components/nofrendo/mappers/map046.c \
-retro-go-stm32/nofrendo-go/components/nofrendo/mappers/map050.c \
-retro-go-stm32/nofrendo-go/components/nofrendo/mappers/map064.c \
-retro-go-stm32/nofrendo-go/components/nofrendo/mappers/map065.c \
-retro-go-stm32/nofrendo-go/components/nofrendo/mappers/map066.c \
-retro-go-stm32/nofrendo-go/components/nofrendo/mappers/map070.c \
-retro-go-stm32/nofrendo-go/components/nofrendo/mappers/map073.c \
-retro-go-stm32/nofrendo-go/components/nofrendo/mappers/map075.c \
-retro-go-stm32/nofrendo-go/components/nofrendo/mappers/map078.c \
-retro-go-stm32/nofrendo-go/components/nofrendo/mappers/map079.c \
-retro-go-stm32/nofrendo-go/components/nofrendo/mappers/map085.c \
-retro-go-stm32/nofrendo-go/components/nofrendo/mappers/map087.c \
-retro-go-stm32/nofrendo-go/components/nofrendo/mappers/map093.c \
-retro-go-stm32/nofrendo-go/components/nofrendo/mappers/map094.c \
-retro-go-stm32/nofrendo-go/components/nofrendo/mappers/map160.c \
-retro-go-stm32/nofrendo-go/components/nofrendo/mappers/map162.c \
-retro-go-stm32/nofrendo-go/components/nofrendo/mappers/map193.c \
-retro-go-stm32/nofrendo-go/components/nofrendo/mappers/map228.c \
-retro-go-stm32/nofrendo-go/components/nofrendo/mappers/map229.c \
-retro-go-stm32/nofrendo-go/components/nofrendo/mappers/map231.c \
-retro-go-stm32/nofrendo-go/components/nofrendo/mappers/mapvrc.c \
-retro-go-stm32/nofrendo-go/components/nofrendo/nes/nes.c \
-retro-go-stm32/nofrendo-go/components/nofrendo/nes/nes_apu.c \
-retro-go-stm32/nofrendo-go/components/nofrendo/nes/nes_input.c \
-retro-go-stm32/nofrendo-go/components/nofrendo/nes/nes_mem.c \
-retro-go-stm32/nofrendo-go/components/nofrendo/nes/nes_mmc.c \
-retro-go-stm32/nofrendo-go/components/nofrendo/nes/nes_ppu.c \
-retro-go-stm32/nofrendo-go/components/nofrendo/nes/nes_rom.c \
-retro-go-stm32/nofrendo-go/components/nofrendo/nes/nes_state.c
+retro-go-stm32/gnuboy-go/components/gnuboy/lcd.c \
+retro-go-stm32/gnuboy-go/components/gnuboy/cpu.c \
+retro-go-stm32/gnuboy-go/components/gnuboy/debug.c \
+retro-go-stm32/gnuboy-go/components/gnuboy/emu.c \
+retro-go-stm32/gnuboy-go/components/gnuboy/hw.c \
+retro-go-stm32/gnuboy-go/components/gnuboy/loader.c \
+retro-go-stm32/gnuboy-go/components/gnuboy/mem.c \
+retro-go-stm32/gnuboy-go/components/gnuboy/rtc.c \
+retro-go-stm32/gnuboy-go/components/gnuboy/sound.c
+
 
 
 # ASM sources
@@ -183,8 +138,7 @@ AS_DEFS =
 C_DEFS =  \
 -DUSE_HAL_DRIVER \
 -DSTM32H7B0xx \
--DIS_LITTLE_ENDIAN \
--DGW_LCD_MODE_LUT8
+-DIS_LITTLE_ENDIAN
 
 
 # AS includes
@@ -201,7 +155,8 @@ C_INCLUDES =  \
 -Iretro-go-stm32/nofrendo-go/components/nofrendo/mappers \
 -Iretro-go-stm32/nofrendo-go/components/nofrendo/nes \
 -Iretro-go-stm32/nofrendo-go/components/nofrendo \
--Iretro-go-stm32/components/odroid
+-Iretro-go-stm32/components/odroid \
+-Iretro-go-stm32/gnuboy-go/components
 
 
 
@@ -244,13 +199,13 @@ vpath %.c $(sort $(dir $(C_SOURCES)))
 OBJECTS += $(addprefix $(BUILD_DIR)/,$(notdir $(ASM_SOURCES:.s=.o)))
 vpath %.s $(sort $(dir $(ASM_SOURCES)))
 
-$(BUILD_DIR)/%.o: %.c Makefile.nes | $(BUILD_DIR) 
+$(BUILD_DIR)/%.o: %.c Makefile.gb | $(BUILD_DIR) 
 	$(CC) -c $(CFLAGS) -Wa,-a,-ad,-alms=$(BUILD_DIR)/$(notdir $(<:.c=.lst)) $< -o $@
 
-$(BUILD_DIR)/%.o: %.s Makefile.nes | $(BUILD_DIR)
+$(BUILD_DIR)/%.o: %.s Makefile.gb | $(BUILD_DIR)
 	$(AS) -c $(CFLAGS) $< -o $@
 
-$(BUILD_DIR)/$(TARGET).elf: $(OBJECTS) Makefile.nes
+$(BUILD_DIR)/$(TARGET).elf: $(OBJECTS) Makefile.gb
 	$(CC) $(OBJECTS) $(LDFLAGS) -o $@
 	$(SZ) $@
 	@echo ""
