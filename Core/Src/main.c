@@ -124,6 +124,10 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
+
+  // Power pin as Input
+  HAL_PWR_DisableWakeUpPin(PWR_WAKEUP_PIN1_LOW);
+
   /* USER CODE END Init */
 
   /* Configure the system clock */

@@ -50,6 +50,7 @@ static odroid_gamepad_state_t *localJoystick = &joystick1;
 static odroid_gamepad_state_t *remoteJoystick = &joystick2;
 
 static uint32_t pause_pressed;
+static uint32_t power_pressed;
 
 static bool overscan = true;
 static uint autocrop = false;
@@ -123,7 +124,7 @@ void osd_wait_for_vsync()
     // Wait until the audio buffer has been transmitted
     static dma_transfer_state_t last_dma_state = DMA_TRANSFER_STATE_HF;
     while (dma_state == last_dma_state) {
-        __NOP();
+        __WFI();
     }
     last_dma_state = dma_state;
 
@@ -214,6 +215,29 @@ void osd_getinput(void)
         }
         pause_pressed = buttons & B_PAUSE;
     }
+
+    if (power_pressed != (buttons & B_POWER)) {
+        printf("Power toggle %d=>%d\n", power_pressed, !power_pressed);
+        power_pressed = buttons & B_POWER;
+        if (buttons & B_POWER) {
+            printf("Power PRESSED %d\n", power_pressed);
+            HAL_SAI_DMAStop(&hsai_BlockA1);
+
+            HAL_Delay(500);
+
+            // PIN1 = Power button
+            HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN1_LOW);
+
+            HAL_PWR_EnterSTANDBYMode();
+
+            // Should never reach
+            while(1) {
+                __NOP();
+            }
+        }
+    }
+
+    odroid_overlay_game_menu();
 
     // Enable to log button presses
 #if 0
