@@ -31,6 +31,7 @@
 #define B_TIME (1 << 6)
 #define B_GAME (1 << 7)
 #define B_PAUSE (1 << 8)
+#define B_POWER (1 << 9)
 
 uint32_t buttons_get() {
     bool left = HAL_GPIO_ReadPin(BTN_Left_GPIO_Port, BTN_Left_Pin) == GPIO_PIN_RESET;
@@ -42,9 +43,11 @@ uint32_t buttons_get() {
     bool time = HAL_GPIO_ReadPin(BTN_TIME_GPIO_Port, BTN_TIME_Pin) == GPIO_PIN_RESET;
     bool game = HAL_GPIO_ReadPin(BTN_GAME_GPIO_Port, BTN_GAME_Pin) == GPIO_PIN_RESET;
     bool pause = HAL_GPIO_ReadPin(BTN_PAUSE_GPIO_Port, BTN_PAUSE_Pin) == GPIO_PIN_RESET;
+    bool power = HAL_GPIO_ReadPin(BTN_PWR_GPIO_Port, BTN_PWR_Pin) == GPIO_PIN_RESET;
 
     return (
-        left | (up << 1) | (right << 2) | (down << 3) | (a << 4) | (b << 5) | (time << 6) | (game << 7) | (pause << 8)
+        left | (up << 1) | (right << 2) | (down << 3) | (a << 4) | (b << 5) |
+        (time << 6) | (game << 7) | (pause << 8) | (power << 9)
     );
 
 

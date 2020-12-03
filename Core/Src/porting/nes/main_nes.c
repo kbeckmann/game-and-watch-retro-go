@@ -27,6 +27,7 @@ typedef enum {
 } dma_transfer_state_t;
 
 static uint32_t audioBuffer[AUDIO_BUFFER_LENGTH];
+static uint32_t audio_mute;
 
 extern unsigned char cart_rom[];
 extern unsigned int cart_rom_len;
@@ -47,6 +48,8 @@ static odroid_gamepad_state_t joystick1;
 static odroid_gamepad_state_t joystick2;
 static odroid_gamepad_state_t *localJoystick = &joystick1;
 static odroid_gamepad_state_t *remoteJoystick = &joystick2;
+
+static uint32_t pause_pressed;
 
 static bool overscan = true;
 static uint autocrop = false;
@@ -119,9 +122,10 @@ void osd_wait_for_vsync()
 
     // Wait until the audio buffer has been transmitted
     static dma_transfer_state_t last_dma_state = DMA_TRANSFER_STATE_HF;
-    while (dma_state != last_dma_state) {
+    while (dma_state == last_dma_state) {
         __NOP();
     }
+    last_dma_state = dma_state;
 
     lastSyncTime = get_elapsed_time();
 }
@@ -144,6 +148,13 @@ void osd_audioframe(int audioSamples)
     apu_process(audiobuffer_emulator, audioSamples); //get audio data
 
     size_t offset = (dma_state == DMA_TRANSFER_STATE_HF) ? 0 : audioSamples;
+
+    if (audio_mute) { 
+        for (int i = 0; i < audioSamples; i++) {
+            audiobuffer_dma[i + offset] = 0;
+        }
+        return;
+    }
 
     // Write to DMA buffer and lower the volume to 1/4
     for (int i = 0; i < audioSamples; i++) {
@@ -195,6 +206,14 @@ void osd_getinput(void)
     if(buttons & B_Right)   pad0 |= INP_PAD_RIGHT;
     if(buttons & B_A)   pad0 |= INP_PAD_A;
     if(buttons & B_B)   pad0 |= INP_PAD_B;
+
+    if (pause_pressed != (buttons & B_PAUSE)) {
+        if (pause_pressed) {
+            printf("Pause pressed %d=>%d\n", audio_mute, !audio_mute);
+            audio_mute = !audio_mute;
+        }
+        pause_pressed = buttons & B_PAUSE;
+    }
 
     // Enable to log button presses
 #if 0
