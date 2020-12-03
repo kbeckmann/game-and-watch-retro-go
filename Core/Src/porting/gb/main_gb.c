@@ -14,12 +14,24 @@
 
 #define APP_ID 20
 
-#define AUDIO_SAMPLE_RATE   (32000)
-#define AUDIO_BUFFER_LENGTH (AUDIO_SAMPLE_RATE / 15 + 1)
+#define AUDIO_SAMPLE_RATE   (48000)
+#define AUDIO_BUFFER_LENGTH (AUDIO_SAMPLE_RATE / 60)
+
+typedef enum {
+    DMA_TRANSFER_STATE_HF = 0x00,
+    DMA_TRANSFER_STATE_TC = 0x01,
+} dma_transfer_state_t;
 
 #define NVS_KEY_SAVE_SRAM "sram"
 
-static int16_t audioBuffer[AUDIO_BUFFER_LENGTH * 2];
+static int16_t pendingSamples = 0;
+static int16_t audiobuffer_emulator[AUDIO_BUFFER_LENGTH * 2 * 2 * 2] __attribute__((section (".audio")));
+static int16_t audiobuffer_dma[AUDIO_BUFFER_LENGTH * 2] __attribute__((section (".audio")));
+static dma_transfer_state_t dma_state;
+
+extern SAI_HandleTypeDef hsai_BlockA1;
+extern DMA_HandleTypeDef hdma_sai1_a;
+
 
 static odroid_video_frame_t update1 = {GB_WIDTH, GB_HEIGHT, GB_WIDTH * 2, 2, 0xFF, -1, NULL, NULL, 0, {}};
 static odroid_video_frame_t update2 = {GB_WIDTH, GB_HEIGHT, GB_WIDTH * 2, 2, 0xFF, -1, NULL, NULL, 0, {}};
@@ -60,8 +72,30 @@ static void netplay_callback(netplay_event_t event, void *arg)
 //     return temp ;
 // }
 
+static uint32_t skippedFrames = 0;
+
 __attribute__((optimize("unroll-loops")))
 static inline void screen_blit(void) {
+    static uint32_t lastFPSTime = 0;
+    static uint32_t lastTime = 0;
+    static uint32_t frames = 0;
+    uint32_t currentTime = HAL_GetTick();
+    uint32_t delta = currentTime - lastFPSTime;
+
+    frames++;
+
+    if (delta >= 1000) {
+        int fps = (10000 * frames) / delta;
+        printf("FPS: %d.%d, frames %d, delta %d ms, skipped %d\n", fps / 10, fps % 10, delta, frames, skippedFrames);
+        frames = 0;
+        skippedFrames = 0;
+        lastFPSTime = currentTime;
+    }
+
+    lastTime = currentTime;
+
+
+
     int w1 = currentUpdate->width;
     int h1 = currentUpdate->height;
     int w2 = 266;
@@ -238,6 +272,16 @@ static bool advanced_settings_cb(odroid_dialog_choice_t *option, odroid_dialog_e
    return false;
 }*/
 
+void HAL_SAI_TxHalfCpltCallback(SAI_HandleTypeDef *hsai)
+{
+    dma_state = DMA_TRANSFER_STATE_HF;
+}
+
+void HAL_SAI_TxCpltCallback(SAI_HandleTypeDef *hsai)
+{
+    dma_state = DMA_TRANSFER_STATE_TC;
+}
+
 void app_main(void)
 {
     odroid_system_init(APP_ID, AUDIO_SAMPLE_RATE);
@@ -268,12 +312,16 @@ void app_main(void)
     fb.blit_func = &screen_blit;
 
     // Audio
+    memset(audiobuffer_emulator, 0, sizeof(audiobuffer_emulator));
     memset(&pcm, 0, sizeof(pcm));
     pcm.hz = AUDIO_SAMPLE_RATE;
-  	pcm.stereo = 1;
-  	pcm.len = AUDIO_BUFFER_LENGTH * 2; // count of 16bit samples (x2 for stereo)
-  	pcm.buf = (n16*)&audioBuffer;
+  	pcm.stereo = 0;
+  	pcm.len = AUDIO_BUFFER_LENGTH * 2;
+  	pcm.buf = (n16*)&audiobuffer_emulator;
   	pcm.pos = 0;
+
+    memset(audiobuffer_dma, 0, sizeof(audiobuffer_dma));
+    HAL_SAI_Transmit_DMA(&hsai_BlockA1, audiobuffer_dma, sizeof(audiobuffer_dma) / sizeof(audiobuffer_dma[0]));
 
     rg_app_desc_t *app = odroid_system_get_app();
 
@@ -342,7 +390,10 @@ void app_main(void)
         if (skipFrames == 0)
         {
             if (get_elapsed_time_since(startTime) > frameTime) skipFrames = 1;
-            if (app->speedupEnabled) skipFrames += app->speedupEnabled * 2;
+            if (app->speedupEnabled) {
+                skipFrames += app->speedupEnabled * 2;
+                skippedFrames += app->speedupEnabled * 2;
+            }
         }
         else if (skipFrames > 0)
         {
@@ -354,7 +405,23 @@ void app_main(void)
 
         if (!app->speedupEnabled)
         {
-            odroid_audio_submit(pcm.buf, pcm.pos >> 1);
+            // odroid_audio_submit(pcm.buf, pcm.pos >> 1);
+
+            size_t offset = (dma_state == DMA_TRANSFER_STATE_HF) ? 0 : AUDIO_BUFFER_LENGTH;
+
+            // Write to DMA buffer and lower the volume to 1/4
+            printf("pcm.pos pos=%d\n", pcm.pos);
+            for (int i = 0; i < AUDIO_BUFFER_LENGTH; i++) {
+                audiobuffer_dma[i + offset] = pcm.buf[i] >> 1;
+            }
+
+            // Wait until the audio buffer has been transmitted
+            static dma_transfer_state_t last_dma_state = DMA_TRANSFER_STATE_HF;
+            while (dma_state == last_dma_state) {
+                __NOP();
+            }
+            last_dma_state = dma_state;
+
         }
     }
 }
