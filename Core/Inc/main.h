@@ -55,6 +55,8 @@ void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
 
+void GW_EnterDeepSleep(void);
+
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/

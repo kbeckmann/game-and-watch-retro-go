@@ -62,6 +62,9 @@ uint8_t extflash_variable[1] __attribute__((section (".extflash_data")));
 uint8_t logbuf[1024 * 4];
 uint32_t log_idx;
 
+#define BOOT_MAGIC_STANDBY  0xfedebeda
+#define BOOT_MAGIC_RESET    0x1fa1afe1
+__attribute__((used)) __attribute__((section (".persistent"))) volatile uint32_t boot_magic;
 
 /* USER CODE END PV */
 
@@ -99,6 +102,32 @@ int _write(int file, char *ptr, int len)
 }
 #endif
 
+void GW_EnterDeepSleep(void)
+{
+  // Stop SAI DMA (audio)
+  HAL_SAI_DMAStop(&hsai_BlockA1);
+
+  // Enable wakup by PIN1, the power button
+  HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN1_LOW);
+
+  lcd_backlight_off();
+
+  // Leave a trace in RAM that we entered standby mode
+  boot_magic = BOOT_MAGIC_STANDBY;
+
+  // Delay 500ms to give us a chance to attach a debugger in case
+  // we end up in a suspend-loop.
+  HAL_Delay(500);
+
+  HAL_PWR_EnterSTANDBYMode();
+
+  // Execution stops here, this function will not return
+  while(1) {
+    __NOP();
+  }
+
+}
+
 /* USER CODE END 0 */
 
 /**
@@ -112,6 +141,21 @@ int main(void)
   for(int i = 0; i < 1000000; i++) {
     __NOP();
   }
+
+  switch (boot_magic) {
+  case BOOT_MAGIC_STANDBY:
+    printf("Boot from standby. boot_magic=0x%08x\n", boot_magic);
+    break;
+  case BOOT_MAGIC_RESET:
+    printf("Boot from warm reset. boot_magic=0x%08x\n", boot_magic);
+    break;
+  default:
+    printf("Boot from brownout? boot_magic=0x%08x\n", boot_magic);
+    break;
+  }
+
+  // Leave a trace that indicates a warm reset
+  boot_magic = BOOT_MAGIC_RESET;
 
   /* USER CODE END 1 */
 

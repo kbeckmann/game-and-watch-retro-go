@@ -255,6 +255,13 @@ SECTIONS
     __bss_end__ = _ebss;
   } >DTCMRAM
 
+  ._persistent :
+  {
+    . = ALIGN(8);
+    *(.persistent)
+    . = ALIGN(8);
+  } >DTCMRAM
+
   /* User_heap_stack section, used to check that there is enough RAM left */
   ._user_heap_stack :
   {
