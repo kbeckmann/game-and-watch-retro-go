@@ -17,7 +17,7 @@ if [[ $# -gt 1 ]]; then
     OUTFILE=$2
 fi
 
-SIZE=$(stat -c%s "$INFILE")
+SIZE=$(wc -c "$INFILE" | awk '{print $1}')
 
 echo "unsigned char cart_rom[] __attribute__((section (\".extflash_game_rom\"))) = {" > $OUTFILE
 xxd -i < "$INFILE" >> $OUTFILE
