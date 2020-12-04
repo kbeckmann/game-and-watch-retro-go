@@ -35,4 +35,4 @@ OUTPUT="$OUTPUT\n$(print_usage ram      __RAM_LENGTH__)"
 OUTPUT="$OUTPUT\n$(print_usage flash    __FLASH_LENGTH__)"
 OUTPUT="$OUTPUT\n$(print_usage extflash __EXTFLASH_LENGTH__)"
 
-echo -ne $OUTPUT | column -t -s ":"
+echo -ne $OUTPUT
