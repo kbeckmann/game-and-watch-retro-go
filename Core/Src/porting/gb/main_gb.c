@@ -115,8 +115,8 @@ static inline void screen_blit(void) {
             uint16_t b2 = screen_buf[(y2*w1)+x2];
             framebuffer1[(i*WIDTH)+j+hpad] = b2;
             // temp[(i*w2)+j] = pixels[(y2*w1)+x2] ;
-        }                
-    }                
+        }
+    }
 
 }
 
@@ -282,13 +282,17 @@ void HAL_SAI_TxCpltCallback(SAI_HandleTypeDef *hsai)
     dma_state = DMA_TRANSFER_STATE_TC;
 }
 
+// Hacky but it works: Locate the framebuffer in ITCRAM
+uint8_t gb_buffer1[GB_WIDTH * GB_HEIGHT * 2]  __attribute__((section (".itcram_data")));
+
 void app_main(void)
 {
     odroid_system_init(APP_ID, AUDIO_SAMPLE_RATE);
     odroid_system_emu_init(&LoadState, &SaveState, &netplay_callback);
 
-    update1.buffer = rg_alloc(GB_WIDTH * GB_HEIGHT * 2, MEM_ANY);
-    update2.buffer = rg_alloc(GB_WIDTH * GB_HEIGHT * 2, MEM_ANY);
+    // Hack: Use the same buffer twice
+    update1.buffer = gb_buffer1;
+    update2.buffer = gb_buffer1;
 
     //saveSRAM = odroid_settings_app_int32_get(NVS_KEY_SAVE_SRAM, 0);
     saveSRAM = false;
