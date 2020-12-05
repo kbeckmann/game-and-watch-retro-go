@@ -233,6 +233,8 @@ LDFLAGS = $(MCU) -specs=nano.specs -T$(LDSCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(BU
 # default action: build all
 all: $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET).hex $(BUILD_DIR)/$(TARGET).bin
 
+roms/nes/loaded_nes_rom.c:
+	$(error Please run ./update_nes_rom.sh to import a NES ROM file)
 
 #######################################
 # build the application

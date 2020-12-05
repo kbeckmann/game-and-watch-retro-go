@@ -188,6 +188,9 @@ LDFLAGS = $(MCU) -specs=nano.specs -T$(LDSCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(BU
 # default action: build all
 all: $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET).hex $(BUILD_DIR)/$(TARGET).bin
 
+roms/gb/loaded_gb_rom.c:
+	$(error Please run ./update_gb_rom.sh to import a GB ROM file)
+
 
 #######################################
 # build the application
