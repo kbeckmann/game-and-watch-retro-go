@@ -197,7 +197,7 @@ int main(void)
   HAL_Delay(500);
 
   lcd_init(&hspi2, &hltdc);
-  memset(framebuffer1, 0x10, sizeof(framebuffer1) / sizeof(framebuffer1[0]));
+  memset(framebuffer1, 0x10, sizeof(framebuffer1));
 
   /* USER CODE END 2 */
 
