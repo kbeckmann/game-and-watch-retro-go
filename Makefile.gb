@@ -77,7 +77,6 @@ Core/Src/porting/odroid_sdcard.c \
 Core/Src/porting/odroid_system.c \
 Core/Src/porting/odroid_display.c \
 Core/Src/porting/odroid_audio.c \
-Core/Src/porting/crc32.c \
 retro-go-stm32/gnuboy-go/components/gnuboy/lcd.c \
 retro-go-stm32/gnuboy-go/components/gnuboy/cpu.c \
 retro-go-stm32/gnuboy-go/components/gnuboy/debug.c \
