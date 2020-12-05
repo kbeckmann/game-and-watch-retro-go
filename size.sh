@@ -8,7 +8,7 @@ function get_symbol {
 	name=$1
 	objdump_cmd="$objdump -t $elf_file"
 	size=$($objdump_cmd | grep " $name" | cut -d " " -f1 | tr 'a-f' 'A-F')
-	printf "ibase=16\n$size\n" | bc
+	printf "$((16#${size}))\n"
 }
 
 function get_section_length {
