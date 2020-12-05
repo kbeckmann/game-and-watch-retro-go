@@ -41,6 +41,7 @@ void update_gamepad_state(odroid_gamepad_state_t *state, uint32_t buttons, odroi
     update_gamepad_state(out_state, buttons, ODROID_INPUT_DOWN, B_Down);
     update_gamepad_state(out_state, buttons, ODROID_INPUT_LEFT, B_Left);
     update_gamepad_state(out_state, buttons, ODROID_INPUT_START, B_GAME);
+    update_gamepad_state(out_state, buttons, ODROID_INPUT_SELECT, B_TIME);
     update_gamepad_state(out_state, buttons, ODROID_INPUT_A, B_A);
     update_gamepad_state(out_state, buttons, ODROID_INPUT_B, B_B);
     // if(buttons & B_Left)
