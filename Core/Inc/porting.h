@@ -17,12 +17,13 @@
 #define IEXTFLASH_ATTR __attribute__((section (".extflash_text")))
 #define DEXTFLASH_ATTR __attribute__((section (".extflash_data")))
 
-// #define IRAM_ATTR __attribute__((section (".extflash_text")))
-// #define DRAM_ATTR __attribute__((section (".extflash_data")))
-#define IRAM_ATTR __attribute__((section (".ram_text")))
-#define DRAM_ATTR __attribute__((section (".ram_data")))
-// #define IRAM_ATTR
-// #define DRAM_ATTR
+#ifdef PORTING_USE_EXTFLASH
+#   define IRAM_ATTR __attribute__((section (".ram_text")))
+#   define DRAM_ATTR __attribute__((section (".ram_data")))
+#else
+#   define IRAM_ATTR
+#   define DRAM_ATTR
+#endif
 
 #define rg_alloc(x, y) malloc(x)
 #define rg_free(x) free(x)
