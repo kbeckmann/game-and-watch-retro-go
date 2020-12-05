@@ -32,6 +32,7 @@ function print_usage {
 OUTPUT="$(print_usage itcram   __ITCMRAM_LENGTH__)"
 OUTPUT="$OUTPUT\n$(print_usage dtcram   __DTCMRAM_LENGTH__)"
 OUTPUT="$OUTPUT\n$(print_usage ram      __RAM_LENGTH__)"
+OUTPUT="$OUTPUT\n$(print_usage ahbram   __AHBRAM_LENGTH__)"
 OUTPUT="$OUTPUT\n$(print_usage flash    __FLASH_LENGTH__)"
 OUTPUT="$OUTPUT\n$(print_usage extflash __EXTFLASH_LENGTH__)"
 
