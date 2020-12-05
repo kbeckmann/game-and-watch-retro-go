@@ -3,8 +3,7 @@ name: Builder
 on:
   push:
     branches:
-      - master
-      - ci
+      - main
 
 
 jobs:
