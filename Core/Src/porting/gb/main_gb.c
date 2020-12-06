@@ -84,6 +84,10 @@ static void netplay_callback(netplay_event_t event, void *arg)
 
 static uint32_t skippedFrames = 0;
 
+// TODO: Move to lcd.c/h
+extern LTDC_HandleTypeDef hltdc;
+
+
 __attribute__((optimize("unroll-loops")))
 static inline void screen_blit(void) {
     static uint32_t lastFPSTime = 0;
@@ -129,7 +133,8 @@ static inline void screen_blit(void) {
         }
     }
 
-    active_framebuffer = active_framebuffer ? 1 : 0;
+    active_framebuffer = active_framebuffer ? 0 : 1;
+    HAL_LTDC_Reload(&hltdc, LTDC_RELOAD_VERTICAL_BLANKING);
 }
 
 void HAL_LTDC_ReloadEventCallback (LTDC_HandleTypeDef *hltdc) {
@@ -330,6 +335,7 @@ void app_main(void)
 
     // Video
     memset(framebuffer1, 0, sizeof(framebuffer1));
+    memset(framebuffer2, 0, sizeof(framebuffer2));
     memset(&fb, 0, sizeof(fb));
     fb.w = GB_WIDTH;
   	fb.h = GB_HEIGHT;
