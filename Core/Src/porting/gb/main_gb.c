@@ -2,6 +2,7 @@
 #include <string.h>
 
 #include "gw_lcd.h"
+#include "gw_linker.h"
 #include "gnuboy/loader.h"
 #include "gnuboy/hw.h"
 #include "gnuboy/lcd.h"
@@ -291,8 +292,13 @@ void HAL_SAI_TxCpltCallback(SAI_HandleTypeDef *hsai)
 // Hacky but it works: Locate the framebuffer in ITCRAM
 uint8_t gb_buffer1[GB_WIDTH * GB_HEIGHT * 2]  __attribute__((section (".itcram_data")));
 
+// 3 pages
+uint8_t state_save_buffer[192 * 1024] __attribute__((section (".emulator_data")));
+
 void app_main(void)
 {
+    odroid_gamepad_state_t joystick;
+
     odroid_system_init(APP_ID, AUDIO_SAMPLE_RATE);
     odroid_system_emu_init(&LoadState, &SaveState, &netplay_callback);
 
@@ -349,11 +355,16 @@ void app_main(void)
         sram_load();
     }*/
 
+    // Don't load state if the pause button is held while booting
+    odroid_input_read_gamepad(&joystick);
+    if (!joystick.values[ODROID_INPUT_VOLUME]) {
+        state_load(&__SAVE_START__, &__SAVE_END__ - &__SAVE_START__);
+    }
+
     const int frameTime = get_frame_time(60);
 
     while (true)
     {
-        odroid_gamepad_state_t joystick;
         odroid_input_read_gamepad(&joystick);
 
         /*if (joystick.values[ODROID_INPUT_MENU]) {
@@ -385,6 +396,25 @@ void app_main(void)
             if (pause_pressed) {
                 printf("Pause pressed %d=>%d\n", audio_mute, !audio_mute);
                 audio_mute = !audio_mute;
+            }
+        }
+
+        if (power_pressed != joystick.values[ODROID_INPUT_POWER]) {
+            printf("Power toggle %d=>%d\n", power_pressed, !power_pressed);
+            power_pressed = joystick.values[ODROID_INPUT_POWER];
+            if (power_pressed) {
+                printf("Power PRESSED %d\n", power_pressed);
+                HAL_SAI_DMAStop(&hsai_BlockA1);
+                lcd_backlight_off();
+
+                if(!joystick.values[ODROID_INPUT_VOLUME]) {
+                    // Always save as long as PAUSE is not pressed
+                    memset(state_save_buffer, '\x00', sizeof(state_save_buffer));
+                    state_save(state_save_buffer, sizeof(state_save_buffer));
+                    store_save(state_save_buffer, sizeof(state_save_buffer));
+                }
+
+                GW_EnterDeepSleep();
             }
         }
 

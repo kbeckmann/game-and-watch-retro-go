@@ -107,20 +107,25 @@ int _write(int file, char *ptr, int len)
 void store_save(uint8_t *data, size_t size) {
   // Sanity checks for save-game support.
   uint32_t save_size = &__SAVE_END__ - &__SAVE_START__;
-  if(save_size < 64 * 1024) {
+  if(save_size < 192 * 1024) {
     // Invalid savegame size
     return;
   }
 
   uint32_t save_address = &__SAVE_START__ - &__EXTFLASH_START__;
 
-  if(size > (64 * 1024)) {
+  if(size > (192 * 1024)) {
     // Max Save size
     Error_Handler();
   }
   OSPI_DisableMemoryMapped(&hospi1);
   OSPI_NOR_WriteEnable(&hospi1);
-  OSPI_BlockErase(&hospi1, save_address);
+  
+  uint32_t i;
+  for (i = 0; i < save_size / (64*1024); i++) {
+    OSPI_BlockErase(&hospi1, save_address + i * 64 * 1024);
+  }
+  
   OSPI_Program(&hospi1, save_address, data, size);
   OSPI_EnableMemoryMappedMode(&hospi1);
 }
