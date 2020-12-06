@@ -26,14 +26,12 @@ function print_usage {
 	usage=$(get_section_length $symbol)
 	length=$(get_symbol $length_symbol)
 	free=$(( $length - $usage ))
-	echo -e "$symbol:$usage / $length:($free bytes free)"
+	echo -e "$symbol\t$usage / $length\t($free bytes free)"
 }
 
-OUTPUT="$(print_usage itcram   __ITCMRAM_LENGTH__)"
-OUTPUT="$OUTPUT\n$(print_usage dtcram   __DTCMRAM_LENGTH__)"
-OUTPUT="$OUTPUT\n$(print_usage ram      __RAM_LENGTH__)"
-OUTPUT="$OUTPUT\n$(print_usage ahbram   __AHBRAM_LENGTH__)"
-OUTPUT="$OUTPUT\n$(print_usage flash    __FLASH_LENGTH__)"
-OUTPUT="$OUTPUT\n$(print_usage extflash __EXTFLASH_LENGTH__)"
-
-echo -ne $OUTPUT
+print_usage itcram   __ITCMRAM_LENGTH__
+print_usage dtcram   __DTCMRAM_LENGTH__
+print_usage ram      __RAM_LENGTH__
+print_usage ahbram   __AHBRAM_LENGTH__
+print_usage flash    __FLASH_LENGTH__
+print_usage extflash __EXTFLASH_LENGTH__
