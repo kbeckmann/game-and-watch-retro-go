@@ -1,5 +1,5 @@
-#ifndef _BUTTONS_H_
-#define _BUTTONS_H_
+#ifndef _GW_BUTTONS_H_
+#define _GW_BUTTONS_H_
 
 #include <stdint.h>
 
@@ -12,6 +12,7 @@
 #define B_TIME (1 << 6)
 #define B_GAME (1 << 7)
 #define B_PAUSE (1 << 8)
+#define B_POWER (1 << 9)
 
 uint32_t buttons_get();
 

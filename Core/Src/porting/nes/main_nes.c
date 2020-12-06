@@ -8,8 +8,9 @@
 #include <nes_state.h>
 #include <nes_input.h>
 #include <osd.h>
-#include "buttons.h"
+#include "gw_buttons.h"
 #include "gw_lcd.h"
+#include "gw_linker.h"
 #include "rom_info.h"
 
 #define WIDTH  320
@@ -25,6 +26,16 @@ typedef enum {
     DMA_TRANSFER_STATE_HF = 0x00,
     DMA_TRANSFER_STATE_TC = 0x01,
 } dma_transfer_state_t;
+
+#ifndef GW_LCD_MODE_LUT8
+#error "Only supports LCD LUT8 mode."
+#endif
+
+#ifdef BLIT_NEAREST
+#define blit blit_nearest
+#else
+#define blit blit_normal
+#endif
 
 static uint32_t audioBuffer[AUDIO_BUFFER_LENGTH];
 static uint32_t audio_mute;
@@ -61,6 +72,17 @@ static bool fullFrame = 0;
 static uint frameTime = 0;
 static uint32_t vsync_wait_ms = 0;
 
+static bool autoload = false;
+static uint32_t active_framebuffer = 0;
+// TODO
+extern void store_save(uint8_t *data, size_t size);
+
+
+
+// if i counted correctly this should max be 23077
+char nes_save_buffer[24000];
+
+
 
 void odroid_display_force_refresh(void)
 {
@@ -96,6 +118,7 @@ void osd_setpalette(rgb_t *pal)
 
     // color 13 is "black". Makes for a nice border.
     memset(framebuffer1, 13, sizeof(framebuffer1));
+    memset(framebuffer2, 13, sizeof(framebuffer2));
 
     odroid_display_force_refresh();
 }
@@ -171,6 +194,47 @@ void osd_audioframe(int audioSamples)
     }
 }
 
+static inline void blit_normal(bitmap_t *bmp, uint8_t *framebuffer) {
+        // LCD is 320 wide, framebuffer is only 256
+    const int hpad = (WIDTH - NES_SCREEN_WIDTH) / 2;
+
+    for (int y = 0; y < bmp->height; y++) {
+        uint8_t *row = bmp->line[y];
+        uint32 *dest = NULL;
+        if(active_framebuffer == 0) {
+            dest = &framebuffer[WIDTH * y + hpad];
+        } else {
+            dest = &framebuffer[WIDTH * y + hpad];
+        }
+        memcpy(dest, row, bmp->width);
+    }
+}
+static inline void blit_nearest(bitmap_t *bmp, uint8_t *framebuffer) {
+    int w1 = bmp->width;
+    int h1 = bmp->height;
+    int w2 = 320;
+    int h2 = h1;
+
+    int x_ratio = (int)((w1<<16)/w2) +1;
+    int y_ratio = (int)((h1<<16)/h2) +1;
+    int hpad = 0;
+    int x2, y2 ;
+
+    // This could be faster:
+    // As we are only scaling on X all the Y stuff is not really
+    // required.
+
+    for (int i=0;i<h2;i++) {
+        for (int j=0;j<w2;j++) {
+            x2 = ((j*x_ratio)>>16) ;
+            y2 = ((i*y_ratio)>>16) ;
+            uint8_t *row = bmp->line[y2];
+            uint16_t b2 = row[x2];
+            framebuffer[(i*WIDTH)+j+hpad] = b2;
+        }
+    }
+}
+
 void osd_blitscreen(bitmap_t *bmp)
 {
     static uint32_t lastFPSTime = 0;
@@ -192,14 +256,24 @@ void osd_blitscreen(bitmap_t *bmp)
 
     lastTime = currentTime;
 
-    // LCD is 320 wide, framebuffer is only 256
-    const int hpad = (WIDTH - NES_SCREEN_WIDTH) / 2;
 
     // This takes less than 1ms
-    for (int y = 0; y < bmp->height; y++) {
-        uint8_t *row = bmp->line[y];
-        uint32_t *dest = &framebuffer1[WIDTH * y + hpad];
-        memcpy(dest, row, bmp->width);
+    if(active_framebuffer == 0) {
+        blit(bmp, framebuffer1);
+        active_framebuffer = 1;
+    } else {
+        blit(bmp, framebuffer2);
+        active_framebuffer = 0;
+    }
+
+    HAL_LTDC_Reload(&hltdc, LTDC_RELOAD_VERTICAL_BLANKING);
+}
+
+void HAL_LTDC_ReloadEventCallback (LTDC_HandleTypeDef *hltdc) {
+    if(active_framebuffer == 0) {
+        HAL_LTDC_SetAddress(hltdc, framebuffer2, 0);
+    } else {
+        HAL_LTDC_SetAddress(hltdc, framebuffer1, 0);
     }
 }
 
@@ -230,7 +304,13 @@ void osd_getinput(void)
         power_pressed = buttons & B_POWER;
         if (buttons & B_POWER) {
             printf("Power PRESSED %d\n", power_pressed);
+            HAL_SAI_DMAStop(&hsai_BlockA1);
 
+            if(!(buttons & B_PAUSE)) {
+                // Always save as long as PAUSE is not pressed
+                state_save(nes_save_buffer, 24000);
+                store_save(nes_save_buffer, 24000);
+            }
 
             GW_EnterDeepSleep();
         }
@@ -264,6 +344,18 @@ uint osd_getromcrc()
 void osd_loadstate()
 {
     frameTime = get_frame_time(nes_getptr()->refresh_rate);
+    if(autoload) {
+        autoload = false;
+        uint32_t save_size = &__SAVE_END__ - &__SAVE_START__;
+        if(save_size < 64 * 1024) {
+            // no save support
+            return;
+        }
+
+        uint32_t address = &__SAVE_START__;
+        uint8_t *ptr = (uint8_t*)address;
+        state_load(ptr, 24000);
+    }
 }
 
 static bool SaveState(char *pathName)
@@ -276,10 +368,18 @@ static bool LoadState(char *pathName)
    return true;
 }
 
+
+
 int app_main(void)
 {
     odroid_system_init(APP_ID, AUDIO_SAMPLE_RATE);
     odroid_system_emu_init(&LoadState, &SaveState, NULL);
+
+    uint32_t buttons = buttons_get();
+    if(!(buttons & B_PAUSE)) {
+        // Always load the previous game except if pause is pressed
+        autoload = true;
+    }
 
     printf("app_main ROM: cart_rom_len=%ld\n", cart_rom_len);
 

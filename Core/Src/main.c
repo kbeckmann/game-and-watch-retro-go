@@ -22,9 +22,10 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "buttons.h"
-#include "flash.h"
+#include "gw_buttons.h"
+#include "gw_flash.h"
 #include "gw_lcd.h"
+#include "gw_linker.h"
 #include <string.h>
 /* USER CODE END Includes */
 
@@ -101,6 +102,28 @@ int _write(int file, char *ptr, int len)
   return len;
 }
 #endif
+
+
+void store_save(uint8_t *data, size_t size) {
+  // Sanity checks for save-game support.
+  uint32_t save_size = &__SAVE_END__ - &__SAVE_START__;
+  if(save_size < 64 * 1024) {
+    // Invalid savegame size
+    return;
+  }
+
+  uint32_t save_address = &__SAVE_START__ - &__EXTFLASH_START__;
+
+  if(size > (64 * 1024)) {
+    // Max Save size
+    Error_Handler();
+  }
+  OSPI_DisableMemoryMapped(&hospi1);
+  OSPI_NOR_WriteEnable(&hospi1);
+  OSPI_BlockErase(&hospi1, save_address);
+  OSPI_Program(&hospi1, save_address, data, size);
+  OSPI_EnableMemoryMappedMode(&hospi1);
+}
 
 void GW_EnterDeepSleep(void)
 {
@@ -209,14 +232,11 @@ int main(void)
 
   // Initialize the external flash
 
-  // SPI_MODE or QUAD_MODE
-  quad_mode_t quad_mode = QUAD_MODE;
+  // SPI_MODE or QUAD_MODE (IS25WP128F & co) or HALF_QUAD_MODE (MX25U8035F/Nintendo Stock Flash)
+  quad_mode_t quad_mode = HALF_QUAD_MODE;
 
-  // VENDOR_MX:   MX25U8035F, Nintendo Stock Flash
-  // VENDOR_ISSI: IS25WP128F, 128Mb large flash
-  spi_chip_vendor_t vendor = VENDOR_MX;
+  OSPI_Init(&hospi1, quad_mode);
 
-  OSPI_Init(&hospi1, quad_mode, vendor);
   OSPI_EnableMemoryMappedMode(&hospi1);
 
   // Copy instructions and data from extflash to axiram
@@ -362,7 +382,6 @@ static void MX_LTDC_Init(void)
   /* USER CODE END LTDC_Init 0 */
 
   LTDC_LayerCfgTypeDef pLayerCfg = {0};
-  LTDC_LayerCfgTypeDef pLayerCfg1 = {0};
 
   /* USER CODE BEGIN LTDC_Init 1 */
 
@@ -410,24 +429,6 @@ static void MX_LTDC_Init(void)
   {
     Error_Handler();
   }
-  pLayerCfg1.WindowX0 = 0;
-  pLayerCfg1.WindowX1 = 0;
-  pLayerCfg1.WindowY0 = 0;
-  pLayerCfg1.WindowY1 = 0;
-  pLayerCfg1.Alpha = 0;
-  pLayerCfg1.Alpha0 = 0;
-  pLayerCfg1.BlendingFactor1 = LTDC_BLENDING_FACTOR1_CA;
-  pLayerCfg1.BlendingFactor2 = LTDC_BLENDING_FACTOR2_CA;
-  pLayerCfg1.FBStartAdress = GFXMMU_VIRTUAL_BUFFER0_BASE;
-  pLayerCfg1.ImageWidth = 0;
-  pLayerCfg1.ImageHeight = 0;
-  pLayerCfg1.Backcolor.Blue = 0;
-  pLayerCfg1.Backcolor.Green = 0;
-  pLayerCfg1.Backcolor.Red = 0;
-  if (HAL_LTDC_ConfigLayer(&hltdc, &pLayerCfg1, 1) != HAL_OK)
-  {
-    Error_Handler();
-  }
   /* USER CODE BEGIN LTDC_Init 2 */
 
   /* USER CODE END LTDC_Init 2 */
@@ -456,7 +457,7 @@ static void MX_OCTOSPI1_Init(void)
   hospi1.Init.FifoThreshold = 4;
   hospi1.Init.DualQuad = HAL_OSPI_DUALQUAD_DISABLE;
   hospi1.Init.MemoryType = HAL_OSPI_MEMTYPE_MACRONIX;
-  hospi1.Init.DeviceSize = 20;
+  hospi1.Init.DeviceSize = 24;
   hospi1.Init.ChipSelectHighTime = 2;
   hospi1.Init.FreeRunningClock = HAL_OSPI_FREERUNCLK_DISABLE;
   hospi1.Init.ClockMode = HAL_OSPI_CLOCK_MODE_0;

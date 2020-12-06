@@ -4,7 +4,7 @@
 
 #if GW_LCD_MODE_LUT8
 uint8_t framebuffer1[320 * 240];
-// uint8_t framebuffer2[320 * 240];
+uint8_t framebuffer2[320 * 240];
 #else
 uint16_t framebuffer1[320 * 240]  __attribute__((section (".lcd")));
 // extern uint16_t framebuffer2[320 * 240]  __attribute__((section (".lcd")));

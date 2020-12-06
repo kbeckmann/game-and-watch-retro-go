@@ -1,26 +1,23 @@
-#include "flash.h"
+#include "gw_flash.h"
 
 static quad_mode_t g_quad_mode = SPI_MODE;
-static spi_chip_vendor_t g_vendor = VENDOR_MX;
 
-void set_cmd_lines(OSPI_RegularCmdTypeDef *cmd, quad_mode_t quad_mode, spi_chip_vendor_t vendor, uint8_t has_address, uint8_t has_data)
+void set_cmd_lines(OSPI_RegularCmdTypeDef *cmd, quad_mode_t quad_mode, uint8_t has_address, uint8_t has_data)
 {
   if (quad_mode == SPI_MODE) {
     cmd->InstructionMode     = HAL_OSPI_INSTRUCTION_1_LINE;
     cmd->AddressMode         = has_address ? HAL_OSPI_ADDRESS_1_LINE : HAL_OSPI_ADDRESS_NONE;
     cmd->DataMode            = has_data ? HAL_OSPI_DATA_1_LINE : HAL_OSPI_DATA_NONE;
+  } else if(quad_mode == QUAD_MODE) {
+    cmd->InstructionMode   = HAL_OSPI_INSTRUCTION_4_LINES;
+      cmd->AddressMode       = has_address ? HAL_OSPI_ADDRESS_4_LINES : HAL_OSPI_ADDRESS_NONE;
+      cmd->DataMode          = has_data ? HAL_OSPI_DATA_4_LINES : HAL_OSPI_DATA_NONE;
+  } else if(quad_mode == HALF_QUAD_MODE) {
+    cmd->InstructionMode   = HAL_OSPI_INSTRUCTION_1_LINE;
+    cmd->AddressMode       = has_address ? HAL_OSPI_ADDRESS_4_LINES : HAL_OSPI_ADDRESS_NONE;
+    cmd->DataMode          = has_data ? HAL_OSPI_DATA_4_LINES : HAL_OSPI_DATA_NONE;
   } else {
-    // QUAD_MODE
-    if (vendor == VENDOR_MX) {
-      cmd->InstructionMode   = HAL_OSPI_INSTRUCTION_1_LINE;
-      cmd->AddressMode       = has_address ? HAL_OSPI_ADDRESS_4_LINES : HAL_OSPI_ADDRESS_NONE;
-      cmd->DataMode          = has_data ? HAL_OSPI_DATA_4_LINES : HAL_OSPI_DATA_NONE;
-    } else {
-      // VENDOR_ISSI
-      cmd->InstructionMode   = HAL_OSPI_INSTRUCTION_4_LINES;
-      cmd->AddressMode       = has_address ? HAL_OSPI_ADDRESS_4_LINES : HAL_OSPI_ADDRESS_NONE;
-      cmd->DataMode          = has_data ? HAL_OSPI_DATA_4_LINES : HAL_OSPI_DATA_NONE;
-    }
+    Error_Handler();
   }
 }
 
@@ -40,10 +37,10 @@ void OSPI_ReadBytes(OSPI_HandleTypeDef *hospi, uint8_t instruction, uint8_t *dat
   sCommand.SIOOMode              = HAL_OSPI_SIOO_INST_EVERY_CMD;
   sCommand.InstructionDtrMode    = HAL_OSPI_INSTRUCTION_DTR_DISABLE;
 
-  if (g_vendor == VENDOR_ISSI) {
-    set_cmd_lines(&sCommand, g_quad_mode, g_vendor, 0, 1);
+  if(g_quad_mode == HALF_QUAD_MODE) {
+    set_cmd_lines(&sCommand, SPI_MODE, 0, 1);
   } else {
-    set_cmd_lines(&sCommand, SPI_MODE, g_vendor, 0, 1);
+    set_cmd_lines(&sCommand, g_quad_mode, 0, 1);
   }
 
   if (HAL_OSPI_Command(hospi, &sCommand, HAL_OSPI_TIMEOUT_DEFAULT_VALUE) != HAL_OK)
@@ -72,7 +69,7 @@ void OSPI_WriteBytes(OSPI_HandleTypeDef *hospi, uint8_t instruction, uint8_t dum
   sCommand.SIOOMode              = HAL_OSPI_SIOO_INST_EVERY_CMD;
   sCommand.InstructionDtrMode    = HAL_OSPI_INSTRUCTION_DTR_DISABLE;
 
-  set_cmd_lines(&sCommand, quad_mode, g_vendor, 0, len > 0);
+  set_cmd_lines(&sCommand, quad_mode, 0, len > 0);
 
   if (HAL_OSPI_Command(hospi, &sCommand, HAL_OSPI_TIMEOUT_DEFAULT_VALUE) != HAL_OK)
   {
@@ -86,9 +83,9 @@ void OSPI_WriteBytes(OSPI_HandleTypeDef *hospi, uint8_t instruction, uint8_t dum
   }
 }
 
-void OSPI_Init(OSPI_HandleTypeDef *hospi, quad_mode_t quad_mode, spi_chip_vendor_t vendor)
+void OSPI_Init(OSPI_HandleTypeDef *hospi, quad_mode_t quad_mode)
 {
-  if (vendor == VENDOR_ISSI) {
+  if (quad_mode == QUAD_MODE) {
     // Disable quad mode (will do nothing in SPI mode)
     OSPI_WriteBytes(hospi, 0xf5, 0, NULL, 0, QUAD_MODE);
     HAL_Delay(2);
@@ -102,13 +99,36 @@ void OSPI_Init(OSPI_HandleTypeDef *hospi, quad_mode_t quad_mode, spi_chip_vendor
   OSPI_WriteBytes(hospi, 0x99, 0, NULL, 0, SPI_MODE);
   HAL_Delay(20);
 
-  g_vendor = vendor;
   g_quad_mode = quad_mode;
 
-  if (quad_mode == QUAD_MODE && vendor == VENDOR_ISSI) {
-    // Enable QPI mode
-    OSPI_WriteBytes(hospi, 0x35, 0, NULL, 0, SPI_MODE);
+
+  if (quad_mode == QUAD_MODE) {
+      OSPI_WriteBytes(hospi, 0x35, 0, NULL, 0, SPI_MODE);
+  } else if(quad_mode == HALF_QUAD_MODE) {
+     // WRSR - Write Status Register
+      // Set Quad Enable bit (6) in status register. Other bits = 0.
+      uint8_t wr_status = 1<<6;
+      uint8_t rd_status = 0xff;
+
+      // Enable write to be allowed to change the status register
+      OSPI_NOR_WriteEnable(hospi);
+
+      // Loop until rd_status is updated
+      while ((rd_status & wr_status) != wr_status) {
+        OSPI_WriteBytes(hospi, 0x01, 0, wr_status, 1, SPI_MODE);
+        OSPI_ReadBytes(hospi, 0x05, &rd_status, 1);
+      }
   }
+}
+
+void OSPI_DisableMemoryMapped(OSPI_HandleTypeDef *hospi)
+{
+  HAL_OSPI_Abort(hospi);
+  // This will *ONLY* work if you absolutely don't
+  // look at the memory mapped address. 
+  // See here:
+  // https://community.st.com/s/question/0D50X00009XkaJuSAJ/stm32f7-qspi-exit-memory-mapped-mode
+  // Even having a debugger open at 0x9000_0000 will break this.
 }
 
 void OSPI_ChipErase(OSPI_HandleTypeDef *hospi)
@@ -125,7 +145,41 @@ void OSPI_ChipErase(OSPI_HandleTypeDef *hospi)
   } while((status & 0x01) == 0x01);
 }
 
+void OSPI_BlockErase(OSPI_HandleTypeDef *hospi, uint32_t address)
+{
+  uint8_t status;
+  OSPI_RegularCmdTypeDef  sCommand;
 
+  memset(&sCommand, 0x0, sizeof(sCommand));
+  sCommand.OperationType         = HAL_OSPI_OPTYPE_COMMON_CFG;
+  sCommand.FlashId               = 0;
+  sCommand.Instruction           = 0xD8; // BE
+  sCommand.InstructionSize       = HAL_OSPI_INSTRUCTION_8_BITS;
+  sCommand.Address               = address;
+  sCommand.AddressSize           = HAL_OSPI_ADDRESS_24_BITS;
+  sCommand.AlternateBytesMode    = HAL_OSPI_ALTERNATE_BYTES_NONE;
+  sCommand.NbData                = 0;
+  sCommand.DummyCycles           = 0;
+  sCommand.DQSMode               = HAL_OSPI_DQS_DISABLE;
+  sCommand.SIOOMode              = HAL_OSPI_SIOO_INST_ONLY_FIRST_CMD;
+  sCommand.InstructionDtrMode    = HAL_OSPI_INSTRUCTION_DTR_DISABLE;
+
+  if(g_quad_mode == HALF_QUAD_MODE) {
+    set_cmd_lines(&sCommand, SPI_MODE, 1, 0);
+  } else {
+    set_cmd_lines(&sCommand, g_quad_mode, 1, 0);
+  }
+
+  if (HAL_OSPI_Command(hospi, &sCommand, HAL_OSPI_TIMEOUT_DEFAULT_VALUE) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  // Wait for Write In Progress Bit to be zero
+  do {
+    OSPI_ReadBytes(hospi, 0x05, &status, 1);
+  } while((status & 0x01) == 0x01);
+}
 
 void  _OSPI_Program(OSPI_HandleTypeDef *hospi, uint32_t address, uint8_t *buffer, size_t buffer_size)
 {
@@ -146,12 +200,11 @@ void  _OSPI_Program(OSPI_HandleTypeDef *hospi, uint32_t address, uint8_t *buffer
   sCommand.SIOOMode              = HAL_OSPI_SIOO_INST_ONLY_FIRST_CMD;
   sCommand.InstructionDtrMode    = HAL_OSPI_INSTRUCTION_DTR_DISABLE;
 
-  // For MX vendor in quad mode, use the 4PP command
-  if (g_quad_mode == QUAD_MODE && g_vendor == VENDOR_MX) {
+  if(g_quad_mode == HALF_QUAD_MODE) {
     sCommand.Instruction         = 0x38; // 4PP
   }
 
-  set_cmd_lines(&sCommand, g_quad_mode, g_vendor, 1, 1);
+  set_cmd_lines(&sCommand, g_quad_mode, 1, 1);
 
   if(buffer_size > 256) {
     Error_Handler();
@@ -183,9 +236,60 @@ void  OSPI_Program(OSPI_HandleTypeDef *hospi, uint32_t address, uint8_t *buffer,
   }
 }
 
+
+void _OSPI_Read(OSPI_HandleTypeDef *hospi, uint32_t address, uint8_t *buffer, size_t buffer_size)
+{
+  uint8_t status;
+  OSPI_RegularCmdTypeDef  sCommand;
+
+  memset(&sCommand, 0x0, sizeof(sCommand));
+  sCommand.OperationType         = HAL_OSPI_OPTYPE_COMMON_CFG;
+  sCommand.FlashId               = 0;
+  sCommand.Instruction           = 0x0B; // FAST_READ
+  sCommand.InstructionSize       = HAL_OSPI_INSTRUCTION_8_BITS;
+  sCommand.Address               = address;
+  sCommand.AddressSize           = HAL_OSPI_ADDRESS_24_BITS;
+  sCommand.AlternateBytesMode    = HAL_OSPI_ALTERNATE_BYTES_NONE;
+  sCommand.NbData = buffer_size;
+  sCommand.DummyCycles           = 8;
+  sCommand.DQSMode               = HAL_OSPI_DQS_DISABLE;
+  sCommand.SIOOMode              = HAL_OSPI_SIOO_INST_ONLY_FIRST_CMD;
+  sCommand.InstructionDtrMode    = HAL_OSPI_INSTRUCTION_DTR_DISABLE;
+
+  set_cmd_lines(&sCommand, g_quad_mode, 1, 1);
+
+  if(buffer_size > 256) {
+    Error_Handler();
+  }
+
+  if (HAL_OSPI_Command(hospi, &sCommand, HAL_OSPI_TIMEOUT_DEFAULT_VALUE) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  if(HAL_OSPI_Receive(hospi, buffer, HAL_OSPI_TIMEOUT_DEFAULT_VALUE) != HAL_OK) {
+    Error_Handler();
+  }
+}
+
+void OSPI_Read(OSPI_HandleTypeDef *hospi, uint32_t address, uint8_t *buffer, size_t buffer_size)
+{
+  unsigned iterations = buffer_size / 256;
+  unsigned dest_page = address / 256;
+
+  for(int i = 0; i < iterations; i++) {
+    _OSPI_Read(hospi, (i + dest_page) * 256, buffer + (i * 256), buffer_size > 256 ? 256 : buffer_size);
+    buffer_size -= 256;
+  }
+}
+
 void  OSPI_NOR_WriteEnable(OSPI_HandleTypeDef *hospi)
 {
-  OSPI_WriteBytes(hospi, 0x06, 0, NULL, 0, g_quad_mode);
+  if(g_quad_mode == HALF_QUAD_MODE) {
+    OSPI_WriteBytes(hospi, 0x06, 0, NULL, 0, SPI_MODE);
+  } else {
+    OSPI_WriteBytes(hospi, 0x06, 0, NULL, 0, g_quad_mode);
+  }
 }
 
 
@@ -212,9 +316,9 @@ void OSPI_EnableMemoryMappedMode(OSPI_HandleTypeDef *spi) {
     .AlternateBytes = 0x00,
   };
 
-  set_cmd_lines(&sCommand, g_quad_mode, g_vendor, 1, 1);
+  set_cmd_lines(&sCommand, g_quad_mode, 1, 1);
 
-  if (g_quad_mode) {
+  if (g_quad_mode != SPI_MODE) {
     sCommand.Instruction = 0xeb;
     sCommand.DummyCycles = 6;
   }

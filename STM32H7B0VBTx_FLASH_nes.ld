@@ -65,7 +65,12 @@ __DTCMRAM_LENGTH__  = 128K;
 __RAM_LENGTH__      = 1024K;
 __AHBRAM_LENGTH__   = 128K;
 __FLASH_LENGTH__    = 128K;
-__EXTFLASH_LENGTH__ = 1024K;
+
+__EXTFLASH_START__  = 0x90000000;
+__SAVE_LENGTH__     = 128K;
+__EXTFLASH_LENGTH__ = DEFINED(LARGE_FLASH) ? 16384K - __SAVE_LENGTH__ : 1024K - __SAVE_LENGTH__ ;
+__SAVE_START__      = __EXTFLASH_START__ + __EXTFLASH_LENGTH__;
+__SAVE_END__        = __EXTFLASH_START__ + __EXTFLASH_LENGTH__ + __SAVE_LENGTH__;
 
 /* Specify the memory areas */
 MEMORY
@@ -78,7 +83,8 @@ MEMORY
 
   /* FLASH */
   FLASH    (xr ) : ORIGIN = 0x08000000, LENGTH =  128K
-  EXTFLASH (xr ) : ORIGIN = 0x90000000, LENGTH = 1024K
+  EXTFLASH (xr ) : ORIGIN = __EXTFLASH_START__, LENGTH = __EXTFLASH_LENGTH__
+  SAVEFLASH(rw) : ORIGIN =  __EXTFLASH_START__ + __EXTFLASH_LENGTH__, LENGTH = __SAVE_LENGTH__
 }
 
 
@@ -113,6 +119,18 @@ SECTIONS
     _eram_data = .;
     . = ALIGN(4);
   } >RAM AT> EXTFLASH
+
+
+  ._saveflash :
+  {
+    . = ALIGN(4);
+    . = ALIGN(64K);
+    *(.saveflash_bank_1)
+    . = ALIGN(64K);
+    *(.saveflash_bank_2)
+    __saveflash_start__ = .;
+    *(.saveflash)
+  } > SAVEFLASH
 
   ._extflash :
   {
