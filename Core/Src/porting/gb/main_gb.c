@@ -24,10 +24,16 @@ typedef enum {
 
 #define NVS_KEY_SAVE_SRAM "sram"
 
+
+static uint32_t pause_pressed;
+static uint32_t power_pressed;
+
+static dma_transfer_state_t dma_state;
+static uint32_t audio_mute;
+
 static int16_t pendingSamples = 0;
 static int16_t audiobuffer_emulator[AUDIO_BUFFER_LENGTH * 2 * 2 * 2] __attribute__((section (".audio")));
 static int16_t audiobuffer_dma[AUDIO_BUFFER_LENGTH * 2] __attribute__((section (".audio")));
-static dma_transfer_state_t dma_state;
 
 extern SAI_HandleTypeDef hsai_BlockA1;
 extern DMA_HandleTypeDef hdma_sai1_a;
@@ -374,6 +380,14 @@ void app_main(void)
         pad_set(PAD_A, joystick.values[ODROID_INPUT_A]);
         pad_set(PAD_B, joystick.values[ODROID_INPUT_B]);
 
+        if (pause_pressed != joystick.values[ODROID_INPUT_VOLUME]) {
+            pause_pressed = joystick.values[ODROID_INPUT_VOLUME];
+            if (pause_pressed) {
+                printf("Pause pressed %d=>%d\n", audio_mute, !audio_mute);
+                audio_mute = !audio_mute;
+            }
+        }
+
         emu_run(drawFrame);
 
         if (saveSRAM)
@@ -414,9 +428,15 @@ void app_main(void)
             size_t offset = (dma_state == DMA_TRANSFER_STATE_HF) ? 0 : AUDIO_BUFFER_LENGTH;
 
             // Write to DMA buffer and lower the volume to 1/4
-            printf("pcm.pos pos=%d\n", pcm.pos);
-            for (int i = 0; i < AUDIO_BUFFER_LENGTH; i++) {
-                audiobuffer_dma[i + offset] = pcm.buf[i] >> 1;
+            // printf("pcm.pos pos=%d\n", pcm.pos);
+            if (audio_mute) { 
+                for (int i = 0; i < AUDIO_BUFFER_LENGTH; i++) {
+                    audiobuffer_dma[i + offset] = 0;
+                }
+            } else {
+                for (int i = 0; i < AUDIO_BUFFER_LENGTH; i++) {
+                    audiobuffer_dma[i + offset] = pcm.buf[i] >> 1;
+                }
             }
 
             // Wait until the audio buffer has been transmitted
