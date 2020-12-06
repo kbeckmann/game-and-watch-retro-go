@@ -25,7 +25,7 @@ Currently playable
 - [x] Video support (uses RGB565 color mode)
 - [X] Mute audio
 - [X] Power button -> deep sleep (saves and loads state)
-- [ ] VSync
+- [X] VSync
 - [X] Sate saving/loading
 - [ ] Support multiple ROMs
 - [ ] OSD menu

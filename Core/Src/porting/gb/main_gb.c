@@ -51,6 +51,9 @@ static bool netplay = false;
 
 static bool saveSRAM = false;
 static int  saveSRAM_Timer = 0;
+
+static uint32_t active_framebuffer = 0;
+
 // --- MAIN
 
 
@@ -115,16 +118,26 @@ static inline void screen_blit(void) {
     //int y_ratio = (int)((h1<<16)/h2) ;
     int x2, y2 ;
     uint16_t* screen_buf = (uint16_t*)currentUpdate->buffer;
+    uint16_t *dest = active_framebuffer ? framebuffer2 : framebuffer1;
+
     for (int i=0;i<h2;i++) {
         for (int j=0;j<w2;j++) {
             x2 = ((j*x_ratio)>>16) ;
             y2 = ((i*y_ratio)>>16) ;
             uint16_t b2 = screen_buf[(y2*w1)+x2];
-            framebuffer1[(i*WIDTH)+j+hpad] = b2;
-            // temp[(i*w2)+j] = pixels[(y2*w1)+x2] ;
+            dest[(i*WIDTH)+j+hpad] = b2;
         }
     }
 
+    active_framebuffer = active_framebuffer ? 1 : 0;
+}
+
+void HAL_LTDC_ReloadEventCallback (LTDC_HandleTypeDef *hltdc) {
+    if (active_framebuffer == 0) {
+        HAL_LTDC_SetAddress(hltdc, framebuffer2, 0);
+    } else {
+        HAL_LTDC_SetAddress(hltdc, framebuffer1, 0);
+    }
 }
 
 // __attribute__((optimize("unroll-loops")))
