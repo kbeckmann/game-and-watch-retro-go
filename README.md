@@ -23,10 +23,10 @@ Currently playable
 - [x] Key input support
 - [x] Audio support (works not so well)
 - [x] Video support (uses RGB565 color mode)
-- [ ] Mute audio
-- [ ] Power button -> deep sleep (loses all memory when started)
+- [X] Mute audio
+- [X] Power button -> deep sleep (saves and loads state)
 - [ ] VSync
-- [ ] Sate saving/loading
+- [X] Sate saving/loading
 - [ ] Support multiple ROMs
 - [ ] OSD menu
 
@@ -45,9 +45,9 @@ Currently playable
 - [x] Audio support (works well)
 - [x] Video support (uses indexed colors w/ a configurable palette)
 - [x] Mute audio
-- [x] Power button -> deep sleep (loses all memory when started)
-- [ ] VSync
-- [ ] Sate saving/loading
+- [X] Power button -> deep sleep (saves and loads state)
+- [X] VSync
+- [X] Sate saving/loading
 - [ ] Support multiple ROMs
 - [ ] OSD menu
 
