@@ -6,10 +6,22 @@ Currently playable
 - GB
 - NES
 
+# How to report issues
+
+:exclamation: Please read this before reporting issues.
+
+Include the following:
+
+- Which console (NES or GB)
+- The full name of the ROM you are running, e.g. "Super_Tilt_Bro_(E).nes"
+- The git hash of this repo and the submodule. Run the following: `git describe --all --long; cd retro-go-stm32; git describe --all --long`
+
+With this information, please head over to the [Discord](https://discord.gg/vVcwrrHTNJ) and post in the #support channel. If you don't want to use discord for some reason, please create an issue.
+
 # Common steps to get build
 - Clone this repo with submodules: `git clone --recurse-submodules https://github.com/kbeckmann/game-and-watch-retro-go`
 - Clone and build `https://github.com/ghidraninja/game-and-watch-flashloader`. The 'game-and-watch-flashloader' folder must be placed in the same dir as 'game-and-watch-retro-go' folder.
-- Generate HAL and support files by opening `gw_retrogo.ioc` in `stm32cubemx` and press the `Generate` button.
+- Generate HAL and support files by opening `gw_retrogo.ioc` in `stm32cubemx` and press the `Generate` button. This will however change a couple of files, so run `git reset --hard` to recover the original contents.
 
 ## GB
 
@@ -18,6 +30,9 @@ Currently playable
 - Build `make -f Makefile.gb -j`
 - Program external flash `make -f Makefile.gb flash_extmem`
 - Program internal flash `make -f Makefile.gb flash`
+
+### Known issues (Please do not report these)
+- [ ] Audio sounds bad, glitchy
 
 ### GB Features / todo
 - [x] Key input support
@@ -51,6 +66,10 @@ Currently playable
 - [ ] Support multiple ROMs
 - [ ] OSD menu
 
+
+# Contact, discussion
+
+Please join the [Discord](https://discord.gg/vVcwrrHTNJ).
 
 # LICENSE
 This project is licensed under the GPLv2. Some components are also available under the MIT license. Respective copyrights apply to each component.
