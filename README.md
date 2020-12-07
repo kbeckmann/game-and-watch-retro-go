@@ -33,6 +33,12 @@ With this information, please head over to the [Discord](https://discord.gg/vVcw
 
 - Clone this repo with submodules: `git clone --recurse-submodules https://github.com/kbeckmann/game-and-watch-retro-go`
 - Clone and build `https://github.com/ghidraninja/game-and-watch-flashloader`. The 'game-and-watch-flashloader' folder must be placed in the same dir as 'game-and-watch-retro-go' folder.
+
+If you are a user who just wants to build and run:
+- Run `git clone --depth 1 https://github.com/STMicroelectronics/STM32CubeH7 && ln -s STM32CubeH7/Drivers Drivers`. This will take a while.
+
+
+If you are a developer:
 - Generate HAL and support files by opening `gw_retrogo.ioc` in `stm32cubemx` and press the `Generate` button. This will however change a couple of files, so run `git reset --hard` to recover the original contents.
 
 
