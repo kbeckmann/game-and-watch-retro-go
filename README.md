@@ -11,11 +11,13 @@ Currently playable
 
 :exclamation: Please read this before reporting issues.
 
-Include the following:
+You may run the script `./report_issue.sh` and follow the steps lined out, or continue reading:
+
+Please include the following:
 
 - Which console (NES or GB)
 - The full name of the ROM you are running, e.g. "Super_Tilt_Bro_(E).nes"
-- The git hash of this repo and the submodule. Run the following: `git describe --all --long; cd retro-go-stm32; git describe --all --long`
+- The git hash of this repo and the submodule. Run the following: `git describe --all --long --dirty=-dirty; cd retro-go-stm32; git describe --all --long --dirty=-dirty`
 
 With this information, please head over to the [Discord](https://discord.gg/vVcwrrHTNJ) and post in the #support channel. If you don't want to use discord for some reason, please create an issue.
 
