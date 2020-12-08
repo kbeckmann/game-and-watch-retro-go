@@ -1,6 +1,6 @@
-# WIP/POC NES (and more) Emulator for Nintendo Game and Watch
+# Emulator collection for Nintendo® Game & Watch™
 
-This is a very quick and dirty port of the [retro-go](https://github.com/ducalex/retro-go) emulator for the Nintendo Game and Watch.
+This is a very quick and dirty port of the [retro-go](https://github.com/ducalex/retro-go) emulator that is intended to run on the Nintendo® Game & Watch™ 2020 edition.
 
 Currently playable
 - GB
@@ -33,6 +33,7 @@ With this information, please head over to the [Discord](https://discord.gg/vVcw
 
 # Common building steps
 
+- In order to run this on a Nintendo® Game & Watch™ [you need to first unlock it](https://github.com/ghidraninja/game-and-watch-backup/).
 - Clone this repo with submodules: `git clone --recurse-submodules https://github.com/kbeckmann/game-and-watch-retro-go`
 - Clone and build `https://github.com/ghidraninja/game-and-watch-flashloader`. The 'game-and-watch-flashloader' folder must be placed in the same dir as 'game-and-watch-retro-go' folder.
 
