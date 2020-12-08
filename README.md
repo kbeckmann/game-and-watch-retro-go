@@ -37,6 +37,7 @@ With this information, please head over to the [Discord](https://discord.gg/vVcw
 - Clone and build `https://github.com/ghidraninja/game-and-watch-flashloader`. The 'game-and-watch-flashloader' folder must be placed in the same dir as 'game-and-watch-retro-go' folder.
 
 If you are a user who just wants to build and run:
+- `cd game-and-watch-retro-go` if you're not already in the game-and-watch-retro-go directory.
 - Run `git clone --depth 1 https://github.com/STMicroelectronics/STM32CubeH7 && ln -s STM32CubeH7/Drivers Drivers`. This will take a while.
 
 
