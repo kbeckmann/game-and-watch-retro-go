@@ -268,10 +268,6 @@ $(BUILD_DIR)/%.hex: $(BUILD_DIR)/%.elf | $(BUILD_DIR)
 	
 $(BUILD_DIR)/%.bin: $(BUILD_DIR)/%.elf | $(BUILD_DIR)
 	$(BIN) $< $@	
-	dd if=$(BUILD_DIR)/$(TARGET).bin of=$(BUILD_DIR)/$(TARGET)_flash.bin bs=1024 count=128
-	$(BIN) -j .isr_vector -j .text -j .rodata -j .ARM.extab -j .ARM -j .preinit_array -j .init_array -j .fini_array -j .data $< $(BUILD_DIR)/$(TARGET)_flash_dont_trust_this.bin
-	
-	# dd if=$(BUILD_DIR)/$(TARGET).bin of=$(BUILD_DIR)/$(TARGET)_extflash2.bin skip=2228224 bs=1024 count=1024
 	$(BIN) -j ._ram_exec -j ._extflash $< $(BUILD_DIR)/$(TARGET)_extflash.bin
 	
 $(BUILD_DIR):
@@ -282,14 +278,13 @@ $(BUILD_DIR):
 OPENOCD ?= openocd
 OCDIFACE ?= interface/stlink.cfg
 
-flash: $(BUILD_DIR)/$(TARGET).bin
-	dd if=$(BUILD_DIR)/$(TARGET).bin of=$(BUILD_DIR)/$(TARGET)_flash.bin bs=1024 count=128
-	$(OPENOCD) -f $(OCDIFACE) -c "transport select hla_swd" -f "target/stm32h7x.cfg" -c "reset_config none; program $(BUILD_DIR)/$(TARGET)_flash.bin 0x08000000 verify reset exit"
+flash: $(BUILD_DIR)/$(TARGET).elf
+	$(OPENOCD) -f $(OCDIFACE) -c "transport select hla_swd" -f "target/stm32h7x.cfg" -c "reset_config none; program $(BUILD_DIR)/$(TARGET).elf reset exit"
 .PHONY: flash
 
-flashx: $(BUILD_DIR)/$(TARGET).bin
+flashx: $(BUILD_DIR)/$(TARGET).elf
 	dd if=$(BUILD_DIR)/$(TARGET).bin of=$(BUILD_DIR)/$(TARGET)_flash.bin bs=1024 count=128
-	echo "reset_config none; program $(BUILD_DIR)/$(TARGET)_flash.bin 0x08000000 verify reset exit" | nc localhost 4444
+	echo "reset_config none; program $(BUILD_DIR)/$(TARGET).elf verify reset exit" | nc localhost 4444
 .PHONY: flashx
 
 
