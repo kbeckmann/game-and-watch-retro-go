@@ -70,6 +70,8 @@ Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_spi_ex.c \
 Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_ospi.c \
 Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_sai.c \
 Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_sai_ex.c \
+Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_rtc.c \
+Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_rtc_ex.c \
 Core/Src/porting/odroid_input.c \
 Core/Src/porting/odroid_netplay.c \
 Core/Src/porting/odroid_overlay.c \
