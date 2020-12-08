@@ -1,6 +1,7 @@
 #include <odroid_system.h>
 #include <string.h>
 
+#include "main.h"
 #include "gw_lcd.h"
 #include "gw_linker.h"
 #include "gnuboy/loader.h"
@@ -124,6 +125,9 @@ static inline void screen_blit(void) {
     uint16_t* screen_buf = (uint16_t*)currentUpdate->buffer;
     uint16_t *dest = active_framebuffer ? framebuffer2 : framebuffer1;
 
+    PROFILING_INIT(t_blit);
+    PROFILING_START(t_blit);
+
     for (int i=0;i<h2;i++) {
         for (int j=0;j<w2;j++) {
             x2 = ((j*x_ratio)>>16) ;
@@ -132,6 +136,12 @@ static inline void screen_blit(void) {
             dest[(i*WIDTH)+j+hpad] = b2;
         }
     }
+
+    PROFILING_END(t_blit);
+
+#ifdef PROFILING_ENABLED
+    printf("Blit: %d us\n", (1000000 * PROFILING_DIFF(t_blit)) / t_blit_t0.SecondFraction);
+#endif
 
     active_framebuffer = active_framebuffer ? 0 : 1;
     HAL_LTDC_Reload(&hltdc, LTDC_RELOAD_VERTICAL_BLANKING);

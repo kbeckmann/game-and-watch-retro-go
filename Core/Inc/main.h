@@ -43,10 +43,47 @@ extern "C" {
 /* Exported constants --------------------------------------------------------*/
 /* USER CODE BEGIN EC */
 
+// hacky
+extern RTC_HandleTypeDef hrtc;
+
 /* USER CODE END EC */
 
 /* Exported macro ------------------------------------------------------------*/
 /* USER CODE BEGIN EM */
+
+// #define PROFILING_ENABLED
+#ifdef PROFILING_ENABLED
+
+#define PROFILING_INIT(_t_name) \
+        RTC_TimeTypeDef _t_name##_t0; \
+        RTC_TimeTypeDef _t_name##_t1;
+
+#define PROFILING_MEASURE(_t) \
+        do { \
+          RTC_DateTypeDef _sDate; \
+          uint32_t Format = RTC_FORMAT_BIN; \
+          HAL_StatusTypeDef ret = HAL_RTC_GetTime(&hrtc, &_t, Format); \
+          HAL_RTC_GetDate(&hrtc, &_sDate, Format); \
+        } while (0)
+
+#define PROFILING_START(_t_name) PROFILING_MEASURE(_t_name##_t0)
+#define PROFILING_END(_t_name) PROFILING_MEASURE(_t_name##_t1)
+#define PROFILING_DIFF(_t_name) \
+        (\
+          (((_t_name##_t1).SecondFraction - (_t_name##_t1).SubSeconds) - ((_t_name##_t0).SecondFraction - (_t_name##_t0).SubSeconds)) \
+          + \
+          (((_t_name##_t1).Seconds - (_t_name##_t0).Seconds)) \
+        )
+
+#else
+
+#define PROFILING_INIT(_t_name)
+#define PROFILING_MEASURE(_t)
+#define PROFILING_START(_t_name)
+#define PROFILING_END(_t_name)
+#define PROFILING_DIFF(_t_name)
+
+#endif
 
 /* USER CODE END EM */
 
