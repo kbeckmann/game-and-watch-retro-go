@@ -28,6 +28,7 @@ With this information, please head over to the [Discord](https://discord.gg/vVcw
 - Did you pull but forgot to update the submodule? Run `git submodule update --init --recursive` to ensure that the submodules are in sync.
 - Always run `make -f Makefile.nes -j clean` or `make -f Makefile.gb -j clean` before building something new. The makefile should handle incremental builds, but please do this first before reporting issues.
 - It is still not working? Try the classic trouble shooting methods: Disconnect power to your debugger and G&W and connect again. Try programming the [Base](https://github.com/ghidraninja/game-and-watch-base) project first to ensure you can actually program your device.
+- If you're having issues with `make -f Makefile.nes flash_extmem`, copy 'gw_retrogo_nes.elf' and 'gw_retrogo_nes_extflash.bin' from the 'game-and-watch-retro-go/build' directory to '[game-and-watch-backup](https://github.com/ghidraninja/game-and-watch-backup/)/prebuilt' overwriting existing files. Then run 'install_pwnadventure.sh' from the game-and-watch-backup directory.
 - Still not working? Ok, head over to #support on the discord and let's see what's going on.
 
 
