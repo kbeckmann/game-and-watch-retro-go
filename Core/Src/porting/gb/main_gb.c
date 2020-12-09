@@ -2,6 +2,7 @@
 #include <string.h>
 
 #include "main.h"
+#include "bilinear.h"
 #include "gw_lcd.h"
 #include "gw_linker.h"
 #include "gnuboy/loader.h"
@@ -134,6 +135,147 @@ static inline void screen_blit(void) {
             y2 = ((i*y_ratio)>>16) ;
             uint16_t b2 = screen_buf[(y2*w1)+x2];
             dest[(i*WIDTH)+j+hpad] = b2;
+        }
+    }
+
+    PROFILING_END(t_blit);
+
+#ifdef PROFILING_ENABLED
+    printf("Blit: %d us\n", (1000000 * PROFILING_DIFF(t_blit)) / t_blit_t0.SecondFraction);
+#endif
+
+    active_framebuffer = active_framebuffer ? 0 : 1;
+    HAL_LTDC_Reload(&hltdc, LTDC_RELOAD_VERTICAL_BLANKING);
+}
+
+static void screen_blit_bilinear(void) {
+    static uint32_t lastFPSTime = 0;
+    static uint32_t lastTime = 0;
+    static uint32_t frames = 0;
+    uint32_t currentTime = HAL_GetTick();
+    uint32_t delta = currentTime - lastFPSTime;
+
+    frames++;
+
+    if (delta >= 1000) {
+        int fps = (10000 * frames) / delta;
+        printf("FPS: %d.%d, frames %d, delta %d ms, skipped %d\n", fps / 10, fps % 10, delta, frames, skippedFrames);
+        frames = 0;
+        skippedFrames = 0;
+        lastFPSTime = currentTime;
+    }
+
+    lastTime = currentTime;
+
+    int w1 = currentUpdate->width;
+    int h1 = currentUpdate->height;
+    // int w2 = 266;
+    // int h2 = 240;
+
+    int w2 = 320;
+    int h2 = 216;
+
+    int x_ratio = (int)((w1<<16)/w2) +1;
+    int y_ratio = (int)((h1<<16)/h2) +1;
+    int hpad = 0;
+    //int x_ratio = (int)((w1<<16)/w2) ;
+    //int y_ratio = (int)((h1<<16)/h2) ;
+    int x2, y2 ;
+    uint16_t* screen_buf = (uint16_t*)currentUpdate->buffer;
+    uint16_t *dest = active_framebuffer ? framebuffer2 : framebuffer1;
+
+
+    image_t dst_img;
+    dst_img.w = 320;
+    dst_img.h = 240;
+    dst_img.bpp = 2;
+    dst_img.pixels = dest;
+
+
+    image_t src_img;
+    src_img.w = currentUpdate->width;
+    src_img.h = currentUpdate->height;
+    src_img.bpp = 2;
+    src_img.pixels = currentUpdate->buffer;
+
+    float x_scale = ((float) w2) / ((float) w1);
+    float y_scale = ((float) h2) / ((float) h1);
+
+
+
+
+    PROFILING_INIT(t_blit);
+    PROFILING_START(t_blit);
+
+    imlib_draw_image(&dst_img, &src_img, hpad, 0, x_scale, y_scale, NULL, -1, 255, NULL,
+                     NULL, IMAGE_HINT_BILINEAR, NULL, NULL);
+
+    PROFILING_END(t_blit);
+
+#ifdef PROFILING_ENABLED
+    printf("Blit: %d us\n", (1000000 * PROFILING_DIFF(t_blit)) / t_blit_t0.SecondFraction);
+#endif
+
+    active_framebuffer = active_framebuffer ? 0 : 1;
+    HAL_LTDC_Reload(&hltdc, LTDC_RELOAD_VERTICAL_BLANKING);
+}
+
+
+__attribute__((optimize("unroll-loops")))
+static inline void screen_blit_jth(void) {
+    static uint32_t lastFPSTime = 0;
+    static uint32_t lastTime = 0;
+    static uint32_t frames = 0;
+    uint32_t currentTime = HAL_GetTick();
+    uint32_t delta = currentTime - lastFPSTime;
+
+    frames++;
+
+    if (delta >= 1000) {
+        int fps = (10000 * frames) / delta;
+        printf("FPS: %d.%d, frames %d, delta %d ms, skipped %d\n", fps / 10, fps % 10, delta, frames, skippedFrames);
+        frames = 0;
+        skippedFrames = 0;
+        lastFPSTime = currentTime;
+    }
+
+    lastTime = currentTime;
+
+    uint16_t* screen_buf = (uint16_t*)currentUpdate->buffer;
+    uint16_t *dest = active_framebuffer ? framebuffer2 : framebuffer1;
+
+    PROFILING_INIT(t_blit);
+    PROFILING_START(t_blit);
+
+
+    int w1 = currentUpdate->width;
+    int h1 = currentUpdate->height;
+    int w2 = 320;
+    int h2 = 240;
+
+    int y_done = 0;
+
+    int y = 0;
+
+    // Iterate on dest buf rows
+    int src_y = 0;
+    for (int y = 0; y < h2; y++) {
+        uint16_t *src_row  = &screen_buf[src_y * w1];
+        uint16_t *dest_row = &dest[y * w2];
+        if (y >= 12 && y <= (240 - 12)) {
+            for (int x = 0; x < w1; x++) {
+                dest_row[2 * x]     = src_row[x];
+                dest_row[2 * x + 1] = src_row[x];
+            }
+            if (y & 1) {
+                src_y++;
+            }
+        } else {
+            for (int x = 0; x < w1; x++) {
+                dest_row[2 * x]     = src_row[x];
+                dest_row[2 * x + 1] = src_row[x];
+            }
+            src_y++;
         }
     }
 
@@ -354,7 +496,9 @@ void app_main(void)
   	fb.ptr = currentUpdate->buffer;
   	fb.enabled = 1;
     fb.byteorder = 1;
-    fb.blit_func = &screen_blit;
+    // fb.blit_func = &screen_blit;
+    // fb.blit_func = &screen_blit_bilinear;
+    fb.blit_func = &screen_blit_jth;
 
     // Audio
     memset(audiobuffer_emulator, 0, sizeof(audiobuffer_emulator));
