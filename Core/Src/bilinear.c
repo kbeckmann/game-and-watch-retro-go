@@ -33,17 +33,6 @@ THE SOFTWARE
 
 #include "main.h"
 #include "bilinear.h"
-#include "gw_lcd.h"
-#include "gw_linker.h"
-#include "gnuboy/loader.h"
-#include "gnuboy/hw.h"
-#include "gnuboy/lcd.h"
-#include "gnuboy/cpu.h"
-#include "gnuboy/mem.h"
-#include "gnuboy/sound.h"
-#include "gnuboy/regs.h"
-#include "gnuboy/rtc.h"
-#include "gnuboy/defs.h"
 
 uint8_t row_scratch_buf[320 * 2];
 
