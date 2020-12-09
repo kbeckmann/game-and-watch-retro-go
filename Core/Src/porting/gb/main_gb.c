@@ -477,12 +477,8 @@ void pcm_submit() {
             audiobuffer_dma[i + offset] = pcm.buf[i] >> 1;
         }
     }
-    static dma_transfer_state_t last_dma_state = DMA_TRANSFER_STATE_HF;
-    while (dma_state == last_dma_state) {
-        __NOP();
-    }
-    last_dma_state = dma_state;
 }
+
 void app_main(void)
 {
     odroid_gamepad_state_t joystick;
@@ -646,6 +642,11 @@ void app_main(void)
         {
             // odroid_audio_submit(pcm.buf, pcm.pos >> 1);
             // handled in pcm_submit instead.
+            static dma_transfer_state_t last_dma_state = DMA_TRANSFER_STATE_HF;
+            while (dma_state == last_dma_state) {
+                __NOP();
+            }
+            last_dma_state = dma_state;
         }
     }
 }
