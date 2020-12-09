@@ -465,6 +465,23 @@ uint8_t gb_buffer1[GB_WIDTH * GB_HEIGHT * 2]  __attribute__((section (".itcram_d
 // 3 pages
 uint8_t state_save_buffer[192 * 1024] __attribute__((section (".emulator_data")));
 
+void pcm_submit() {
+    size_t offset = (dma_state == DMA_TRANSFER_STATE_HF) ? 0 : AUDIO_BUFFER_LENGTH;
+    if (audio_mute) {
+        for (int i = 0; i < AUDIO_BUFFER_LENGTH; i++) {
+            audiobuffer_dma[i + offset] = 0;
+        }
+    } else {
+        for (int i = 0; i < AUDIO_BUFFER_LENGTH; i++) {
+            audiobuffer_dma[i + offset] = pcm.buf[i] >> 2;
+        }
+    }
+    static dma_transfer_state_t last_dma_state = DMA_TRANSFER_STATE_HF;
+    while (dma_state == last_dma_state) {
+        __NOP();
+    }
+    last_dma_state = dma_state;
+}
 void app_main(void)
 {
     odroid_gamepad_state_t joystick;
@@ -504,10 +521,10 @@ void app_main(void)
     memset(audiobuffer_emulator, 0, sizeof(audiobuffer_emulator));
     memset(&pcm, 0, sizeof(pcm));
     pcm.hz = AUDIO_SAMPLE_RATE;
-  	pcm.stereo = 0;
-  	pcm.len = AUDIO_BUFFER_LENGTH * 2;
-  	pcm.buf = (n16*)&audiobuffer_emulator;
-  	pcm.pos = 0;
+    pcm.stereo = 0;
+    pcm.len = AUDIO_BUFFER_LENGTH;
+    pcm.buf = (n16*)&audiobuffer_emulator;
+    pcm.pos = 0;
 
     memset(audiobuffer_dma, 0, sizeof(audiobuffer_dma));
     HAL_SAI_Transmit_DMA(&hsai_BlockA1, audiobuffer_dma, sizeof(audiobuffer_dma) / sizeof(audiobuffer_dma[0]));
@@ -627,28 +644,7 @@ void app_main(void)
         if (!app->speedupEnabled)
         {
             // odroid_audio_submit(pcm.buf, pcm.pos >> 1);
-
-            size_t offset = (dma_state == DMA_TRANSFER_STATE_HF) ? 0 : AUDIO_BUFFER_LENGTH;
-
-            // Write to DMA buffer and lower the volume to 1/4
-            // printf("pcm.pos pos=%d\n", pcm.pos);
-            if (audio_mute) { 
-                for (int i = 0; i < AUDIO_BUFFER_LENGTH; i++) {
-                    audiobuffer_dma[i + offset] = 0;
-                }
-            } else {
-                for (int i = 0; i < AUDIO_BUFFER_LENGTH; i++) {
-                    audiobuffer_dma[i + offset] = pcm.buf[i] >> 1;
-                }
-            }
-
-            // Wait until the audio buffer has been transmitted
-            static dma_transfer_state_t last_dma_state = DMA_TRANSFER_STATE_HF;
-            while (dma_state == last_dma_state) {
-                __NOP();
-            }
-            last_dma_state = dma_state;
-
+            // handled in pcm_submit instead.
         }
     }
 }
