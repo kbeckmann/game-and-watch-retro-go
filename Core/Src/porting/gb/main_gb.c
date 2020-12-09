@@ -473,7 +473,7 @@ void pcm_submit() {
         }
     } else {
         for (int i = 0; i < AUDIO_BUFFER_LENGTH; i++) {
-            audiobuffer_dma[i + offset] = pcm.buf[i] >> 2;
+            audiobuffer_dma[i + offset] = pcm.buf[i] >> 1;
         }
     }
     static dma_transfer_state_t last_dma_state = DMA_TRANSFER_STATE_HF;
