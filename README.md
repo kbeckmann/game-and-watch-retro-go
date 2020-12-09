@@ -57,13 +57,12 @@ If you are a developer:
 
 ### Known issues (Please do not report these)
 
-- [ ] Audio sounds bad, glitchy
 
 
 ### GB Features / todo
 
 - [x] Key input support
-- [x] Audio support (works not so well)
+- [x] Audio support (works well!)
 - [x] Video support (uses RGB565 color mode)
 - [X] Mute audio
 - [X] Power button -> deep sleep (saves and loads state)
