@@ -26,7 +26,7 @@ With this information, please head over to the [Discord](https://discord.gg/vVcw
 
 - Do you have any changed files, even if you didn't intentionally change them? Please run `git reset --hard` to ensure an unchanged state.
 - Did you pull but forgot to update the submodule? Run `git submodule update --init --recursive` to ensure that the submodules are in sync.
-- Always run `make -f Makefile.nes -j clean` or `make -f Makefile.nes -j clean` before building something new. The makefile should handle incremental builds, but please do this first before reporting issues.
+- Always run `make -f Makefile.nes -j clean` or `make -f Makefile.gb -j clean` before building something new. The makefile should handle incremental builds, but please do this first before reporting issues.
 - It is still not working? Try the classic trouble shooting methods: Disconnect power to your debugger and G&W and connect again. Try programming the [Base](https://github.com/ghidraninja/game-and-watch-base) project first to ensure you can actually program your device.
 - Still not working? Ok, head over to #support on the discord and let's see what's going on.
 
@@ -49,7 +49,7 @@ If you are a developer:
 ## GB
 
 - Follow the common steps above
-- Import a GB ROM file: `./update_gb_rom.sh my_rom.gb``
+- Import a GB ROM file: `./update_gb_rom.sh my_rom.gb`
 - Build `make -f Makefile.gb -j`
 - Program external flash `make -f Makefile.gb flash_extmem`
 - Program internal flash `make -f Makefile.gb flash`
@@ -76,7 +76,7 @@ If you are a developer:
 ## NES
 
 - Follow the common steps above
-- Import a NES ROM file: `./update_nes_rom.sh my_rom.nes``
+- Import a NES ROM file: `./update_nes_rom.sh my_rom.nes`
 - Build `make -f Makefile.nes -j`
 - Program external flash `make -f Makefile.nes flash_extmem`
 - Program internal flash `make -f Makefile.nes flash`
