@@ -8,6 +8,7 @@
 #include <nes_state.h>
 #include <nes_input.h>
 #include <osd.h>
+#include "main.h"
 #include "gw_buttons.h"
 #include "gw_lcd.h"
 #include "gw_linker.h"
@@ -209,30 +210,39 @@ static inline void blit_normal(bitmap_t *bmp, uint8_t *framebuffer) {
         memcpy(dest, row, bmp->width);
     }
 }
+
 static inline void blit_nearest(bitmap_t *bmp, uint8_t *framebuffer) {
     int w1 = bmp->width;
     int h1 = bmp->height;
-    int w2 = 320;
+    int w2 = WIDTH;
     int h2 = h1;
 
-    int x_ratio = (int)((w1<<16)/w2) +1;
-    int y_ratio = (int)((h1<<16)/h2) +1;
-    int hpad = 0;
-    int x2, y2 ;
+    // Blit: 5581 us
+    // This can still be improved quite a bit by using aligned accesses.
 
-    // This could be faster:
-    // As we are only scaling on X all the Y stuff is not really
-    // required.
+    PROFILING_INIT(t_blit);
+    PROFILING_START(t_blit);
 
-    for (int i=0;i<h2;i++) {
-        for (int j=0;j<w2;j++) {
-            x2 = ((j*x_ratio)>>16) ;
-            y2 = ((i*y_ratio)>>16) ;
-            uint8_t *row = bmp->line[y2];
-            uint16_t b2 = row[x2];
-            framebuffer[(i*WIDTH)+j+hpad] = b2;
+    int ctr = 0;
+    for (int y = 0; y < h2; y++) {
+        uint8_t  *src_row  = bmp->line[y];
+        uint8_t *dest_row = &framebuffer[y * w2];
+        int x2 = 0;
+        for (int x = 0; x < w1; x++) {
+            uint8_t b2 = src_row[x];
+            dest_row[x2++] = b2;
+            if (ctr++ == 4) {
+                ctr = 0;
+                dest_row[x2++] = b2;
+            }
         }
     }
+
+    PROFILING_END(t_blit);
+
+#ifdef PROFILING_ENABLED
+    printf("Blit: %d us\n", (1000000 * PROFILING_DIFF(t_blit)) / t_blit_t0.SecondFraction);
+#endif
 }
 
 void osd_blitscreen(bitmap_t *bmp)

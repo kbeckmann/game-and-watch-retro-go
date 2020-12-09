@@ -37,12 +37,13 @@ BUILD_DIR = build
 # C sources
 C_SOURCES =  \
 roms/nes/loaded_nes_rom.c \
+Core/Src/bilinear.c \
+Core/Src/gw_buttons.c \
 Core/Src/gw_flash.c \
 Core/Src/gw_lcd.c \
-Core/Src/gw_buttons.c \
 Core/Src/main.c \
-Core/Src/stm32h7xx_it.c \
 Core/Src/stm32h7xx_hal_msp.c \
+Core/Src/stm32h7xx_it.c \
 Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_cortex.c \
 Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_ltdc.c \
 Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_ltdc_ex.c \
