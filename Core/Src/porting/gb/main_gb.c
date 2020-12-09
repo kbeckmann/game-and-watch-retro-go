@@ -256,13 +256,14 @@ static inline void screen_blit_jth(void) {
     int y_done = 0;
 
     int y = 0;
+    const int border = 24;
 
     // Iterate on dest buf rows
     int src_y = 0;
     for (int y = 0; y < h2; y++) {
         uint16_t *src_row  = &screen_buf[src_y * w1];
         uint16_t *dest_row = &dest[y * w2];
-        if (y >= 12 && y <= (240 - 12)) {
+        if (y >= border && y <= (240 - border)) {
             for (int x = 0; x < w1; x++) {
                 dest_row[2 * x]     = src_row[x];
                 dest_row[2 * x + 1] = src_row[x];
