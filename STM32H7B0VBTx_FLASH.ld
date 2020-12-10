@@ -65,7 +65,12 @@ __DTCMRAM_LENGTH__  = 128K;
 __RAM_LENGTH__      = 1024K;
 __AHBRAM_LENGTH__   = 128K;
 __FLASH_LENGTH__    = 128K;
-__EXTFLASH_LENGTH__ = 1024K;
+
+__EXTFLASH_START__  = 0x90000000;
+__SAVE_LENGTH__     = 192K;
+__EXTFLASH_LENGTH__ = DEFINED(LARGE_FLASH) ? 16384K - __SAVE_LENGTH__ : 1024K - __SAVE_LENGTH__ ;
+__SAVE_START__      = __EXTFLASH_START__ + __EXTFLASH_LENGTH__;
+__SAVE_END__        = __EXTFLASH_START__ + __EXTFLASH_LENGTH__ + __SAVE_LENGTH__;
 
 /* Specify the memory areas */
 MEMORY
@@ -78,7 +83,8 @@ MEMORY
 
   /* FLASH */
   FLASH    (xr ) : ORIGIN = 0x08000000, LENGTH =  128K
-  EXTFLASH (xr ) : ORIGIN = 0x90000000, LENGTH = 1024K
+  EXTFLASH (xr ) : ORIGIN = __EXTFLASH_START__, LENGTH = __EXTFLASH_LENGTH__
+  SAVEFLASH(rw) : ORIGIN =  __EXTFLASH_START__ + __EXTFLASH_LENGTH__, LENGTH = __SAVE_LENGTH__
 }
 
 
@@ -100,6 +106,7 @@ SECTIONS
   /* Data that should be copied from extflash to axiram */
   /* used by the startup to initialize data */
   _siramdata = LOADADDR(._ram_exec);
+  __extflash_start__ = LOADADDR(._ram_exec);
   ._ram_exec :
   {
     __ram_start__ = .;
@@ -113,9 +120,20 @@ SECTIONS
     . = ALIGN(4);
   } >RAM AT> EXTFLASH
 
+
+  ._saveflash :
+  {
+    . = ALIGN(4);
+    . = ALIGN(64K);
+    *(.saveflash_bank_1)
+    . = ALIGN(64K);
+    *(.saveflash_bank_2)
+    __saveflash_start__ = .;
+    *(.saveflash)
+  } > SAVEFLASH
+
   ._extflash :
   {
-    __extflash_start__ = .;
     __extflash_text_start__ = .;
     . = ALIGN(4);
     *(.extflash_text)
@@ -138,12 +156,20 @@ SECTIONS
   {
     . = ALIGN(4);
     *(.lcd)
-    *(.audio)
     *(.emulator_data)
     *(.emulator_text)
     . = ALIGN(4);
     __ram_end__ = .;
   } > RAM
+
+  ._ahbram :
+  {
+    __ahbram_start__ = .;
+    . = ALIGN(4);
+    *(.audio)
+    . = ALIGN(4);
+    __ahbram_end__ = .;
+  } > AHBRAM
 
   /* The startup code goes first into FLASH */
   .isr_vector :
@@ -245,6 +271,13 @@ SECTIONS
     . = ALIGN(4);
     _ebss = .;         /* define a global symbol at bss end */
     __bss_end__ = _ebss;
+  } >DTCMRAM
+
+  ._persistent :
+  {
+    . = ALIGN(8);
+    *(.persistent)
+    . = ALIGN(8);
   } >DTCMRAM
 
   /* User_heap_stack section, used to check that there is enough RAM left */

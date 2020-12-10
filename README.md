@@ -34,25 +34,23 @@ With this information, please head over to the [Discord](https://discord.gg/vVcw
 # Common building steps
 
 - In order to run this on a Nintendo® Game & Watch™ [you need to first unlock it](https://github.com/ghidraninja/game-and-watch-backup/).
-- Clone this repo with submodules: `git clone --recurse-submodules https://github.com/kbeckmann/game-and-watch-retro-go`
-- Clone and build `https://github.com/ghidraninja/game-and-watch-flashloader`. The 'game-and-watch-flashloader' folder must be placed in the same dir as 'game-and-watch-retro-go' folder.
-
-If you are a user who just wants to build and run:
-- `cd game-and-watch-retro-go` if you're not already in the game-and-watch-retro-go directory.
-- Run `git clone --depth 1 https://github.com/STMicroelectronics/STM32CubeH7 && ln -s STM32CubeH7/Drivers Drivers`. This will take a while.
-
+- Clone this repo with submodules:
+    - `git clone --recurse-submodules https://github.com/kbeckmann/game-and-watch-retro-go`
+- Clone and build `https://github.com/ghidraninja/game-and-watch-flashloader`.
+    - `git clone https://github.com/ghidraninja/game-and-watch-flashloader`
+    - `cd game-and-watch-flashloader`
+    - `make -j`
+- Note that `game-and-watch-flashloader` must be placed in the same directory as `game-and-watch-retro-go`, e.g. `/home/user/projects/game-and-watch-flashloader` and `/home/user/projects/game-and-watch-retro-go`.
 
 If you are a developer:
-- Generate HAL and support files by opening `gw_retrogo.ioc` in `stm32cubemx` and press the `Generate` button. This will however change a couple of files, so run `git reset --hard` to recover the original contents.
+- If you need to change the project settings and generate c-code from stm32cubemx, make sure to not have a dirty working copy as the tool will overwrite files that will need to be perhaps partially reverted. Also update Makefile.common in case new drivers are used.
 
 
 ## GB
 
 - Follow the common steps above
 - Import a GB ROM file: `./update_gb_rom.sh my_rom.gb`
-- Build `make -f Makefile.gb -j`
-- Program external flash `make -f Makefile.gb flash_extmem`
-- Program internal flash `make -f Makefile.gb flash`
+- Build and program external and internal flash: `make -f Makefile.gb -j flash_all`
 
 
 ### Known issues (Please do not report these)
@@ -76,9 +74,7 @@ If you are a developer:
 
 - Follow the common steps above
 - Import a NES ROM file: `./update_nes_rom.sh my_rom.nes`
-- Build `make -f Makefile.nes -j`
-- Program external flash `make -f Makefile.nes flash_extmem`
-- Program internal flash `make -f Makefile.nes flash`
+- Build and program external and internal flash: `make -f Makefile.nes -j flash_all`
 
 
 ### NES Features / todo
