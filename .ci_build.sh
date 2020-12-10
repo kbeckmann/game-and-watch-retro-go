@@ -3,10 +3,6 @@ set -xe
 
 sudo apt-get install -y gcc-arm-none-eabi binutils-arm-none-eabi
 
-# This is intended to be executed by the CI bot
-git clone --depth 1 https://github.com/STMicroelectronics/STM32CubeH7
-ln -s STM32CubeH7/Drivers Drivers
-
 # Would be nice to clone the repo with submodules. If you know how to do this, please make a PR!
 git submodule update --init --recursive
 
