@@ -189,7 +189,7 @@ LIBDIR =
 LDFLAGS = $(MCU) -specs=nano.specs -T$(LDSCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--gc-sections
 
 # default action: build all
-all: $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET).hex $(BUILD_DIR)/$(TARGET).bin
+all: $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET).hex $(BUILD_DIR)/$(TARGET)_extflash.bin
 
 roms/gb/loaded_gb_rom.c:
 	$(error Please run ./update_gb_rom.sh to import a GB ROM file)
@@ -222,8 +222,7 @@ $(BUILD_DIR)/$(TARGET).elf: $(OBJECTS) Makefile.gb STM32H7B0VBTx_FLASH_gb.ld
 $(BUILD_DIR)/%.hex: $(BUILD_DIR)/%.elf | $(BUILD_DIR)
 	$(HEX) $< $@
 	
-$(BUILD_DIR)/%.bin: $(BUILD_DIR)/%.elf | $(BUILD_DIR)
-	$(BIN) $< $@	
+$(BUILD_DIR)/$(TARGET)_extflash.bin: $(BUILD_DIR)/$(TARGET).elf | $(BUILD_DIR)
 	$(BIN) -j ._ram_exec -j ._extflash $< $(BUILD_DIR)/$(TARGET)_extflash.bin
 	
 $(BUILD_DIR):
@@ -239,13 +238,12 @@ flash: $(BUILD_DIR)/$(TARGET).elf
 .PHONY: flash
 
 flashx: $(BUILD_DIR)/$(TARGET).elf
-	dd if=$(BUILD_DIR)/$(TARGET).bin of=$(BUILD_DIR)/$(TARGET)_flash.bin bs=1024 count=128
 	echo "reset_config none; program $(BUILD_DIR)/$(TARGET).elf verify reset exit" | nc localhost 4444
 .PHONY: flashx
 
 
 FLASHLOADER ?= ../game-and-watch-flashloader/flash.sh
-flash_extmem: $(BUILD_DIR)/$(TARGET).bin
+flash_extmem: $(BUILD_DIR)/$(TARGET)_extflash.bin
 	$(FLASHLOADER) $(BUILD_DIR)/$(TARGET)_extflash.bin
 .PHONY: flash_extmem
 
