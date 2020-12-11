@@ -182,6 +182,9 @@ int main(void)
     __NOP();
   }
 
+  // Nullpointer redzone
+  memset(0, '\x41', &__NULLPTR_LENGTH__);
+
   switch (boot_magic) {
   case BOOT_MAGIC_STANDBY:
     printf("Boot from standby. boot_magic=0x%08x\n", boot_magic);
