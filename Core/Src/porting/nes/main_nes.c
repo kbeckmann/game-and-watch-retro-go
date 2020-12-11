@@ -77,7 +77,6 @@ static uint frameTime = 0;
 static uint32_t vsync_wait_ms = 0;
 
 static bool autoload = false;
-static uint32_t active_framebuffer = 0;
 // TODO
 extern void store_save(uint8_t *data, size_t size);
 
@@ -87,11 +86,6 @@ extern void store_save(uint8_t *data, size_t size);
 char nes_save_buffer[24000];
 
 
-
-void odroid_display_force_refresh(void)
-{
-    // forceVideoRefresh = true;
-}
 
 int osd_init()
 {

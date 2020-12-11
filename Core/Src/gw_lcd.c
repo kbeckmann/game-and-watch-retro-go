@@ -3,12 +3,14 @@
 #include "main.h"
 
 #if GW_LCD_MODE_LUT8
-uint8_t framebuffer1[320 * 240];
-uint8_t framebuffer2[320 * 240];
+uint8_t framebuffer1[GW_LCD_WIDTH * GW_LCD_HEIGHT];
+uint8_t framebuffer2[GW_LCD_WIDTH * GW_LCD_HEIGHT];
 #else
-uint16_t framebuffer1[320 * 240]  __attribute__((section (".lcd")));
-uint16_t framebuffer2[320 * 240]  __attribute__((section (".lcd")));
+uint16_t framebuffer1[GW_LCD_WIDTH * GW_LCD_HEIGHT]  __attribute__((section (".lcd")));
+uint16_t framebuffer2[GW_LCD_WIDTH * GW_LCD_HEIGHT]  __attribute__((section (".lcd")));
 #endif // GW_LCD_MODE_LUT8
+
+uint32_t active_framebuffer = 0;
 
 void lcd_backlight_off() {
   HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, GPIO_PIN_RESET);

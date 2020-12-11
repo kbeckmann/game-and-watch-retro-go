@@ -53,3 +53,24 @@ void odroid_input_wait_for_key(odroid_gamepad_key_t key, bool pressed)
 {
 }
 
+bool odroid_input_key_is_pressed(odroid_gamepad_key_t key)
+{
+    odroid_gamepad_state_t joystick;
+    odroid_input_read_gamepad(&joystick);
+
+    if (key == ODROID_INPUT_ANY) {
+        return joystick.bitmask > 0 ? 1 : 0;
+    }
+
+    return joystick.values[key];
+}
+
+odroid_battery_state_t odroid_input_read_battery()
+{
+    odroid_battery_state_t ret = {
+        .millivolts = 1337,
+        .percentage = 42,
+    };
+
+    return ret;
+}
