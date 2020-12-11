@@ -56,3 +56,19 @@ IRAM_ATTR void odroid_system_tick(uint skippedFrame, uint fullFrame, uint busyTi
 
     statistics.lastTickTime = get_elapsed_time();
 }
+
+void odroid_system_switch_app(int app)
+{
+    printf("%s: Switching to app %d.\n", __func__, app);
+
+    // TODO
+
+    // odroid_display_clear(0);
+    // odroid_display_show_hourglass();
+
+    // odroid_audio_terminate();
+    // odroid_sdcard_close();
+
+    // odroid_system_set_boot_app(app);
+    // esp_restart();
+}

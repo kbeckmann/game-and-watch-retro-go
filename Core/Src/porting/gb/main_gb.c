@@ -55,7 +55,6 @@ static bool netplay = false;
 static bool saveSRAM = false;
 static int  saveSRAM_Timer = 0;
 
-static uint32_t active_framebuffer = 0;
 
 // --- MAIN
 
@@ -480,7 +479,7 @@ void pcm_submit() {
     }
 }
 
-void app_main(void)
+void app_main_gb(void)
 {
     odroid_gamepad_state_t joystick;
 
@@ -547,6 +546,10 @@ void app_main(void)
 
     while (true)
     {
+        gui_redraw();
+        continue;
+
+
         odroid_input_read_gamepad(&joystick);
 
         /*if (joystick.values[ODROID_INPUT_MENU]) {
