@@ -94,6 +94,8 @@ C_INCLUDES +=  \
 C_DEFS += \
 -DGW_LCD_MODE_LUT8 \
 -DPORTING_USE_EXTFLASH \
+-DNES_CACHE_ROM_IN_RAM \
+
 
 
 REQUIRED_FILE=roms/nes/loaded_nes_rom.c
