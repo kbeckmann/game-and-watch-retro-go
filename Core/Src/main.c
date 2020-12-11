@@ -66,6 +66,8 @@ uint8_t extflash_variable[1] __attribute__((section (".extflash_data")));
 uint8_t logbuf[1024 * 4];
 uint32_t log_idx;
 
+uint32_t boot_buttons;
+
 #define BOOT_MAGIC_STANDBY  0xfedebeda
 #define BOOT_MAGIC_RESET    0x1fa1afe1
 __attribute__((used)) __attribute__((section (".persistent"))) volatile uint32_t boot_magic;
@@ -160,6 +162,12 @@ void GW_EnterDeepSleep(void)
 
 }
 
+// Returns buttons that were pressed at boot
+uint32_t GW_GetBootButtons(void)
+{
+  return boot_buttons;
+}
+
 /* USER CODE END 0 */
 
 /**
@@ -225,6 +233,9 @@ int main(void)
   /* Initialize interrupts */
   MX_NVIC_Init();
   /* USER CODE BEGIN 2 */
+
+  // Save the button states as early as possible
+  boot_buttons = buttons_get();
 
   // Keep this
   HAL_Delay(500);

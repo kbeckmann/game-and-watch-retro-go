@@ -393,11 +393,13 @@ int app_main(void)
     odroid_system_init(APP_ID, AUDIO_SAMPLE_RATE);
     odroid_system_emu_init(&LoadState, &SaveState, NULL);
 
-    uint32_t buttons = buttons_get();
-    if(!(buttons & B_PAUSE)) {
-        // Always load the previous game except if pause is pressed
-        autoload = true;
-    }
+    uint32_t buttons = GW_GetBootButtons();
+    pause_pressed = (buttons & B_PAUSE);
+    power_pressed = (buttons & B_POWER);
+
+    // Always load the previous game unless pause is pressed
+    autoload = !pause_pressed;
+
 
     printf("app_main ROM: cart_rom_len=%ld\n", cart_rom_len);
 

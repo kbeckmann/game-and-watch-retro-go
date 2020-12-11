@@ -93,6 +93,7 @@ void Error_Handler(void);
 /* USER CODE BEGIN EFP */
 
 void GW_EnterDeepSleep(void);
+uint32_t GW_GetBootButtons(void);
 
 /* USER CODE END EFP */
 

@@ -5,6 +5,7 @@
 #include "bilinear.h"
 #include "gw_lcd.h"
 #include "gw_linker.h"
+#include "gw_buttons.h"
 #include "gnuboy/loader.h"
 #include "gnuboy/hw.h"
 #include "gnuboy/lcd.h"
@@ -533,18 +534,12 @@ void app_main(void)
     //pal_set_dmg(odroid_settings_Palette_get());
     pal_set_dmg(2);
 
-    /*if (app->startAction == ODROID_START_ACTION_RESUME)
-    {
-        odroid_system_emu_load_state(0);
-    }
-    else if (saveSRAM)
-    {
-        sram_load();
-    }*/
-
     // Don't load state if the pause button is held while booting
-    odroid_input_read_gamepad(&joystick);
-    if (!joystick.values[ODROID_INPUT_VOLUME]) {
+    uint32_t boot_buttons = GW_GetBootButtons();
+    pause_pressed = (boot_buttons & B_PAUSE);
+    power_pressed = (boot_buttons & B_POWER);
+
+    if (!pause_pressed) {
         state_load(&__SAVE_START__, &__SAVE_END__ - &__SAVE_START__);
     }
 
