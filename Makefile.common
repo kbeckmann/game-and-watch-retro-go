@@ -13,6 +13,22 @@ OPT ?= -Og
 # Build path
 BUILD_DIR ?= build_$(TARGET)
 
+
+
+# Common C sources
+C_SOURCES +=  \
+retro-go-stm32/components/lupng/lupng.c \
+retro-go-stm32/components/miniz/miniz.c \
+retro-go-stm32/retro-go/main/gui.c \
+Core/Src/retro-go/rg_main.c \
+Core/Src/retro-go/rg_emulators.c \
+Core/Src/porting/odroid_settings.c \
+Core/Src/retro-go/bitmaps/header_gb.c \
+Core/Src/retro-go/bitmaps/header_nes.c \
+Core/Src/retro-go/bitmaps/logo_gb.c \
+Core/Src/retro-go/bitmaps/logo_nes.c \
+
+
 # Version and URL for the STM32CubeH7 SDK
 SDK_VERSION ?= v1.8.0
 SDK_URL ?= https://raw.githubusercontent.com/STMicroelectronics/STM32CubeH7
@@ -153,7 +169,8 @@ C_INCLUDES +=  \
 -IDrivers/STM32H7xx_HAL_Driver/Inc/Legacy \
 -IDrivers/CMSIS/Device/ST/STM32H7xx/Include \
 -IDrivers/CMSIS/Include \
-
+-Iretro-go-stm32/components/miniz \
+-Iretro-go-stm32/components/lupng \
 
 # compile gcc flags
 ASFLAGS += $(MCU) $(AS_DEFS) $(AS_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections
@@ -206,13 +223,13 @@ endef
 # generate all object prerequisite rules
 $(eval $(foreach obj,$(SDK_C_SOURCES) $(SDK_ASM_SOURCES),$(call sdk_obj_prereq_gen,$(obj))))
 
-$(BUILD_DIR)/%.o: %.c Makefile.$(TARGET) $(LDSCRIPT) $(SDK_HEADERS) | $(BUILD_DIR)
+$(BUILD_DIR)/%.o: %.c Makefile.common Makefile.$(TARGET) $(LDSCRIPT) $(SDK_HEADERS) | $(BUILD_DIR)
 	$(CC) -c $(CFLAGS) -Wa,-a,-ad,-alms=$(BUILD_DIR)/$(notdir $(<:.c=.lst)) $< -o $@
 
-$(BUILD_DIR)/%.o: %.s Makefile.$(TARGET) $(LDSCRIPT) | $(BUILD_DIR)
+$(BUILD_DIR)/%.o: %.s Makefile.common Makefile.$(TARGET) $(LDSCRIPT) | $(BUILD_DIR)
 	$(AS) -c $(CFLAGS) $< -o $@
 
-$(BUILD_DIR)/$(TARGET).elf: $(OBJECTS) Makefile.$(TARGET) $(LDSCRIPT)
+$(BUILD_DIR)/$(TARGET).elf: $(OBJECTS) Makefile.common Makefile.$(TARGET) $(LDSCRIPT)
 	$(CC) $(OBJECTS) $(LDFLAGS) -o $@
 	$(SZ) $@
 	./size.sh $@

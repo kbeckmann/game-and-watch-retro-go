@@ -63,7 +63,7 @@ uint8_t nullpointer_guard[1024] __attribute__((section (".itcram_start")))  __at
 
 // uint16_t audiobuffer[48000] __attribute__((section (".audio")));
 uint8_t extflash_variable[1] __attribute__((section (".extflash_data")));
-uint8_t logbuf[1024 * 4];
+uint8_t logbuf[1024 * 16];
 uint32_t log_idx;
 
 uint32_t boot_buttons;
