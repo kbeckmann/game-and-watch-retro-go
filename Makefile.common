@@ -205,15 +205,16 @@ endef
 # generate all object prerequisite rules
 $(eval $(foreach obj,$(SDK_C_SOURCES) $(SDK_ASM_SOURCES),$(call sdk_obj_prereq_gen,$(obj))))
 
-$(BUILD_DIR)/%.o: %.c Makefile.$(TARGET) $(SDK_HEADERS) | $(BUILD_DIR)
+$(BUILD_DIR)/%.o: %.c Makefile.$(TARGET) $(LDSCRIPT) $(SDK_HEADERS) | $(BUILD_DIR)
 	$(CC) -c $(CFLAGS) -Wa,-a,-ad,-alms=$(BUILD_DIR)/$(notdir $(<:.c=.lst)) $< -o $@
 
-$(BUILD_DIR)/%.o: %.s Makefile.$(TARGET) | $(BUILD_DIR)
+$(BUILD_DIR)/%.o: %.s Makefile.$(TARGET) $(LDSCRIPT) | $(BUILD_DIR)
 	$(AS) -c $(CFLAGS) $< -o $@
 
-$(BUILD_DIR)/$(TARGET).elf: $(OBJECTS) Makefile.$(TARGET)
+$(BUILD_DIR)/$(TARGET).elf: $(OBJECTS) Makefile.$(TARGET) $(LDSCRIPT)
 	$(CC) $(OBJECTS) $(LDFLAGS) -o $@
 	$(SZ) $@
+	./size.sh $@
 
 $(BUILD_DIR)/%.hex: $(BUILD_DIR)/%.elf | $(BUILD_DIR)
 	$(HEX) $< $@
