@@ -168,6 +168,15 @@ uint32_t GW_GetBootButtons(void)
   return boot_buttons;
 }
 
+// Workaround for being able to run with -D_FORTIFY_SOURCE=1
+static void memcpy_no_check(uint32_t *dst, uint32_t *src, size_t len)
+{
+  uint32_t *end = dst + len;
+  while (dst != end) {
+    *(dst++) = *(src++);
+  }
+}
+
 /* USER CODE END 0 */
 
 /**
@@ -273,7 +282,7 @@ int main(void)
   copy_areas[1] = (uint32_t) &_sram_text;  // 0x24000000
   copy_areas[2] = (uint32_t) &_eram_data;  // 0x24000000 + length
   copy_areas[3] = copy_areas[2] - copy_areas[1];
-  memcpy(copy_areas[1], copy_areas[0], copy_areas[2] - copy_areas[1]);
+  memcpy_no_check(copy_areas[1], copy_areas[0], copy_areas[2] - copy_areas[1]);
 
   // Sanity check, sometimes this is triggered
   uint32_t add = 0x90000000;
