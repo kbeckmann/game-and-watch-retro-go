@@ -28,6 +28,7 @@
 #include "gw_lcd.h"
 #include "gw_linker.h"
 #include <string.h>
+#include <assert.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -171,7 +172,9 @@ uint32_t GW_GetBootButtons(void)
 // Workaround for being able to run with -D_FORTIFY_SOURCE=1
 static void memcpy_no_check(uint32_t *dst, uint32_t *src, size_t len)
 {
-  uint32_t *end = dst + len;
+  assert((len & 0b11) == 0);
+
+  uint32_t *end = dst + len / 4;
   while (dst != end) {
     *(dst++) = *(src++);
   }
