@@ -59,7 +59,11 @@ bool odroid_input_key_is_pressed(odroid_gamepad_key_t key)
     odroid_input_read_gamepad(&joystick);
 
     if (key == ODROID_INPUT_ANY) {
-        return joystick.bitmask > 0 ? 1 : 0;
+        uint32_t buttons = buttons_get();
+        if(buttons) {
+            return true;
+        }
+        return false;
     }
 
     return joystick.values[key];

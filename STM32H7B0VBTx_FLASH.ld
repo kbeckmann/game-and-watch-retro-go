@@ -146,11 +146,29 @@ SECTIONS
     *(.extflash_data)
     . = ALIGN(4);
     __extflash_data_end__ = .;
+    __extflash_odroid_start__ = .;
+    build_gb/main_gb.o  (.text .text* .rodata .rodata*)
+    build_gb/sound.o  (.text .text* .rodata .rodata*)
+    build_gb/odroid*.o (.text .text* .rodata .rodata*)
+    build_gb/rg*.o (.text .text* .rodata .rodata*)
+    build_gb/logo*.o (.text .text* .rodata .rodata*)
+    build_gb/rom_*.o (.text .text* .rodata .rodata*)
+    build_gb/miniz.o (.text .text* .rodata .rodata*)
+    build_gb/lupng.o (.text .text* .rodata .rodata*)
+    build_gb/gui.o (.text .text* .rodata .rodata*)
+    __extflash_odroid_end__ = .;
+    . = ALIGN(128K);
     __extflash_game_rom_start__ = .;
     . = ALIGN(4);
     *(.extflash_game_rom)
     . = ALIGN(4);
     __extflash_game_rom_end__ = .;
+    . = ALIGN(128K);
+    __extflash_game_rom2_start__ = .;
+    . = ALIGN(4);
+    *(.extflash_game_rom2)
+    . = ALIGN(4);
+    __extflash_game_rom2_end__ = .;
     __extflash_end__ = .;
   } > EXTFLASH
 

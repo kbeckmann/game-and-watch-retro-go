@@ -22,6 +22,7 @@ retro-go-stm32/components/miniz/miniz.c \
 retro-go-stm32/retro-go/main/gui.c \
 Core/Src/retro-go/rg_main.c \
 Core/Src/retro-go/rg_emulators.c \
+Core/Src/retro-go/rom_manager.c \
 Core/Src/porting/odroid_settings.c \
 Core/Src/retro-go/bitmaps/header_gb.c \
 Core/Src/retro-go/bitmaps/header_nes.c \
@@ -249,17 +250,24 @@ $(BUILD_DIR):
 
 OPENOCD ?= openocd
 OCDIFACE ?= interface/stlink.cfg
+TRANSPORT ?= hla_swd
 
 # Starts openocd and attaches to the target. To be used with 'flashx' and 'gdb'
 openocd:
-	$(OPENOCD) -f $(OCDIFACE) -c "transport select hla_swd" -f "target/stm32h7x.cfg" -c "reset_config none; init; halt"
+	$(OPENOCD) -f $(OCDIFACE) -c "transport select $(TRANSPORT)" -f "target/stm32h7x.cfg" -c "reset_config none; init; halt"
 .PHONY: openocd
 
 
 # Flashes using a new openocd instance
 flash: $(BUILD_DIR)/$(TARGET).elf
-	$(OPENOCD) -f $(OCDIFACE) -c "transport select hla_swd" -f "target/stm32h7x.cfg" -c "reset_config none; program $(BUILD_DIR)/$(TARGET).elf reset exit"
+	$(OPENOCD) -f $(OCDIFACE) -c "transport select $(TRANSPORT)" -f "target/stm32h7x.cfg" -c "reset_config none; program $(BUILD_DIR)/$(TARGET).elf reset exit"
 .PHONY: flash
+
+
+# Flash without building or so
+jflash:
+	$(OPENOCD) -f $(OCDIFACE) -c "transport select $(TRANSPORT)" -f "target/stm32h7x.cfg" -c "reset_config none; program $(BUILD_DIR)/$(TARGET).elf reset exit"
+.PHONY: jflash
 
 
 # Flashes using an existing openocd instance

@@ -479,8 +479,8 @@ void pcm_submit() {
     }
 }
 
-void app_main_gb(void)
-{
+
+rg_app_desc_t * init() {
     odroid_gamepad_state_t joystick;
 
     odroid_system_init(APP_ID, AUDIO_SAMPLE_RATE);
@@ -541,13 +541,19 @@ void app_main_gb(void)
     if (!pause_pressed) {
         state_load(&__SAVE_START__, &__SAVE_END__ - &__SAVE_START__);
     }
+    return app;
+}
+
+void app_main_gb(void)
+{
+    rg_app_desc_t *app = init();
+    odroid_gamepad_state_t joystick;
+
 
     const int frameTime = get_frame_time(60);
 
     while (true)
     {
-        gui_redraw();
-        continue;
 
 
         odroid_input_read_gamepad(&joystick);
