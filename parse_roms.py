@@ -48,14 +48,11 @@ def find_roms(system_name: str, folder: str, extension: str) -> [ROM]:
 
     for rom in rom_files:
         if not rom.endswith(extension):
-            print("cont")
-            print(rom)
             continue
 
         rom_path = os.path.join(roms_path, rom)
         found_roms.append(ROM(system_name, rom_path))
     
-    print(found_roms)
     return found_roms
 
 def generate_rom_entries(name: str, roms: [ROM], variable_prefix: str) -> str:
