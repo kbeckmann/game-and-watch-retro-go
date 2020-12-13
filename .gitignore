@@ -9,3 +9,6 @@ Core/Inc/rom_info.h
 roms
 
 .mxproject
+
+Core/Src/retro-go/nes_roms.c
+Core/Src/retro-go/gb_roms.c

@@ -150,7 +150,8 @@ void retro_loop()
 
         odroid_input_read_gamepad(&gui.joystick);
 
-        if (gui.idle_counter > 0 && gui.joystick.bitmask == 0)
+        uint32_t buttons = buttons_get();
+        if (gui.idle_counter > 0 && buttons == 0)
         {
             gui_event(TAB_IDLE, tab);
 
@@ -243,12 +244,13 @@ void retro_loop()
             }
         }
 
-        if (gui.joystick.bitmask) {
+        
+        if (buttons) {
             gui.idle_counter = 0;
         } else {
             gui.idle_counter++;
         }
-
+        HAL_Delay(200);
         // usleep(15 * 1000UL);
     }
 }

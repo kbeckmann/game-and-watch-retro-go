@@ -6,6 +6,8 @@
 // #include "rg_favorites.h"
 #include "bitmaps.h"
 #include "gui.h"
+#include "gb_rom.h"
+#include "rom_manager.h"
 
 static retro_emulator_t emulators[16];
 static int emulators_count = 0;
@@ -100,13 +102,35 @@ void emulator_init(retro_emulator_t *emu)
 
     printf("Retro-Go: Initializing emulator '%s'\n", emu->system_name);
 
-    retro_emulator_file_t *file = &emu->roms.files[emu->roms.count++];
-    strcpy(file->folder, "/");
-    strcpy(file->name, "test");
-    strcpy(file->ext, "gb");
-    file->emulator = (void*)emu;
-    file->crc_offset = emu->crc_offset;
-    file->checksum = 0;
+
+    const rom_system *system = rom_manager_system(&rom_mgr, emu->system_name);
+    if(system) {
+        emu->roms.files = malloc(system->roms_count * sizeof(retro_emulator_file_t));
+        for(int i=0; i < system->roms_count; i++) {
+            const rom_entry *rom = &system->roms[i];
+            retro_emulator_file_t *file = &emu->roms.files[emu->roms.count++];
+            // strcpy(file->folder, "/");
+            file->address = rom->flash_address;
+            file->size = rom->size;
+            strcpy(file->name, rom->rom_name);
+            strcpy(file->ext, system->extension);
+        }
+    } else {
+        while(1) {
+            lcd_backlight_on();
+            HAL_Delay(100);
+            lcd_backlight_off();
+            HAL_Delay(100);
+        }
+    }
+
+    // retro_emulator_file_t *file = &emu->roms.files[emu->roms.count++];
+    // strcpy(file->folder, "/");
+    // strcpy(file->name, "test");
+    // strcpy(file->ext, "gb");
+    // file->emulator = (void*)emu;
+    // file->crc_offset = emu->crc_offset;
+    // file->checksum = 0;
 
 
     // char path[128];
@@ -153,15 +177,16 @@ void emulator_init(retro_emulator_t *emu)
     // free(files);
 }
 
-const char *emu_get_file_path(retro_emulator_file_t *file)
+const uint32_t *emu_get_file_address(retro_emulator_file_t *file)
 {
-    static char buffer[192];
-    if (file == NULL) return NULL;
-    sprintf(buffer, "%s/%s.%s", file->folder, file->name, file->ext);
-    return (const char*)&buffer;
+    // static char buffer[192];
+    // if (file == NULL) return NULL;
+    // sprintf(buffer, "%s/%s.%s", file->folder, file->name, file->ext);
+    // return (const char*)&buffer;
+    return file->address;
 }
 
-bool emulator_build_file_object(const char *path, retro_emulator_file_t *file)
+/*bool emulator_build_file_object(const char *path, retro_emulator_file_t *file)
 {
     const char *name = odroid_sdcard_get_filename(path);
     const char *ext = odroid_sdcard_get_extension(path);
@@ -187,7 +212,7 @@ bool emulator_build_file_object(const char *path, retro_emulator_file_t *file)
     }
 
     return false;
-}
+}*/
 
 void emulator_crc32_file(retro_emulator_file_t *file)
 {
@@ -265,7 +290,7 @@ void emulator_show_file_info(retro_emulator_file_t *file)
 
     sprintf(choices[0].value, "%.127s", file->name);
     sprintf(choices[1].value, "%s", file->ext);
-    sprintf(choices[2].value, "%s", file->folder);
+    // sprintf(choices[2].value, "%s", file->folder);
     // sprintf(choices[3].value, "%d KB", odroid_sdcard_get_filesize(emu_get_file_path(file)) / 1024);
     sprintf(choices[3].value, "%d KB", 42);
 
@@ -331,16 +356,18 @@ void emulator_show_file_menu(retro_emulator_file_t *file)
 
 void emulator_start(retro_emulator_file_t *file, bool load_state)
 {
-    const char *path = emu_get_file_path(file);
-    assert(path != NULL);
+    const uint32_t address = emu_get_file_address(file);
 
-    printf("Retro-Go: Starting game: %s\n", path);
+    printf("Retro-Go: Starting game: %s\n", file->name);
+    ROM_DATA = address;
+    ROM_DATA_LENGTH = file->size;
 
-    odroid_settings_StartAction_set(load_state ? ODROID_START_ACTION_RESUME : ODROID_START_ACTION_NEWGAME);
-    odroid_settings_RomFilePath_set(path);
-    odroid_settings_commit();
+    // odroid_settings_StartAction_set(load_state ? ODROID_START_ACTION_RESUME : ODROID_START_ACTION_NEWGAME);
+    // odroid_settings_RomFilePath_set(path);
+    // odroid_settings_commit();
 
-    odroid_system_switch_app(((retro_emulator_t *)file->emulator)->partition);
+    // odroid_system_switch_app(((retro_emulator_t *)file->emulator)->partition);
+    app_main_gb();
 }
 
 void emulators_init()

@@ -33,8 +33,7 @@ retro-go-stm32/gnuboy-go/components/gnuboy/lcd.c \
 retro-go-stm32/gnuboy-go/components/gnuboy/loader.c \
 retro-go-stm32/gnuboy-go/components/gnuboy/mem.c \
 retro-go-stm32/gnuboy-go/components/gnuboy/rtc.c \
-retro-go-stm32/gnuboy-go/components/gnuboy/sound.c \
-roms/gb/loaded_gb_rom.c \
+retro-go-stm32/gnuboy-go/components/gnuboy/sound.c
 
 
 C_INCLUDES +=  \
@@ -48,7 +47,7 @@ C_INCLUDES +=  \
 
 C_DEFS += \
 -DIS_LITTLE_ENDIAN \
--DDISABLE_AHBRAM_DCACHE \
+-DDISABLE_AHBRAM_DCACHE
 
 
 REQUIRED_FILE=roms/gb/loaded_gb_rom.c

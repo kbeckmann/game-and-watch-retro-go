@@ -29,6 +29,7 @@ int odroid_overlay_game_menu()
 #include <stdio.h>
 #include <math.h>
 
+#include "gw_buttons.h"
 #include "bitmaps/font_basic.h"
 #include "odroid_system.h"
 #include "odroid_overlay.h"
@@ -289,6 +290,10 @@ int odroid_overlay_dialog(const char *header, odroid_dialog_choice_t *options, i
     odroid_overlay_draw_dialog(header, options, sel);
 
     while (odroid_input_key_is_pressed(ODROID_INPUT_ANY));
+    uint32_t buttons = buttons_get();
+    while(buttons) {
+        buttons = buttons_get();
+    }
 
     while (1)
     {
@@ -365,10 +370,14 @@ int odroid_overlay_dialog(const char *header, odroid_dialog_choice_t *options, i
         }
 
         // usleep(20 * 1000UL);
-        HAL_Delay(20);
+        HAL_Delay(200);
     }
 
     odroid_input_wait_for_key(last_key, false);
+    buttons = buttons_get();
+    while(buttons) {
+        buttons = buttons_get();
+    }
 
     odroid_display_force_refresh();
 
