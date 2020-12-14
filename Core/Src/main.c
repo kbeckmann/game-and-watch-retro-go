@@ -195,7 +195,7 @@ int main(void)
   }
 
   // Nullpointer redzone
-  memset(0, '\x41', &__NULLPTR_LENGTH__);
+  memset(0, '\x41', (size_t)&__NULLPTR_LENGTH__);
 
   switch (boot_magic) {
   case BOOT_MAGIC_STANDBY:
@@ -775,6 +775,8 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE END 4 */
 
+int __builtin_popcount (unsigned int x);
+
 /* MPU Configuration */
 
 void MPU_Config(void)
@@ -798,6 +800,25 @@ void MPU_Config(void)
   MPU_InitStruct.IsBufferable = MPU_ACCESS_NOT_BUFFERABLE;
 
   HAL_MPU_ConfigRegion(&MPU_InitStruct);
+
+  if (__builtin_popcount((size_t)&__NULLPTR_LENGTH__) == 1) {
+    /* Only continue if a single bit set in __NULLPTR_LENGTH__.
+     * The MPU can only handle memory sizes which are a power of 2 */
+    MPU_InitStruct.Enable = MPU_REGION_ENABLE;
+    MPU_InitStruct.Number = MPU_REGION_NUMBER1;
+    MPU_InitStruct.BaseAddress = 0x00000000;
+    /* 128B --> 0x06, 256B --> 0x07, 512B --> 0x08, ... */
+    MPU_InitStruct.Size = ffs((size_t)&__NULLPTR_LENGTH__) - 2;
+    MPU_InitStruct.SubRegionDisable = 0x0;
+    MPU_InitStruct.TypeExtField = MPU_TEX_LEVEL0;
+    MPU_InitStruct.AccessPermission = MPU_REGION_NO_ACCESS;
+    MPU_InitStruct.DisableExec = MPU_INSTRUCTION_ACCESS_DISABLE;
+    MPU_InitStruct.IsShareable = MPU_ACCESS_NOT_SHAREABLE;
+    MPU_InitStruct.IsCacheable = MPU_ACCESS_NOT_CACHEABLE;
+    MPU_InitStruct.IsBufferable = MPU_ACCESS_NOT_BUFFERABLE;
+
+    HAL_MPU_ConfigRegion(&MPU_InitStruct);
+  }
   
 #ifdef DISABLE_AHBRAM_DCACHE
   /** Initializes and configures the Region and the memory to be protected
