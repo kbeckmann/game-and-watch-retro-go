@@ -115,7 +115,7 @@ void OSPI_Init(OSPI_HandleTypeDef *hospi, quad_mode_t quad_mode)
 
       // Loop until rd_status is updated
       while ((rd_status & wr_status) != wr_status) {
-        OSPI_WriteBytes(hospi, 0x01, 0, wr_status, 1, SPI_MODE);
+        OSPI_WriteBytes(hospi, 0x01, 0, &wr_status, 1, SPI_MODE);
         OSPI_ReadBytes(hospi, 0x05, &rd_status, 1);
       }
   }
