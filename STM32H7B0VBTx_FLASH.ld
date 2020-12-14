@@ -267,6 +267,7 @@ SECTIONS
   /* Initialized data sections goes into RAM, load LMA copy after code */
   .data : 
   {
+    __dtcram_start__ = .;
 
     . = ALIGN(4);
     _sdata = .;        /* create a global symbol at data start */
@@ -287,7 +288,6 @@ SECTIONS
   . = ALIGN(4);
   .bss :
   {
-    __dtcram_start__ = .;
     /* This is used by the startup in order to initialize the .bss secion */
     _sbss = .;         /* define a global symbol at bss start */
     __bss_start__ = _sbss;
@@ -310,12 +310,16 @@ SECTIONS
   /* User_heap_stack section, used to check that there is enough RAM left */
   ._user_stack :
   {
-    . = ALIGN(16);
+    /* Pad the unused area between the last symbol and the start of the redzone */
+    __dtc_padding_start__ = .;
+    . = . + __DTCMRAM_LENGTH__ - (_Min_Stack_Size + _Stack_Redzone_Size) - (__dtc_padding_start__ - __dtcram_start__);
+    __dtc_padding_end__ = .;
+
     _stack_redzone = .;
     . = . + _Stack_Redzone_Size;
-    . = ALIGN(16);
+    _stack_bottom = .;
     . = . + _Min_Stack_Size;
-    . = ALIGN(16);
+    _stack_top = .;
     __dtcram_end__ = .;
   } >DTCMRAM
 
@@ -329,5 +333,3 @@ SECTIONS
 
   .ARM.attributes 0 : { *(.ARM.attributes) }
 }
-
-

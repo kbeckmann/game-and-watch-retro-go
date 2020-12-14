@@ -30,7 +30,13 @@ function print_usage {
 }
 
 print_usage itcram   __ITCMRAM_LENGTH__
-print_usage dtcram   __DTCMRAM_LENGTH__
+
+# DTCRAM is a special case
+dtc_size=$(get_symbol __DTCMRAM_LENGTH__)
+dtc_free=$(get_section_length dtc_padding)
+dtc_usage=$(( dtc_size - dtc_free ))
+echo -e "dtcram\t$dtc_usage / $dtc_size ($dtc_free bytes free)"
+
 print_usage ram      __RAM_LENGTH__
 print_usage ahbram   __AHBRAM_LENGTH__
 print_usage flash    __FLASH_LENGTH__
