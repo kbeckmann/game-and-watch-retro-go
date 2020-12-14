@@ -20,6 +20,7 @@ C_SOURCES +=  \
 retro-go-stm32/components/lupng/lupng.c \
 retro-go-stm32/components/miniz/miniz.c \
 retro-go-stm32/retro-go/main/gui.c \
+Core/Src/retro-go/rg_alloc.c \
 Core/Src/retro-go/rg_main.c \
 Core/Src/retro-go/rg_emulators.c \
 Core/Src/retro-go/rom_manager.c \
@@ -160,7 +161,7 @@ C_DEFS +=  \
 -DVECT_TAB_ITCM \
 -DIS_LITTLE_ENDIAN \
 -D_FORTIFY_SOURCE=1 \
-
+-DDEBUG_RG_ALLOC
 
 # AS includes
 AS_INCLUDES +=
