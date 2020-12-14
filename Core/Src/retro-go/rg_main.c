@@ -106,7 +106,6 @@ static inline bool tab_enabled(tab_t *tab)
 void retro_loop()
 {
     tab_t *tab = gui_get_current_tab();
-    int debounce = 0;
     int last_key = -1;
     int selected_tab_last = -1;
 
@@ -150,8 +149,7 @@ void retro_loop()
 
         odroid_input_read_gamepad(&gui.joystick);
 
-        uint32_t buttons = buttons_get();
-        if (gui.idle_counter > 0 && buttons == 0)
+        if (gui.idle_counter > 0 && gui.joystick.bitmask == 0)
         {
             gui_event(TAB_IDLE, tab);
 
@@ -162,16 +160,12 @@ void retro_loop()
         if (last_key >= 0) {
             if (!gui.joystick.values[last_key]) {
                 last_key = -1;
-                debounce = 0;
-            } else if (debounce++ > 12) {
-                debounce = 12;
-                last_key = -1;
             }
         } else {
             for (int i = 0; i < ODROID_INPUT_MAX; i++)
                 if (gui.joystick.values[i]) last_key = i;
 
-            if (last_key == ODROID_INPUT_MENU) {
+            if (last_key == ODROID_INPUT_START) {
                 odroid_dialog_choice_t choices[] = {
                     {0, "Ver.", "build string", 1, NULL},
                     {0, "Date", "", 1, NULL},
@@ -202,7 +196,7 @@ void retro_loop()
                 // }
                 gui_redraw();
             }
-            else if (last_key == ODROID_INPUT_VOLUME) {
+            else if (last_key == ODROID_INPUT_SELECT) {
                 odroid_dialog_choice_t choices[] = {
                     {0, "---", "", -1, NULL},
                     // {0, "Color theme", "1/10", 1, &color_shift_cb},
@@ -215,14 +209,6 @@ void retro_loop()
                 };
                 odroid_overlay_settings_menu(choices);
                 gui_redraw();
-            }
-            else if (last_key == ODROID_INPUT_SELECT) {
-                debounce = -10;
-                gui.selected--;
-            }
-            else if (last_key == ODROID_INPUT_START) {
-                debounce = -10;
-                gui.selected++;
             }
             else if (last_key == ODROID_INPUT_UP) {
                 gui_scroll_list(tab, LINE_UP);
@@ -244,14 +230,13 @@ void retro_loop()
             }
         }
 
-        
-        if (buttons) {
+        if (gui.joystick.bitmask) {
             gui.idle_counter = 0;
         } else {
             gui.idle_counter++;
         }
-        HAL_Delay(200);
-        // usleep(15 * 1000UL);
+
+        HAL_Delay(15);
     }
 }
 

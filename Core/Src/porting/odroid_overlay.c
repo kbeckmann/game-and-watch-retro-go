@@ -290,10 +290,6 @@ int odroid_overlay_dialog(const char *header, odroid_dialog_choice_t *options, i
     odroid_overlay_draw_dialog(header, options, sel);
 
     while (odroid_input_key_is_pressed(ODROID_INPUT_ANY));
-    uint32_t buttons = buttons_get();
-    while(buttons) {
-        buttons = buttons_get();
-    }
 
     while (1)
     {
@@ -369,15 +365,10 @@ int odroid_overlay_dialog(const char *header, odroid_dialog_choice_t *options, i
             sel_old = sel;
         }
 
-        // usleep(20 * 1000UL);
-        HAL_Delay(200);
+        HAL_Delay(20);
     }
 
     odroid_input_wait_for_key(last_key, false);
-    buttons = buttons_get();
-    while(buttons) {
-        buttons = buttons_get();
-    }
 
     odroid_display_force_refresh();
 
