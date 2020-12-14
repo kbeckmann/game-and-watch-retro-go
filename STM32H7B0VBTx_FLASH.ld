@@ -54,8 +54,11 @@ ENTRY(Reset_Handler)
 
 /* Highest address of the user mode stack */
 _estack = 0x20020000;    /* end of RAM */
+
 /* Generate a link error if heap and stack don't fit into RAM */
-_Min_Heap_Size = 0x0;      /* required amount of heap  */
+_Heap_Size = 16 * 1024;     /* required amount of heap */
+
+_Stack_Redzone_Size = 256;  /* size of stack overflow protection */
 _Min_Stack_Size = 4 * 1024; /* required amount of stack */
 
 
@@ -178,7 +181,11 @@ SECTIONS
     *(.lcd)
     *(.emulator_data)
     *(.emulator_text)
-    . = ALIGN(4);
+    . = ALIGN(16);
+    _heap_start = . ;
+    . = . + _Heap_Size;
+    . = ALIGN(16);
+    _heap_end = . ;
     __ram_end__ = .;
   } > RAM
 
@@ -301,14 +308,14 @@ SECTIONS
   } >DTCMRAM
 
   /* User_heap_stack section, used to check that there is enough RAM left */
-  ._user_heap_stack :
+  ._user_stack :
   {
-    . = ALIGN(8);
-    PROVIDE ( end = . );
-    PROVIDE ( _end = . );
-    . = . + _Min_Heap_Size;
+    . = ALIGN(16);
+    _stack_redzone = .;
+    . = . + _Stack_Redzone_Size;
+    . = ALIGN(16);
     . = . + _Min_Stack_Size;
-    . = ALIGN(8);
+    . = ALIGN(16);
     __dtcram_end__ = .;
   } >DTCMRAM
 
