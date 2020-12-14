@@ -1,5 +1,27 @@
 #include <stdlib.h>
 #include <stdint.h>
+#include <assert.h>
+
+#include "gw_linker.h"
+
+
+void *
+_sbrk (incr)
+     int incr;
+{
+    static char * heap_end;
+    char *        prev_heap_end;
+
+    if (heap_end == 0)
+        heap_end = &_heap_start;
+
+    assert((heap_end + incr) < (&_heap_end));
+
+    prev_heap_end = heap_end;
+    heap_end += incr;
+
+    return (void *) prev_heap_end;
+}
 
 #ifdef DEBUG_RG_ALLOC
 
