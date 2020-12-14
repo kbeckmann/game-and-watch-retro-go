@@ -820,11 +820,31 @@ void MPU_Config(void)
     HAL_MPU_ConfigRegion(&MPU_InitStruct);
   }
   
+  // Stack redzone
+  if (__builtin_popcount((size_t)&_Stack_Redzone_Size) == 1) {
+    /* Only continue if a single bit set in _Stack_Redzone_Size.
+     * The MPU can only handle memory sizes which are a power of 2 */
+    MPU_InitStruct.Enable = MPU_REGION_ENABLE;
+    MPU_InitStruct.Number = MPU_REGION_NUMBER2;
+    MPU_InitStruct.BaseAddress = &_stack_redzone;
+    /* 128B --> 0x06, 256B --> 0x07, 512B --> 0x08, ... */
+    MPU_InitStruct.Size = ffs((size_t)&_Stack_Redzone_Size) - 2;
+    MPU_InitStruct.SubRegionDisable = 0x0;
+    MPU_InitStruct.TypeExtField = MPU_TEX_LEVEL0;
+    MPU_InitStruct.AccessPermission = MPU_REGION_NO_ACCESS;
+    MPU_InitStruct.DisableExec = MPU_INSTRUCTION_ACCESS_DISABLE;
+    MPU_InitStruct.IsShareable = MPU_ACCESS_NOT_SHAREABLE;
+    MPU_InitStruct.IsCacheable = MPU_ACCESS_NOT_CACHEABLE;
+    MPU_InitStruct.IsBufferable = MPU_ACCESS_NOT_BUFFERABLE;
+
+    HAL_MPU_ConfigRegion(&MPU_InitStruct);
+  }
+  
 #ifdef DISABLE_AHBRAM_DCACHE
   /** Initializes and configures the Region and the memory to be protected
   */
   MPU_InitStruct.Enable = MPU_REGION_ENABLE;
-  MPU_InitStruct.Number = MPU_REGION_NUMBER1;
+  MPU_InitStruct.Number = MPU_REGION_NUMBER3;
   MPU_InitStruct.BaseAddress = 0x24000000;
   MPU_InitStruct.Size = MPU_REGION_SIZE_512KB;
   MPU_InitStruct.SubRegionDisable = 0x0;
