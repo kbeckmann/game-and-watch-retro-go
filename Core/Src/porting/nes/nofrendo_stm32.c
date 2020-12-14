@@ -31,7 +31,7 @@
 #include <nofrendo.h>
 #include <osd.h>
 #include <nes.h>
-
+#include <assert.h>
 
 /* our happy little timer ISR */
 volatile int nofrendo_ticks = 0;

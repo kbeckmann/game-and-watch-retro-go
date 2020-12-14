@@ -29,6 +29,7 @@
 #include "gw_linker.h"
 #include <string.h>
 #include <assert.h>
+#include <stdio.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -60,7 +61,10 @@ SPI_HandleTypeDef hspi2;
 
 /* USER CODE BEGIN PV */
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wattributes"
 uint8_t nullpointer_guard[1024] __attribute__((section (".itcram_start")))  __attribute__((keep));
+#pragma GCC diagnostic pop
 
 // uint16_t audiobuffer[48000] __attribute__((section (".audio")));
 uint8_t extflash_variable[1] __attribute__((section (".extflash_data")));
@@ -195,17 +199,20 @@ int main(void)
   }
 
   // Nullpointer redzone
-  memset(0, '\x41', (size_t)&__NULLPTR_LENGTH__);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wnonnull"
+  memset(0x0, '\x41', (size_t)&__NULLPTR_LENGTH__);
+#pragma GCC diagnostic pop
 
   switch (boot_magic) {
   case BOOT_MAGIC_STANDBY:
-    printf("Boot from standby. boot_magic=0x%08x\n", boot_magic);
+    printf("Boot from standby. boot_magic=0x%08lx\n", boot_magic);
     break;
   case BOOT_MAGIC_RESET:
-    printf("Boot from warm reset. boot_magic=0x%08x\n", boot_magic);
+    printf("Boot from warm reset. boot_magic=0x%08lx\n", boot_magic);
     break;
   default:
-    printf("Boot from brownout? boot_magic=0x%08x\n", boot_magic);
+    printf("Boot from brownout? boot_magic=0x%08lx\n", boot_magic);
     break;
   }
 
@@ -279,12 +286,11 @@ int main(void)
   extern uint32_t _siramdata;
   extern uint32_t _sram_text;
   extern uint32_t _eram_data;
-  uint32_t copy_areas[4];
+  void *copy_areas[3];
 
-  copy_areas[0] = (uint32_t) &_siramdata;  // 0x90000000
-  copy_areas[1] = (uint32_t) &_sram_text;  // 0x24000000
-  copy_areas[2] = (uint32_t) &_eram_data;  // 0x24000000 + length
-  copy_areas[3] = copy_areas[2] - copy_areas[1];
+  copy_areas[0] = &_siramdata;  // 0x90000000
+  copy_areas[1] = &_sram_text;  // 0x24000000
+  copy_areas[2] = &_eram_data;  // 0x24000000 + length
   memcpy_no_check(copy_areas[1], copy_areas[0], copy_areas[2] - copy_areas[1]);
 
   // Sanity check, sometimes this is triggered

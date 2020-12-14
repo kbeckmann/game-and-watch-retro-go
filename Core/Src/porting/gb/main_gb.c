@@ -35,7 +35,6 @@ static uint32_t power_pressed;
 static dma_transfer_state_t dma_state;
 static uint32_t audio_mute;
 
-static int16_t pendingSamples = 0;
 static int16_t audiobuffer_emulator[AUDIO_BUFFER_LENGTH * 2 * 2 * 2] __attribute__((section (".audio")));
 static int16_t audiobuffer_dma[AUDIO_BUFFER_LENGTH * 2] __attribute__((section (".audio")));
 
@@ -50,13 +49,12 @@ static odroid_video_frame_t *currentUpdate = &update1;
 static bool fullFrame = false;
 static uint skipFrames = 0;
 
-static bool netplay = false;
-
 static bool saveSRAM = false;
 static int  saveSRAM_Timer = 0;
 
 static uint32_t active_framebuffer = 0;
 
+extern void store_save(uint8_t *data, size_t size);
 // --- MAIN
 
 
@@ -94,7 +92,6 @@ extern LTDC_HandleTypeDef hltdc;
 __attribute__((optimize("unroll-loops")))
 static inline void screen_blit(void) {
     static uint32_t lastFPSTime = 0;
-    static uint32_t lastTime = 0;
     static uint32_t frames = 0;
     uint32_t currentTime = HAL_GetTick();
     uint32_t delta = currentTime - lastFPSTime;
@@ -103,15 +100,11 @@ static inline void screen_blit(void) {
 
     if (delta >= 1000) {
         int fps = (10000 * frames) / delta;
-        printf("FPS: %d.%d, frames %d, delta %d ms, skipped %d\n", fps / 10, fps % 10, delta, frames, skippedFrames);
+        printf("FPS: %d.%d, frames %ld, delta %ld ms, skipped %ld\n", fps / 10, fps % 10, delta, frames, skippedFrames);
         frames = 0;
         skippedFrames = 0;
         lastFPSTime = currentTime;
     }
-
-    lastTime = currentTime;
-
-
 
     int w1 = currentUpdate->width;
     int h1 = currentUpdate->height;
@@ -149,9 +142,9 @@ static inline void screen_blit(void) {
     HAL_LTDC_Reload(&hltdc, LTDC_RELOAD_VERTICAL_BLANKING);
 }
 
+#if 0
 static void screen_blit_bilinear(void) {
     static uint32_t lastFPSTime = 0;
-    static uint32_t lastTime = 0;
     static uint32_t frames = 0;
     uint32_t currentTime = HAL_GetTick();
     uint32_t delta = currentTime - lastFPSTime;
@@ -160,13 +153,11 @@ static void screen_blit_bilinear(void) {
 
     if (delta >= 1000) {
         int fps = (10000 * frames) / delta;
-        printf("FPS: %d.%d, frames %d, delta %d ms, skipped %d\n", fps / 10, fps % 10, delta, frames, skippedFrames);
+        printf("FPS: %d.%d, frames %ld, delta %ld ms, skipped %ld\n", fps / 10, fps % 10, delta, frames, skippedFrames);
         frames = 0;
         skippedFrames = 0;
         lastFPSTime = currentTime;
     }
-
-    lastTime = currentTime;
 
     int w1 = currentUpdate->width;
     int h1 = currentUpdate->height;
@@ -176,13 +167,7 @@ static void screen_blit_bilinear(void) {
     int w2 = 320;
     int h2 = 216;
 
-    int x_ratio = (int)((w1<<16)/w2) +1;
-    int y_ratio = (int)((h1<<16)/h2) +1;
     int hpad = 0;
-    //int x_ratio = (int)((w1<<16)/w2) ;
-    //int y_ratio = (int)((h1<<16)/h2) ;
-    int x2, y2 ;
-    uint16_t* screen_buf = (uint16_t*)currentUpdate->buffer;
     uint16_t *dest = active_framebuffer ? framebuffer2 : framebuffer1;
 
 
@@ -190,7 +175,7 @@ static void screen_blit_bilinear(void) {
     dst_img.w = 320;
     dst_img.h = 240;
     dst_img.bpp = 2;
-    dst_img.pixels = dest;
+    dst_img.pixels = (uint8_t *)dest;
 
 
     image_t src_img;
@@ -220,12 +205,11 @@ static void screen_blit_bilinear(void) {
     active_framebuffer = active_framebuffer ? 0 : 1;
     HAL_LTDC_Reload(&hltdc, LTDC_RELOAD_VERTICAL_BLANKING);
 }
-
+#endif
 
 __attribute__((optimize("unroll-loops")))
 static inline void screen_blit_jth(void) {
     static uint32_t lastFPSTime = 0;
-    static uint32_t lastTime = 0;
     static uint32_t frames = 0;
     uint32_t currentTime = HAL_GetTick();
     uint32_t delta = currentTime - lastFPSTime;
@@ -234,13 +218,11 @@ static inline void screen_blit_jth(void) {
 
     if (delta >= 1000) {
         int fps = (10000 * frames) / delta;
-        printf("FPS: %d.%d, frames %d, delta %d ms, skipped %d\n", fps / 10, fps % 10, delta, frames, skippedFrames);
+        printf("FPS: %d.%d, frames %ld, delta %ld ms, skipped %ld\n", fps / 10, fps % 10, delta, frames, skippedFrames);
         frames = 0;
         skippedFrames = 0;
         lastFPSTime = currentTime;
     }
-
-    lastTime = currentTime;
 
     uint16_t* screen_buf = (uint16_t*)currentUpdate->buffer;
     uint16_t *dest = active_framebuffer ? framebuffer2 : framebuffer1;
@@ -250,13 +232,9 @@ static inline void screen_blit_jth(void) {
 
 
     int w1 = currentUpdate->width;
-    int h1 = currentUpdate->height;
     int w2 = 320;
     int h2 = 240;
 
-    int y_done = 0;
-
-    int y = 0;
     const int border = 24;
 
     // Iterate on dest buf rows
@@ -293,9 +271,9 @@ static inline void screen_blit_jth(void) {
 
 void HAL_LTDC_ReloadEventCallback (LTDC_HandleTypeDef *hltdc) {
     if (active_framebuffer == 0) {
-        HAL_LTDC_SetAddress(hltdc, framebuffer2, 0);
+        HAL_LTDC_SetAddress(hltdc, (uint32_t)framebuffer2, 0);
     } else {
-        HAL_LTDC_SetAddress(hltdc, framebuffer1, 0);
+        HAL_LTDC_SetAddress(hltdc, (uint32_t)framebuffer1, 0);
     }
 }
 
@@ -356,7 +334,7 @@ static bool LoadState(char *pathName)
     return true;*/
 }
 
-
+#if 0
 static bool palette_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event)
 {
     /* what?! */
@@ -383,6 +361,7 @@ static bool palette_update_cb(odroid_dialog_choice_t *option, odroid_dialog_even
     return event == ODROID_DIALOG_ENTER;*/
     return false;
 }
+#endif
 
 /*static bool save_sram_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event)
 {
@@ -525,7 +504,7 @@ void app_main(void)
     pcm.pos = 0;
 
     memset(audiobuffer_dma, 0, sizeof(audiobuffer_dma));
-    HAL_SAI_Transmit_DMA(&hsai_BlockA1, audiobuffer_dma, sizeof(audiobuffer_dma) / sizeof(audiobuffer_dma[0]));
+    HAL_SAI_Transmit_DMA(&hsai_BlockA1, (uint8_t *)audiobuffer_dma, sizeof(audiobuffer_dma) / sizeof(audiobuffer_dma[0]));
 
     rg_app_desc_t *app = odroid_system_get_app();
 
@@ -576,16 +555,16 @@ void app_main(void)
         if (pause_pressed != joystick.values[ODROID_INPUT_VOLUME]) {
             pause_pressed = joystick.values[ODROID_INPUT_VOLUME];
             if (pause_pressed) {
-                printf("Pause pressed %d=>%d\n", audio_mute, !audio_mute);
+                printf("Pause pressed %ld=>%d\n", audio_mute, !audio_mute);
                 audio_mute = !audio_mute;
             }
         }
 
         if (power_pressed != joystick.values[ODROID_INPUT_POWER]) {
-            printf("Power toggle %d=>%d\n", power_pressed, !power_pressed);
+            printf("Power toggle %ld=>%d\n", power_pressed, !power_pressed);
             power_pressed = joystick.values[ODROID_INPUT_POWER];
             if (power_pressed) {
-                printf("Power PRESSED %d\n", power_pressed);
+                printf("Power PRESSED %ld\n", power_pressed);
                 HAL_SAI_DMAStop(&hsai_BlockA1);
                 lcd_backlight_off();
 

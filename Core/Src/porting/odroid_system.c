@@ -33,7 +33,7 @@ void odroid_system_emu_init(state_handler_t load, state_handler_t save, netplay_
     currentApp.loadState = load;
     currentApp.saveState = save;
 
-    printf("%s: Init done. GameId=%08X\n", __func__, currentApp.gameId);
+    printf("%s: Init done. GameId=%08lX\n", __func__, currentApp.gameId);
 }
 
 rg_app_desc_t *odroid_system_get_app()
@@ -44,7 +44,7 @@ rg_app_desc_t *odroid_system_get_app()
 
 bool odroid_system_emu_load_state(int slot)
 {
-
+    return false;
 }
 
 IRAM_ATTR void odroid_system_tick(uint skippedFrame, uint fullFrame, uint busyTime)

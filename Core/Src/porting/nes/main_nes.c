@@ -38,7 +38,6 @@ typedef enum {
 #define blit blit_normal
 #endif
 
-static uint32_t audioBuffer[AUDIO_BUFFER_LENGTH];
 static uint32_t audio_mute;
 
 extern unsigned char cart_rom[];
@@ -47,11 +46,12 @@ extern unsigned int cart_rom_len;
 #ifdef NES_CACHE_ROM_IN_RAM
 unsigned char ram_cart_rom[ROM_LENGTH] __attribute__((section (".emulator_data")));;
 unsigned int  ram_cart_rom_len = ROM_LENGTH;
+
+unsigned int crc32_le(unsigned int crc, unsigned char const * buf, unsigned int len);
 #endif
 
 static uint romCRC32;
 
-static int16_t pendingSamples = 0;
 static int16_t audiobuffer_emulator[AUDIO_BUFFER_LENGTH] __attribute__((section (".audio")));
 static int16_t audiobuffer_dma[AUDIO_BUFFER_LENGTH * 2] __attribute__((section (".audio")));
 static uint32_t dma_counter;
@@ -60,17 +60,8 @@ static dma_transfer_state_t dma_state;
 extern SAI_HandleTypeDef hsai_BlockA1;
 extern DMA_HandleTypeDef hdma_sai1_a;
 
-static odroid_gamepad_state_t joystick1;
-static odroid_gamepad_state_t joystick2;
-static odroid_gamepad_state_t *localJoystick = &joystick1;
-static odroid_gamepad_state_t *remoteJoystick = &joystick2;
-
 static uint32_t pause_pressed;
 static uint32_t power_pressed;
-
-static bool overscan = true;
-static uint autocrop = false;
-static bool netplay  = false;
 
 static bool fullFrame = 0;
 static uint frameTime = 0;
@@ -84,7 +75,7 @@ extern void store_save(uint8_t *data, size_t size);
 
 
 // if i counted correctly this should max be 23077
-char nes_save_buffer[24000];
+uint8_t nes_save_buffer[24000];
 
 
 
@@ -107,8 +98,6 @@ void osd_setpalette(rgb_t *pal)
 
     for (int i = 0; i < 64; i++)
     {
-        uint16_t c = (pal[i].b>>3) | ((pal[i].g>>2)<<5) | ((pal[i].r>>3)<<11);
-
         // The upper bits are used to indicate background and transparency.
         // They need to be indexed as well.
         clut[i]        = (pal[i].b) | (pal[i].g << 8) | (pal[i].r << 16);
@@ -204,7 +193,7 @@ static inline void blit_normal(bitmap_t *bmp, uint8_t *framebuffer) {
 
     for (int y = 0; y < bmp->height; y++) {
         uint8_t *row = bmp->line[y];
-        uint32 *dest = NULL;
+        uint8_t *dest = NULL;
         if(active_framebuffer == 0) {
             dest = &framebuffer[WIDTH * y + hpad];
         } else {
@@ -251,7 +240,6 @@ static inline void blit_nearest(bitmap_t *bmp, uint8_t *framebuffer) {
 void osd_blitscreen(bitmap_t *bmp)
 {
     static uint32_t lastFPSTime = 0;
-    static uint32_t lastTime = 0;
     static uint32_t frames = 0;
     uint32_t currentTime = HAL_GetTick();
     uint32_t delta = currentTime - lastFPSTime;
@@ -260,15 +248,12 @@ void osd_blitscreen(bitmap_t *bmp)
 
     if (delta >= 1000) {
         int fps = (10000 * frames) / delta;
-        printf("FPS: %d.%d, frames %d, delta %d ms, skipped %d, vsync_wait_ms %d\n", fps / 10, fps % 10, frames, delta, skippedFrames);
+        printf("FPS: %d.%d, frames %ld, delta %ld ms, skipped %ld\n", fps / 10, fps % 10, frames, delta, skippedFrames);
         frames = 0;
         skippedFrames = 0;
         vsync_wait_ms = 0;
         lastFPSTime = currentTime;
     }
-
-    lastTime = currentTime;
-
 
     // This takes less than 1ms
     if(active_framebuffer == 0) {
@@ -284,9 +269,9 @@ void osd_blitscreen(bitmap_t *bmp)
 
 void HAL_LTDC_ReloadEventCallback (LTDC_HandleTypeDef *hltdc) {
     if(active_framebuffer == 0) {
-        HAL_LTDC_SetAddress(hltdc, framebuffer2, 0);
+        HAL_LTDC_SetAddress(hltdc, (uint32_t)framebuffer2, 0);
     } else {
-        HAL_LTDC_SetAddress(hltdc, framebuffer1, 0);
+        HAL_LTDC_SetAddress(hltdc, (uint32_t)framebuffer1, 0);
     }
 }
 
@@ -306,17 +291,17 @@ void osd_getinput(void)
 
     if (pause_pressed != (buttons & B_PAUSE)) {
         if (pause_pressed) {
-            printf("Pause pressed %d=>%d\n", audio_mute, !audio_mute);
+            printf("Pause pressed %ld=>%d\n", audio_mute, !audio_mute);
             audio_mute = !audio_mute;
         }
         pause_pressed = buttons & B_PAUSE;
     }
 
     if (power_pressed != (buttons & B_POWER)) {
-        printf("Power toggle %d=>%d\n", power_pressed, !power_pressed);
+        printf("Power toggle %ld=>%d\n", power_pressed, !power_pressed);
         power_pressed = buttons & B_POWER;
         if (buttons & B_POWER) {
-            printf("Power PRESSED %d\n", power_pressed);
+            printf("Power PRESSED %ld\n", power_pressed);
             HAL_SAI_DMAStop(&hsai_BlockA1);
 
             if(!(buttons & B_PAUSE)) {
@@ -370,8 +355,7 @@ void osd_loadstate()
             return;
         }
 
-        uint32_t address = &__SAVE_START__;
-        uint8_t *ptr = (uint8_t*)address;
+        uint8_t *ptr = (uint8_t*)&__SAVE_START__;
         state_load(ptr, 24000);
     }
 }
@@ -401,7 +385,7 @@ int app_main(void)
     autoload = !pause_pressed;
 
 
-    printf("app_main ROM: cart_rom_len=%ld\n", cart_rom_len);
+    printf("app_main ROM: cart_rom_len=%d\n", cart_rom_len);
 
 #ifdef NES_CACHE_ROM_IN_RAM
     memcpy(ram_cart_rom, cart_rom, cart_rom_len);
@@ -414,7 +398,7 @@ int app_main(void)
 
     memset(audiobuffer_dma, 0, sizeof(audiobuffer_dma));
 
-    HAL_SAI_Transmit_DMA(&hsai_BlockA1, audiobuffer_dma, sizeof(audiobuffer_dma) / sizeof(audiobuffer_dma[0]));
+    HAL_SAI_Transmit_DMA(&hsai_BlockA1, (uint8_t *)audiobuffer_dma, sizeof(audiobuffer_dma) / sizeof(audiobuffer_dma[0]));
 
     // nofrendo_start("Rom name (E).nes", NES_PAL, AUDIO_SAMPLE_RATE);
     nofrendo_start("Rom name (USA).nes", NES_NTSC, AUDIO_SAMPLE_RATE);
