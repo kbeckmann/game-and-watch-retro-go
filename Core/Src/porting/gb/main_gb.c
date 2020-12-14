@@ -34,8 +34,6 @@ static odroid_video_frame_t *currentUpdate = &update1;
 static bool fullFrame = false;
 static uint skipFrames = 0;
 
-static bool netplay = false;
-
 static bool saveSRAM = false;
 static int  saveSRAM_Timer = 0;
 
@@ -77,7 +75,6 @@ static uint32_t skippedFrames = 0;
 __attribute__((optimize("unroll-loops")))
 static inline void screen_blit(void) {
     static uint32_t lastFPSTime = 0;
-    static uint32_t lastTime = 0;
     static uint32_t frames = 0;
     uint32_t currentTime = HAL_GetTick();
     uint32_t delta = currentTime - lastFPSTime;
@@ -86,13 +83,12 @@ static inline void screen_blit(void) {
 
     if (delta >= 1000) {
         int fps = (10000 * frames) / delta;
-        printf("FPS: %d.%d, frames %d, delta %d ms, skipped %d\n", fps / 10, fps % 10, delta, frames, skippedFrames);
+        printf("FPS: %d.%d, frames %ld, delta %ld ms, skipped %ld\n", fps / 10, fps % 10, delta, frames, skippedFrames);
         frames = 0;
         skippedFrames = 0;
         lastFPSTime = currentTime;
     }
 
-    lastTime = currentTime;
 
 
 
@@ -133,7 +129,6 @@ static inline void screen_blit(void) {
 
 static void screen_blit_bilinear(void) {
     static uint32_t lastFPSTime = 0;
-    static uint32_t lastTime = 0;
     static uint32_t frames = 0;
     uint32_t currentTime = HAL_GetTick();
     uint32_t delta = currentTime - lastFPSTime;
@@ -147,8 +142,6 @@ static void screen_blit_bilinear(void) {
         skippedFrames = 0;
         lastFPSTime = currentTime;
     }
-
-    lastTime = currentTime;
 
     int w1 = currentUpdate->width;
     int h1 = currentUpdate->height;
@@ -207,7 +200,6 @@ __attribute__((optimize("unroll-loops")))
 __attribute__((section (".itcram_hot_text")))
 static inline void screen_blit_jth(void) {
     static uint32_t lastFPSTime = 0;
-    static uint32_t lastTime = 0;
     static uint32_t frames = 0;
     uint32_t currentTime = HAL_GetTick();
     uint32_t delta = currentTime - lastFPSTime;
@@ -222,7 +214,6 @@ static inline void screen_blit_jth(void) {
         lastFPSTime = currentTime;
     }
 
-    lastTime = currentTime;
 
     uint16_t* screen_buf = (uint16_t*)currentUpdate->buffer;
     uint16_t *dest = lcd_get_active_buffer();

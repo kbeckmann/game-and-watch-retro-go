@@ -120,10 +120,7 @@ size_t image_size(image_t *ptr)
 
 void imlib_draw_row_setup(imlib_draw_row_data_t *data)
 {
-    size_t image_row_size = image_size(data->dst_img) / data->dst_img->h;
-
     data->toggle = 0;
-    // data->row_buffer[0] = fb_alloc(image_row_size, FB_ALLOC_NO_HINT);
     data->row_buffer[0] = row_scratch_buf;
     data->row_buffer[1] = data->row_buffer[0];
 
@@ -163,8 +160,8 @@ void imlib_draw_image(image_t *dst_img, image_t *src_img, int dst_x_start, int d
         y_scale = -y_scale;
     }
 
-    int src_img_w = roi ? roi->w : src_img->w, w_limit = src_img_w - 1, w_limit_m_1 = w_limit - 1;
-    int src_img_h = roi ? roi->h : src_img->h, h_limit = src_img_h - 1, h_limit_m_1 = h_limit - 1;
+    int src_img_w = roi ? roi->w : src_img->w, w_limit = src_img_w - 1;
+    int src_img_h = roi ? roi->h : src_img->h, h_limit = src_img_h - 1;
 
     int src_width_scaled = fast_floorf(x_scale * src_img_w);
     int src_height_scaled = fast_floorf(y_scale * src_img_h);
@@ -249,11 +246,11 @@ void imlib_draw_image(image_t *dst_img, image_t *src_img, int dst_x_start, int d
     // top 16-bits = whole part, bottom 16-bits = fractional part.
 
     int dst_x_reset = (dst_delta_x < 0) ? (dst_x_end - 1) : dst_x_start;
-    long src_x_frac = fast_floorf(65536.0f / x_scale), src_x_frac_size = (src_x_frac + 0xFFFF) >> 16;
+    long src_x_frac = fast_floorf(65536.0f / x_scale);
     long src_x_accum_reset = fast_floorf((src_x_start << 16) / x_scale);
 
     int dst_y_reset = (dst_delta_y < 0) ? (dst_y_end - 1) : dst_y_start;
-    long src_y_frac = fast_floorf(65536.0f / y_scale), src_y_frac_size = (src_y_frac + 0xFFFF) >> 16;
+    long src_y_frac = fast_floorf(65536.0f / y_scale);
     long src_y_accum_reset = fast_floorf((src_y_start << 16) / y_scale);
 
     // Nearest Neighbor

@@ -1,4 +1,6 @@
+#include "main.h"
 #include "gw_flash.h"
+#include <string.h>
 
 static quad_mode_t g_quad_mode = SPI_MODE;
 
@@ -239,7 +241,6 @@ void  OSPI_Program(OSPI_HandleTypeDef *hospi, uint32_t address, uint8_t *buffer,
 
 void _OSPI_Read(OSPI_HandleTypeDef *hospi, uint32_t address, uint8_t *buffer, size_t buffer_size)
 {
-  uint8_t status;
   OSPI_RegularCmdTypeDef  sCommand;
 
   memset(&sCommand, 0x0, sizeof(sCommand));
