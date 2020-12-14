@@ -214,7 +214,7 @@ void odroid_overlay_draw_dialog(const char *header, odroid_dialog_choice_t *opti
 
     int options_count = get_dialog_items_count(options);
 
-    char *rows = malloc(options_count * 256);
+    char *rows = rg_alloc(options_count * 256, MEM_ANY);
 
     for (int i = 0; i < options_count; i++)
     {

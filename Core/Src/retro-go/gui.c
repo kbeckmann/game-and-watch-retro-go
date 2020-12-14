@@ -306,7 +306,7 @@ void gui_draw_cover(retro_emulator_file_t *file)
     retro_emulator_t *emu = (retro_emulator_t *)file->emulator;
 
     if (gp_buffer == NULL)
-        gp_buffer = malloc(gp_buffer_size);
+        gp_buffer = rg_alloc(gp_buffer_size, MEM_ANY);
 
     uint16_t *cover_buffer = (uint16_t*)gp_buffer;
     const int cover_buffer_length = gp_buffer_size / 2;

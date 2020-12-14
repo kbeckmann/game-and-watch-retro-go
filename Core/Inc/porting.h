@@ -25,5 +25,9 @@
 #   define DRAM_ATTR
 #endif
 
+#ifndef DEBUG_RG_ALLOC
+
 #define rg_alloc(x, y) malloc(x)
 #define rg_free(x) free(x)
+
+#endif
