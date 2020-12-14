@@ -35,6 +35,8 @@ void update_gamepad_state(odroid_gamepad_state_t *state, uint32_t buttons, odroi
  
  void odroid_input_read_gamepad(odroid_gamepad_state_t* out_state)
  {
+    memset(out_state, '\x00', sizeof(odroid_gamepad_state_t));
+
     uint32_t buttons = buttons_get();
     update_gamepad_state(out_state, buttons, ODROID_INPUT_UP, B_Up);
     update_gamepad_state(out_state, buttons, ODROID_INPUT_RIGHT, B_Right);
