@@ -273,7 +273,7 @@ void odroid_overlay_draw_dialog(const char *header, odroid_dialog_choice_t *opti
     odroid_overlay_draw_rect(box_x, box_y, box_width, box_height, box_padding, box_color);
     odroid_overlay_draw_rect(box_x - 1, box_y - 1, box_width + 2, box_height + 2, 1, box_border_color);
 
-    free(rows);
+    rg_free(rows);
 }
 
 int odroid_overlay_dialog(const char *header, odroid_dialog_choice_t *options, int selected)

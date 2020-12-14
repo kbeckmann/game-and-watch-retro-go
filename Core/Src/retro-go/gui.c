@@ -59,7 +59,7 @@ void gui_event(gui_event_t event, tab_t *tab)
 
 tab_t *gui_add_tab(const char *name, const void *logo, const void *header, void *arg, void *event_handler)
 {
-    tab_t *tab = calloc(1, sizeof(tab_t));
+    tab_t *tab = rg_calloc(1, sizeof(tab_t));
 
     sprintf(tab->name, "%s", name);
     sprintf(tab->status, "Loading...");
@@ -159,12 +159,12 @@ void gui_resize_list(tab_t *tab, int new_size)
 
     if (new_size == 0)
     {
-        free(tab->listbox.items);
+        rg_free(tab->listbox.items);
         tab->listbox.items = NULL;
     }
     else
     {
-        tab->listbox.items = realloc(tab->listbox.items, new_size * sizeof(listbox_item_t));
+        tab->listbox.items = rg_realloc(tab->listbox.items, new_size * sizeof(listbox_item_t));
         for (int i = cur_size; i < new_size; i++)
             memset(&tab->listbox.items[i], 0, sizeof(listbox_item_t));
     }

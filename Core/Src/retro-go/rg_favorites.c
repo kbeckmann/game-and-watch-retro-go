@@ -61,13 +61,13 @@ static void favorites_load()
     char *temp_ptr = favorites_str;
 
     favorites_count = 0;
-    free(favorites);
+    rg_free(favorites);
 
     while (*temp_ptr)
         if (*temp_ptr++ == '\n')
             favorites_count++;
 
-    favorites = calloc(favorites_count + 1, sizeof(favorite_t));
+    favorites = rg_calloc(favorites_count + 1, sizeof(favorite_t));
     gui_resize_list(fav_tab, favorites_count);
 
     char *token = strtok(favorites_str, "\n");
@@ -115,7 +115,7 @@ static void favorites_load()
 
 static void favorites_save()
 {
-    char *buffer = calloc(favorites_count, 128);
+    char *buffer = rg_calloc(favorites_count, 128);
 
     for (int i = 0; i < favorites_count; i++)
     {
@@ -127,7 +127,7 @@ static void favorites_save()
 
     odroid_settings_string_set(KEY_FAVORITES, buffer);
     odroid_settings_commit();
-    free(buffer);
+    rg_free(buffer);
 }
 
 favorite_t *favorite_find(retro_emulator_file_t *file)
