@@ -6,7 +6,7 @@ ROM_ENTRIES_TEMPLATE = """
 const rom_entry {name}[] = {{
     {body}
 }};
-const uint32_t {name}_count = {rom_count};
+#define {name}_count ({rom_count})
 """
 
 ROM_ENTRY_TEMPLATE = """\t{{.rom_name = "{name}", .flash_address = (uint32_t)&{variable_name}[0], .size={size}}},"""

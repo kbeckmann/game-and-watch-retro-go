@@ -17,7 +17,7 @@ typedef struct {
 } rom_system;
 
 typedef struct {
-    const rom_system *systems;
+    const rom_system **systems;
     uint32_t systems_count;
 } rom_manager;
 
