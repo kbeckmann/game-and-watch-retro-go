@@ -38,6 +38,15 @@ extern "C" {
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
 
+typedef enum {
+  BSOD_ABORT,
+  BSOD_HARDFAULT,
+  BSOD_MEMFAULT,
+  BSOD_BUSFAULT,
+  BSOD_USAGEFAULT,
+  BSOD_OTHER,
+} BSOD_t;
+
 /* USER CODE END ET */
 
 /* Exported constants --------------------------------------------------------*/
@@ -88,7 +97,9 @@ extern RTC_HandleTypeDef hrtc;
 /* USER CODE END EM */
 
 /* Exported functions prototypes ---------------------------------------------*/
+
 void Error_Handler(void);
+void BSOD(BSOD_t fault, void *pc, void *lr) __attribute__((noreturn));
 
 /* USER CODE BEGIN EFP */
 

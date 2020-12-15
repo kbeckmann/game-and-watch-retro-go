@@ -178,3 +178,10 @@ void* lcd_get_inactive_buffer(void)
   return active_framebuffer ? framebuffer1 : framebuffer2;
 }
 
+void lcd_reset_active_buffer(void)
+{
+  HAL_LTDC_SetAddress(&hltdc, framebuffer1, 0);
+  active_framebuffer = 0;
+}
+
+
