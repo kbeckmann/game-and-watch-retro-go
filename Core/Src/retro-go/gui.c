@@ -230,6 +230,8 @@ void gui_redraw()
     gui_draw_status(tab);
     gui_draw_list(tab);
     gui_event(TAB_REDRAW, tab);
+
+    lcd_swap();
 }
 
 void gui_draw_navbar()

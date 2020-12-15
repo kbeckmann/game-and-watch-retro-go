@@ -1,3 +1,5 @@
+#include <assert.h>
+
 #include "odroid_system.h"
 
 static panic_trace_t *panicTrace = (void *)0x0;
@@ -59,16 +61,18 @@ IRAM_ATTR void odroid_system_tick(uint skippedFrame, uint fullFrame, uint busyTi
 
 void odroid_system_switch_app(int app)
 {
-    printf("%s: Switching to app %d.\n", __func__, app);
+    printf("%s: Switching to app %d.\n", __FUNCTION__, app);
 
-    // TODO
+    switch (app) {
+    case 0:
+        NVIC_SystemReset();
+        break;
+    default:
+        assert(0);
+    }
+}
 
-    // odroid_display_clear(0);
-    // odroid_display_show_hourglass();
-
-    // odroid_audio_terminate();
-    // odroid_sdcard_close();
-
-    // odroid_system_set_boot_app(app);
-    // esp_restart();
+runtime_stats_t odroid_system_get_stats()
+{
+    return statistics;
 }

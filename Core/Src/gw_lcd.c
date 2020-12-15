@@ -10,7 +10,9 @@ uint16_t framebuffer1[GW_LCD_WIDTH * GW_LCD_HEIGHT]  __attribute__((section (".l
 uint16_t framebuffer2[GW_LCD_WIDTH * GW_LCD_HEIGHT]  __attribute__((section (".lcd")));
 #endif // GW_LCD_MODE_LUT8
 
-uint32_t active_framebuffer = 0;
+extern LTDC_HandleTypeDef hltdc;
+
+uint32_t active_framebuffer;
 
 void lcd_backlight_off() {
   HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, GPIO_PIN_RESET);
@@ -144,3 +146,35 @@ void lcd_init(SPI_HandleTypeDef *spi, LTDC_HandleTypeDef *ltdc) {
 
   HAL_LTDC_SetAddress(ltdc,(uint32_t) &framebuffer1, 0);
 }
+
+void HAL_LTDC_ReloadEventCallback (LTDC_HandleTypeDef *hltdc) {
+  if (active_framebuffer == 0) {
+    HAL_LTDC_SetAddress(hltdc, framebuffer2, 0);
+  } else {
+    HAL_LTDC_SetAddress(hltdc, framebuffer1, 0);
+  }
+}
+
+void lcd_swap(void)
+{
+  HAL_LTDC_Reload(&hltdc, LTDC_RELOAD_VERTICAL_BLANKING);
+  active_framebuffer = active_framebuffer ? 0 : 1;
+}
+
+void lcd_sync(void)
+{
+  void *active = lcd_get_active_buffer();
+  void *inactive = lcd_get_inactive_buffer();
+  memcpy(inactive, active, sizeof(framebuffer1));
+}
+
+void* lcd_get_active_buffer(void)
+{
+  return active_framebuffer ? framebuffer2 : framebuffer1;
+}
+
+void* lcd_get_inactive_buffer(void)
+{
+  return active_framebuffer ? framebuffer1 : framebuffer2;
+}
+

@@ -26,4 +26,9 @@ extern uint32_t active_framebuffer;
 void lcd_init(SPI_HandleTypeDef *spi, LTDC_HandleTypeDef *ltdc);
 void lcd_backlight_on();
 void lcd_backlight_off();
+void lcd_swap(void);
+void lcd_sync(void);
+void* lcd_get_active_buffer(void);
+void* lcd_get_inactive_buffer(void);
+
 #endif

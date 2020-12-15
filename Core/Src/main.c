@@ -60,11 +60,8 @@ SPI_HandleTypeDef hspi2;
 
 /* USER CODE BEGIN PV */
 
-uint8_t nullpointer_guard[1024] __attribute__((section (".itcram_start")))  __attribute__((keep));
-
-// uint16_t audiobuffer[48000] __attribute__((section (".audio")));
-uint8_t extflash_variable[1] __attribute__((section (".extflash_data")));
-uint8_t logbuf[1024 * 16];
+// uint8_t logbuf[1024 * 16] __attribute__((section (".log_data")));
+uint8_t logbuf[1024 * 4];
 uint32_t log_idx;
 
 uint32_t boot_buttons;
@@ -276,14 +273,11 @@ int main(void)
   OSPI_EnableMemoryMappedMode(&hospi1);
 
   // Copy instructions and data from extflash to axiram
-  extern uint32_t _siramdata;
-  extern uint32_t _sram_text;
-  extern uint32_t _eram_data;
   uint32_t copy_areas[4];
 
   copy_areas[0] = (uint32_t) &_siramdata;  // 0x90000000
-  copy_areas[1] = (uint32_t) &_sram_text;  // 0x24000000
-  copy_areas[2] = (uint32_t) &_eram_data;  // 0x24000000 + length
+  copy_areas[1] = (uint32_t) &__ram_exec_start__;  // 0x24000000
+  copy_areas[2] = (uint32_t) &__ram_exec_end__;  // 0x24000000 + length
   copy_areas[3] = copy_areas[2] - copy_areas[1];
   memcpy_no_check(copy_areas[1], copy_areas[0], copy_areas[2] - copy_areas[1]);
 
@@ -794,7 +788,7 @@ void MPU_Config(void)
   MPU_InitStruct.SubRegionDisable = 0x0;
   MPU_InitStruct.TypeExtField = MPU_TEX_LEVEL0;
   MPU_InitStruct.AccessPermission = MPU_REGION_FULL_ACCESS;
-  MPU_InitStruct.DisableExec = MPU_INSTRUCTION_ACCESS_DISABLE;
+  MPU_InitStruct.DisableExec = MPU_INSTRUCTION_ACCESS_ENABLE;
   MPU_InitStruct.IsShareable = MPU_ACCESS_NOT_SHAREABLE;
   MPU_InitStruct.IsCacheable = MPU_ACCESS_NOT_CACHEABLE;
   MPU_InitStruct.IsBufferable = MPU_ACCESS_NOT_BUFFERABLE;
@@ -812,7 +806,7 @@ void MPU_Config(void)
     MPU_InitStruct.SubRegionDisable = 0x0;
     MPU_InitStruct.TypeExtField = MPU_TEX_LEVEL0;
     MPU_InitStruct.AccessPermission = MPU_REGION_NO_ACCESS;
-    MPU_InitStruct.DisableExec = MPU_INSTRUCTION_ACCESS_DISABLE;
+    MPU_InitStruct.DisableExec = MPU_INSTRUCTION_ACCESS_ENABLE;
     MPU_InitStruct.IsShareable = MPU_ACCESS_NOT_SHAREABLE;
     MPU_InitStruct.IsCacheable = MPU_ACCESS_NOT_CACHEABLE;
     MPU_InitStruct.IsBufferable = MPU_ACCESS_NOT_BUFFERABLE;
@@ -850,7 +844,7 @@ void MPU_Config(void)
   MPU_InitStruct.SubRegionDisable = 0x0;
   MPU_InitStruct.TypeExtField = MPU_TEX_LEVEL0;
   MPU_InitStruct.AccessPermission = MPU_REGION_FULL_ACCESS;
-  MPU_InitStruct.DisableExec = MPU_INSTRUCTION_ACCESS_DISABLE;
+  MPU_InitStruct.DisableExec = MPU_INSTRUCTION_ACCESS_ENABLE;
   MPU_InitStruct.IsShareable = MPU_ACCESS_NOT_SHAREABLE;
   MPU_InitStruct.IsCacheable = MPU_ACCESS_NOT_CACHEABLE;
   MPU_InitStruct.IsBufferable = MPU_ACCESS_NOT_BUFFERABLE;
