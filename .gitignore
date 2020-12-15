@@ -6,6 +6,7 @@ Drivers
 
 Makefile
 Core/Inc/rom_info.h
+Core/Inc/githash.h
 roms
 
 .mxproject

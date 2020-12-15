@@ -27,6 +27,7 @@
 #include "gw_flash.h"
 #include "gw_lcd.h"
 #include "gw_linker.h"
+#include "githash.h"
 
 #include "odroid_colors.h"
 #include "odroid_overlay.h"
@@ -117,7 +118,7 @@ __attribute__((optimize("-O0"))) void BSOD(BSOD_t fault, void *pc, void *lr)
 
   __disable_irq();
 
-  snprintf(msg, sizeof(msg), "FATAL EXCEPTION: %s\nPC=%p LR=%p\n", fault_list[fault], pc, lr);
+  snprintf(msg, sizeof(msg), "FATAL EXCEPTION: %s %s\nPC=%p LR=%p\n", fault_list[fault], GIT_HASH, pc, lr);
 
   lcd_sync();
   lcd_reset_active_buffer();

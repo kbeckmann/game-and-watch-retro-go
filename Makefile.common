@@ -227,7 +227,13 @@ endef
 # generate all object prerequisite rules
 $(eval $(foreach obj,$(SDK_C_SOURCES) $(SDK_ASM_SOURCES),$(call sdk_obj_prereq_gen,$(obj))))
 
-$(BUILD_DIR)/%.o: %.c Makefile.common Makefile.$(TARGET) $(LDSCRIPT) $(SDK_HEADERS) | $(BUILD_DIR)
+Core/Inc/githash.h:
+	echo -ne '#ifndef GIT_HASH\n#define GIT_HASH "' > $@ && \
+	git describe --always --dirty | tr -d "\n" >> $@ && \
+	echo -ne '"\n#endif' >> $@
+.PHONY: Core/Inc/githash.h
+
+$(BUILD_DIR)/%.o: %.c Core/Inc/githash.h Makefile.common Makefile.$(TARGET) $(LDSCRIPT) $(SDK_HEADERS) | $(BUILD_DIR)
 	$(CC) -c $(CFLAGS) -Wa,-a,-ad,-alms=$(BUILD_DIR)/$(notdir $(<:.c=.lst)) $< -o $@
 
 $(BUILD_DIR)/%.o: %.s Makefile.common Makefile.$(TARGET) $(LDSCRIPT) | $(BUILD_DIR)
