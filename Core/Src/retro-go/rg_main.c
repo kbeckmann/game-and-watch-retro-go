@@ -236,6 +236,7 @@ void retro_loop()
             gui.idle_counter++;
         }
 
+        gui_redraw();
         HAL_Delay(15);
     }
 }

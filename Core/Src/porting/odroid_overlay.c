@@ -361,10 +361,11 @@ int odroid_overlay_dialog(const char *header, odroid_dialog_choice_t *options, i
             {
                 sel = (sel + dir) % options_count;
             }
-            odroid_overlay_draw_dialog(header, options, sel);
             sel_old = sel;
         }
 
+        odroid_overlay_draw_dialog(header, options, sel);
+        lcd_swap();
         HAL_Delay(20);
     }
 
@@ -618,14 +619,15 @@ int odroid_overlay_game_menu()
     while (odroid_input_key_is_pressed(ODROID_INPUT_ANY));
     draw_game_status_bar(stats);
 
+    lcd_sync();
+
     int r = odroid_overlay_dialog("Retro-Go", choices, 0);
 
     switch (r)
     {
         case 10: odroid_system_emu_save_state(0); break;
         case 20: odroid_system_emu_save_state(0); odroid_system_switch_app(0); break;
-        case 30: odroid_system_emu_load_state(0); break; // esp_restart();
-        case 40: odroid_netplay_quick_start(); break;
+        case 30: odroid_system_emu_load_state(0); break; // TODO: Reload emulator?
         case 50: odroid_overlay_game_debug_menu(); break;
         case 100: odroid_system_switch_app(0); break;
     }

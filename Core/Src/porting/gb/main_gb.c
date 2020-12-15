@@ -86,9 +86,6 @@ static void netplay_callback(netplay_event_t event, void *arg)
 
 static uint32_t skippedFrames = 0;
 
-// TODO: Move to lcd.c/h
-extern LTDC_HandleTypeDef hltdc;
-
 
 __attribute__((optimize("unroll-loops")))
 static inline void screen_blit(void) {
@@ -124,7 +121,7 @@ static inline void screen_blit(void) {
     //int y_ratio = (int)((h1<<16)/h2) ;
     int x2, y2 ;
     uint16_t* screen_buf = (uint16_t*)currentUpdate->buffer;
-    uint16_t *dest = active_framebuffer ? framebuffer2 : framebuffer1;
+    uint16_t *dest = lcd_get_active_buffer();
 
     PROFILING_INIT(t_blit);
     PROFILING_START(t_blit);
@@ -144,8 +141,7 @@ static inline void screen_blit(void) {
     printf("Blit: %d us\n", (1000000 * PROFILING_DIFF(t_blit)) / t_blit_t0.SecondFraction);
 #endif
 
-    active_framebuffer = active_framebuffer ? 0 : 1;
-    HAL_LTDC_Reload(&hltdc, LTDC_RELOAD_VERTICAL_BLANKING);
+    lcd_swap();
 }
 
 static void screen_blit_bilinear(void) {
@@ -182,7 +178,7 @@ static void screen_blit_bilinear(void) {
     //int y_ratio = (int)((h1<<16)/h2) ;
     int x2, y2 ;
     uint16_t* screen_buf = (uint16_t*)currentUpdate->buffer;
-    uint16_t *dest = active_framebuffer ? framebuffer2 : framebuffer1;
+    uint16_t *dest = lcd_get_active_buffer();
 
 
     image_t dst_img;
@@ -216,8 +212,7 @@ static void screen_blit_bilinear(void) {
     printf("Blit: %d us\n", (1000000 * PROFILING_DIFF(t_blit)) / t_blit_t0.SecondFraction);
 #endif
 
-    active_framebuffer = active_framebuffer ? 0 : 1;
-    HAL_LTDC_Reload(&hltdc, LTDC_RELOAD_VERTICAL_BLANKING);
+    lcd_swap();
 }
 
 
@@ -242,7 +237,7 @@ static inline void screen_blit_jth(void) {
     lastTime = currentTime;
 
     uint16_t* screen_buf = (uint16_t*)currentUpdate->buffer;
-    uint16_t *dest = active_framebuffer ? framebuffer2 : framebuffer1;
+    uint16_t *dest = lcd_get_active_buffer();
 
     PROFILING_INIT(t_blit);
     PROFILING_START(t_blit);
@@ -286,16 +281,7 @@ static inline void screen_blit_jth(void) {
     printf("Blit: %d us\n", (1000000 * PROFILING_DIFF(t_blit)) / t_blit_t0.SecondFraction);
 #endif
 
-    active_framebuffer = active_framebuffer ? 0 : 1;
-    HAL_LTDC_Reload(&hltdc, LTDC_RELOAD_VERTICAL_BLANKING);
-}
-
-void HAL_LTDC_ReloadEventCallback (LTDC_HandleTypeDef *hltdc) {
-    if (active_framebuffer == 0) {
-        HAL_LTDC_SetAddress(hltdc, framebuffer2, 0);
-    } else {
-        HAL_LTDC_SetAddress(hltdc, framebuffer1, 0);
-    }
+    lcd_swap();
 }
 
 // __attribute__((optimize("unroll-loops")))
@@ -479,6 +465,23 @@ void pcm_submit() {
     }
 }
 
+bool odroid_netplay_quick_start(void)
+{
+    return true;
+}
+
+bool odroid_system_emu_save_state(int slot)
+{
+    // TODO
+    return true;
+}
+
+// TODO: Move to own file
+void odroid_audio_mute(bool mute)
+{
+    audio_mute = mute;
+}
+
 
 rg_app_desc_t * init() {
     odroid_gamepad_state_t joystick;
@@ -558,17 +561,21 @@ void app_main_gb(void)
 
         odroid_input_read_gamepad(&joystick);
 
-        /*if (joystick.values[ODROID_INPUT_MENU]) {
+        if (joystick.values[ODROID_INPUT_VOLUME]) {
+
+            // TODO: Sync framebuffers in a nicer way
+            lcd_sync();
+
             odroid_overlay_game_menu();
         }
-        else if (joystick.values[ODROID_INPUT_VOLUME]) {
-            odroid_dialog_choice_t options[] = {
-                {100, "Palette", "7/7", !hw.cgb, &palette_update_cb},
-                {101, "More...", "", 1, &advanced_settings_cb},
-                ODROID_DIALOG_CHOICE_LAST
-            };
-            odroid_overlay_game_settings_menu(options);
-        }*/
+        // else if (joystick.values[ODROID_INPUT_VOLUME]) {
+        //     odroid_dialog_choice_t options[] = {
+        //         {100, "Palette", "7/7", !hw.cgb, &palette_update_cb},
+        //         // {101, "More...", "", 1, &advanced_settings_cb},
+        //         ODROID_DIALOG_CHOICE_LAST
+        //     };
+        //     odroid_overlay_game_settings_menu(options);
+        // }
 
         uint startTime = get_elapsed_time();
         bool drawFrame = !skipFrames;

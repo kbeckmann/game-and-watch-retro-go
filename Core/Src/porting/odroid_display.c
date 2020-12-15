@@ -9,7 +9,7 @@ short odroid_display_queue_update(odroid_video_frame_t *frame, odroid_video_fram
 
 void odroid_display_write_rect(short left, short top, short width, short height, short stride, const uint16_t* buffer)
 {
-    pixel_t *dest = active_framebuffer ? framebuffer2 : framebuffer1;
+    pixel_t *dest = lcd_get_active_buffer();
 
     for (short y = 0; y < height; y++) {
         pixel_t *dest_row = &dest[(y + top) * GW_LCD_WIDTH + left];

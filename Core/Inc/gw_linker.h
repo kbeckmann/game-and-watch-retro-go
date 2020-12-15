@@ -14,3 +14,7 @@ extern uint8_t _stack_redzone;
 extern uint8_t _heap_start;
 extern uint8_t _heap_end;
 
+
+extern uint32_t _siramdata;
+extern uint32_t __ram_exec_start__;
+extern uint32_t __ram_exec_end__;
