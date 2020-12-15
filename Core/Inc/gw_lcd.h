@@ -31,4 +31,7 @@ void lcd_sync(void);
 void* lcd_get_active_buffer(void);
 void* lcd_get_inactive_buffer(void);
 
+// To be used by fault handlers
+void lcd_reset_active_buffer(void);
+
 #endif

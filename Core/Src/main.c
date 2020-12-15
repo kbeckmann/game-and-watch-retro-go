@@ -27,6 +27,10 @@
 #include "gw_flash.h"
 #include "gw_lcd.h"
 #include "gw_linker.h"
+
+#include "odroid_colors.h"
+#include "odroid_overlay.h"
+
 #include <string.h>
 #include <assert.h>
 /* USER CODE END Includes */
@@ -91,6 +95,72 @@ void app_main(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
+
+const char *fault_list[] = {
+  [BSOD_ABORT] = "Assert",
+  [BSOD_HARDFAULT] = "Hardfault",
+  [BSOD_MEMFAULT] = "Memfault",
+  [BSOD_BUSFAULT] = "Busfault",
+  [BSOD_USAGEFAULT] = "Usagefault",
+  [BSOD_OTHER] = "Other",
+};
+
+__attribute__((optimize("-O0"))) void BSOD(BSOD_t fault, void *pc, void *lr)
+{
+  char msg[256];
+  size_t i = 0;
+  char *start;
+  char *end;
+  char *line;
+  int y = 2*8;
+
+  __disable_irq();
+
+  snprintf(msg, sizeof(msg), "FATAL EXCEPTION: %s\nPC=%p LR=%p\n", fault_list[fault], pc, lr);
+
+  lcd_sync();
+  lcd_reset_active_buffer();
+
+  odroid_overlay_draw_text(0, 0, GW_LCD_WIDTH, msg, C_RED, C_BLUE);
+
+  // Print each line from the log in reverse
+  end = logbuf + strnlen(logbuf, sizeof(logbuf));
+  while (y < GW_LCD_HEIGHT) {
+    // Max 28 lines
+    if (i++ >= 28) {
+      break;
+    }
+
+    // Find the last line start not beyond end (inefficient but simple solution)
+    start = logbuf;
+    while (start < end) {
+      line = start;
+      start = strnstr(start, "\n", end - start) + 1;
+      end[0] = '\x00';
+    }
+    end = line;
+    
+    y += odroid_overlay_draw_text(0, y, GW_LCD_WIDTH, line, C_WHITE, C_BLUE);
+
+    if (line == logbuf) {
+      // No more lines to print
+      break;
+    }
+  }
+
+  while (1) {
+    __NOP();
+  }
+
+  // Does not return
+}
+
+// Used by assert()
+void abort(void)
+{
+  BSOD(BSOD_ABORT, 0, 0);
+}
 
 #if 1
 int _write(int file, char *ptr, int len)
@@ -861,18 +931,17 @@ void MPU_Config(void)
   * @brief  This function is executed in case of error occurrence.
   * @retval None
   */
-void Error_Handler(void)
+__attribute__((optimize("-O0"))) void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
-  __disable_irq();
-  while(1) {
-    // Blink display to indicate failure
-    lcd_backlight_off();
-    HAL_Delay(500);
-    lcd_backlight_on();
-    HAL_Delay(500);
-  }
+
+  // Hacky way to get the return address
+  uint32_t stack;
+  uint32_t *pStack = &stack;
+
+  BSOD(BSOD_OTHER, pStack[3], 0);
+
   /* USER CODE END Error_Handler_Debug */
 }
 
