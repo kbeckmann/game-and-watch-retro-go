@@ -233,7 +233,9 @@ Core/Inc/githash.h:
 	echo -ne '"\n#endif' >> $@
 .PHONY: Core/Inc/githash.h
 
-$(BUILD_DIR)/%.o: %.c Core/Inc/githash.h Makefile.common Makefile.$(TARGET) $(LDSCRIPT) $(SDK_HEADERS) | $(BUILD_DIR)
+Core/Src/main.c: Core/Inc/githash.h
+
+$(BUILD_DIR)/%.o: %.c Makefile.common Makefile.$(TARGET) $(LDSCRIPT) $(SDK_HEADERS) | $(BUILD_DIR)
 	$(CC) -c $(CFLAGS) -Wa,-a,-ad,-alms=$(BUILD_DIR)/$(notdir $(<:.c=.lst)) $< -o $@
 
 $(BUILD_DIR)/%.o: %.s Makefile.common Makefile.$(TARGET) $(LDSCRIPT) | $(BUILD_DIR)
