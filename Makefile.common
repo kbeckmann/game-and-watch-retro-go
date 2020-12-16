@@ -5,7 +5,8 @@
 DEBUG ?= 1
 # optimization
 OPT ?= -Og
-
+# use bash for shell commands
+SHELL = /bin/bash
 
 #######################################
 # paths
