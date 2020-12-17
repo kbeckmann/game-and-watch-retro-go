@@ -1,6 +1,11 @@
+#include <assert.h>
+
 #include "odroid_system.h"
 #include "odroid_display.h"
 #include "gw_lcd.h"
+
+static const uint8_t backlightLevels[] = {128, 144, 160, 192, 255};
+static odroid_display_backlight_t backlightLevel = ODROID_BACKLIGHT_LEVEL4;
 
 short odroid_display_queue_update(odroid_video_frame_t *frame, odroid_video_frame_t *previousFrame)
 {
@@ -26,5 +31,19 @@ void odroid_display_write(short left, short top, short width, short height, cons
 void odroid_display_force_refresh(void)
 {
     // forceVideoRefresh = true;
+}
+
+odroid_display_backlight_t odroid_display_get_backlight()
+{
+    return backlightLevel;
+}
+
+void odroid_display_set_backlight(odroid_display_backlight_t level)
+{
+    assert(level >= ODROID_BACKLIGHT_LEVEL0 && level < ODROID_BACKLIGHT_LEVEL_COUNT);
+
+    backlightLevel = level;
+    lcd_backlight_set(backlightLevels[level]);
+    odroid_settings_Backlight_set(level);
 }
 
