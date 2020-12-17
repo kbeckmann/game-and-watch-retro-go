@@ -423,20 +423,19 @@ static bool volume_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event
 
 static bool brightness_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event)
 {
-    // int8_t level = odroid_display_get_backlight();
-    // int8_t max = ODROID_BACKLIGHT_LEVEL_COUNT - 1;
+    int8_t level = odroid_display_get_backlight();
+    int8_t max = ODROID_BACKLIGHT_LEVEL_COUNT - 1;
 
-    // if (event == ODROID_DIALOG_PREV && level > 0) {
-    //     odroid_display_set_backlight(--level);
-    // }
+    if (event == ODROID_DIALOG_PREV && level > 0) {
+        odroid_display_set_backlight(--level);
+    }
 
-    // if (event == ODROID_DIALOG_NEXT && level < max) {
-    //     odroid_display_set_backlight(++level);
-    // }
+    if (event == ODROID_DIALOG_NEXT && level < max) {
+        odroid_display_set_backlight(++level);
+    }
 
-    // sprintf(option->value, "%d/%d", level + 1, max + 1);
-    // return event == ODROID_DIALOG_ENTER;
-    return false;
+    sprintf(option->value, "%d/%d", level + 1, max + 1);
+    return event == ODROID_DIALOG_ENTER;
 }
 
 static bool audio_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event)
