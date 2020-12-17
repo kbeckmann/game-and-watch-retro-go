@@ -12,21 +12,36 @@ uint16_t framebuffer2[GW_LCD_WIDTH * GW_LCD_HEIGHT]  __attribute__((section (".l
 
 extern LTDC_HandleTypeDef hltdc;
 
+extern DAC_HandleTypeDef hdac1;
+extern DAC_HandleTypeDef hdac2;
+
 uint32_t active_framebuffer;
 
-void lcd_backlight_off() {
-  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, GPIO_PIN_RESET);
-  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
-  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, GPIO_PIN_RESET);
-}
-void lcd_backlight_on() {
-  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, GPIO_PIN_SET);
-  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET);
-  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, GPIO_PIN_SET);
+void lcd_backlight_off()
+{
+  HAL_DAC_Stop(&hdac1, DAC_CHANNEL_1);
+  HAL_DAC_Stop(&hdac1, DAC_CHANNEL_2);
+  HAL_DAC_Stop(&hdac2, DAC_CHANNEL_1);
 }
 
-void lcd_init(SPI_HandleTypeDef *spi, LTDC_HandleTypeDef *ltdc) {
+void lcd_backlight_set(uint8_t brightness)
+{
+  HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_8B_R, brightness);
+  HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_2, DAC_ALIGN_8B_R, brightness);
+  HAL_DAC_SetValue(&hdac2, DAC_CHANNEL_1, DAC_ALIGN_8B_R, brightness);
 
+  HAL_DAC_Start(&hdac1, DAC_CHANNEL_1);
+  HAL_DAC_Start(&hdac1, DAC_CHANNEL_2);
+  HAL_DAC_Start(&hdac2, DAC_CHANNEL_1);
+}
+
+void lcd_backlight_on()
+{
+  lcd_backlight_set(255);
+}
+
+void lcd_init(SPI_HandleTypeDef *spi, LTDC_HandleTypeDef *ltdc)
+{
   // Turn display *off* completely.
   lcd_backlight_off();
 
@@ -43,8 +58,6 @@ void lcd_init(SPI_HandleTypeDef *spi, LTDC_HandleTypeDef *ltdc) {
   // Turn off CS
   HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_RESET);
   HAL_Delay(100);
-
-  lcd_backlight_on();
 
 
 // Wake
@@ -145,6 +158,12 @@ void lcd_init(SPI_HandleTypeDef *spi, LTDC_HandleTypeDef *ltdc) {
   HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
 
   HAL_LTDC_SetAddress(ltdc,(uint32_t) &framebuffer1, 0);
+
+  memset(framebuffer1, 0, sizeof(framebuffer1));
+  memset(framebuffer2, 0, sizeof(framebuffer2));
+
+  // Finally enable the backlight
+  lcd_backlight_on();
 }
 
 void HAL_LTDC_ReloadEventCallback (LTDC_HandleTypeDef *hltdc) {

@@ -76,6 +76,130 @@ void HAL_MspInit(void)
   /* USER CODE END MspInit 1 */
 }
 
+static uint32_t HAL_RCC_DAC12_CLK_ENABLED=0;
+
+/**
+* @brief DAC MSP Initialization
+* This function configures the hardware resources used in this example
+* @param hdac: DAC handle pointer
+* @retval None
+*/
+void HAL_DAC_MspInit(DAC_HandleTypeDef* hdac)
+{
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
+  if(hdac->Instance==DAC1)
+  {
+  /* USER CODE BEGIN DAC1_MspInit 0 */
+
+  /* USER CODE END DAC1_MspInit 0 */
+    /* Peripheral clock enable */
+    HAL_RCC_DAC12_CLK_ENABLED++;
+    if(HAL_RCC_DAC12_CLK_ENABLED==1){
+      __HAL_RCC_DAC12_CLK_ENABLE();
+    }
+
+    __HAL_RCC_GPIOA_CLK_ENABLE();
+    /**DAC1 GPIO Configuration
+    PA4     ------> DAC1_OUT1
+    PA5     ------> DAC1_OUT2
+    */
+    GPIO_InitStruct.Pin = GPIO_PIN_4|GPIO_PIN_5;
+    GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /* USER CODE BEGIN DAC1_MspInit 1 */
+
+  /* USER CODE END DAC1_MspInit 1 */
+  }
+  else if(hdac->Instance==DAC2)
+  {
+  /* USER CODE BEGIN DAC2_MspInit 0 */
+
+    // The generated code is *supposed* to do the following,
+    // however it does not, so we have to to it ourselves.
+    static uint32_t HAL_RCC_DAC2_CLK_ENABLED = 0;
+
+    HAL_RCC_DAC2_CLK_ENABLED++;
+    if(HAL_RCC_DAC2_CLK_ENABLED==1){
+      __HAL_RCC_DAC2_CLK_ENABLE();
+    }
+
+  /* USER CODE END DAC2_MspInit 0 */
+    /* Peripheral clock enable */
+    HAL_RCC_DAC12_CLK_ENABLED++;
+    if(HAL_RCC_DAC12_CLK_ENABLED==1){
+      __HAL_RCC_DAC12_CLK_ENABLE();
+    }
+
+    __HAL_RCC_GPIOA_CLK_ENABLE();
+    /**DAC2 GPIO Configuration
+    PA6     ------> DAC2_OUT1
+    */
+    GPIO_InitStruct.Pin = GPIO_PIN_6;
+    GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /* USER CODE BEGIN DAC2_MspInit 1 */
+
+  /* USER CODE END DAC2_MspInit 1 */
+  }
+
+}
+
+/**
+* @brief DAC MSP De-Initialization
+* This function freeze the hardware resources used in this example
+* @param hdac: DAC handle pointer
+* @retval None
+*/
+void HAL_DAC_MspDeInit(DAC_HandleTypeDef* hdac)
+{
+  if(hdac->Instance==DAC1)
+  {
+  /* USER CODE BEGIN DAC1_MspDeInit 0 */
+
+  /* USER CODE END DAC1_MspDeInit 0 */
+    /* Peripheral clock disable */
+    HAL_RCC_DAC12_CLK_ENABLED--;
+    if(HAL_RCC_DAC12_CLK_ENABLED==0){
+      __HAL_RCC_DAC12_CLK_DISABLE();
+    }
+
+    /**DAC1 GPIO Configuration
+    PA4     ------> DAC1_OUT1
+    PA5     ------> DAC1_OUT2
+    */
+    HAL_GPIO_DeInit(GPIOA, GPIO_PIN_4|GPIO_PIN_5);
+
+  /* USER CODE BEGIN DAC1_MspDeInit 1 */
+
+  /* USER CODE END DAC1_MspDeInit 1 */
+  }
+  else if(hdac->Instance==DAC2)
+  {
+  /* USER CODE BEGIN DAC2_MspDeInit 0 */
+
+  /* USER CODE END DAC2_MspDeInit 0 */
+    /* Peripheral clock disable */
+    HAL_RCC_DAC12_CLK_ENABLED--;
+    if(HAL_RCC_DAC12_CLK_ENABLED==0){
+      __HAL_RCC_DAC12_CLK_DISABLE();
+    }
+
+    /**DAC2 GPIO Configuration
+    PA6     ------> DAC2_OUT1
+    */
+    HAL_GPIO_DeInit(GPIOA, GPIO_PIN_6);
+
+  /* USER CODE BEGIN DAC2_MspDeInit 1 */
+
+  /* USER CODE END DAC2_MspDeInit 1 */
+  }
+
+}
+
 /**
 * @brief LTDC MSP Initialization
 * This function configures the hardware resources used in this example
