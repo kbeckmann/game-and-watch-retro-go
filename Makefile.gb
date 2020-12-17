@@ -91,8 +91,7 @@ retro-go-stm32/nofrendo-go/components/nofrendo/nes/nes_mmc.c \
 retro-go-stm32/nofrendo-go/components/nofrendo/nes/nes_ppu.c \
 retro-go-stm32/nofrendo-go/components/nofrendo/nes/nes_rom.c \
 retro-go-stm32/nofrendo-go/components/nofrendo/nes/nes_state.c \
-retro-go-stm32/nofrendo-go/components/nofrendo/nes/nes.c \
-roms/nes/loaded_nes_rom.c
+retro-go-stm32/nofrendo-go/components/nofrendo/nes/nes.c
 
 C_INCLUDES +=  \
 -Iretro-go-stm32/nofrendo-go/components/nofrendo/cpu \
@@ -108,8 +107,8 @@ C_DEFS += \
 -DDISABLE_AHBRAM_DCACHE
 
 
-REQUIRED_FILE=roms/gb/loaded_gb_rom.c
-REQUIRED_FILE_MSG=Please run ./update_gb_rom.sh to import a GB ROM file
+#REQUIRED_FILE=roms/gb/loaded_gb_rom.c
+#REQUIRED_FILE_MSG=Please run ./update_gb_rom.sh to import a GB ROM file
 
 
 include Makefile.common

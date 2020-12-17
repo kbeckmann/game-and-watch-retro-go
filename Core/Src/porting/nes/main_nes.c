@@ -22,16 +22,6 @@
 #define blit blit_normal
 #endif
 
-extern unsigned char cart_rom[];
-extern unsigned int cart_rom_len;
-
-#ifdef NES_CACHE_ROM_IN_RAM
-unsigned char ram_cart_rom[ROM_LENGTH] __attribute__((section (".emulator_data")));;
-unsigned int  ram_cart_rom_len = ROM_LENGTH;
-#endif
-
-static uint romCRC32;
-
 
 
 static odroid_gamepad_state_t joystick1;
@@ -320,18 +310,11 @@ void osd_getinput(void)
 
 size_t osd_getromdata(unsigned char **data)
 {
-#ifdef NES_CACHE_ROM_IN_RAM
-    *data = (unsigned char*)ram_cart_rom;
-    return ram_cart_rom_len;
-#else
-    *data = (unsigned char*)cart_rom;
-    return cart_rom_len;
-#endif
 }
 
 uint osd_getromcrc()
 {
-   return romCRC32;
+   return 0x1337;
 }
 
 void osd_loadstate()
@@ -377,15 +360,6 @@ int app_main_nes(void)
     // Always load the previous game unless pause is pressed
     autoload = !pause_pressed;
 
-
-    printf("app_main ROM: cart_rom_len=%ld\n", cart_rom_len);
-
-#ifdef NES_CACHE_ROM_IN_RAM
-    memcpy(ram_cart_rom, cart_rom, cart_rom_len);
-    romCRC32 = crc32_le(0, (const uint8_t*)(ram_cart_rom + 16), ram_cart_rom_len - 16);
-#else
-    romCRC32 = crc32_le(0, (const uint8_t*)(cart_rom + 16), cart_rom_len - 16);
-#endif
 
     printf("Nofrendo start!\n");
 
