@@ -13,7 +13,6 @@
 #include "gw_buttons.h"
 #include "gw_lcd.h"
 #include "gw_linker.h"
-#include "rom_info.h"
 
 uint32_t audioBuffer[AUDIO_BUFFER_LENGTH];
 uint32_t audio_mute;
