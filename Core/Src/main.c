@@ -52,6 +52,9 @@
 
 /* Private variables ---------------------------------------------------------*/
 
+DAC_HandleTypeDef hdac1;
+DAC_HandleTypeDef hdac2;
+
 LTDC_HandleTypeDef hltdc;
 
 OSPI_HandleTypeDef hospi1;
@@ -87,6 +90,8 @@ static void MX_SPI2_Init(void);
 static void MX_OCTOSPI1_Init(void);
 static void MX_SAI1_Init(void);
 static void MX_RTC_Init(void);
+static void MX_DAC1_Init(void);
+static void MX_DAC2_Init(void);
 static void MX_NVIC_Init(void);
 /* USER CODE BEGIN PFP */
 
@@ -312,6 +317,8 @@ int main(void)
   MX_OCTOSPI1_Init();
   MX_SAI1_Init();
   MX_RTC_Init();
+  MX_DAC1_Init();
+  MX_DAC2_Init();
 
   /* Initialize interrupts */
   MX_NVIC_Init();
@@ -324,7 +331,6 @@ int main(void)
   HAL_Delay(500);
 
   lcd_init(&hspi2, &hltdc);
-  memset(framebuffer1, 0x10, sizeof(framebuffer1));
 
   /* USER CODE END 2 */
 
@@ -472,6 +478,95 @@ static void MX_NVIC_Init(void)
   /* OCTOSPI1_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(OCTOSPI1_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(OCTOSPI1_IRQn);
+}
+
+/**
+  * @brief DAC1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_DAC1_Init(void)
+{
+
+  /* USER CODE BEGIN DAC1_Init 0 */
+
+  /* USER CODE END DAC1_Init 0 */
+
+  DAC_ChannelConfTypeDef sConfig = {0};
+
+  /* USER CODE BEGIN DAC1_Init 1 */
+
+  /* USER CODE END DAC1_Init 1 */
+  /** DAC Initialization
+  */
+  hdac1.Instance = DAC1;
+  if (HAL_DAC_Init(&hdac1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /** DAC channel OUT1 config
+  */
+  sConfig.DAC_SampleAndHold = DAC_SAMPLEANDHOLD_DISABLE;
+  sConfig.DAC_Trigger = DAC_TRIGGER_NONE;
+  sConfig.DAC_OutputBuffer = DAC_OUTPUTBUFFER_ENABLE;
+  sConfig.DAC_ConnectOnChipPeripheral = DAC_CHIPCONNECT_DISABLE;
+  sConfig.DAC_UserTrimming = DAC_TRIMMING_FACTORY;
+  if (HAL_DAC_ConfigChannel(&hdac1, &sConfig, DAC_CHANNEL_1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /** DAC channel OUT2 config
+  */
+  sConfig.DAC_ConnectOnChipPeripheral = DAC_SAMPLEANDHOLD_DISABLE;
+  if (HAL_DAC_ConfigChannel(&hdac1, &sConfig, DAC_CHANNEL_2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN DAC1_Init 2 */
+
+  /* USER CODE END DAC1_Init 2 */
+
+}
+
+/**
+  * @brief DAC2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_DAC2_Init(void)
+{
+
+  /* USER CODE BEGIN DAC2_Init 0 */
+
+  /* USER CODE END DAC2_Init 0 */
+
+  DAC_ChannelConfTypeDef sConfig = {0};
+
+  /* USER CODE BEGIN DAC2_Init 1 */
+
+  /* USER CODE END DAC2_Init 1 */
+  /** DAC Initialization
+  */
+  hdac2.Instance = DAC2;
+  if (HAL_DAC_Init(&hdac2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /** DAC channel OUT1 config
+  */
+  sConfig.DAC_SampleAndHold = DAC_SAMPLEANDHOLD_DISABLE;
+  sConfig.DAC_Trigger = DAC_TRIGGER_NONE;
+  sConfig.DAC_OutputBuffer = DAC_OUTPUTBUFFER_ENABLE;
+  sConfig.DAC_ConnectOnChipPeripheral = DAC_CHIPCONNECT_DISABLE;
+  sConfig.DAC_UserTrimming = DAC_TRIMMING_FACTORY;
+  if (HAL_DAC_ConfigChannel(&hdac2, &sConfig, DAC_CHANNEL_1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN DAC2_Init 2 */
+
+  /* USER CODE END DAC2_Init 2 */
+
 }
 
 /**
@@ -775,9 +870,6 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIO_Speaker_enable_GPIO_Port, GPIO_Speaker_enable_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6, GPIO_PIN_SET);
-
-  /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
@@ -805,13 +897,6 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(BTN_PWR_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PA4 PA5 PA6 */
-  GPIO_InitStruct.Pin = GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
   /*Configure GPIO pin : PB12 */
   GPIO_InitStruct.Pin = GPIO_PIN_12;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
@@ -838,9 +923,9 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
-/* USER CODE END 4 */
-
 int __builtin_popcount (unsigned int x);
+
+/* USER CODE END 4 */
 
 /* MPU Configuration */
 

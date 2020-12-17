@@ -43,6 +43,8 @@ SDK_DIR ?= Drivers
 # SDK C sources
 SDK_C_SOURCES =  \
 Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_cortex.c \
+Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_dac_ex.c \
+Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_dac.c \
 Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_dma_ex.c \
 Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_dma.c \
 Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_exti.c \
@@ -87,6 +89,8 @@ Drivers/CMSIS/Include/core_cm7.h \
 Drivers/CMSIS/Include/mpu_armv7.h \
 Drivers/STM32H7xx_HAL_Driver/Inc/Legacy/stm32_hal_legacy.h \
 Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_cortex.h \
+Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_dac_ex.h \
+Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_dac.h \
 Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_def.h \
 Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_dma_ex.h \
 Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_dma.h \
