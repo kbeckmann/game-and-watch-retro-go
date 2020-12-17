@@ -110,6 +110,7 @@ void emulator_init(retro_emulator_t *emu)
             const rom_entry *rom = &system->roms[i];
             retro_emulator_file_t *file = &emu->roms.files[emu->roms.count++];
             // strcpy(file->folder, "/");
+            file->emulator = (void*)emu;
             file->address = rom->flash_address;
             file->size = rom->size;
             strcpy(file->name, rom->rom_name);
@@ -357,7 +358,6 @@ void emulator_show_file_menu(retro_emulator_file_t *file)
 void emulator_start(retro_emulator_file_t *file, bool load_state)
 {
     const uint32_t address = emu_get_file_address(file);
-
     printf("Retro-Go: Starting game: %s\n", file->name);
     ROM_DATA = address;
     ROM_DATA_LENGTH = file->size;
@@ -367,13 +367,21 @@ void emulator_start(retro_emulator_file_t *file, bool load_state)
     // odroid_settings_commit();
 
     // odroid_system_switch_app(((retro_emulator_t *)file->emulator)->partition);
-    app_main_gb();
+    retro_emulator_t *emu = file->emulator;
+    // TODO: Make this cleaner
+    if(strcmp(emu->system_name, "Nintendo Gameboy") == 0) {
+        app_main_gb();
+    } else if(strcmp(emu->system_name, "Nintendo Entertainment System") == 0) {
+        app_main_nes();
+    }
+    
 }
 
 void emulators_init()
 {
-    add_emulator("Nintendo Entertainment System", "nes", "nes", "nofrendo-go", 16, logo_nes, header_nes);
     add_emulator("Nintendo Gameboy", "gb", "gb", "gnuboy-go", 0, logo_gb, header_gb);
+    add_emulator("Nintendo Entertainment System", "nes", "nes", "nofrendo-go", 16, logo_nes, header_nes);
+    
     // add_emulator("Nintendo Gameboy Color", "gbc", "gbc", "gnuboy-go", 0, logo_gbc, header_gbc);
     // add_emulator("Sega Master System", "sms", "sms", "smsplusgx-go", 0, logo_sms, header_sms);
     // add_emulator("Sega Game Gear", "gg", "gg", "smsplusgx-go", 0, logo_gg, header_gg);

@@ -121,12 +121,10 @@ void retro_loop()
             int direction = (gui.selected - selected_tab_last) < 0 ? -1 : 1;
 
             tab = gui_set_current_tab(gui.selected);
-
             if (!tab->initialized)
             {
                 gui_redraw();
                 gui_init_tab(tab);
-
                 if (tab_enabled(tab))
                 {
                     gui_draw_status(tab);
@@ -217,10 +215,16 @@ void retro_loop()
                 gui_scroll_list(tab, LINE_DOWN);
             }
             else if (last_key == ODROID_INPUT_LEFT) {
-                gui_scroll_list(tab, PAGE_UP);
+                gui.selected--;
+                if(gui.selected < 0) {
+                    gui.selected = gui.tabcount - 1;
+                }
             }
             else if (last_key == ODROID_INPUT_RIGHT) {
-                gui_scroll_list(tab, PAGE_DOWN);
+                gui.selected++;
+                if(gui.selected >= gui.tabcount) {
+                    gui.selected = 0;
+                }
             }
             else if (last_key == ODROID_INPUT_A) {
                 gui_event(KEY_PRESS_A, tab);

@@ -103,6 +103,9 @@ tab_t *gui_get_tab(int index)
 tab_t *gui_get_current_tab()
 {
     return gui_get_tab(gui.selected);
+
+
+
 }
 
 tab_t *gui_set_current_tab(int index)

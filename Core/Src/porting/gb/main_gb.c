@@ -15,32 +15,15 @@
 #include "gnuboy/regs.h"
 #include "gnuboy/rtc.h"
 #include "gnuboy/defs.h"
+#include "common.h"
 
 #define APP_ID 20
-
-#define AUDIO_SAMPLE_RATE   (48000)
-#define AUDIO_BUFFER_LENGTH (AUDIO_SAMPLE_RATE / 60)
-
-typedef enum {
-    DMA_TRANSFER_STATE_HF = 0x00,
-    DMA_TRANSFER_STATE_TC = 0x01,
-} dma_transfer_state_t;
 
 #define NVS_KEY_SAVE_SRAM "sram"
 
 
 static uint32_t pause_pressed;
 static uint32_t power_pressed;
-
-static dma_transfer_state_t dma_state;
-static uint32_t audio_mute;
-
-static int16_t pendingSamples = 0;
-static int16_t audiobuffer_emulator[AUDIO_BUFFER_LENGTH * 2 * 2 * 2] __attribute__((section (".audio")));
-static int16_t audiobuffer_dma[AUDIO_BUFFER_LENGTH * 2] __attribute__((section (".audio")));
-
-extern SAI_HandleTypeDef hsai_BlockA1;
-extern DMA_HandleTypeDef hdma_sai1_a;
 
 
 static odroid_video_frame_t update1 = {GB_WIDTH, GB_HEIGHT, GB_WIDTH * 2, 2, 0xFF, -1, NULL, NULL, 0, {}};
@@ -436,16 +419,6 @@ static bool advanced_settings_cb(odroid_dialog_choice_t *option, odroid_dialog_e
    return false;
 }*/
 
-void HAL_SAI_TxHalfCpltCallback(SAI_HandleTypeDef *hsai)
-{
-    dma_state = DMA_TRANSFER_STATE_HF;
-}
-
-void HAL_SAI_TxCpltCallback(SAI_HandleTypeDef *hsai)
-{
-    dma_state = DMA_TRANSFER_STATE_TC;
-}
-
 // Hacky but it works: Locate the framebuffer in ITCRAM
 uint8_t gb_buffer1[GB_WIDTH * GB_HEIGHT * 2]  __attribute__((section (".itcram_data")));
 
@@ -542,7 +515,7 @@ rg_app_desc_t * init() {
     power_pressed = (boot_buttons & B_POWER);
 
     if (!pause_pressed) {
-        state_load(&__SAVE_START__, &__SAVE_END__ - &__SAVE_START__);
+        gb_state_load(&__SAVE_START__, &__SAVE_END__ - &__SAVE_START__);
     }
     return app;
 }
@@ -608,7 +581,7 @@ void app_main_gb(void)
                 if(!joystick.values[ODROID_INPUT_VOLUME]) {
                     // Always save as long as PAUSE is not pressed
                     memset(state_save_buffer, '\x00', sizeof(state_save_buffer));
-                    state_save(state_save_buffer, sizeof(state_save_buffer));
+                    gb_state_save(state_save_buffer, sizeof(state_save_buffer));
                     store_save(state_save_buffer, sizeof(state_save_buffer));
                 }
 
