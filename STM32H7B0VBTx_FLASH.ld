@@ -66,11 +66,19 @@ _Min_Stack_Size = 20 * 1024; /* required amount of stack */
 __NULLPTR_LENGTH__  = 0x100;
 __ITCMRAM_LENGTH__  = 64K;
 __DTCMRAM_LENGTH__  = 128K;
+__CORE_RAM_LENGTH   = 340K;
 __RAM_LENGTH__      = 1024K;
 __AHBRAM_LENGTH__   = 128K;
 __FLASH_LENGTH__    = 128K;
 
 __EXTFLASH_START__  = 0x90000000;
+
+
+/* These variables are used for the overlay mapping */
+_CORE_RAM_START_ = 0x24000000;
+_CORE_RAM_END_ =  _CORE_RAM_START_ + __CORE_RAM_LENGTH;
+__EMULATOR_RAM_START__ = _CORE_RAM_END_;
+_EMULATOR_RAM_LENGTH = __RAM_LENGTH__ - __CORE_RAM_LENGTH;
 
 
 /* saveflash.ld sets __SAVEFLASH_LENGTH__ */
@@ -85,9 +93,10 @@ MEMORY
 {
   /* RAM */
   NULLPTR  (xrw) : ORIGIN = 0x00000000, LENGTH =   __NULLPTR_LENGTH__
-  ITCMRAM  (xrw) : ORIGIN = 0x00000000 + __NULLPTR_LENGTH__, LENGTH =   64K - __NULLPTR_LENGTH__
+  ITCMRAM  (xrw) : ORIGIN = 0x00000000 + __NULLPTR_LENGTH__, LENGTH =   __ITCMRAM_LENGTH__ - __NULLPTR_LENGTH__
   DTCMRAM  (xrw) : ORIGIN = 0x20000000, LENGTH =  __DTCMRAM_LENGTH__
-  RAM      (xrw) : ORIGIN = 0x24000000, LENGTH = __RAM_LENGTH__
+  RAM      (xrw) : ORIGIN = _CORE_RAM_START_, LENGTH = __CORE_RAM_LENGTH
+  EMURAM   (xrw) : ORIGIN = __EMULATOR_RAM_START__, LENGTH = _EMULATOR_RAM_LENGTH
   AHBRAM   (xrw) : ORIGIN = 0x30000000, LENGTH =  __AHBRAM_LENGTH__
 
   /* FLASH */
@@ -124,7 +133,6 @@ SECTIONS
     __itcram_hot_end__ = .;
   } >ITCMRAM AT> EXTFLASH
 
-
   /* Data that should be copied from extflash to axiram */
   /* used by the startup to initialize data */
   _siramdata = LOADADDR(._ram_exec);
@@ -143,21 +151,11 @@ SECTIONS
     . = ALIGN(4);
     __extflash_odroid_start__ = .;
     . = ALIGN(4);
-    build_gb/nes*.o (.text .text* .rodata .rodata*)
-    . = ALIGN(4);
-    build_gb/rg*.o (.text .text* .rodata .rodata*)
-    . = ALIGN(4);
-    build_gb/odroid*.o (.text .text* .rodata .rodata*)
-    . = ALIGN(4);
-    build_gb/main_gb.o  (.text .text* .rodata .rodata*)
-    . = ALIGN(4);
-    build_gb/dis6502.o (.text .text* .rodata .rodata*)
-    . = ALIGN(4);
-    build_gb/cpu.o (.text .text* .rodata .rodata*)
     . = ALIGN(4);
     __extflash_odroid_end__ = .;
     __ram_exec_end__ = .;
   } >RAM AT> EXTFLASH
+
 
   ._extflash :
   {
@@ -165,17 +163,13 @@ SECTIONS
     __extflash_nes_start__ = .;
     build_gb/rom_*.o (.text .text* .rodata .rodata*)
     . = ALIGN(4);
-    build_gb/miniz.o (.text .text* .rodata .rodata*)
+    build_gb/core/miniz.o (.text .text* .rodata .rodata*)
     . = ALIGN(4);
-    build_gb/lupng.o (.text .text* .rodata .rodata*)
+    build_gb/core/lupng.o (.text .text* .rodata .rodata*)
     . = ALIGN(4);
-    build_gb/gui.o (.text .text* .rodata .rodata*)
+    build_gb/core/gui.o (.text .text* .rodata .rodata*)
     . = ALIGN(4);
-    build_gb/sound.o  (.text .text* .rodata .rodata*)
-    . = ALIGN(4);
-    build_gb/logo*.o (.text .text* .rodata .rodata*)
-    . = ALIGN(4);
-    build_gb/bitmap.o (.text .text* .rodata .rodata*)
+    build_gb/core/logo*.o (.text .text* .rodata .rodata*)
     . = ALIGN(4);
     __extflash_end_start__ = .;
     . = ALIGN(4);
@@ -195,6 +189,70 @@ SECTIONS
     __extflash_end__ = .;
   } > EXTFLASH
 
+  .overlay_nes __EMULATOR_RAM_START__ : {
+      . = ALIGN(4);
+      build_gb/nes/*.o (.data .data* .text .text* .rodata .rodata*)
+      _OVERLAY_NES_LOAD_END = .;
+  } AT> EXTFLASH
+  _OVERLAY_NES_LOAD_START = LOADADDR(.overlay_nes);
+  _OVERLAY_NES_SIZE = SIZEOF(.overlay_nes);
+
+  .overlay_nes_bss _OVERLAY_NES_LOAD_END : {
+    . = ALIGN(4);
+    _OVERLAY_NES_BSS_START = .;
+    build_gb/nes/*.o (.bss .bss*)
+    . = ALIGN(4);
+    build_gb/nes/*.o (COMMON)
+    _OVERLAY_NES_BSS_END = .;
+  }
+  _OVERLAY_NES_BSS_SIZE = SIZEOF(.overlay_nes_bss);
+
+  .overlay_gb __EMULATOR_RAM_START__ : {
+    . = ALIGN(4);
+    build_gb/gnuboy/*.o (.data .data* .text .text* .rodata .rodata*)
+    . = ALIGN(4);
+    _OVERLAY_GB_LOAD_END = .;
+  } AT> EXTFLASH
+  _OVERLAY_GB_LOAD_START = LOADADDR(.overlay_gb);
+  _OVERLAY_GB_SIZE = SIZEOF(.overlay_gb);
+
+  .overlay_gb_bss _OVERLAY_GB_LOAD_END : {
+    . = ALIGN(4);
+    _OVERLAY_GB_BSS_START = .;
+    build_gb/gnuboy/*.o (COMMON)
+    . = ALIGN(4);
+    build_gb/gnuboy/*.o (.bss .bss*)
+    _OVERLAY_GB_BSS_END = .;
+  }
+  _OVERLAY_GB_BSS_SIZE = SIZEOF(.overlay_gb_bss);
+
+  .overlay_sms __EMULATOR_RAM_START__ : {
+      . = ALIGN(4);
+      build_gb/smsplusgx/*.o (.data .data* .text .text* .rodata .rodata*)
+      . = ALIGN(4);
+      _OVERLAY_SMS_LOAD_END = .;
+  } AT> EXTFLASH
+  _OVERLAY_SMS_LOAD_START = LOADADDR(.overlay_sms);
+  _OVERLAY_SMS_SIZE = SIZEOF(.overlay_sms);
+
+  .overlay_sms_bss  _OVERLAY_SMS_LOAD_END : {
+    . = ALIGN(4);
+    _OVERLAY_SMS_BSS_START = .;
+      build_gb/smsplusgx/*.o (.bss .bss*)
+      . = ALIGN(4);
+      build_gb/smsplusgx/*.o (COMMON)
+      _OVERLAY_SMS_BSS_END = .;
+  }
+  _OVERLAY_SMS_BSS_SIZE = SIZEOF(.overlay_sms_bss);
+
+
+  ._ram_space_check_sms : {
+    . = . + SIZEOF(.overlay_sms);
+    . = . + SIZEOF(.overlay_sms_bss);
+  } >EMURAM
+
+
+
   ._saveflash :
   {
     __saveflash_start__ = .;
@@ -206,7 +264,9 @@ SECTIONS
   ._ram :
   {
     . = ALIGN(4);
+    _LCD_START = .;
     *(.lcd)
+    _LCD_END = .;
     *(.emulator_data)
     *(.emulator_text)
     *(.log_data)
@@ -223,6 +283,7 @@ SECTIONS
     __ahbram_start__ = .;
     . = ALIGN(4);
     *(.audio)
+    *(.ahb)
     . = ALIGN(4);
     __ahbram_end__ = .;
   } > AHBRAM

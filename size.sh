@@ -37,7 +37,7 @@ dtc_free=$(get_section_length dtc_padding)
 dtc_usage=$(( dtc_size - dtc_free ))
 echo -e "dtcram\t$dtc_usage / $dtc_size ($dtc_free bytes free)"
 
-print_usage ram      __RAM_LENGTH__
+print_usage ram      __CORE_RAM_LENGTH
 print_usage ahbram   __AHBRAM_LENGTH__
 print_usage flash    __FLASH_LENGTH__
 print_usage extflash __EXTFLASH_LENGTH__

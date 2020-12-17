@@ -10,16 +10,19 @@ retro_emulator_file_t *ACTIVE_FILE = NULL;
 
 #include "gb_roms.c"
 #include "nes_roms.c"
+#include "sms_roms.c"
 
 const rom_system_t systems[] = {
     nes_system,
-    gb_system
+    gb_system,
+    sms_system
 };
 
 const rom_manager_t rom_mgr = {
     .systems = systems,
-    .systems_count = 2
+    .systems_count = 3
 };
+
 
 const rom_system_t *rom_manager_system(const rom_manager_t *mgr, char *name) {
     for(int i=0; i < mgr->systems_count; i++) {

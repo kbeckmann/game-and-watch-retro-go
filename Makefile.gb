@@ -22,9 +22,12 @@ Core/Src/porting/odroid_netplay.c \
 Core/Src/porting/odroid_overlay.c \
 Core/Src/porting/odroid_sdcard.c \
 Core/Src/porting/odroid_system.c \
+Core/Src/porting/crc32.c \
 Core/Src/stm32h7xx_hal_msp.c \
 Core/Src/stm32h7xx_it.c \
-Core/Src/system_stm32h7xx.c \
+Core/Src/system_stm32h7xx.c
+
+GNUBOY_C_SOURCES = \
 retro-go-stm32/gnuboy-go/components/gnuboy/cpu.c \
 retro-go-stm32/gnuboy-go/components/gnuboy/debug.c \
 retro-go-stm32/gnuboy-go/components/gnuboy/emu.c \
@@ -34,7 +37,8 @@ retro-go-stm32/gnuboy-go/components/gnuboy/loader.c \
 retro-go-stm32/gnuboy-go/components/gnuboy/mem.c \
 retro-go-stm32/gnuboy-go/components/gnuboy/rtc.c \
 retro-go-stm32/gnuboy-go/components/gnuboy/sound.c \
-Core/Src/porting/crc32.c \
+
+NES_C_SOURCES = \
 Core/Src/porting/nes/common.c \
 Core/Src/porting/nes/main_nes.c \
 Core/Src/porting/nes/nofrendo_stm32.c \
@@ -93,13 +97,34 @@ retro-go-stm32/nofrendo-go/components/nofrendo/nes/nes_rom.c \
 retro-go-stm32/nofrendo-go/components/nofrendo/nes/nes_state.c \
 retro-go-stm32/nofrendo-go/components/nofrendo/nes/nes.c
 
+SMSPLUSGX_C_SOURCES = \
+retro-go-stm32/smsplusgx-go/components/smsplus/loadrom.c \
+retro-go-stm32/smsplusgx-go/components/smsplus/render.c \
+retro-go-stm32/smsplusgx-go/components/smsplus/sms.c \
+retro-go-stm32/smsplusgx-go/components/smsplus/state.c \
+retro-go-stm32/smsplusgx-go/components/smsplus/vdp.c \
+retro-go-stm32/smsplusgx-go/components/smsplus/pio.c \
+retro-go-stm32/smsplusgx-go/components/smsplus/tms.c \
+retro-go-stm32/smsplusgx-go/components/smsplus/memz80.c \
+retro-go-stm32/smsplusgx-go/components/smsplus/system.c \
+retro-go-stm32/smsplusgx-go/components/smsplus/cpu/z80.c \
+retro-go-stm32/smsplusgx-go/components/smsplus/sound/emu2413.c \
+retro-go-stm32/smsplusgx-go/components/smsplus/sound/fmintf.c \
+retro-go-stm32/smsplusgx-go/components/smsplus/sound/sn76489.c \
+retro-go-stm32/smsplusgx-go/components/smsplus/sound/sms_sound.c \
+retro-go-stm32/smsplusgx-go/components/smsplus/sound/ym2413.c \
+Core/Src/porting/smsplusgx/main_smsplusgx.c
+
 C_INCLUDES +=  \
 -Iretro-go-stm32/nofrendo-go/components/nofrendo/cpu \
 -Iretro-go-stm32/nofrendo-go/components/nofrendo/mappers \
 -Iretro-go-stm32/nofrendo-go/components/nofrendo/nes \
 -Iretro-go-stm32/nofrendo-go/components/nofrendo \
 -Iretro-go-stm32/components/odroid \
--Iretro-go-stm32/gnuboy-go/components
+-Iretro-go-stm32/gnuboy-go/components \
+-Iretro-go-stm32/smsplusgx-go/components/smsplus \
+-Iretro-go-stm32/smsplusgx-go/components/smsplus/cpu \
+-Iretro-go-stm32/smsplusgx-go/components/smsplus/sound
 
 
 C_DEFS += \

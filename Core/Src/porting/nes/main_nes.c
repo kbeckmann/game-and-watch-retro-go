@@ -46,7 +46,7 @@ static bool autoload = false;
 
 
 // if i counted correctly this should max be 23077
-char nes_save_buffer[24000] __attribute__((section (".emulator_data")));
+char nes_save_buffer[24000];
 
 static bool SaveState(char *pathName)
 {

@@ -22,3 +22,21 @@ extern uint32_t __ram_exec_end__;
 extern uint32_t _sitcram_hot;
 extern uint32_t __itcram_hot_start__;
 extern uint32_t __itcram_hot_end__;
+
+
+// If this is not an array the compiler might put in a memory_chk with dest_size 1...
+extern uint8_t __EMULATOR_RAM_START__[];
+extern uint8_t __CORE_RAM_LENGTH;
+extern uint8_t _OVERLAY_NES_LOAD_START;
+extern uint8_t _OVERLAY_NES_SIZE;
+extern uint8_t _OVERLAY_NES_BSS_START[];
+extern uint8_t _OVERLAY_NES_BSS_SIZE;
+extern uint8_t _OVERLAY_GB_LOAD_START;
+extern uint8_t _OVERLAY_GB_SIZE;
+extern uint8_t _OVERLAY_GB_BSS_START[];
+extern uint8_t _OVERLAY_GB_BSS_SIZE;
+
+extern uint8_t _OVERLAY_SMS_LOAD_START;
+extern uint8_t _OVERLAY_SMS_SIZE;
+extern uint8_t _OVERLAY_SMS_BSS_START[];
+extern uint8_t _OVERLAY_SMS_BSS_SIZE;

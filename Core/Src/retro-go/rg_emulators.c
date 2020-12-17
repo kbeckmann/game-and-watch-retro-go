@@ -2,6 +2,7 @@
 #include <string.h>
 #include <assert.h>
 
+#include "gw_linker.h"
 #include "rg_emulators.h"
 // #include "rg_favorites.h"
 #include "bitmaps.h"
@@ -371,9 +372,36 @@ void emulator_start(retro_emulator_file_t *file, bool load_state)
     retro_emulator_t *emu = file->emulator;
     // TODO: Make this cleaner
     if(strcmp(emu->system_name, "Nintendo Gameboy") == 0) {
+        // printf("Core ram end: %d\n", &__EMULATOR_RAM_START__);
+        uint8_t *ram_start = &__EMULATOR_RAM_START__[0];
+        uint8_t *load_start = &_OVERLAY_GB_LOAD_START;
+        uint32_t size = &_OVERLAY_GB_SIZE;
+        memcpy(ram_start, load_start, size);
+
+        uint8_t *bss_start = &_OVERLAY_GB_BSS_START[0];
+        uint32_t bss_size = &_OVERLAY_GB_BSS_SIZE;
+        memset(bss_start, 0x0, bss_size);
         app_main_gb(load_state);
     } else if(strcmp(emu->system_name, "Nintendo Entertainment System") == 0) {
+        uint8_t *ram_start = &__EMULATOR_RAM_START__[0];
+        uint8_t *load_start = &_OVERLAY_NES_LOAD_START;
+        uint32_t size = &_OVERLAY_NES_SIZE;
+        memcpy(ram_start, load_start, size);
+
+        uint8_t *bss_start = &_OVERLAY_NES_BSS_START[0];
+        uint32_t bss_size = &_OVERLAY_NES_BSS_SIZE;
+        memset(bss_start, 0x0, bss_size);
         app_main_nes(load_state);
+    } else if(strcmp(emu->system_name, "Sega Master System") == 0) {
+        uint8_t *ram_start = &__EMULATOR_RAM_START__[0];
+        uint8_t *load_start = &_OVERLAY_SMS_LOAD_START;
+        uint32_t size = &_OVERLAY_SMS_SIZE;
+        memcpy(ram_start, load_start, size);
+
+        uint8_t *bss_start = &_OVERLAY_SMS_BSS_START[0];
+        uint32_t bss_size = &_OVERLAY_SMS_BSS_SIZE;
+        memset(bss_start, 0x0, bss_size);
+        app_main_smsplusgx();
     }
     
 }
@@ -382,9 +410,8 @@ void emulators_init()
 {
     add_emulator("Nintendo Gameboy", "gb", "gb", "gnuboy-go", 0, logo_gb, header_gb);
     add_emulator("Nintendo Entertainment System", "nes", "nes", "nofrendo-go", 16, logo_nes, header_nes);
-    
     // add_emulator("Nintendo Gameboy Color", "gbc", "gbc", "gnuboy-go", 0, logo_gbc, header_gbc);
-    // add_emulator("Sega Master System", "sms", "sms", "smsplusgx-go", 0, logo_sms, header_sms);
+    add_emulator("Sega Master System", "sms", "sms", "smsplusgx-go", 0, logo_sms, header_sms);
     // add_emulator("Sega Game Gear", "gg", "gg", "smsplusgx-go", 0, logo_gg, header_gg);
     // add_emulator("ColecoVision", "col", "col", "smsplusgx-go", 0, logo_col, header_col);
     // add_emulator("PC Engine", "pce", "pce", "huexpress-go", 0, logo_pce, header_pce);
