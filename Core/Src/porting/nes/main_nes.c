@@ -12,7 +12,6 @@
 #include "gw_buttons.h"
 #include "gw_lcd.h"
 #include "gw_linker.h"
-#include "rom_info.h"
 #include "common.h"
 
 #define APP_ID 30
