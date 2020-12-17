@@ -15,7 +15,7 @@ const rom_system systems[] = {
 
 const rom_manager rom_mgr = {
     .systems = systems,
-    .systems_count = sizeof(systems) / sizeof(rom_system)
+    .systems_count = 2
 };
 
 const rom_system *rom_manager_system(const rom_manager *mgr, char *name) {

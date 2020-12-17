@@ -56,10 +56,10 @@ ENTRY(Reset_Handler)
 _estack = _stack_top;    /* end of RAM */
 
 /* Generate a link error if heap and stack don't fit into RAM */
-_Heap_Size = 16 * 1024;     /* required amount of heap */
+_Heap_Size = 32 * 1024;     /* required amount of heap */
 
 _Stack_Redzone_Size = 256;  /* size of stack overflow protection */
-_Min_Stack_Size = 16 * 1024; /* required amount of stack */
+_Min_Stack_Size = 20 * 1024; /* required amount of stack */
 
 
 /* Useful for scripts */
@@ -82,12 +82,12 @@ MEMORY
   /* RAM */
   NULLPTR  (xrw) : ORIGIN = 0x00000000, LENGTH =   __NULLPTR_LENGTH__
   ITCMRAM  (xrw) : ORIGIN = 0x00000000 + __NULLPTR_LENGTH__, LENGTH =   64K - __NULLPTR_LENGTH__
-  DTCMRAM  (xrw) : ORIGIN = 0x20000000, LENGTH =  128K
-  RAM      (xrw) : ORIGIN = 0x24000000, LENGTH = 1024K
-  AHBRAM   (xrw) : ORIGIN = 0x30000000, LENGTH =  128K
+  DTCMRAM  (xrw) : ORIGIN = 0x20000000, LENGTH =  __DTCMRAM_LENGTH__
+  RAM      (xrw) : ORIGIN = 0x24000000, LENGTH = __RAM_LENGTH__
+  AHBRAM   (xrw) : ORIGIN = 0x30000000, LENGTH =  __AHBRAM_LENGTH__
 
   /* FLASH */
-  FLASH    (xr ) : ORIGIN = 0x08000000, LENGTH =  128K
+  FLASH    (xr ) : ORIGIN = 0x08000000, LENGTH =  __FLASH_LENGTH__
   EXTFLASH (xr ) : ORIGIN = __EXTFLASH_START__, LENGTH = __EXTFLASH_LENGTH__
   SAVEFLASH(xr ) : ORIGIN = __EXTFLASH_START__ + __EXTFLASH_LENGTH__, LENGTH = __SAVE_LENGTH__
 }
@@ -125,15 +125,8 @@ SECTIONS
     _eram_data = .;
     . = ALIGN(4);
     __extflash_odroid_start__ = .;
-    build_gb/main_gb.o  (.text .text* .rodata .rodata*)
-    build_gb/sound.o  (.text .text* .rodata .rodata*)
-    build_gb/odroid*.o (.text .text* .rodata .rodata*)
-    build_gb/rg*.o (.text .text* .rodata .rodata*)
-    build_gb/logo*.o (.text .text* .rodata .rodata*)
-    build_gb/rom_*.o (.text .text* .rodata .rodata*)
-    build_gb/miniz.o (.text .text* .rodata .rodata*)
-    build_gb/lupng.o (.text .text* .rodata .rodata*)
-    build_gb/gui.o (.text .text* .rodata .rodata*)
+    
+
     . = ALIGN(4);
     __extflash_odroid_end__ = .;
     __ram_exec_end__ = .;
@@ -141,8 +134,37 @@ SECTIONS
 
   ._extflash :
   {
-    __extflash_text_start__ = .;
     . = ALIGN(4);
+    __extflash_nes_start__ = .;
+    build_gb/rom_*.o (.text .text* .rodata .rodata*)
+    . = ALIGN(4);
+    build_gb/miniz.o (.text .text* .rodata .rodata*)
+    . = ALIGN(4);
+    build_gb/lupng.o (.text .text* .rodata .rodata*)
+    . = ALIGN(4);
+    build_gb/gui.o (.text .text* .rodata .rodata*)
+    . = ALIGN(4);
+    build_gb/nes*.o (.text .text* .rodata .rodata*)
+    . = ALIGN(4);
+    build_gb/main_gb.o  (.text .text* .rodata .rodata*)
+    . = ALIGN(4);
+    build_gb/sound.o  (.text .text* .rodata .rodata*)
+    . = ALIGN(4);
+    build_gb/odroid*.o (.text .text* .rodata .rodata*)
+    . = ALIGN(4);
+    build_gb/rg*.o (.text .text* .rodata .rodata*)
+    . = ALIGN(4);
+    build_gb/logo*.o (.text .text* .rodata .rodata*)
+    . = ALIGN(4);
+    build_gb/bitmap.o (.text .text* .rodata .rodata*)
+    . = ALIGN(4);
+    build_gb/cpu.o (.text .text* .rodata .rodata*)
+    . = ALIGN(4);
+    build_gb/dis6502.o (.text .text* .rodata .rodata*)
+    . = ALIGN(4);
+    __extflash_end_start__ = .;
+    . = ALIGN(4);
+    __extflash_text_start__ = .;
     *(.extflash_text)
     . = ALIGN(4);
     __extflash_text_end__ = .;

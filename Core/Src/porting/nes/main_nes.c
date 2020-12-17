@@ -13,33 +13,15 @@
 #include "gw_lcd.h"
 #include "gw_linker.h"
 #include "rom_info.h"
-
-#define WIDTH  320
-#define HEIGHT 240
-#define BPP      4
+#include "common.h"
 
 #define APP_ID 30
-
-#define AUDIO_SAMPLE_RATE   (48000)
-#define AUDIO_BUFFER_LENGTH (AUDIO_SAMPLE_RATE / 60)
-
-typedef enum {
-    DMA_TRANSFER_STATE_HF = 0x00,
-    DMA_TRANSFER_STATE_TC = 0x01,
-} dma_transfer_state_t;
-
-#ifndef GW_LCD_MODE_LUT8
-#error "Only supports LCD LUT8 mode."
-#endif
 
 #ifdef BLIT_NEAREST
 #define blit blit_nearest
 #else
 #define blit blit_normal
 #endif
-
-static uint32_t audioBuffer[AUDIO_BUFFER_LENGTH];
-static uint32_t audio_mute;
 
 extern unsigned char cart_rom[];
 extern unsigned int cart_rom_len;
@@ -51,14 +33,7 @@ unsigned int  ram_cart_rom_len = ROM_LENGTH;
 
 static uint romCRC32;
 
-static int16_t pendingSamples = 0;
-static int16_t audiobuffer_emulator[AUDIO_BUFFER_LENGTH] __attribute__((section (".audio")));
-static int16_t audiobuffer_dma[AUDIO_BUFFER_LENGTH * 2] __attribute__((section (".audio")));
-static uint32_t dma_counter;
-static dma_transfer_state_t dma_state;
 
-extern SAI_HandleTypeDef hsai_BlockA1;
-extern DMA_HandleTypeDef hdma_sai1_a;
 
 static odroid_gamepad_state_t joystick1;
 static odroid_gamepad_state_t joystick2;
@@ -83,7 +58,7 @@ extern void store_save(uint8_t *data, size_t size);
 
 
 // if i counted correctly this should max be 23077
-char nes_save_buffer[24000];
+char nes_save_buffer[24000]   __attribute__((section (".lcd")));;
 
 
 
@@ -95,8 +70,11 @@ int osd_init()
 // TODO: Move to lcd.c/h
 extern LTDC_HandleTypeDef hltdc;
 
+static rgb_t *palette = NULL;
 void osd_setpalette(rgb_t *pal)
 {
+    palette = pal;
+#ifdef GW_LCD_MODE_LUT8
     uint32_t clut[256];
 
     for (int i = 0; i < 64; i++)
@@ -119,6 +97,7 @@ void osd_setpalette(rgb_t *pal)
     memset(framebuffer2, 13, sizeof(framebuffer2));
 
     odroid_display_force_refresh();
+#endif
 }
 
 static uint32_t skippedFrames = 0;
@@ -158,18 +137,6 @@ void osd_wait_for_vsync()
     lastSyncTime = get_elapsed_time();
 }
 
-void HAL_SAI_TxHalfCpltCallback(SAI_HandleTypeDef *hsai)
-{
-    dma_counter++;
-    dma_state = DMA_TRANSFER_STATE_HF;
-}
-
-void HAL_SAI_TxCpltCallback(SAI_HandleTypeDef *hsai)
-{
-    dma_counter++;
-    dma_state = DMA_TRANSFER_STATE_TC;
-}
-
 void osd_audioframe(int audioSamples)
 {
     if (odroid_system_get_app()->speedupEnabled)
@@ -192,6 +159,8 @@ void osd_audioframe(int audioSamples)
     }
 }
 
+
+#ifdef GW_LCD_MODE_LUT8
 static inline void blit_normal(bitmap_t *bmp, uint8_t *framebuffer) {
         // LCD is 320 wide, framebuffer is only 256
     const int hpad = (WIDTH - NES_SCREEN_WIDTH) / 2;
@@ -207,6 +176,26 @@ static inline void blit_normal(bitmap_t *bmp, uint8_t *framebuffer) {
         memcpy(dest, row, bmp->width);
     }
 }
+#else
+
+__attribute__((optimize("unroll-loops")))
+static inline void blit_normal(bitmap_t *bmp, uint16_t *framebuffer) {
+    int w2 = 320;
+    int h2 = 240;
+    int hpad = 27;
+     int x2, y2 ;
+
+     for(int y = 0; y < bmp->height; y++) {
+         uint8_t *row = bmp->line[y];
+         for(int x = 0; x < bmp->width; x++) {
+             uint8_t i = row[x];
+
+             uint16_t c = (palette[i].b>>3) | ((palette[i].g>>2)<<5) | ((palette[i].r>>3)<<11);
+            framebuffer[w2 * y + (x+hpad)] = c;
+         }
+     }
+ }
+#endif
 
 static inline void blit_nearest(bitmap_t *bmp, uint8_t *framebuffer) {
     int w1 = bmp->width;
@@ -285,14 +274,6 @@ void osd_blitscreen(bitmap_t *bmp)
     HAL_LTDC_Reload(&hltdc, LTDC_RELOAD_VERTICAL_BLANKING);
 }
 
-void HAL_LTDC_ReloadEventCallback (LTDC_HandleTypeDef *hltdc) {
-    if(active_framebuffer == 0) {
-        HAL_LTDC_SetAddress(hltdc, framebuffer2, 0);
-    } else {
-        HAL_LTDC_SetAddress(hltdc, framebuffer1, 0);
-    }
-}
-
 void osd_getinput(void)
 {
     uint16 pad0 = 0;
@@ -311,6 +292,7 @@ void osd_getinput(void)
         if (pause_pressed) {
             printf("Pause pressed %d=>%d\n", audio_mute, !audio_mute);
             audio_mute = !audio_mute;
+            // odroid_overlay_game_menu();
         }
         pause_pressed = buttons & B_PAUSE;
     }
@@ -324,7 +306,7 @@ void osd_getinput(void)
 
             if(!(buttons & B_PAUSE)) {
                 // Always save as long as PAUSE is not pressed
-                state_save(nes_save_buffer, 24000);
+                nes_state_save(nes_save_buffer, 24000);
                 store_save(nes_save_buffer, 24000);
             }
 
@@ -332,7 +314,7 @@ void osd_getinput(void)
         }
     }
 
-    odroid_overlay_game_menu();
+    // odroid_overlay_game_menu();
 
     // Enable to log button presses
 #if 0
@@ -375,7 +357,7 @@ void osd_loadstate()
 
         uint32_t address = &__SAVE_START__;
         uint8_t *ptr = (uint8_t*)address;
-        state_load(ptr, 24000);
+        nes_state_load(ptr, 24000);
     }
 }
 
@@ -391,8 +373,10 @@ static bool LoadState(char *pathName)
 
 
 
-int app_main(void)
+int app_main_nes(void)
 {
+    memset(framebuffer1, 0x0, sizeof(framebuffer1));
+    memset(framebuffer2, 0x0, sizeof(framebuffer2));
     odroid_system_init(APP_ID, AUDIO_SAMPLE_RATE);
     odroid_system_emu_init(&LoadState, &SaveState, NULL);
 
