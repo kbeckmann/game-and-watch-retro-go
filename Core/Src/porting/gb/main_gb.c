@@ -432,8 +432,10 @@ void pcm_submit() {
             audiobuffer_dma[i + offset] = 0;
         }
     } else {
+        uint8_t level = ODROID_AUDIO_VOLUME_MAX - odroid_audio_volume_get() + 1;
+
         for (int i = 0; i < AUDIO_BUFFER_LENGTH; i++) {
-            audiobuffer_dma[i + offset] = pcm.buf[i] >> 1;
+            audiobuffer_dma[i + offset] = pcm.buf[i] >> level;
         }
     }
 }
@@ -545,7 +547,13 @@ void app_main_gb(void)
             // TODO: Sync framebuffers in a nicer way
             lcd_sync();
 
-            odroid_overlay_game_menu();
+            odroid_dialog_choice_t options[] = {
+                {300, "Palette", "7/7", !hw.cgb, &palette_update_cb},
+                // {301, "More...", "", 1, &advanced_settings_cb},
+                ODROID_DIALOG_CHOICE_LAST
+            };
+            odroid_overlay_game_menu(options);
+
         }
         // else if (joystick.values[ODROID_INPUT_VOLUME]) {
         //     odroid_dialog_choice_t options[] = {

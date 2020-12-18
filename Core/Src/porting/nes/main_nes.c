@@ -273,7 +273,7 @@ void osd_getinput(void)
         if (pause_pressed) {
             printf("Pause pressed %d=>%d\n", audio_mute, !audio_mute);
             audio_mute = !audio_mute;
-            odroid_overlay_game_menu();
+            odroid_overlay_game_menu(NULL);
         }
         pause_pressed = buttons & B_PAUSE;
     }
@@ -294,8 +294,6 @@ void osd_getinput(void)
             GW_EnterDeepSleep();
         }
     }
-
-    // odroid_overlay_game_menu();
 
     // Enable to log button presses
 #if 0

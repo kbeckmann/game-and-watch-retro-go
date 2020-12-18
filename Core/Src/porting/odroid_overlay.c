@@ -404,20 +404,20 @@ bool odroid_overlay_dialog_is_open(void)
 
 static bool volume_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event)
 {
-    // int8_t level = odroid_audio_volume_get();
-    // int8_t min = ODROID_AUDIO_VOLUME_MIN;
-    // int8_t max = ODROID_AUDIO_VOLUME_MAX;
+    int8_t level = odroid_audio_volume_get();
+    int8_t min = ODROID_AUDIO_VOLUME_MIN;
+    int8_t max = ODROID_AUDIO_VOLUME_MAX;
 
-    // if (event == ODROID_DIALOG_PREV && level > min) {
-    //     odroid_audio_volume_set(--level);
-    // }
+    if (event == ODROID_DIALOG_PREV && level > min) {
+        odroid_audio_volume_set(--level);
+    }
 
-    // if (event == ODROID_DIALOG_NEXT && level < max) {
-    //     odroid_audio_volume_set(++level);
-    // }
+    if (event == ODROID_DIALOG_NEXT && level < max) {
+        odroid_audio_volume_set(++level);
+    }
 
-    // sprintf(option->value, "%d/%d", level, max);
-    // return event == ODROID_DIALOG_ENTER;
+    sprintf(option->value, "%d/%d", level, max);
+    return event == ODROID_DIALOG_ENTER;
     return false;
 }
 
@@ -436,21 +436,6 @@ static bool brightness_update_cb(odroid_dialog_choice_t *option, odroid_dialog_e
 
     sprintf(option->value, "%d/%d", level + 1, max + 1);
     return event == ODROID_DIALOG_ENTER;
-}
-
-static bool audio_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event)
-{
-    // int8_t sink = odroid_audio_get_sink();
-
-    // if (event == ODROID_DIALOG_PREV || event == ODROID_DIALOG_NEXT) {
-    //     sink = (sink == ODROID_AUDIO_SINK_SPEAKER) ? ODROID_AUDIO_SINK_DAC : ODROID_AUDIO_SINK_SPEAKER;
-    //     odroid_audio_set_sink(sink);
-    // }
-
-    // strcpy(option->value, (sink == ODROID_AUDIO_SINK_DAC) ? "Ext DAC" : "Speaker");
-    // return event == ODROID_DIALOG_ENTER;
-
-    return false;
 }
 
 static bool filter_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event)
@@ -499,28 +484,29 @@ static bool scaling_update_cb(odroid_dialog_choice_t *option, odroid_dialog_even
 
 bool speedup_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event)
 {
-    // rg_app_desc_t *app = odroid_system_get_app();
-    // if (event == ODROID_DIALOG_PREV && --app->speedupEnabled < 0) app->speedupEnabled = 2;
-    // if (event == ODROID_DIALOG_NEXT && ++app->speedupEnabled > 2) app->speedupEnabled = 0;
+    rg_app_desc_t *app = odroid_system_get_app();
+    if (event == ODROID_DIALOG_PREV && --app->speedupEnabled < 0) app->speedupEnabled = 2;
+    if (event == ODROID_DIALOG_NEXT && ++app->speedupEnabled > 2) app->speedupEnabled = 0;
 
-    // sprintf(option->value, "%dx", app->speedupEnabled + 1);
-    // return event == ODROID_DIALOG_ENTER;
-    return false;
+    sprintf(option->value, "%dx", app->speedupEnabled + 1);
+    return event == ODROID_DIALOG_ENTER;
 }
 
 int odroid_overlay_settings_menu(odroid_dialog_choice_t *extra_options)
 {
-    odroid_dialog_choice_t options[12] = {
-        {0, "Brightness", "50%",  1, &brightness_update_cb},
-        {1, "Volume    ", "50%",  1, &volume_update_cb},
-        {2, "Audio out ", "Spkr", 1, &audio_update_cb},
+    static char bright_value[8];
+    static char volume_value[8];
+
+    odroid_dialog_choice_t options[32] = {
+        {0, "Brightness", bright_value, 1, &brightness_update_cb},
+        {1, "Volume    ", volume_value, 1, &volume_update_cb},
         ODROID_DIALOG_CHOICE_LAST
     };
 
     if (extra_options) {
         int options_count = get_dialog_items_count(options);
         int extra_options_count = get_dialog_items_count(extra_options);
-        memcpy(options + options_count, extra_options, (extra_options_count + 1) * sizeof(odroid_dialog_choice_t));
+        memcpy(&options[options_count], extra_options, (extra_options_count + 1) * sizeof(odroid_dialog_choice_t));
     }
 
     int ret = odroid_overlay_dialog("Options", options, 0);
@@ -551,17 +537,20 @@ static void draw_game_status_bar(runtime_stats_t stats)
 
 int odroid_overlay_game_settings_menu(odroid_dialog_choice_t *extra_options)
 {
-    odroid_dialog_choice_t options[12] = {
-        {10, "Scaling", "Full", 1, &scaling_update_cb},
-        {12, "Filtering", "None", 1, &filter_update_cb}, // Interpolation
-        {13, "Speed", "1x", 1, &speedup_update_cb},
+    char speedup_value[8];
+
+    odroid_dialog_choice_t options[32] = {
+        {200, "Scaling", "Full", 1, &scaling_update_cb},
+        {210, "Filtering", "None", 1, &filter_update_cb}, // Interpolation
+        {220, "Speed", speedup_value, 1, &speedup_update_cb},
+
         ODROID_DIALOG_CHOICE_LAST
     };
 
     if (extra_options) {
         int options_count = get_dialog_items_count(options);
         int extra_options_count = get_dialog_items_count(extra_options);
-        memcpy(options + options_count, extra_options, (extra_options_count + 1) * sizeof(odroid_dialog_choice_t));
+        memcpy(&options[options_count], extra_options, (extra_options_count + 1) * sizeof(odroid_dialog_choice_t));
     }
 
     // Collect stats before freezing emulation with wait_all_keys_released()
@@ -594,19 +583,15 @@ int odroid_overlay_game_debug_menu(void)
     return odroid_overlay_dialog("Debugging", options, 0);
 }
 
-int odroid_overlay_game_menu()
+int odroid_overlay_game_menu(odroid_dialog_choice_t *extra_options)
 {
     odroid_dialog_choice_t choices[] = {
         // {0, "Continue", "",  1, NULL},
         {10, "Save & Continue", "",  1, NULL},
         {20, "Save & Quit", "", 1, NULL},
         {30, "Reload", "", 1, NULL},
-        #ifdef ENABLE_NETPLAY
-        {40, "Netplay", "", 1, NULL},
-        #else
-        // {40, "Netplay", "", 0, NULL},
-        #endif
-        {50, "Tools", "", 1, NULL},
+        {40, "Options", "", 1, NULL},
+        // {50, "Tools", "", 1, NULL},
         {100, "Quit", "", 1, NULL},
         ODROID_DIALOG_CHOICE_LAST
     };
@@ -627,6 +612,7 @@ int odroid_overlay_game_menu()
         case 10: odroid_system_emu_save_state(0); break;
         case 20: odroid_system_emu_save_state(0); odroid_system_switch_app(0); break;
         case 30: odroid_system_emu_load_state(0); break; // TODO: Reload emulator?
+        case 40: odroid_overlay_game_settings_menu(extra_options); break;
         case 50: odroid_overlay_game_debug_menu(); break;
         case 100: odroid_system_switch_app(0); break;
     }
