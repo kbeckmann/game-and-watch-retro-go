@@ -125,8 +125,10 @@ SECTIONS
     _eram_data = .;
     . = ALIGN(4);
     __extflash_odroid_start__ = .;
-    
-
+    . = ALIGN(4);
+   build_gb/nes*.o (.text .text* .rodata .rodata*)
+    . = ALIGN(4);
+   build_gb/rg*.o (.text .text* .rodata .rodata*)
     . = ALIGN(4);
     __extflash_odroid_end__ = .;
     __ram_exec_end__ = .;
@@ -144,15 +146,11 @@ SECTIONS
     . = ALIGN(4);
     build_gb/gui.o (.text .text* .rodata .rodata*)
     . = ALIGN(4);
-    build_gb/nes*.o (.text .text* .rodata .rodata*)
-    . = ALIGN(4);
     build_gb/main_gb.o  (.text .text* .rodata .rodata*)
     . = ALIGN(4);
     build_gb/sound.o  (.text .text* .rodata .rodata*)
     . = ALIGN(4);
     build_gb/odroid*.o (.text .text* .rodata .rodata*)
-    . = ALIGN(4);
-    build_gb/rg*.o (.text .text* .rodata .rodata*)
     . = ALIGN(4);
     build_gb/logo*.o (.text .text* .rodata .rodata*)
     . = ALIGN(4);
@@ -175,16 +173,8 @@ SECTIONS
     __extflash_data_end__ = .;
     . = ALIGN(128K);
     __extflash_game_rom_start__ = .;
-    . = ALIGN(4);
     *(.extflash_game_rom)
-    . = ALIGN(4);
     __extflash_game_rom_end__ = .;
-    . = ALIGN(128K);
-    __extflash_game_rom2_start__ = .;
-    . = ALIGN(4);
-    *(.extflash_game_rom2)
-    . = ALIGN(4);
-    __extflash_game_rom2_end__ = .;
     __extflash_end__ = .;
   } > EXTFLASH
 
