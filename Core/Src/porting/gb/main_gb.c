@@ -452,6 +452,12 @@ bool odroid_system_emu_save_state(int slot)
 // TODO: Move to own file
 void odroid_audio_mute(bool mute)
 {
+    if (mute) {
+        for (int i = 0; i < sizeof(audiobuffer_dma) / sizeof(audiobuffer_dma[0]); i++) {
+            audiobuffer_dma[i] = 0;
+        }
+    }
+
     audio_mute = mute;
 }
 
