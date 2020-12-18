@@ -8,6 +8,7 @@
 #include "rg_emulators.h"
 #include "rg_favorites.h"
 #include "gui.h"
+#include "githash.h"
 
 #if 0
 #define KEY_SELECTED_TAB  "SelectedTab"
@@ -165,33 +166,23 @@ void retro_loop()
 
             if (last_key == ODROID_INPUT_START) {
                 odroid_dialog_choice_t choices[] = {
-                    {0, "Ver.", "build string", 1, NULL},
-                    {0, "Date", "", 1, NULL},
+                    {0, "Ver.", GIT_HASH, 1, NULL},
                     {0, "By", "ducalex", 1, NULL},
+                    {0, "", "kbeckmann", 1, NULL},
+                    {0, "", "stacksmashing", 1, NULL},
                     {0, "", "", -1, NULL},
-                    {1, "Reboot to firmware", "", 1, NULL},
-                    {2, "Reset settings", "", 1, NULL},
+                    {1, "Reset settings", "", 1, NULL},
                     {0, "Close", "", 1, NULL},
                     ODROID_DIALOG_CHOICE_LAST
                 };
 
-                // const esp_app_desc_t *app = esp_ota_get_app_description();
-                // sprintf(choices[0].value, "%.30s", app->version);
-                // sprintf(choices[1].value, "%s %.5s", app->date, app->time);
-
-                // if (strstr(app->version, "-0-") == strrchr(app->version, '-') - 2)
-                //     sprintf(strstr(choices[0].value, "-0-") , " (%s)", strrchr(app->version, '-') + 1);
-
                 int sel = odroid_overlay_dialog("Retro-Go", choices, -1);
                 if (sel == 1) {
-                    odroid_system_switch_app(-16);
+                    if (odroid_overlay_confirm("Reset all settings? (TODO)", false) == 1) {
+                        odroid_settings_reset();
+                        odroid_system_switch_app(0); // reset
+                    }
                 }
-                // else if (sel == 2) {
-                //     if (odroid_overlay_confirm("Reset all settings?", false) == 1) {
-                //         odroid_settings_reset();
-                //         // esp_restart();
-                //     }
-                // }
                 gui_redraw();
             }
             else if (last_key == ODROID_INPUT_SELECT) {

@@ -126,9 +126,11 @@ SECTIONS
     . = ALIGN(4);
     __extflash_odroid_start__ = .;
     . = ALIGN(4);
-   build_gb/nes*.o (.text .text* .rodata .rodata*)
+    build_gb/nes*.o (.text .text* .rodata .rodata*)
     . = ALIGN(4);
-   build_gb/rg*.o (.text .text* .rodata .rodata*)
+    build_gb/rg*.o (.text .text* .rodata .rodata*)
+    . = ALIGN(4);
+    build_gb/odroid*.o (.text .text* .rodata .rodata*)
     . = ALIGN(4);
     __extflash_odroid_end__ = .;
     __ram_exec_end__ = .;
@@ -149,8 +151,6 @@ SECTIONS
     build_gb/main_gb.o  (.text .text* .rodata .rodata*)
     . = ALIGN(4);
     build_gb/sound.o  (.text .text* .rodata .rodata*)
-    . = ALIGN(4);
-    build_gb/odroid*.o (.text .text* .rodata .rodata*)
     . = ALIGN(4);
     build_gb/logo*.o (.text .text* .rodata .rodata*)
     . = ALIGN(4);
