@@ -273,7 +273,7 @@ void osd_getinput(void)
         if (pause_pressed) {
             printf("Pause pressed %d=>%d\n", audio_mute, !audio_mute);
             audio_mute = !audio_mute;
-            // odroid_overlay_game_menu();
+            odroid_overlay_game_menu();
         }
         pause_pressed = buttons & B_PAUSE;
     }
