@@ -6,7 +6,6 @@
 // #include "rg_favorites.h"
 #include "bitmaps.h"
 #include "gui.h"
-#include "gb_rom.h"
 #include "rom_manager.h"
 
 static retro_emulator_t emulators[16];

@@ -13,6 +13,7 @@
 #include "gw_lcd.h"
 #include "gw_linker.h"
 #include "common.h"
+#include "rom_manager.h"
 
 #define APP_ID 30
 
@@ -310,6 +311,8 @@ void osd_getinput(void)
 
 size_t osd_getromdata(unsigned char **data)
 {
+    *data = ROM_DATA;
+    return ROM_DATA_LENGTH;
 }
 
 uint osd_getromcrc()
