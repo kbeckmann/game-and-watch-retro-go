@@ -220,21 +220,30 @@ static inline void blit_nearest(bitmap_t *bmp, uint8_t *framebuffer) {
     int w2 = WIDTH;
     int h2 = h1;
 
-    // Blit: 5581 us
-    // This can still be improved quite a bit by using aligned accesses.
+// #define SCALE_TO_320
+#define SCALE_TO_307
 
+#ifdef SCALE_TO_307
+    const int hpad = (WIDTH - 307) / 2;
+#   define SCALE_CTR 4
+#else
+    const int hpad = 0;
+#   define SCALE_CTR 3
+#endif
+
+    // Blit: 1364 us
     PROFILING_INIT(t_blit);
     PROFILING_START(t_blit);
 
-    int ctr = 0;
     for (int y = 0; y < h2; y++) {
         uint8_t  *src_row  = bmp->line[y];
-        uint8_t *dest_row = &framebuffer[y * w2];
+        uint8_t *dest_row = &framebuffer[y * w2 + hpad];
         int x2 = 0;
+        int ctr = 0;
         for (int x = 0; x < w1; x++) {
             uint8_t b2 = src_row[x];
             dest_row[x2++] = b2;
-            if (ctr++ == 4) {
+            if (ctr++ == SCALE_CTR) {
                 ctr = 0;
                 dest_row[x2++] = b2;
             }
