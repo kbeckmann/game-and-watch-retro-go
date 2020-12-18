@@ -1,6 +1,7 @@
-#include "rom_manager.h"
 #include <string.h>
-#include "gb_rom.h"
+
+#include "rom_manager.h"
+#include "rg_emulators.h"
 
 unsigned char *ROM_DATA = NULL;
 unsigned ROM_DATA_LENGTH;
@@ -25,4 +26,10 @@ const rom_system *rom_manager_system(const rom_manager *mgr, char *name) {
         }
     }
     return NULL;
+}
+
+void rom_manager_set_active_file(retro_emulator_file_t *file)
+{
+    ROM_DATA = file->address;
+    ROM_DATA_LENGTH = file->size;
 }

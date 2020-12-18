@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 
+#include "rg_emulators.h"
 
 typedef struct {
     const char *rom_name;
@@ -22,5 +23,8 @@ typedef struct {
 } rom_manager;
 
 extern const rom_manager rom_mgr;
+extern unsigned char *ROM_DATA;
+extern unsigned ROM_DATA_LENGTH;
 
 const rom_system *rom_manager_system(const rom_manager *mgr, char *name);
+void rom_manager_set_active_file(retro_emulator_file_t *file);
