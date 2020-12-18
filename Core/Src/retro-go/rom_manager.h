@@ -25,6 +25,7 @@ typedef struct {
 extern const rom_manager rom_mgr;
 extern unsigned char *ROM_DATA;
 extern unsigned ROM_DATA_LENGTH;
+extern retro_emulator_file_t *ACTIVE_FILE;
 
 const rom_system *rom_manager_system(const rom_manager *mgr, char *name);
 void rom_manager_set_active_file(retro_emulator_file_t *file);

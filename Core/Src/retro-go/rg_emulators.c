@@ -358,8 +358,7 @@ void emulator_start(retro_emulator_file_t *file, bool load_state)
 {
     const uint32_t address = emu_get_file_address(file);
     printf("Retro-Go: Starting game: %s\n", file->name);
-    ROM_DATA = address;
-    ROM_DATA_LENGTH = file->size;
+    rom_manager_set_active_file(file);
 
     // odroid_settings_StartAction_set(load_state ? ODROID_START_ACTION_RESUME : ODROID_START_ACTION_NEWGAME);
     // odroid_settings_RomFilePath_set(path);

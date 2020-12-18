@@ -372,15 +372,13 @@ int app_main_nes(void)
     // Always load the previous game unless pause is pressed
     autoload = !pause_pressed;
 
-
     printf("Nofrendo start!\n");
 
     memset(audiobuffer_dma, 0, sizeof(audiobuffer_dma));
 
     HAL_SAI_Transmit_DMA(&hsai_BlockA1, audiobuffer_dma, sizeof(audiobuffer_dma) / sizeof(audiobuffer_dma[0]));
 
-    // nofrendo_start("Rom name (E).nes", NES_PAL, AUDIO_SAMPLE_RATE);
-    nofrendo_start("Rom name (USA).nes", NES_NTSC, AUDIO_SAMPLE_RATE);
+    nofrendo_start(ACTIVE_FILE->name, NES_AUTO, AUDIO_SAMPLE_RATE);
 
     return 0;
 }
