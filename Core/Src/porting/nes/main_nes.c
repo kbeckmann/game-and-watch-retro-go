@@ -136,7 +136,12 @@ void osd_audioframe(int audioSamples)
 
     size_t offset = (dma_state == DMA_TRANSFER_STATE_HF) ? 0 : audioSamples;
 
-    if (audio_mute) { 
+    // MUST shift with at least 1 place, or it will brownout.
+    uint8_t volume = odroid_audio_volume_get();
+    uint8_t shift = ODROID_AUDIO_VOLUME_MAX - volume + 1;
+
+    if (volume == ODROID_AUDIO_VOLUME_MIN) {
+        // mute
         for (int i = 0; i < audioSamples; i++) {
             audiobuffer_dma[i + offset] = 0;
         }
@@ -145,7 +150,7 @@ void osd_audioframe(int audioSamples)
 
     // Write to DMA buffer and lower the volume to 1/4
     for (int i = 0; i < audioSamples; i++) {
-        audiobuffer_dma[i + offset] = audiobuffer_emulator[i] >> 1;
+        audiobuffer_dma[i + offset] = audiobuffer_emulator[i] >> shift;
     }
 }
 
@@ -281,7 +286,6 @@ void osd_getinput(void)
     if (pause_pressed != (buttons & B_PAUSE)) {
         if (pause_pressed) {
             printf("Pause pressed %d=>%d\n", audio_mute, !audio_mute);
-            audio_mute = !audio_mute;
             odroid_overlay_game_menu(NULL);
         }
         pause_pressed = buttons & B_PAUSE;

@@ -426,16 +426,17 @@ uint8_t gb_buffer1[GB_WIDTH * GB_HEIGHT * 2]  __attribute__((section (".itcram_d
 uint8_t state_save_buffer[192 * 1024] __attribute__((section (".emulator_data")));
 
 void pcm_submit() {
+    uint8_t volume = odroid_audio_volume_get();
+    uint8_t shift = ODROID_AUDIO_VOLUME_MAX - volume + 1;
     size_t offset = (dma_state == DMA_TRANSFER_STATE_HF) ? 0 : AUDIO_BUFFER_LENGTH;
-    if (audio_mute) {
+
+    if (audio_mute || volume == ODROID_AUDIO_VOLUME_MIN) {
         for (int i = 0; i < AUDIO_BUFFER_LENGTH; i++) {
             audiobuffer_dma[i + offset] = 0;
         }
     } else {
-        uint8_t level = ODROID_AUDIO_VOLUME_MAX - odroid_audio_volume_get() + 1;
-
         for (int i = 0; i < AUDIO_BUFFER_LENGTH; i++) {
-            audiobuffer_dma[i + offset] = pcm.buf[i] >> level;
+            audiobuffer_dma[i + offset] = pcm.buf[i] >> shift;
         }
     }
 }
@@ -575,14 +576,6 @@ void app_main_gb(void)
         pad_set(PAD_START, joystick.values[ODROID_INPUT_START]);
         pad_set(PAD_A, joystick.values[ODROID_INPUT_A]);
         pad_set(PAD_B, joystick.values[ODROID_INPUT_B]);
-
-        if (pause_pressed != joystick.values[ODROID_INPUT_VOLUME]) {
-            pause_pressed = joystick.values[ODROID_INPUT_VOLUME];
-            if (pause_pressed) {
-                printf("Pause pressed %d=>%d\n", audio_mute, !audio_mute);
-                audio_mute = !audio_mute;
-            }
-        }
 
         if (power_pressed != joystick.values[ODROID_INPUT_POWER]) {
             printf("Power toggle %d=>%d\n", power_pressed, !power_pressed);
