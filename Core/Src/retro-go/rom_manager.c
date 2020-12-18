@@ -5,6 +5,7 @@
 
 unsigned char *ROM_DATA = NULL;
 unsigned ROM_DATA_LENGTH;
+retro_emulator_file_t *ACTIVE_FILE = NULL;
 
 #include "gb_roms.c"
 #include "nes_roms.c"
@@ -30,6 +31,7 @@ const rom_system *rom_manager_system(const rom_manager *mgr, char *name) {
 
 void rom_manager_set_active_file(retro_emulator_file_t *file)
 {
+    ACTIVE_FILE = file;
     ROM_DATA = file->address;
     ROM_DATA_LENGTH = file->size;
 }
