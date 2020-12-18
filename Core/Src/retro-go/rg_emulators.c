@@ -277,12 +277,18 @@ void emulator_crc32_file(retro_emulator_file_t *file)
 
 void emulator_show_file_info(retro_emulator_file_t *file)
 {
+    char filename_value[128];
+    char type_value[32];
+    char size_value[32];
+    char crc_value[32];
+    crc_value[0] = '\x00';
+
     odroid_dialog_choice_t choices[] = {
-        {0, "File", "...", 1, NULL},
-        {0, "Type", "N/A", 1, NULL},
+        {0, "File", filename_value, 1, NULL},
+        {0, "Type", type_value, 1, NULL},
         {0, "Folder", "...", 1, NULL},
-        {0, "Size", "0", 1, NULL},
-        {0, "CRC32", "N/A", 1, NULL},
+        {0, "Size", size_value, 1, NULL},
+        {0, "CRC32", crc_value, 1, NULL},
         {0, "---", "", -1, NULL},
         {1, "Close", "", 1, NULL},
         ODROID_DIALOG_CHOICE_LAST
@@ -292,7 +298,7 @@ void emulator_show_file_info(retro_emulator_file_t *file)
     sprintf(choices[1].value, "%s", file->ext);
     // sprintf(choices[2].value, "%s", file->folder);
     // sprintf(choices[3].value, "%d KB", odroid_sdcard_get_filesize(emu_get_file_path(file)) / 1024);
-    sprintf(choices[3].value, "%d KB", 42);
+    sprintf(choices[3].value, "%d KB", file->size / 1024);
 
     if (file->checksum > 1)
     {
