@@ -138,6 +138,10 @@ SECTIONS
     . = ALIGN(4);
     build_gb/main_gb.o  (.text .text* .rodata .rodata*)
     . = ALIGN(4);
+    build_gb/dis6502.o (.text .text* .rodata .rodata*)
+    . = ALIGN(4);
+    build_gb/cpu.o (.text .text* .rodata .rodata*)
+    . = ALIGN(4);
     __extflash_odroid_end__ = .;
     __ram_exec_end__ = .;
   } >RAM AT> EXTFLASH
@@ -159,10 +163,6 @@ SECTIONS
     build_gb/logo*.o (.text .text* .rodata .rodata*)
     . = ALIGN(4);
     build_gb/bitmap.o (.text .text* .rodata .rodata*)
-    . = ALIGN(4);
-    build_gb/cpu.o (.text .text* .rodata .rodata*)
-    . = ALIGN(4);
-    build_gb/dis6502.o (.text .text* .rodata .rodata*)
     . = ALIGN(4);
     __extflash_end_start__ = .;
     . = ALIGN(4);

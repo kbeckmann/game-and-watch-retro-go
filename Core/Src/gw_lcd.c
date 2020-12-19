@@ -10,6 +10,8 @@ uint16_t framebuffer1[GW_LCD_WIDTH * GW_LCD_HEIGHT]  __attribute__((section (".l
 uint16_t framebuffer2[GW_LCD_WIDTH * GW_LCD_HEIGHT]  __attribute__((section (".lcd")));
 #endif // GW_LCD_MODE_LUT8
 
+uint8_t emulator_framebuffer[256 * 240]  __attribute__((section (".itcram_data")));
+
 extern LTDC_HandleTypeDef hltdc;
 
 extern DAC_HandleTypeDef hdac1;

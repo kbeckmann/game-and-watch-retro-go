@@ -60,7 +60,7 @@ extern RTC_HandleTypeDef hrtc;
 /* Exported macro ------------------------------------------------------------*/
 /* USER CODE BEGIN EM */
 
-// #define PROFILING_ENABLED
+#define PROFILING_ENABLED
 #ifdef PROFILING_ENABLED
 
 #define PROFILING_INIT(_t_name) \
