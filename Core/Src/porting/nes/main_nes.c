@@ -17,6 +17,7 @@
 
 #define APP_ID 30
 
+// #define BLIT_NEAREST
 #ifdef BLIT_NEAREST
 #define blit blit_nearest
 #else
@@ -196,6 +197,31 @@ static inline void blit_normal(bitmap_t *bmp, uint8_t *framebuffer) {
         memcpy(dest, row, bmp->width);
     }
 }
+
+static inline void blit_nearest(bitmap_t *bmp, uint8_t *framebuffer) {
+    int w1 = bmp->width;
+    int h1 = bmp->height;
+    int w2 = WIDTH;
+    int h2 = h1;
+
+    // Blit: 5581 us
+    // This can still be improved quite a bit by using aligned accesses.
+
+    int ctr = 0;
+    for (int y = 0; y < h2; y++) {
+        uint8_t  *src_row  = bmp->line[y];
+        uint8_t *dest_row = &framebuffer[y * w2];
+        int x2 = 0;
+        for (int x = 0; x < w1; x++) {
+            uint8_t b2 = src_row[x];
+            dest_row[x2++] = b2;
+            if (ctr++ == 4) {
+                ctr = 0;
+                dest_row[x2++] = b2;
+            }
+        }
+    }
+}
 #else
 
 __attribute__((optimize("unroll-loops")))
@@ -215,13 +241,12 @@ static inline void blit_normal(bitmap_t *bmp, uint16_t *framebuffer) {
         }
     }
 }
-#endif
 
-static inline void blit_nearest(bitmap_t *bmp, uint8_t *framebuffer) {
+static inline void blit_nearest(bitmap_t *bmp, uint16_t *framebuffer) {
     int w1 = bmp->width;
     int h1 = bmp->height;
     int w2 = WIDTH;
-    int h2 = h1;
+    int h2 = 240;
 
 // #define SCALE_TO_320
 #define SCALE_TO_307
@@ -234,18 +259,18 @@ static inline void blit_nearest(bitmap_t *bmp, uint8_t *framebuffer) {
 #   define SCALE_CTR 3
 #endif
 
-    // Blit: 1364 us
+    // 1612 us
     PROFILING_INIT(t_blit);
     PROFILING_START(t_blit);
 
     int ctr = 0;
     for (int y = 0; y < h2; y++) {
         uint8_t  *src_row  = bmp->line[y];
-        uint8_t *dest_row = &framebuffer[y * w2 + hpad];
+        uint16_t *dest_row = &framebuffer[y * w2];
         int x2 = 0;
         int ctr = 0;
         for (int x = 0; x < w1; x++) {
-            uint8_t b2 = src_row[x];
+            uint16_t b2 = palette565[src_row[x]];
             dest_row[x2++] = b2;
             if (ctr++ == SCALE_CTR) {
                 ctr = 0;
@@ -260,6 +285,9 @@ static inline void blit_nearest(bitmap_t *bmp, uint8_t *framebuffer) {
     printf("Blit: %d us\n", (1000000 * PROFILING_DIFF(t_blit)) / t_blit_t0.SecondFraction);
 #endif
 }
+
+#endif
+
 
 void osd_blitscreen(bitmap_t *bmp)
 {
