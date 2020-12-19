@@ -16,6 +16,7 @@
 #include "gnuboy/rtc.h"
 #include "gnuboy/defs.h"
 #include "common.h"
+#include "rom_manager.h"
 
 #define APP_ID 20
 
@@ -37,6 +38,9 @@ static bool netplay = false;
 
 static bool saveSRAM = false;
 static int  saveSRAM_Timer = 0;
+
+// 3 pages
+uint8_t state_save_buffer[192 * 1024] __attribute__((section (".emulator_data")));
 
 
 // --- MAIN
@@ -301,27 +305,19 @@ static inline void screen_blit_jth(void) {
 
 static bool SaveState(char *pathName)
 {
-    // For convenience we also write the sram to its own file
-    // So that it can be imported in other emulators
-    // No save ;_;
-    return 0;
-    // sram_save();
+    printf("Saving state...\n");
 
-    // return state_save(pathName) == 0;
+    memset(state_save_buffer, '\x00', sizeof(state_save_buffer));
+    gb_state_save(state_save_buffer, sizeof(state_save_buffer));
+    store_save(ACTIVE_FILE->save_address, state_save_buffer, sizeof(state_save_buffer));
+
+    return 0;
 }
 
 static bool LoadState(char *pathName)
 {
+    gb_state_load(ACTIVE_FILE->save_address, ACTIVE_FILE->save_size);
     return true;
-    /*if (state_load(pathName) != 0)
-    {
-        emu_reset();
-
-        if (saveSRAM) sram_load();
-
-        return false;
-    }
-    return true;*/
 }
 
 
@@ -422,9 +418,6 @@ static bool advanced_settings_cb(odroid_dialog_choice_t *option, odroid_dialog_e
 // Hacky but it works: Locate the framebuffer in ITCRAM
 uint8_t gb_buffer1[GB_WIDTH * GB_HEIGHT * 2]  __attribute__((section (".itcram_data")));
 
-// 3 pages
-uint8_t state_save_buffer[192 * 1024] __attribute__((section (".emulator_data")));
-
 void pcm_submit() {
     uint8_t volume = odroid_audio_volume_get();
     uint8_t shift = ODROID_AUDIO_VOLUME_MAX - volume + 1;
@@ -446,12 +439,6 @@ bool odroid_netplay_quick_start(void)
     return true;
 }
 
-bool odroid_system_emu_save_state(int slot)
-{
-    // TODO
-    return true;
-}
-
 // TODO: Move to own file
 void odroid_audio_mute(bool mute)
 {
@@ -465,7 +452,7 @@ void odroid_audio_mute(bool mute)
 }
 
 
-rg_app_desc_t * init() {
+rg_app_desc_t * init(uint8_t load_state) {
     odroid_gamepad_state_t joystick;
 
     odroid_system_init(APP_ID, AUDIO_SAMPLE_RATE);
@@ -523,15 +510,15 @@ rg_app_desc_t * init() {
     pause_pressed = (boot_buttons & B_PAUSE);
     power_pressed = (boot_buttons & B_POWER);
 
-    if (!pause_pressed) {
-        gb_state_load(&__SAVE_START__, &__SAVE_END__ - &__SAVE_START__);
+    if (load_state) {
+        LoadState("");
     }
     return app;
 }
 
-void app_main_gb(void)
+void app_main_gb(uint8_t load_state)
 {
-    rg_app_desc_t *app = init();
+    rg_app_desc_t *app = init(load_state);
     odroid_gamepad_state_t joystick;
 
 
@@ -587,9 +574,7 @@ void app_main_gb(void)
 
                 if(!joystick.values[ODROID_INPUT_VOLUME]) {
                     // Always save as long as PAUSE is not pressed
-                    memset(state_save_buffer, '\x00', sizeof(state_save_buffer));
-                    gb_state_save(state_save_buffer, sizeof(state_save_buffer));
-                    store_save(state_save_buffer, sizeof(state_save_buffer));
+                    SaveState("");
                 }
 
                 GW_EnterDeepSleep();

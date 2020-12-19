@@ -46,7 +46,14 @@ rg_app_desc_t *odroid_system_get_app()
 
 bool odroid_system_emu_load_state(int slot)
 {
+    (*currentApp.loadState)("");
+    return true;
+}
 
+bool odroid_system_emu_save_state(int slot)
+{
+    (*currentApp.saveState)("");
+    return true;
 }
 
 IRAM_ATTR void odroid_system_tick(uint skippedFrame, uint fullFrame, uint busyTime)

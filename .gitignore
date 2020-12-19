@@ -11,5 +11,7 @@ roms
 
 .mxproject
 
+saveflash.ld
+
 Core/Src/retro-go/nes_roms.c
 Core/Src/retro-go/gb_roms.c

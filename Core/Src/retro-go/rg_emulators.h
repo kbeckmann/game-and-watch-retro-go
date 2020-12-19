@@ -10,6 +10,8 @@ typedef struct {
     // char folder[32];
     uint8_t *address;
     size_t size;
+    const uint8_t *save_address;
+    uint32_t save_size;
     size_t crc_offset;
     uint32_t checksum;
     bool missing_cover;

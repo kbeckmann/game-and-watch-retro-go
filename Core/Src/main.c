@@ -184,28 +184,31 @@ int _write(int file, char *ptr, int len)
 #endif
 
 
-void store_save(uint8_t *data, size_t size) {
-  // Sanity checks for save-game support.
-  uint32_t save_size = &__SAVE_END__ - &__SAVE_START__;
-  if(save_size < 192 * 1024) {
-    // Invalid savegame size
-    return;
-  }
+void store_save(uint8_t *flash_ptr, uint8_t *data, size_t size)
+{
+  uint32_t i;
 
-  uint32_t save_address = &__SAVE_START__ - &__EXTFLASH_START__;
+  // Only allow pointers in the SAVEFLASH allocated area
+  assert((flash_ptr >= &__SAVEFLASH_START__) && ((flash_ptr + size) <= &__SAVEFLASH_END__));
 
-  if(size > (192 * 1024)) {
-    // Max Save size
-    Error_Handler();
-  }
+  // Convert mem mapped pointer to flash address
+  uint32_t save_address = flash_ptr - &__EXTFLASH_START__;
+
+  // Only allow 64kB aligned pointers
+  assert((save_address & (64*1024 - 1)) == 0);
+
   OSPI_DisableMemoryMapped(&hospi1);
   OSPI_NOR_WriteEnable(&hospi1);
-  
-  uint32_t i;
-  for (i = 0; i < save_size / (64*1024); i++) {
+
+  size_t blocks = size / (64 * 1024);
+  if ((size & (64*1024 - 1)) != 0) {
+    blocks++;
+  }
+
+  for (i = 0; i < blocks; i++) {
     OSPI_BlockErase(&hospi1, save_address + i * 64 * 1024);
   }
-  
+
   OSPI_Program(&hospi1, save_address, data, size);
   OSPI_EnableMemoryMappedMode(&hospi1);
 }
