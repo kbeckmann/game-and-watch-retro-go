@@ -342,14 +342,9 @@ void emulator_show_file_menu(retro_emulator_file_t *file)
         emulator_start(file, sel == 0);
     }
     else if (sel == 2) {
-        // if (odroid_overlay_confirm("Delete save file?", false) == 1) {
-        //     if (has_save) {
-        //         odroid_sdcard_unlink(save_path);
-        //     }
-        //     if (has_sram) {
-        //         odroid_sdcard_unlink(sram_path);
-        //     }
-        // }
+        if (odroid_overlay_confirm("Delete save file?", false) == 1) {
+            store_erase(file->save_address, file->save_size);
+        }
     }
     else if (sel == 3) {
         // if (is_fav)
