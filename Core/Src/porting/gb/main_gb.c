@@ -204,6 +204,7 @@ static void screen_blit_bilinear(void) {
 
 
 __attribute__((optimize("unroll-loops")))
+__attribute__((section (".itcram_hot_text")))
 static inline void screen_blit_jth(void) {
     static uint32_t lastFPSTime = 0;
     static uint32_t lastTime = 0;
@@ -242,25 +243,43 @@ static inline void screen_blit_jth(void) {
 
     // Iterate on dest buf rows
     int src_y = 0;
-    for (int y = 0; y < h2; y++) {
-        uint16_t *src_row  = &screen_buf[src_y * w1];
+
+    for(int y = 0; y < border; ++y) {
+        uint16_t *src_row  = &screen_buf[y * w1];
         uint16_t *dest_row = &dest[y * w2];
-        if (y >= border && y <= (240 - border)) {
-            for (int x = 0; x < w1; x++) {
-                dest_row[2 * x]     = src_row[x];
-                dest_row[2 * x + 1] = src_row[x];
-            }
-            if (y & 1) {
-                src_y++;
-            }
-        } else {
-            for (int x = 0; x < w1; x++) {
-                dest_row[2 * x]     = src_row[x];
-                dest_row[2 * x + 1] = src_row[x];
-            }
-            src_y++;
+        for (int x = 0, xsrc=0; x < w2; x+=2,xsrc++) {
+            dest_row[x]     = src_row[xsrc];
+            dest_row[x + 1] = src_row[xsrc];
         }
     }
+
+    for (int y = border, src_y = border; y < h2-border; y+=2, src_y++) {
+        uint16_t *src_row  = &screen_buf[src_y * w1];
+        uint32_t *dest_row0 = &dest[y * w2];
+        for (int x = 0, xsrc=0; x < w2; x++,xsrc++) {
+            uint32_t col = src_row[xsrc];
+            dest_row0[x] = (col | (col << 16));
+        }
+    }
+
+    for (int y = border, src_y = border; y < h2-border; y+=2, src_y++) {
+        uint16_t *src_row  = &screen_buf[src_y * w1];
+        uint32_t *dest_row1 = &dest[(y + 1) * w2];
+        for (int x = 0, xsrc=0; x < w2; x++,xsrc++) {
+            uint32_t col = src_row[xsrc];
+            dest_row1[x] = (col | (col << 16));
+        }
+    }
+
+    for(int y = 0; y < border; ++y) {
+        uint16_t *src_row  = &screen_buf[(h1-border+y) * w1];
+        uint16_t *dest_row = &dest[(h2-border+y) * w2];
+        for (int x = 0, xsrc=0; x < w2; x+=2,xsrc++) {
+            dest_row[x]     = src_row[xsrc];
+            dest_row[x + 1] = src_row[xsrc];
+        }
+    }
+
 
     PROFILING_END(t_blit);
 

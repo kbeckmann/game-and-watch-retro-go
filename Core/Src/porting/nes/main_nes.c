@@ -17,6 +17,7 @@
 
 #define APP_ID 30
 
+// #define BLIT_NEAREST
 #ifdef BLIT_NEAREST
 #define blit blit_nearest
 #else
@@ -196,26 +197,6 @@ static inline void blit_normal(bitmap_t *bmp, uint8_t *framebuffer) {
         memcpy(dest, row, bmp->width);
     }
 }
-#else
-
-__attribute__((optimize("unroll-loops")))
-static inline void blit_normal(bitmap_t *bmp, uint16_t *framebuffer) {
-    const int w1 = bmp->width;
-    const int h1 = bmp->height;
-    const int w2 = 320;
-    const int h2 = 240;
-    const int hpad = 27;
-    int x2, y2;
-
-    for (int y = 0; y < h2; y++) {
-        uint8_t  *src_row  = bmp->line[y];
-        uint16_t *dest_row = &framebuffer[y * w2 + hpad];
-        for (int x = 0; x < w1; x++) {
-            dest_row[x] = palette565[src_row[x]];
-        }
-    }
-}
-#endif
 
 static inline void blit_nearest(bitmap_t *bmp, uint8_t *framebuffer) {
     int w1 = bmp->width;
@@ -241,6 +222,52 @@ static inline void blit_nearest(bitmap_t *bmp, uint8_t *framebuffer) {
         }
     }
 }
+#else
+
+__attribute__((optimize("unroll-loops")))
+static inline void blit_normal(bitmap_t *bmp, uint16_t *framebuffer) {
+    const int w1 = bmp->width;
+    const int h1 = bmp->height;
+    const int w2 = 320;
+    const int h2 = 240;
+    const int hpad = 27;
+    int x2, y2;
+
+    for (int y = 0; y < h2; y++) {
+        uint8_t  *src_row  = bmp->line[y];
+        uint16_t *dest_row = &framebuffer[y * w2 + hpad];
+        for (int x = 0; x < w1; x++) {
+            dest_row[x] = palette565[src_row[x]];
+        }
+    }
+}
+
+static inline void blit_nearest(bitmap_t *bmp, uint16_t *framebuffer) {
+    int w1 = bmp->width;
+    int h1 = bmp->height;
+    int w2 = WIDTH;
+    int h2 = 240;
+
+    // 1612 us
+
+    int ctr = 0;
+    for (int y = 0; y < h2; y++) {
+        uint8_t  *src_row  = bmp->line[y];
+        uint16_t *dest_row = &framebuffer[y * w2];
+        int x2 = 0;
+        for (int x = 0; x < w1; x++) {
+            uint16_t b2 = palette565[src_row[x]];
+            dest_row[x2++] = b2;
+            if (ctr++ == 3) {
+                ctr = 0;
+                dest_row[x2++] = b2;
+            }
+        }
+    }
+}
+
+#endif
+
 
 void osd_blitscreen(bitmap_t *bmp)
 {

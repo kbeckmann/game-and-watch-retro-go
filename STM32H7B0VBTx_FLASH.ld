@@ -100,7 +100,6 @@ MEMORY
 /* Define output sections */
 SECTIONS
 {
-  /* Copied from flash to ram at boot */
   ._itcram :
   {
     __itcram_start__ = .;
@@ -111,6 +110,20 @@ SECTIONS
     . = ALIGN(4);
     __itcram_end__ = .;
   } > ITCMRAM
+
+  /* Copied from flash to ram at boot */
+  _sitcram_hot = LOADADDR(._itcram_hot);
+  ._itcram_hot :
+  {
+    __itcram_hot_start__ = .;
+    . = ALIGN(4);
+    *(.itcram_hot_data)
+    . = ALIGN(4);
+    *(.itcram_hot_text)
+    . = ALIGN(4);
+    __itcram_hot_end__ = .;
+  } >ITCMRAM AT> EXTFLASH
+
 
   /* Data that should be copied from extflash to axiram */
   /* used by the startup to initialize data */

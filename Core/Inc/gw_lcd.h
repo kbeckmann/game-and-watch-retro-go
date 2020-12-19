@@ -8,12 +8,12 @@
 #define GW_LCD_HEIGHT 240
 
 #ifdef GW_LCD_MODE_LUT8
-extern uint8_t framebuffer1[GW_LCD_WIDTH * GW_LCD_HEIGHT]  __attribute__((section (".lcd")));
-extern uint8_t framebuffer2[GW_LCD_WIDTH * GW_LCD_HEIGHT]  __attribute__((section (".lcd")));
+extern uint8_t framebuffer1[GW_LCD_WIDTH * GW_LCD_HEIGHT]  __attribute__((section (".lcd"))) __attribute__ ((aligned (16)));
+extern uint8_t framebuffer2[GW_LCD_WIDTH * GW_LCD_HEIGHT]  __attribute__((section (".lcd"))) __attribute__ ((aligned (16)));
 typedef uint8_t pixel_t;
 #else
-extern uint16_t framebuffer1[GW_LCD_WIDTH * GW_LCD_HEIGHT]  __attribute__((section (".lcd")));
-extern uint16_t framebuffer2[GW_LCD_WIDTH * GW_LCD_HEIGHT]  __attribute__((section (".lcd")));
+extern uint16_t framebuffer1[GW_LCD_WIDTH * GW_LCD_HEIGHT]  __attribute__((section (".lcd"))) __attribute__ ((aligned (16)));
+extern uint16_t framebuffer2[GW_LCD_WIDTH * GW_LCD_HEIGHT]  __attribute__((section (".lcd"))) __attribute__ ((aligned (16)));
 typedef uint16_t pixel_t;
 #endif // GW_LCD_MODE_LUT8
 

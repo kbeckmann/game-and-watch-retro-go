@@ -371,13 +371,21 @@ int main(void)
   OSPI_EnableMemoryMappedMode(&hospi1);
 
   // Copy instructions and data from extflash to axiram
-  uint32_t copy_areas[4];
+  static uint32_t copy_areas[4] __attribute__((used));
 
   copy_areas[0] = (uint32_t) &_siramdata;  // 0x90000000
   copy_areas[1] = (uint32_t) &__ram_exec_start__;  // 0x24000000
   copy_areas[2] = (uint32_t) &__ram_exec_end__;  // 0x24000000 + length
   copy_areas[3] = copy_areas[2] - copy_areas[1];
   memcpy_no_check(copy_areas[1], copy_areas[0], copy_areas[2] - copy_areas[1]);
+
+  // Copy ITCRAM HOT section
+  static uint32_t copy_areas2[4] __attribute__((used));
+  copy_areas2[0] = (uint32_t) &_sitcram_hot;
+  copy_areas2[1] = (uint32_t) &__itcram_hot_start__;
+  copy_areas2[2] = (uint32_t) &__itcram_hot_end__;
+  copy_areas2[3] = copy_areas2[2] - copy_areas2[1];
+  memcpy_no_check(copy_areas2[1], copy_areas2[0], copy_areas2[3]);
 
   // Sanity check, sometimes this is triggered
   uint32_t add = 0x90000000;

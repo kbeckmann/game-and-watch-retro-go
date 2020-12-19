@@ -6,11 +6,11 @@
 uint8_t framebuffer1[GW_LCD_WIDTH * GW_LCD_HEIGHT];
 uint8_t framebuffer2[GW_LCD_WIDTH * GW_LCD_HEIGHT];
 #else
-uint16_t framebuffer1[GW_LCD_WIDTH * GW_LCD_HEIGHT]  __attribute__((section (".lcd")));
-uint16_t framebuffer2[GW_LCD_WIDTH * GW_LCD_HEIGHT]  __attribute__((section (".lcd")));
+uint16_t framebuffer1[GW_LCD_WIDTH * GW_LCD_HEIGHT];
+uint16_t framebuffer2[GW_LCD_WIDTH * GW_LCD_HEIGHT];
 #endif // GW_LCD_MODE_LUT8
 
-uint8_t emulator_framebuffer[256 * 240]  __attribute__((section (".itcram_data")));
+uint8_t emulator_framebuffer[256 * 240];
 
 extern LTDC_HandleTypeDef hltdc;
 
