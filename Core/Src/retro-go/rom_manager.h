@@ -8,24 +8,24 @@ typedef struct {
     const char *rom_name;
     uint32_t flash_address;
     uint32_t size;
-} rom_entry;
+} rom_entry_t;
 
 typedef struct {
     char system_name[64];
-    const rom_entry *roms;
+    const rom_entry_t *roms;
     char *extension;
     uint32_t roms_count;
-} rom_system;
+} rom_system_t;
 
 typedef struct {
-    const rom_system *systems;
+    const rom_system_t *systems;
     uint32_t systems_count;
-} rom_manager;
+} rom_manager_t;
 
-extern const rom_manager rom_mgr;
+extern const rom_manager_t rom_mgr;
 extern unsigned char *ROM_DATA;
 extern unsigned ROM_DATA_LENGTH;
 extern retro_emulator_file_t *ACTIVE_FILE;
 
-const rom_system *rom_manager_system(const rom_manager *mgr, char *name);
+const rom_system_t *rom_manager_system(const rom_manager_t *mgr, char *name);
 void rom_manager_set_active_file(retro_emulator_file_t *file);
