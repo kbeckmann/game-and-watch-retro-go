@@ -251,7 +251,8 @@ void GW_EnterDeepSleep(void)
 
   // Execution stops here, this function will not return
   while(1) {
-    __NOP();
+    // If we for some reason survive until here, let's just reboot
+    HAL_NVIC_SystemReset();
   }
 
 }
