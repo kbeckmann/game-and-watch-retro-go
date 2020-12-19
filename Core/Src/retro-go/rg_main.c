@@ -110,6 +110,13 @@ void retro_loop()
     int last_key = -1;
     int selected_tab_last = -1;
 
+    // Read the initial state as to not trigger on button held down during boot
+    odroid_input_read_gamepad(&gui.joystick);
+
+    for (int i = 0; i < ODROID_INPUT_MAX; i++) {
+        if (gui.joystick.values[i]) last_key = i;
+    }
+
     // gui.selected   = odroid_settings_int32_get(KEY_SELECTED_TAB, 0);
     // gui.theme      = odroid_settings_int32_get(KEY_GUI_THEME, 0);
     // gui.show_empty = odroid_settings_int32_get(KEY_SHOW_EMPTY, 1);
@@ -187,12 +194,12 @@ void retro_loop()
             }
             else if (last_key == ODROID_INPUT_SELECT) {
                 odroid_dialog_choice_t choices[] = {
-                    {0, "---", "", -1, NULL},
+                    // {0, "---", "", -1, NULL},
                     // {0, "Color theme", "1/10", 1, &color_shift_cb},
                     // {0, "Font size", "Small", 1, &font_size_cb},
                     // {0, "Show cover", "Yes", 1, &show_cover_cb},
                     // {0, "Show empty", "Yes", 1, &show_empty_cb},
-                    {0, "---", "", -1, NULL},
+                    // {0, "---", "", -1, NULL},
                     // {0, "Startup app", "Last", 1, &startup_app_cb},
                     ODROID_DIALOG_CHOICE_LAST
                 };
@@ -222,6 +229,9 @@ void retro_loop()
             }
             else if (last_key == ODROID_INPUT_B) {
                 gui_event(KEY_PRESS_B, tab);
+            }
+            else if (last_key == ODROID_INPUT_POWER) {
+                GW_EnterDeepSleep();
             }
         }
 
