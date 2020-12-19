@@ -18,11 +18,14 @@
 #define APP_ID 30
 
 // #define BLIT_NEAREST
-#ifdef BLIT_NEAREST
-#define blit blit_nearest
-#else
-#define blit blit_normal
-#endif
+// #ifdef BLIT_NEAREST
+// #define blit blit_nearest
+// #else
+// #define blit blit_normal
+// #endif
+
+// #define blit blit_4to5
+#define blit blit_5to6
 
 
 
@@ -286,6 +289,75 @@ static inline void blit_nearest(bitmap_t *bmp, uint16_t *framebuffer) {
 #endif
 }
 
+#define CONV(_b0) ((0b11111000000000000000000000&_b0)>>10) | ((0b000001111110000000000&_b0)>>5) | ((0b0000000000011111&_b0));
+
+__attribute__((optimize("unroll-loops")))
+static void blit_4to5(bitmap_t *bmp, uint16_t *framebuffer) {
+    int w1 = bmp->width;
+    int h1 = bmp->height;
+    int w2 = WIDTH;
+    int h2 = 240;
+
+    // 2480 us
+
+    for (int y = 0; y < h2; y++) {
+        uint8_t  *src_row  = bmp->line[y];
+        uint16_t *dest_row = &framebuffer[y * w2];
+        for (int x_src = 0, x_dst=0; x_src < w1; x_src+=4, x_dst+=5) {
+
+
+            uint32_t b0 = palette565[src_row[x_src]];
+            uint32_t b1 = palette565[src_row[x_src+1]];
+            uint32_t b2 = palette565[src_row[x_src+2]];
+            uint32_t b3 = palette565[src_row[x_src+3]];
+            b0 = ((0b1111100000000000&b0)<<10) | ((0b0000011111100000&b0)<<5) | ((0b0000000000011111&b0));
+            b1 = ((0b1111100000000000&b1)<<10) | ((0b0000011111100000&b1)<<5) | ((0b0000000000011111&b1));
+            b2 = ((0b1111100000000000&b2)<<10) | ((0b0000011111100000&b2)<<5) | ((0b0000000000011111&b2));
+            b3 = ((0b1111100000000000&b3)<<10) | ((0b0000011111100000&b3)<<5) | ((0b0000000000011111&b3));
+            dest_row[x_dst]   = CONV(b0);
+            dest_row[x_dst+1] = CONV((b0+b0+b0+b1)>>2);
+            dest_row[x_dst+2] = CONV((b1+b2)>>1);
+            dest_row[x_dst+3] = CONV((b2+b2+b2+b3)>>2);
+            dest_row[x_dst+4] = CONV(b3);
+        }
+    }
+}
+
+
+__attribute__((optimize("unroll-loops")))
+static void blit_5to6(bitmap_t *bmp, uint16_t *framebuffer) {
+    int w1 = bmp->width;
+    int h1 = bmp->height;
+    int w2 = WIDTH;
+    int h2 = 240;
+
+    // 2635 us
+
+    for (int y = 0; y < h2; y++) {
+        uint8_t  *src_row  = bmp->line[y];
+        uint16_t *dest_row = &framebuffer[y * w2];
+        for (int x_src = 0, x_dst=0; x_src < w1; x_src+=5, x_dst+=6) {
+
+
+            uint32_t b0 = palette565[src_row[x_src]];
+            uint32_t b1 = palette565[src_row[x_src+1]];
+            uint32_t b2 = palette565[src_row[x_src+2]];
+            uint32_t b3 = palette565[src_row[x_src+3]];
+            uint32_t b4 = palette565[src_row[x_src+4]];
+            b0 = ((0b1111100000000000&b0)<<10) | ((0b0000011111100000&b0)<<5) | ((0b0000000000011111&b0));
+            b1 = ((0b1111100000000000&b1)<<10) | ((0b0000011111100000&b1)<<5) | ((0b0000000000011111&b1));
+            b2 = ((0b1111100000000000&b2)<<10) | ((0b0000011111100000&b2)<<5) | ((0b0000000000011111&b2));
+            b3 = ((0b1111100000000000&b3)<<10) | ((0b0000011111100000&b3)<<5) | ((0b0000000000011111&b3));
+            b4 = ((0b1111100000000000&b4)<<10) | ((0b0000011111100000&b4)<<5) | ((0b0000000000011111&b4));
+            dest_row[x_dst]   = CONV(b0);
+            dest_row[x_dst+1] = CONV((b0+b1+b1+b1)>>2);
+            dest_row[x_dst+2] = CONV((b1+b2)>>1);
+            dest_row[x_dst+3] = CONV((b2+b3)>>1);
+            dest_row[x_dst+4] = CONV((b3+b3+b3+b4)>>2);
+            dest_row[x_dst+5] = CONV(b4);
+        }
+    }
+}
 #endif
 
 
