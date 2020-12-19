@@ -184,7 +184,7 @@ int _write(int file, char *ptr, int len)
 #endif
 
 
-void store_save(uint8_t *flash_ptr, uint8_t *data, size_t size)
+void store_erase(uint8_t *flash_ptr, size_t size)
 {
   uint32_t i;
 
@@ -209,7 +209,24 @@ void store_save(uint8_t *flash_ptr, uint8_t *data, size_t size)
     OSPI_BlockErase(&hospi1, save_address + i * 64 * 1024);
   }
 
+  OSPI_EnableMemoryMappedMode(&hospi1);
+}
+
+void store_save(uint8_t *flash_ptr, uint8_t *data, size_t size)
+{
+  // Convert mem mapped pointer to flash address
+  uint32_t save_address = flash_ptr - &__EXTFLASH_START__;
+
+  // Only allow 64kB aligned pointers
+  assert((save_address & (64*1024 - 1)) == 0);
+
+  store_erase(flash_ptr, size);
+
+  OSPI_DisableMemoryMapped(&hospi1);
+  OSPI_NOR_WriteEnable(&hospi1);
+
   OSPI_Program(&hospi1, save_address, data, size);
+
   OSPI_EnableMemoryMappedMode(&hospi1);
 }
 
