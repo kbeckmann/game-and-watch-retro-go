@@ -415,9 +415,6 @@ static bool advanced_settings_cb(odroid_dialog_choice_t *option, odroid_dialog_e
    return false;
 }*/
 
-// Hacky but it works: Locate the framebuffer in ITCRAM
-uint8_t gb_buffer1[GB_WIDTH * GB_HEIGHT * 2]  __attribute__((section (".itcram_data")));
-
 void pcm_submit() {
     uint8_t volume = odroid_audio_volume_get();
     uint8_t shift = ODROID_AUDIO_VOLUME_MAX - volume + 1;
@@ -459,8 +456,8 @@ rg_app_desc_t * init(uint8_t load_state) {
     odroid_system_emu_init(&LoadState, &SaveState, &netplay_callback);
 
     // Hack: Use the same buffer twice
-    update1.buffer = gb_buffer1;
-    update2.buffer = gb_buffer1;
+    update1.buffer = emulator_framebuffer;
+    update2.buffer = emulator_framebuffer;
 
     //saveSRAM = odroid_settings_app_int32_get(NVS_KEY_SAVE_SRAM, 0);
     saveSRAM = false;

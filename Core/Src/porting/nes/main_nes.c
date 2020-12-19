@@ -38,7 +38,7 @@ static uint autocrop = false;
 static bool netplay  = false;
 
 static bool fullFrame = 0;
-static uint frameTime = 0;
+static uint frameTime = 1000 / 60; // TODO: Handle PAL vs NTSC
 static uint32_t vsync_wait_ms = 0;
 
 static bool autoload = false;
@@ -72,6 +72,8 @@ int osd_init()
 extern LTDC_HandleTypeDef hltdc;
 
 static rgb_t *palette = NULL;
+static uint16_t palette565[256];
+
 void osd_setpalette(rgb_t *pal)
 {
     palette = pal;
@@ -98,6 +100,18 @@ void osd_setpalette(rgb_t *pal)
     memset(framebuffer2, 13, sizeof(framebuffer2));
 
     odroid_display_force_refresh();
+#else
+    for (int i = 0; i < 64; i++)
+    {
+        uint16_t c = (pal[i].b>>3) | ((pal[i].g>>2)<<5) | ((pal[i].r>>3)<<11);
+
+        // The upper bits are used to indicate background and transparency.
+        // They need to be indexed as well.
+        palette565[i]        = c;
+        palette565[i | 0x40] = c;
+        palette565[i | 0x80] = c;
+    }
+
 #endif
 }
 
@@ -186,21 +200,21 @@ static inline void blit_normal(bitmap_t *bmp, uint8_t *framebuffer) {
 
 __attribute__((optimize("unroll-loops")))
 static inline void blit_normal(bitmap_t *bmp, uint16_t *framebuffer) {
-    int w2 = 320;
-    int h2 = 240;
-    int hpad = 27;
-     int x2, y2 ;
+    const int w1 = bmp->width;
+    const int h1 = bmp->height;
+    const int w2 = 320;
+    const int h2 = 240;
+    const int hpad = 27;
+    int x2, y2;
 
-     for(int y = 0; y < bmp->height; y++) {
-         uint8_t *row = bmp->line[y];
-         for(int x = 0; x < bmp->width; x++) {
-             uint8_t i = row[x];
-
-             uint16_t c = (palette[i].b>>3) | ((palette[i].g>>2)<<5) | ((palette[i].r>>3)<<11);
-            framebuffer[w2 * y + (x+hpad)] = c;
-         }
-     }
- }
+    for (int y = 0; y < h2; y++) {
+        uint8_t  *src_row  = bmp->line[y];
+        uint16_t *dest_row = &framebuffer[y * w2 + hpad];
+        for (int x = 0; x < w1; x++) {
+            dest_row[x] = palette565[src_row[x]];
+        }
+    }
+}
 #endif
 
 static inline void blit_nearest(bitmap_t *bmp, uint8_t *framebuffer) {
@@ -224,6 +238,7 @@ static inline void blit_nearest(bitmap_t *bmp, uint8_t *framebuffer) {
     PROFILING_INIT(t_blit);
     PROFILING_START(t_blit);
 
+    int ctr = 0;
     for (int y = 0; y < h2; y++) {
         uint8_t  *src_row  = bmp->line[y];
         uint8_t *dest_row = &framebuffer[y * w2 + hpad];
@@ -267,6 +282,8 @@ void osd_blitscreen(bitmap_t *bmp)
 
     lastTime = currentTime;
 
+    PROFILING_INIT(t_blit);
+    PROFILING_START(t_blit);
 
     // This takes less than 1ms
     if(active_framebuffer == 0) {
@@ -276,6 +293,12 @@ void osd_blitscreen(bitmap_t *bmp)
         blit(bmp, framebuffer2);
         active_framebuffer = 0;
     }
+
+    PROFILING_END(t_blit);
+
+#ifdef PROFILING_ENABLED
+    printf("Blit: %d us\n", (1000000 * PROFILING_DIFF(t_blit)) / t_blit_t0.SecondFraction);
+#endif
 
     HAL_LTDC_Reload(&hltdc, LTDC_RELOAD_VERTICAL_BLANKING);
 }

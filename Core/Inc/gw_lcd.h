@@ -17,6 +17,11 @@ extern uint16_t framebuffer2[GW_LCD_WIDTH * GW_LCD_HEIGHT]  __attribute__((secti
 typedef uint16_t pixel_t;
 #endif // GW_LCD_MODE_LUT8
 
+
+// To be shared between NES and GB. NES is larger.
+extern uint8_t emulator_framebuffer[256 * 240]  __attribute__((section (".itcram_data")));
+
+
 // 0 => framebuffer1
 // 1 => framebuffer2
 extern uint32_t active_framebuffer;
