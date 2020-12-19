@@ -8,7 +8,7 @@ typedef struct {
     char name[128];
     char ext[8];
     // char folder[32];
-    uint32_t address;
+    uint8_t *address;
     size_t size;
     size_t crc_offset;
     uint32_t checksum;

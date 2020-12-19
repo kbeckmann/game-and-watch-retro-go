@@ -1,4 +1,5 @@
 #include <string.h>
+#include <stdint.h>
 
 #include "rom_manager.h"
 #include "rg_emulators.h"
@@ -10,17 +11,17 @@ retro_emulator_file_t *ACTIVE_FILE = NULL;
 #include "gb_roms.c"
 #include "nes_roms.c"
 
-const rom_system systems[] = {
+const rom_system_t systems[] = {
     nes_system,
     gb_system
 };
 
-const rom_manager rom_mgr = {
+const rom_manager_t rom_mgr = {
     .systems = systems,
     .systems_count = 2
 };
 
-const rom_system *rom_manager_system(const rom_manager *mgr, char *name) {
+const rom_system_t *rom_manager_system(const rom_manager_t *mgr, char *name) {
     for(int i=0; i < mgr->systems_count; i++) {
         if(strcmp(mgr->systems[i].system_name, name) == 0) {
             return &mgr->systems[i];

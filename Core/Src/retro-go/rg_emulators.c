@@ -102,11 +102,11 @@ void emulator_init(retro_emulator_t *emu)
     printf("Retro-Go: Initializing emulator '%s'\n", emu->system_name);
 
 
-    const rom_system *system = rom_manager_system(&rom_mgr, emu->system_name);
+    const rom_system_t *system = rom_manager_system(&rom_mgr, emu->system_name);
     if(system) {
         emu->roms.files = rg_alloc(system->roms_count * sizeof(retro_emulator_file_t), MEM_ANY);
         for(int i=0; i < system->roms_count; i++) {
-            const rom_entry *rom = &system->roms[i];
+            const rom_entry_t *rom = &system->roms[i];
             retro_emulator_file_t *file = &emu->roms.files[emu->roms.count++];
             // strcpy(file->folder, "/");
             file->emulator = (void*)emu;

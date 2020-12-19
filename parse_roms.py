@@ -3,7 +3,7 @@
 import os
 
 ROM_ENTRIES_TEMPLATE = """
-const rom_entry {name}[] = {{
+const rom_entry_t {name}[] = {{
     {body}
 }};
 const uint32_t {name}_count = {rom_count};
@@ -12,7 +12,7 @@ const uint32_t {name}_count = {rom_count};
 ROM_ENTRY_TEMPLATE = """\t{{.rom_name = "{name}", .flash_address = (uint32_t)&{variable_name}[0], .size={size}}},"""
 
 SYSTEM_TEMPLATE = """
-const rom_system {name} = {{
+const rom_system_t {name} = {{
     .system_name = "{system_name}",
     .roms = {variable_name},
     .extension = "{extension}",
