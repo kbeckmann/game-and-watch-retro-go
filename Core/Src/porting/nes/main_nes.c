@@ -42,15 +42,26 @@ static uint frameTime = 0;
 static uint32_t vsync_wait_ms = 0;
 
 static bool autoload = false;
-// TODO
-extern void store_save(uint8_t *data, size_t size);
-
 
 
 // if i counted correctly this should max be 23077
-char nes_save_buffer[24000]   __attribute__((section (".lcd")));;
+char nes_save_buffer[24000] __attribute__((section (".emulator_data")));
 
+static bool SaveState(char *pathName)
+{
+    printf("Saving state...\n");
 
+    nes_state_save(nes_save_buffer, 24000);
+    store_save(ACTIVE_FILE->save_address, nes_save_buffer, sizeof(nes_save_buffer));
+
+    return 0;
+}
+
+static bool LoadState(char *pathName)
+{
+    nes_state_load(ACTIVE_FILE->save_address, ACTIVE_FILE->save_size);
+    return true;
+}
 
 int osd_init()
 {
@@ -290,9 +301,7 @@ void osd_getinput(void)
             HAL_SAI_DMAStop(&hsai_BlockA1);
 
             if(!(buttons & B_PAUSE)) {
-                // Always save as long as PAUSE is not pressed
-                nes_state_save(nes_save_buffer, 24000);
-                store_save(nes_save_buffer, 24000);
+                SaveState("");
             }
 
             GW_EnterDeepSleep();
@@ -324,34 +333,14 @@ uint osd_getromcrc()
 
 void osd_loadstate()
 {
-    frameTime = get_frame_time(nes_getptr()->refresh_rate);
     if(autoload) {
         autoload = false;
-        uint32_t save_size = &__SAVE_END__ - &__SAVE_START__;
-        if(save_size < 64 * 1024) {
-            // no save support
-            return;
-        }
-
-        uint32_t address = &__SAVE_START__;
-        uint8_t *ptr = (uint8_t*)address;
-        nes_state_load(ptr, 24000);
+        LoadState("");
     }
 }
 
-static bool SaveState(char *pathName)
-{
-    return true;
-}
 
-static bool LoadState(char *pathName)
-{
-   return true;
-}
-
-
-
-int app_main_nes(void)
+int app_main_nes(uint8_t load_state)
 {
     memset(framebuffer1, 0x0, sizeof(framebuffer1));
     memset(framebuffer2, 0x0, sizeof(framebuffer2));
@@ -362,8 +351,7 @@ int app_main_nes(void)
     pause_pressed = (buttons & B_PAUSE);
     power_pressed = (buttons & B_POWER);
 
-    // Always load the previous game unless pause is pressed
-    autoload = !pause_pressed;
+    autoload = load_state;
 
     printf("Nofrendo start!\n");
 

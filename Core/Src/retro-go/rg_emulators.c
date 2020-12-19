@@ -112,6 +112,8 @@ void emulator_init(retro_emulator_t *emu)
             file->emulator = (void*)emu;
             file->address = rom->flash_address;
             file->size = rom->size;
+            file->save_address = rom->save_address;
+            file->save_size = rom->save_size;
             strcpy(file->name, rom->rom_name);
             strcpy(file->ext, system->extension);
         }
@@ -321,7 +323,7 @@ void emulator_show_file_menu(retro_emulator_file_t *file)
 
     char *save_path = "/save";
     char *sram_path = "/sram";
-    bool has_save = 0;
+    bool has_save = 1;
     bool has_sram = 0;
     bool is_fav = 0;
 
@@ -374,9 +376,9 @@ void emulator_start(retro_emulator_file_t *file, bool load_state)
     retro_emulator_t *emu = file->emulator;
     // TODO: Make this cleaner
     if(strcmp(emu->system_name, "Nintendo Gameboy") == 0) {
-        app_main_gb();
+        app_main_gb(load_state);
     } else if(strcmp(emu->system_name, "Nintendo Entertainment System") == 0) {
-        app_main_nes();
+        app_main_nes(load_state);
     }
     
 }

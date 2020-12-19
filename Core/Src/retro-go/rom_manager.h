@@ -6,8 +6,10 @@
 
 typedef struct {
     const char *rom_name;
-    uint32_t flash_address;
+    const uint8_t *flash_address;
     uint32_t size;
+    const uint8_t *save_address;
+    uint32_t save_size;
 } rom_entry_t;
 
 typedef struct {

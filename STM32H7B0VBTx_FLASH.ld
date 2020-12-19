@@ -71,10 +71,14 @@ __AHBRAM_LENGTH__   = 128K;
 __FLASH_LENGTH__    = 128K;
 
 __EXTFLASH_START__  = 0x90000000;
-__SAVE_LENGTH__     = 192K;
-__EXTFLASH_LENGTH__ = DEFINED(LARGE_FLASH) ? 16384K - __SAVE_LENGTH__ : 1024K - __SAVE_LENGTH__ ;
-__SAVE_START__      = __EXTFLASH_START__ + __EXTFLASH_LENGTH__;
-__SAVE_END__        = __EXTFLASH_START__ + __EXTFLASH_LENGTH__ + __SAVE_LENGTH__;
+
+
+/* saveflash.ld sets __SAVEFLASH_LENGTH__ */
+INCLUDE saveflash.ld
+
+__EXTFLASH_LENGTH__ = DEFINED(LARGE_FLASH) ? 16384K - __SAVEFLASH_LENGTH__ : 1024K - __SAVEFLASH_LENGTH__ ;
+__SAVEFLASH_START__ = __EXTFLASH_START__ + __EXTFLASH_LENGTH__;
+__SAVEFLASH_END__   = __EXTFLASH_START__ + __EXTFLASH_LENGTH__ + __SAVEFLASH_LENGTH__;
 
 /* Specify the memory areas */
 MEMORY
@@ -87,9 +91,9 @@ MEMORY
   AHBRAM   (xrw) : ORIGIN = 0x30000000, LENGTH =  __AHBRAM_LENGTH__
 
   /* FLASH */
-  FLASH    (xr ) : ORIGIN = 0x08000000, LENGTH =  __FLASH_LENGTH__
-  EXTFLASH (xr ) : ORIGIN = __EXTFLASH_START__, LENGTH = __EXTFLASH_LENGTH__
-  SAVEFLASH(xr ) : ORIGIN = __EXTFLASH_START__ + __EXTFLASH_LENGTH__, LENGTH = __SAVE_LENGTH__
+  FLASH    (xr ) : ORIGIN = 0x08000000,          LENGTH =  __FLASH_LENGTH__
+  EXTFLASH (xr ) : ORIGIN = __EXTFLASH_START__,  LENGTH = __EXTFLASH_LENGTH__
+  SAVEFLASH(xr ) : ORIGIN = __SAVEFLASH_START__, LENGTH = __SAVEFLASH_LENGTH__
 }
 
 
@@ -132,6 +136,8 @@ SECTIONS
     . = ALIGN(4);
     build_gb/odroid*.o (.text .text* .rodata .rodata*)
     . = ALIGN(4);
+    build_gb/main_gb.o  (.text .text* .rodata .rodata*)
+    . = ALIGN(4);
     __extflash_odroid_end__ = .;
     __ram_exec_end__ = .;
   } >RAM AT> EXTFLASH
@@ -147,8 +153,6 @@ SECTIONS
     build_gb/lupng.o (.text .text* .rodata .rodata*)
     . = ALIGN(4);
     build_gb/gui.o (.text .text* .rodata .rodata*)
-    . = ALIGN(4);
-    build_gb/main_gb.o  (.text .text* .rodata .rodata*)
     . = ALIGN(4);
     build_gb/sound.o  (.text .text* .rodata .rodata*)
     . = ALIGN(4);
@@ -180,13 +184,9 @@ SECTIONS
 
   ._saveflash :
   {
-    . = ALIGN(4);
-    . = ALIGN(64K);
-    *(.saveflash_bank_1)
-    . = ALIGN(64K);
-    *(.saveflash_bank_2)
     __saveflash_start__ = .;
     *(.saveflash)
+    __saveflash_end__ = .;
   } > SAVEFLASH
 
 

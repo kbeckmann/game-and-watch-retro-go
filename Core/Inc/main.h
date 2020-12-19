@@ -100,6 +100,7 @@ extern RTC_HandleTypeDef hrtc;
 
 void Error_Handler(void);
 void BSOD(BSOD_t fault, void *pc, void *lr) __attribute__((noreturn));
+void store_save(uint8_t *flash_ptr, uint8_t *data, size_t size);
 
 /* USER CODE BEGIN EFP */
 
