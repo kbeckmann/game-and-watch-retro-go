@@ -330,12 +330,13 @@ static void blit_5to6(bitmap_t *bmp, uint16_t *framebuffer) {
     int h1 = bmp->height;
     int w2 = WIDTH;
     int h2 = 240;
+    const int hpad = (WIDTH - 307) / 2;
 
     // 2635 us
 
     for (int y = 0; y < h2; y++) {
         uint8_t  *src_row  = bmp->line[y];
-        uint16_t *dest_row = &framebuffer[y * w2];
+        uint16_t *dest_row = &framebuffer[y * w2 + hpad];
         for (int x_src = 0, x_dst=0; x_src < w1; x_src+=5, x_dst+=6) {
 
 
