@@ -1,6 +1,6 @@
 # Emulator collection for Nintendo® Game & Watch™
 
-This is a very quick and dirty port of the [retro-go](https://github.com/ducalex/retro-go) emulator that is intended to run on the Nintendo® Game & Watch™ 2020 edition.
+This is a very quick and dirty port of the [retro-go](https://github.com/ducalex/retro-go) emulator collection that is intended to run on the Nintendo® Game & Watch™ 2020 edition.
 
 Currently playable
 - GB
@@ -31,7 +31,7 @@ With this information, please head over to the [Discord](https://discord.gg/vVcw
 - Still not working? Ok, head over to #support on the discord and let's see what's going on.
 
 
-# Common building steps
+# Building steps
 
 - In order to run this on a Nintendo® Game & Watch™ [you need to first unlock it](https://github.com/ghidraninja/game-and-watch-backup/).
 - Clone this repo with submodules:
@@ -41,52 +41,43 @@ With this information, please head over to the [Discord](https://discord.gg/vVcw
     - `cd game-and-watch-flashloader`
     - `make -j`
 - Note that `game-and-watch-flashloader` must be placed in the same directory as `game-and-watch-retro-go`, e.g. `/home/user/projects/game-and-watch-flashloader` and `/home/user/projects/game-and-watch-retro-go`.
+- Place GB roms in `roms/gb/` and NES roms in `roms/nes`.
+- Run `python3 parse_roms.py` to import the roms to the project.
+- Build and program external and internal flash: `make -f Makefile.gb -j flash_all`
+
 
 If you are a developer:
 - If you need to change the project settings and generate c-code from stm32cubemx, make sure to not have a dirty working copy as the tool will overwrite files that will need to be perhaps partially reverted. Also update Makefile.common in case new drivers are used.
 
 
-## GB
+## Known issues (Please do not report these)
 
-- Follow the common steps above
-- Import a GB ROM file: `./update_gb_rom.sh my_rom.gb`
-- Build and program external and internal flash: `make -f Makefile.gb -j flash_all`
+- Currently none
 
 
-### Known issues (Please do not report these)
-
-
-
-### GB Features / todo
+## GB Features / todo
 
 - [x] Key input support
 - [x] Audio support (works well!)
 - [x] Video support (uses RGB565 color mode)
-- [X] Mute audio
+- [X] Audio volume
 - [X] Power button -> deep sleep (saves and loads state)
 - [X] VSync
 - [X] Sate saving/loading
-- [ ] Support multiple ROMs
-- [ ] OSD menu
+- [X] Support multiple ROMs
+- [X] OSD menu
 
 
-## NES
-
-- Follow the common steps above
-- Import a NES ROM file: `./update_nes_rom.sh my_rom.nes`
-- Build and program external and internal flash: `make -f Makefile.nes -j flash_all`
-
-
-### NES Features / todo
+## NES Features / todo
 - [x] Key input support
 - [x] Audio support (works well)
 - [x] Video support (uses indexed colors w/ a configurable palette)
-- [x] Mute audio
+- [X] Audio volume
 - [X] Power button -> deep sleep (saves and loads state)
 - [X] VSync
 - [X] Sate saving/loading
-- [ ] Support multiple ROMs
-- [ ] OSD menu
+- [X] Support multiple ROMs
+- [X] OSD menu
 
 
 # Contact, discussion
