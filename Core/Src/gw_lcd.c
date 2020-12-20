@@ -10,7 +10,7 @@ uint16_t framebuffer1[GW_LCD_WIDTH * GW_LCD_HEIGHT];
 uint16_t framebuffer2[GW_LCD_WIDTH * GW_LCD_HEIGHT];
 #endif // GW_LCD_MODE_LUT8
 
-uint8_t emulator_framebuffer[256 * 240];
+uint8_t emulator_framebuffer[(256 + 8) * 240];
 
 extern LTDC_HandleTypeDef hltdc;
 

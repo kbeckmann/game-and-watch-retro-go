@@ -250,23 +250,25 @@ static inline void blit_normal(bitmap_t *bmp, uint16_t *framebuffer) {
     }
 }
 
+__attribute__((optimize("unroll-loops")))
 static inline void blit_nearest(bitmap_t *bmp, uint16_t *framebuffer) {
     int w1 = bmp->width;
     int h1 = bmp->height;
     int w2 = WIDTH;
     int h2 = 240;
+    const int hpad = (WIDTH - 307) / 2;
 
-    // 1612 us
+    // 1767 us
 
-    int ctr = 0;
     for (int y = 0; y < h2; y++) {
+        int ctr = 0;
         uint8_t  *src_row  = bmp->line[y];
-        uint16_t *dest_row = &framebuffer[y * w2];
+        uint16_t *dest_row = &framebuffer[y * w2 + hpad];
         int x2 = 0;
         for (int x = 0; x < w1; x++) {
             uint16_t b2 = palette565[src_row[x]];
             dest_row[x2++] = b2;
-            if (ctr++ == 3) {
+            if (ctr++ == 4) {
                 ctr = 0;
                 dest_row[x2++] = b2;
             }
@@ -306,7 +308,7 @@ static void blit_4to5(bitmap_t *bmp, uint16_t *framebuffer) {
 
 __attribute__((optimize("unroll-loops")))
 static void blit_5to6(bitmap_t *bmp, uint16_t *framebuffer) {
-    int w1 = bmp->width;
+    int w1_adjusted = bmp->width - 4;
     int h1 = bmp->height;
     int w2 = WIDTH;
     int h2 = 240;
@@ -317,7 +319,9 @@ static void blit_5to6(bitmap_t *bmp, uint16_t *framebuffer) {
     for (int y = 0; y < h2; y++) {
         uint8_t  *src_row  = bmp->line[y];
         uint16_t *dest_row = &framebuffer[y * w2 + hpad];
-        for (int x_src = 0, x_dst=0; x_src < w1; x_src+=5, x_dst+=6) {
+        int x_src = 0;
+        int x_dst = 0;
+        for (; x_src < w1_adjusted; x_src+=5, x_dst+=6) {
             uint32_t b0 = palette_spaced_565[src_row[x_src]];
             uint32_t b1 = palette_spaced_565[src_row[x_src+1]];
             uint32_t b2 = palette_spaced_565[src_row[x_src+2]];
@@ -331,6 +335,8 @@ static void blit_5to6(bitmap_t *bmp, uint16_t *framebuffer) {
             dest_row[x_dst+4] = CONV((b3+b3+b3+b4)>>2);
             dest_row[x_dst+5] = CONV(b4);
         }
+        // Last column, x_src=255
+        dest_row[x_dst] = palette565[src_row[x_src]];
     }
 }
 #endif
@@ -378,6 +384,23 @@ void osd_blitscreen(bitmap_t *bmp)
     HAL_LTDC_Reload(&hltdc, LTDC_RELOAD_VERTICAL_BLANKING);
 }
 
+static bool palette_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event)
+{
+   int pal = ppu_getopt(PPU_PALETTE_RGB);
+   int max = PPU_PAL_COUNT - 1;
+
+   if (event == ODROID_DIALOG_PREV) pal = pal > 0 ? pal - 1 : max;
+   if (event == ODROID_DIALOG_NEXT) pal = pal < max ? pal + 1 : 0;
+
+   if (event == ODROID_DIALOG_PREV || event == ODROID_DIALOG_NEXT) {
+      odroid_settings_Palette_set(pal);
+      ppu_setopt(PPU_PALETTE_RGB, pal);
+   }
+
+   sprintf(option->value, "%.7s", ppu_getpalette(pal)->name);
+   return event == ODROID_DIALOG_ENTER;
+}
+
 void osd_getinput(void)
 {
     uint16 pad0 = 0;
@@ -395,7 +418,16 @@ void osd_getinput(void)
     if (pause_pressed != (buttons & B_PAUSE)) {
         if (pause_pressed) {
             printf("Pause pressed %d=>%d\n", audio_mute, !audio_mute);
-            odroid_overlay_game_menu(NULL);
+
+            odroid_dialog_choice_t options[] = {
+                    {100, "Palette", "Default", 1, &palette_update_cb},
+                    // {101, "More...", "", 1, &advanced_settings_cb},
+                    ODROID_DIALOG_CHOICE_LAST
+            };
+
+            odroid_overlay_game_menu(options);
+            memset(framebuffer1, 0x0, sizeof(framebuffer1));
+            memset(framebuffer2, 0x0, sizeof(framebuffer2));
         }
         pause_pressed = buttons & B_PAUSE;
     }

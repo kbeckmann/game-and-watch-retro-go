@@ -342,8 +342,7 @@ static bool LoadState(char *pathName)
 
 static bool palette_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event)
 {
-    /* what?! */
-    /*int pal = pal_get_dmg();
+    int pal = pal_get_dmg();
     int max = pal_count_dmg();
 
     if (event == ODROID_DIALOG_PREV) {
@@ -357,14 +356,16 @@ static bool palette_update_cb(odroid_dialog_choice_t *option, odroid_dialog_even
     if (event == ODROID_DIALOG_PREV || event == ODROID_DIALOG_NEXT) {
         odroid_settings_Palette_set(pal);
         pal_set_dmg(pal);
+        lcd_reset_active_buffer();
         emu_run(true);
+        lcd_swap();
+        lcd_sync();
     }
 
     if (pal == 0) strcpy(option->value, "GBC");
     else sprintf(option->value, "%d/%d", pal, max);
 
-    return event == ODROID_DIALOG_ENTER;*/
-    return false;
+    return event == ODROID_DIALOG_ENTER;
 }
 
 /*static bool save_sram_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event)
