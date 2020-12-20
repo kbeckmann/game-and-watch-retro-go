@@ -17,17 +17,14 @@
 
 #define APP_ID 30
 
-// #define BLIT_NEAREST
-// #ifdef BLIT_NEAREST
 // #define blit blit_nearest
-// #else
 // #define blit blit_normal
-// #endif
-
 // #define blit blit_4to5
+// #define blit blit_5to6
+
+#ifndef blit
 #define blit blit_5to6
-
-
+#endif
 
 static odroid_gamepad_state_t joystick1;
 static odroid_gamepad_state_t joystick2;
@@ -77,6 +74,8 @@ extern LTDC_HandleTypeDef hltdc;
 
 static rgb_t *palette = NULL;
 static uint16_t palette565[256];
+static uint32_t palette_spaced_565[256];
+
 
 void osd_setpalette(rgb_t *pal)
 {
@@ -114,6 +113,12 @@ void osd_setpalette(rgb_t *pal)
         palette565[i]        = c;
         palette565[i | 0x40] = c;
         palette565[i | 0x80] = c;
+
+        uint32_t sc = ((0b1111100000000000&c)<<10) | ((0b0000011111100000&c)<<5) | ((0b0000000000011111&c));
+        palette_spaced_565[i] = sc;
+        palette_spaced_565[i | 0x40] = sc;
+        palette_spaced_565[i | 0x80] = sc;
+
     }
 
 #endif
@@ -278,22 +283,17 @@ static void blit_4to5(bitmap_t *bmp, uint16_t *framebuffer) {
     int w2 = WIDTH;
     int h2 = 240;
 
-    // 2480 us
+    // 1767 us
 
     for (int y = 0; y < h2; y++) {
         uint8_t  *src_row  = bmp->line[y];
         uint16_t *dest_row = &framebuffer[y * w2];
         for (int x_src = 0, x_dst=0; x_src < w1; x_src+=4, x_dst+=5) {
+            uint32_t b0 = palette_spaced_565[src_row[x_src]];
+            uint32_t b1 = palette_spaced_565[src_row[x_src+1]];
+            uint32_t b2 = palette_spaced_565[src_row[x_src+2]];
+            uint32_t b3 = palette_spaced_565[src_row[x_src+3]];
 
-
-            uint32_t b0 = palette565[src_row[x_src]];
-            uint32_t b1 = palette565[src_row[x_src+1]];
-            uint32_t b2 = palette565[src_row[x_src+2]];
-            uint32_t b3 = palette565[src_row[x_src+3]];
-            b0 = ((0b1111100000000000&b0)<<10) | ((0b0000011111100000&b0)<<5) | ((0b0000000000011111&b0));
-            b1 = ((0b1111100000000000&b1)<<10) | ((0b0000011111100000&b1)<<5) | ((0b0000000000011111&b1));
-            b2 = ((0b1111100000000000&b2)<<10) | ((0b0000011111100000&b2)<<5) | ((0b0000000000011111&b2));
-            b3 = ((0b1111100000000000&b3)<<10) | ((0b0000011111100000&b3)<<5) | ((0b0000000000011111&b3));
             dest_row[x_dst]   = CONV(b0);
             dest_row[x_dst+1] = CONV((b0+b0+b0+b1)>>2);
             dest_row[x_dst+2] = CONV((b1+b2)>>1);
@@ -312,24 +312,18 @@ static void blit_5to6(bitmap_t *bmp, uint16_t *framebuffer) {
     int h2 = 240;
     const int hpad = (WIDTH - 307) / 2;
 
-    // 2635 us
+    // Blit: 2015 us
 
     for (int y = 0; y < h2; y++) {
         uint8_t  *src_row  = bmp->line[y];
         uint16_t *dest_row = &framebuffer[y * w2 + hpad];
         for (int x_src = 0, x_dst=0; x_src < w1; x_src+=5, x_dst+=6) {
+            uint32_t b0 = palette_spaced_565[src_row[x_src]];
+            uint32_t b1 = palette_spaced_565[src_row[x_src+1]];
+            uint32_t b2 = palette_spaced_565[src_row[x_src+2]];
+            uint32_t b3 = palette_spaced_565[src_row[x_src+3]];
+            uint32_t b4 = palette_spaced_565[src_row[x_src+4]];
 
-
-            uint32_t b0 = palette565[src_row[x_src]];
-            uint32_t b1 = palette565[src_row[x_src+1]];
-            uint32_t b2 = palette565[src_row[x_src+2]];
-            uint32_t b3 = palette565[src_row[x_src+3]];
-            uint32_t b4 = palette565[src_row[x_src+4]];
-            b0 = ((0b1111100000000000&b0)<<10) | ((0b0000011111100000&b0)<<5) | ((0b0000000000011111&b0));
-            b1 = ((0b1111100000000000&b1)<<10) | ((0b0000011111100000&b1)<<5) | ((0b0000000000011111&b1));
-            b2 = ((0b1111100000000000&b2)<<10) | ((0b0000011111100000&b2)<<5) | ((0b0000000000011111&b2));
-            b3 = ((0b1111100000000000&b3)<<10) | ((0b0000011111100000&b3)<<5) | ((0b0000000000011111&b3));
-            b4 = ((0b1111100000000000&b4)<<10) | ((0b0000011111100000&b4)<<5) | ((0b0000000000011111&b4));
             dest_row[x_dst]   = CONV(b0);
             dest_row[x_dst+1] = CONV((b0+b1+b1+b1)>>2);
             dest_row[x_dst+2] = CONV((b1+b2)>>1);
