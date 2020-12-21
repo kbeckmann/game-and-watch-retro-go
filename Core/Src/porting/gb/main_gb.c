@@ -25,9 +25,10 @@
 // #define blit screen_blit
 // #define blit screen_blit_bilinear
 // #define blit screen_blit_jth
+// #define blit screen_blit_v3to5
 
 #ifndef blit
-#define blit screen_blit_jth
+#define blit screen_blit_v3to5
 #endif
 
 
@@ -167,6 +168,68 @@ static void screen_blit_bilinear(void) {
 
     imlib_draw_image(&dst_img, &src_img, hpad, 0, x_scale, y_scale, NULL, -1, 255, NULL,
                      NULL, IMAGE_HINT_BILINEAR, NULL, NULL);
+
+    PROFILING_END(t_blit);
+
+#ifdef PROFILING_ENABLED
+    printf("Blit: %d us\n", (1000000 * PROFILING_DIFF(t_blit)) / t_blit_t0.SecondFraction);
+#endif
+
+    lcd_swap();
+}
+
+__attribute__((optimize("unroll-loops")))
+__attribute__((section (".itcram_hot_text")))
+static inline void screen_blit_v3to5(void) {
+    static uint32_t lastFPSTime = 0;
+    static uint32_t frames = 0;
+    uint32_t currentTime = HAL_GetTick();
+    uint32_t delta = currentTime - lastFPSTime;
+
+    frames++;
+
+    if (delta >= 1000) {
+        int fps = (10000 * frames) / delta;
+        printf("FPS: %d.%d, frames %ld, delta %ld ms, skipped %ld\n", fps / 10, fps % 10, delta, frames, skippedFrames);
+        frames = 0;
+        skippedFrames = 0;
+        lastFPSTime = currentTime;
+    }
+
+    uint16_t *dest = lcd_get_active_buffer();
+
+    PROFILING_INIT(t_blit);
+    PROFILING_START(t_blit);
+
+#define CONV(_b0)    (((0b11111000000000000000000000&_b0)>>10) | ((0b000001111110000000000&_b0)>>5) | ((0b0000000000011111&_b0)))
+#define EXPAND(_b0)  (((0b1111100000000000 & _b0) << 10) | ((0b0000011111100000 & _b0) << 5) | ((0b0000000000011111 & _b0)))
+
+    int y_src = 0;
+    int y_dst = 0;
+    int w = currentUpdate->width;
+    int h = currentUpdate->height;
+    for (; y_src < h; y_src += 3, y_dst += 5) {
+        int x_src = 0;
+        int x_dst = 0;
+        for (; x_src < w; x_src += 1, x_dst += 2) {
+            uint16_t *src_col = &((uint16_t *)currentUpdate->buffer)[(y_src * w) + x_src];
+            uint32_t b0 = EXPAND(src_col[w * 0]);
+            uint32_t b1 = EXPAND(src_col[w * 1]);
+            uint32_t b2 = EXPAND(src_col[w * 2]);
+
+            dest[((y_dst + 0) * WIDTH) + x_dst] = CONV(b0);
+            dest[((y_dst + 1) * WIDTH) + x_dst] = CONV((b0+b1)>>1);
+            dest[((y_dst + 2) * WIDTH) + x_dst] = CONV(b1);
+            dest[((y_dst + 3) * WIDTH) + x_dst] = CONV((b1+b2)>>1);
+            dest[((y_dst + 4) * WIDTH) + x_dst] = CONV(b2);
+
+            dest[((y_dst + 0) * WIDTH) + x_dst + 1] = CONV(b0);
+            dest[((y_dst + 1) * WIDTH) + x_dst + 1] = CONV((b0+b1)>>1);
+            dest[((y_dst + 2) * WIDTH) + x_dst + 1] = CONV(b1);
+            dest[((y_dst + 3) * WIDTH) + x_dst + 1] = CONV((b1+b2)>>1);
+            dest[((y_dst + 4) * WIDTH) + x_dst + 1] = CONV(b2);
+        }
+    }
 
     PROFILING_END(t_blit);
 
