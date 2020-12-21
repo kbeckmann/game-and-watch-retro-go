@@ -28,7 +28,7 @@ const rom_system_t {name} = {{
 
 class ROM:
     def __init__(self, system_name: str, filepath: str):
-        self.name = os.path.basename(filepath).split(".")[0]
+        self.name = (os.path.splitext(os.path.basename(filepath))[0])
         self.path = filepath
         self.size = os.path.getsize(filepath)
 
