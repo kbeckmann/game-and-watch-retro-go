@@ -22,6 +22,8 @@
 #define PAL_SHIFT_MASK 0x80
 
 static uint16_t palette[32];
+static uint32_t palette_spaced[32];
+
 
 static uint skipFrames = 0;
 
@@ -69,20 +71,122 @@ static bool LoadState(char *pathName)
     return true;
 }
 
-uint8_t *fb_buffer =emulator_framebuffer;
+uint8_t *fb_buffer = emulator_framebuffer;
 
-static inline void blit_normal(bitmap_t *bmp, uint16_t *framebuffer) {
-    const int hpad = (WIDTH - bmp->viewport.w) / 2;
-    const int vpad = (HEIGHT - bmp->viewport.h) / 2;
+#define CONV(_b0) ((0b11111000000000000000000000&_b0)>>10) | ((0b000001111110000000000&_b0)>>5) | ((0b0000000000011111&_b0));
 
-    for (int y = 0; y < bmp->viewport.h; y++) {
-        uint8_t *row = &bmp->data[(y + bmp->viewport.y) * bmp->pitch];
-        uint16_t *dest = NULL;
-        dest = &framebuffer[WIDTH * (y + vpad) + hpad];
-        for (int x = 0; x < bmp->viewport.w; x++) {
-            uint16_t pixel = palette[row[x + bmp->viewport.x] & 0x1f];
-            dest[x] = pixel << 8 | pixel >> 8;
+__attribute__((optimize("unroll-loops")))
+void blit_gg(bitmap_t *bmp, uint16_t *framebuffer) {	/* 160 x 144 -> 320 x 240 */
+    int y_src = 0;
+    int y_dst = 0;
+    for (; y_src < bmp->viewport.h; y_src += 3, y_dst += 5) {
+        int x_src = 0;
+        int x_dst = 0;
+        for (; x_src < bmp->viewport.w; x_src += 1, x_dst += 2) {
+            uint8_t *src_col = &bmp->data[(y_src + bmp->viewport.y) * bmp->pitch + x_src + bmp->viewport.x];
+            uint32_t b0 = palette_spaced[src_col[bmp->pitch * 0] & 0x1f];
+            uint32_t b1 = palette_spaced[src_col[bmp->pitch * 1] & 0x1f];
+            uint32_t b2 = palette_spaced[src_col[bmp->pitch * 2] & 0x1f];
+
+            framebuffer[((y_dst + 0) * WIDTH) + x_dst] = CONV(b0);
+            framebuffer[((y_dst + 1) * WIDTH) + x_dst] = CONV((b0+b1)>>1);
+            framebuffer[((y_dst + 2) * WIDTH) + x_dst] = CONV(b1);
+            framebuffer[((y_dst + 3) * WIDTH) + x_dst] = CONV((b1+b2)>>1);
+            framebuffer[((y_dst + 4) * WIDTH) + x_dst] = CONV(b2);
+
+            framebuffer[((y_dst + 0) * WIDTH) + x_dst + 1] = CONV(b0);
+            framebuffer[((y_dst + 1) * WIDTH) + x_dst + 1] = CONV((b0+b1)>>1);
+            framebuffer[((y_dst + 2) * WIDTH) + x_dst + 1] = CONV(b1);
+            framebuffer[((y_dst + 3) * WIDTH) + x_dst + 1] = CONV((b1+b2)>>1);
+            framebuffer[((y_dst + 4) * WIDTH) + x_dst + 1] = CONV(b2);
         }
+    }
+}
+
+__attribute__((optimize("unroll-loops")))
+void blit_sms(bitmap_t *bmp, uint16_t *framebuffer) {	/* 256 x 192 -> 320 x 230 */
+    const int hpad = (WIDTH - 307) / 2;
+    const int vpad = (HEIGHT - 230) / 2;
+
+    uint32_t block[6 * 5]; /* workspace: 5 rows, 6 pixels wide */
+
+    int y_src = 1;         /* 1st and last row of 192 will not be scaled */
+    int y_dst = 1 + vpad;  /* the remaining 190 are scaled */
+    for (; y_src < bmp->viewport.h - 1; y_src += 5, y_dst += 6) {
+        int x_src = 0;
+        int x_dst = hpad;
+        for (; x_src < bmp->viewport.w - 1; x_src += 5, x_dst += 6) {
+            for (int y = 0; y < 5; y++) {
+                uint8_t *src_row = &bmp->data[(y_src + y + bmp->viewport.y) * bmp->pitch];
+                uint32_t b0 = palette_spaced[src_row[x_src + 0] & 0x1f];
+                uint32_t b1 = palette_spaced[src_row[x_src + 1] & 0x1f];
+                uint32_t b2 = palette_spaced[src_row[x_src + 2] & 0x1f];
+                uint32_t b3 = palette_spaced[src_row[x_src + 3] & 0x1f];
+                uint32_t b4 = palette_spaced[src_row[x_src + 4] & 0x1f];
+
+                block[(y * 6) + 0] = b0;
+                block[(y * 6) + 1] = (b0+b1+b1+b1)>>2;
+                block[(y * 6) + 2] = (b1+b2)>>1;
+                block[(y * 6) + 3] = (b2+b3)>>1;
+                block[(y * 6) + 4] = (b3+b3+b3+b4)>>2;
+                block[(y * 6) + 5] = b4;
+            }
+
+            for (int x = 0; x < 6; x++) {
+                uint32_t b0 = block[(0 * 6) + x];
+                uint32_t b1 = block[(1 * 6) + x];
+                uint32_t b2 = block[(2 * 6) + x];
+                uint32_t b3 = block[(3 * 6) + x];
+                uint32_t b4 = block[(4 * 6) + x];
+
+                framebuffer[((y_dst + 0) * WIDTH) + x + x_dst] = CONV(b0);
+                framebuffer[((y_dst + 1) * WIDTH) + x + x_dst] = CONV((b0+b1+b1+b1)>>2);
+                framebuffer[((y_dst + 2) * WIDTH) + x + x_dst] = CONV((b1+b2)>>1);
+                framebuffer[((y_dst + 3) * WIDTH) + x + x_dst] = CONV((b2+b3)>>1);
+                framebuffer[((y_dst + 4) * WIDTH) + x + x_dst] = CONV((b3+b3+b3+b4)>>2);
+                framebuffer[((y_dst + 5) * WIDTH) + x + x_dst] = CONV(b4);
+            }
+        }
+
+        /* Last column, x_src = 255 */
+	uint8_t *src_col = &bmp->data[(y_src + bmp->viewport.y) * bmp->pitch + x_src];
+	uint32_t b0 = palette_spaced[src_col[bmp->pitch * 0] & 0x1f];
+	uint32_t b1 = palette_spaced[src_col[bmp->pitch * 1] & 0x1f];
+	uint32_t b2 = palette_spaced[src_col[bmp->pitch * 2] & 0x1f];
+	uint32_t b3 = palette_spaced[src_col[bmp->pitch * 3] & 0x1f];
+	uint32_t b4 = palette_spaced[src_col[bmp->pitch * 4] & 0x1f];
+
+	framebuffer[((y_dst + 0) * WIDTH) + x_dst] = CONV(b0);
+	framebuffer[((y_dst + 1) * WIDTH) + x_dst] = CONV((b0+b1+b1+b1)>>2);
+	framebuffer[((y_dst + 2) * WIDTH) + x_dst] = CONV((b1+b2)>>1);
+	framebuffer[((y_dst + 3) * WIDTH) + x_dst] = CONV((b2+b3)>>1);
+	framebuffer[((y_dst + 4) * WIDTH) + x_dst] = CONV((b3+b3+b3+b4)>>2);
+	framebuffer[((y_dst + 5) * WIDTH) + x_dst] = CONV(b4);
+    }
+
+    y_src = 0;		   /* First & last row */
+    y_dst = 0 + vpad;
+    for (; y_src < bmp->viewport.h; y_src += 191, y_dst += 228) {
+        uint8_t *src_row = &bmp->data[(y_src + bmp->viewport.y) * bmp->pitch];
+        uint16_t *dest_row = &framebuffer[WIDTH * y_dst];
+        int x_src = 0;
+        int x_dst = hpad;
+        for (; x_src < bmp->viewport.w - 1; x_src += 5, x_dst += 6) {
+            uint32_t b0 = palette_spaced[src_row[x_src + 0] & 0x1f];
+            uint32_t b1 = palette_spaced[src_row[x_src + 1] & 0x1f];
+            uint32_t b2 = palette_spaced[src_row[x_src + 2] & 0x1f];
+            uint32_t b3 = palette_spaced[src_row[x_src + 3] & 0x1f];
+            uint32_t b4 = palette_spaced[src_row[x_src + 4] & 0x1f];
+
+            dest_row[x_dst + 0]   = CONV(b0);
+            dest_row[x_dst + 1] = CONV((b0+b1+b1+b1)>>2);
+            dest_row[x_dst + 2] = CONV((b1+b2)>>1);
+            dest_row[x_dst + 3] = CONV((b2+b3)>>1);
+            dest_row[x_dst + 4] = CONV((b3+b3+b3+b4)>>2);
+            dest_row[x_dst + 5] = CONV(b4);
+        }
+        /* Last column, x_src = 255 */
+        dest_row[x_dst] = CONV(palette_spaced[src_row[x_src] & 0x1f]);
     }
 }
 
@@ -218,12 +322,24 @@ void app_main_smsplusgx(void)
             }
 
             render_copy_palette((uint16_t *)&palette);
-            // This takes less than 1ms
+            for (int i = 0; i < 32; i++) {
+                uint16_t p = (palette[i] << 8) | (palette[i] >> 8);
+                palette_spaced[i] = ((0b1111100000000000 & p) << 10) |
+                                    ((0b0000011111100000 & p) << 5) |
+                                    ((0b0000000000011111 & p));
+            }
+
             if(active_framebuffer == 0) {
-                blit_normal(&bitmap, framebuffer1);
+                if (consoleIsSMS)
+                    blit_sms(&bitmap, framebuffer1);
+                if (consoleIsGG)
+                    blit_gg(&bitmap, framebuffer1);
                 active_framebuffer = 1;
             } else {
-                blit_normal(&bitmap, framebuffer2);
+                if (consoleIsSMS)
+                    blit_sms(&bitmap, framebuffer2);
+                if (consoleIsGG)
+                    blit_gg(&bitmap, framebuffer2);
                 active_framebuffer = 0;
             }
 
