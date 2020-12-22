@@ -166,9 +166,11 @@ Core/Src/porting/odroid_settings.c \
 Core/Src/retro-go/bitmaps/header_gb.c \
 Core/Src/retro-go/bitmaps/header_nes.c \
 Core/Src/retro-go/bitmaps/header_sms.c \
+Core/Src/retro-go/bitmaps/header_gg.c \
 Core/Src/retro-go/bitmaps/logo_gb.c \
 Core/Src/retro-go/bitmaps/logo_nes.c \
-Core/Src/retro-go/bitmaps/logo_sms.c
+Core/Src/retro-go/bitmaps/logo_sms.c \
+Core/Src/retro-go/bitmaps/logo_gg.c
 
 
 # Version and URL for the STM32CubeH7 SDK

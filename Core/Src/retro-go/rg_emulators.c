@@ -392,7 +392,8 @@ void emulator_start(retro_emulator_file_t *file, bool load_state)
         uint32_t bss_size = &_OVERLAY_NES_BSS_SIZE;
         memset(bss_start, 0x0, bss_size);
         app_main_nes(load_state);
-    } else if(strcmp(emu->system_name, "Sega Master System") == 0) {
+    } else if(strcmp(emu->system_name, "Sega Master System") == 0 ||
+              strcmp(emu->system_name, "Sega Game Gear") == 0) {
         uint8_t *ram_start = &__EMULATOR_RAM_START__[0];
         uint8_t *load_start = &_OVERLAY_SMS_LOAD_START;
         uint32_t size = &_OVERLAY_SMS_SIZE;
@@ -403,7 +404,6 @@ void emulator_start(retro_emulator_file_t *file, bool load_state)
         memset(bss_start, 0x0, bss_size);
         app_main_smsplusgx();
     }
-    
 }
 
 void emulators_init()
@@ -412,7 +412,7 @@ void emulators_init()
     add_emulator("Nintendo Entertainment System", "nes", "nes", "nofrendo-go", 16, logo_nes, header_nes);
     // add_emulator("Nintendo Gameboy Color", "gbc", "gbc", "gnuboy-go", 0, logo_gbc, header_gbc);
     add_emulator("Sega Master System", "sms", "sms", "smsplusgx-go", 0, logo_sms, header_sms);
-    // add_emulator("Sega Game Gear", "gg", "gg", "smsplusgx-go", 0, logo_gg, header_gg);
+    add_emulator("Sega Game Gear", "gg", "gg", "smsplusgx-go", 0, logo_gg, header_gg);
     // add_emulator("ColecoVision", "col", "col", "smsplusgx-go", 0, logo_col, header_col);
     // add_emulator("PC Engine", "pce", "pce", "huexpress-go", 0, logo_pce, header_pce);
     // add_emulator("Atari Lynx", "lnx", "lnx", "handy-go", 64, logo_lnx, header_lnx);
