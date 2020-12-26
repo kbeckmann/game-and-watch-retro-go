@@ -286,7 +286,7 @@ flashx: $(BUILD_DIR)/$(TARGET).elf
 .PHONY: flashx
 
 
-FLASHLOADER ?= ../game-and-watch-flashloader/flash.sh
+FLASHLOADER ?= ../game-and-watch-flashloader/flash_multi.sh
 flash_extmem: $(BUILD_DIR)/$(TARGET)_extflash.bin
 	$(FLASHLOADER) $(BUILD_DIR)/$(TARGET)_extflash.bin
 .PHONY: flash_extmem
