@@ -155,9 +155,12 @@ __attribute__((optimize("-O0"))) void BSOD(BSOD_t fault, void *pc, void *lr)
     }
   }
 
-  while (1) {
+  uint32_t old_buttons = buttons_get();
+  while ((buttons_get() == 0 || (buttons_get() == old_buttons))) {
     __NOP();
   }
+
+  HAL_NVIC_SystemReset();
 
   // Does not return
 }
