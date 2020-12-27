@@ -1,10 +1,5 @@
 #!/bin/bash
-echo -ne '#ifndef GIT_HASH\n#define GIT_HASH "'
 
-GITHASH=$(git describe --always --dirty | tr -d "\n")
+GITHASH=$(git rev-parse --short HEAD 2>/dev/null || echo "NOGIT")
 
-if [[ "$GITHASH" == "" ]]; then
-    echo "nogit"
-fi
-
-echo -ne '"\n#endif'
+echo -e "#ifndef GIT_HASH\n#define GIT_HASH \""${GITHASH}\""\n#endif"
