@@ -239,6 +239,7 @@ Core/Inc/githash.h:
 .PHONY: Core/Inc/githash.h
 
 Core/Src/main.c: Core/Inc/githash.h
+Core/Src/retro-go/rg_main.c: Core/Inc/githash.h
 
 $(BUILD_DIR)/%.o: %.c Makefile.common Makefile $(LDSCRIPT) $(SDK_HEADERS) | $(BUILD_DIR)
 	$(CC) -c $(CFLAGS) -Wa,-a,-ad,-alms=$(BUILD_DIR)/$(notdir $(<:.c=.lst)) $< -o $@
