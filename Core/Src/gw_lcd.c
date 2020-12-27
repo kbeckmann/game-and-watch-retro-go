@@ -1,3 +1,5 @@
+#include <string.h>
+
 #include "gw_lcd.h"
 #include "stm32h7xx_hal.h"
 #include "main.h"
@@ -170,9 +172,9 @@ void lcd_init(SPI_HandleTypeDef *spi, LTDC_HandleTypeDef *ltdc)
 
 void HAL_LTDC_ReloadEventCallback (LTDC_HandleTypeDef *hltdc) {
   if (active_framebuffer == 0) {
-    HAL_LTDC_SetAddress(hltdc, framebuffer2, 0);
+    HAL_LTDC_SetAddress(hltdc, (uint32_t) framebuffer2, 0);
   } else {
-    HAL_LTDC_SetAddress(hltdc, framebuffer1, 0);
+    HAL_LTDC_SetAddress(hltdc, (uint32_t) framebuffer1, 0);
   }
 }
 
@@ -201,7 +203,7 @@ void* lcd_get_inactive_buffer(void)
 
 void lcd_reset_active_buffer(void)
 {
-  HAL_LTDC_SetAddress(&hltdc, framebuffer1, 0);
+  HAL_LTDC_SetAddress(&hltdc, (uint32_t) framebuffer1, 0);
   active_framebuffer = 0;
 }
 

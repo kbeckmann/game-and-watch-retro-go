@@ -22,6 +22,14 @@
 
 #define NVS_KEY_SAVE_SRAM "sram"
 
+// #define blit screen_blit
+// #define blit screen_blit_bilinear
+// #define blit screen_blit_jth
+
+#ifndef blit
+#define blit screen_blit_jth
+#endif
+
 
 static uint32_t pause_pressed;
 static uint32_t power_pressed;
@@ -50,24 +58,6 @@ static void netplay_callback(netplay_event_t event, void *arg)
 }
 
 #define WIDTH 320
-
-// int[] resizePixels(int[] pixels,int w1,int h1,int w2,int h2) {
-//     int[] temp = new int[w2*h2] ;
-//     // EDIT: added +1 to account for an early rounding problem
-//     int x_ratio = (int)((w1<<16)/w2) +1;
-//     int y_ratio = (int)((h1<<16)/h2) +1;
-//     //int x_ratio = (int)((w1<<16)/w2) ;
-//     //int y_ratio = (int)((h1<<16)/h2) ;
-//     int x2, y2 ;
-//     for (int i=0;i<h2;i++) {
-//         for (int j=0;j<w2;j++) {
-//             x2 = ((j*x_ratio)>>16) ;
-//             y2 = ((i*y_ratio)>>16) ;
-//             temp[(i*w2)+j] = pixels[(y2*w1)+x2] ;
-//         }                
-//     }                
-//     return temp ;
-// }
 
 static uint32_t skippedFrames = 0;
 
@@ -137,7 +127,7 @@ static void screen_blit_bilinear(void) {
 
     if (delta >= 1000) {
         int fps = (10000 * frames) / delta;
-        printf("FPS: %d.%d, frames %d, delta %d ms, skipped %d\n", fps / 10, fps % 10, delta, frames, skippedFrames);
+        printf("FPS: %d.%d, frames %ld, delta %ld ms, skipped %ld\n", fps / 10, fps % 10, delta, frames, skippedFrames);
         frames = 0;
         skippedFrames = 0;
         lastFPSTime = currentTime;
@@ -145,19 +135,11 @@ static void screen_blit_bilinear(void) {
 
     int w1 = currentUpdate->width;
     int h1 = currentUpdate->height;
-    // int w2 = 266;
-    // int h2 = 240;
 
     int w2 = 320;
     int h2 = 216;
 
-    int x_ratio = (int)((w1<<16)/w2) +1;
-    int y_ratio = (int)((h1<<16)/h2) +1;
     int hpad = 0;
-    //int x_ratio = (int)((w1<<16)/w2) ;
-    //int y_ratio = (int)((h1<<16)/h2) ;
-    int x2, y2 ;
-    uint16_t* screen_buf = (uint16_t*)currentUpdate->buffer;
     uint16_t *dest = lcd_get_active_buffer();
 
 
@@ -165,7 +147,7 @@ static void screen_blit_bilinear(void) {
     dst_img.w = 320;
     dst_img.h = 240;
     dst_img.bpp = 2;
-    dst_img.pixels = dest;
+    dst_img.pixels = (uint8_t *) dest;
 
 
     image_t src_img;
@@ -208,7 +190,7 @@ static inline void screen_blit_jth(void) {
 
     if (delta >= 1000) {
         int fps = (10000 * frames) / delta;
-        printf("FPS: %d.%d, frames %d, delta %d ms, skipped %d\n", fps / 10, fps % 10, delta, frames, skippedFrames);
+        printf("FPS: %d.%d, frames %ld, delta %ld ms, skipped %ld\n", fps / 10, fps % 10, delta, frames, skippedFrames);
         frames = 0;
         skippedFrames = 0;
         lastFPSTime = currentTime;
@@ -227,14 +209,9 @@ static inline void screen_blit_jth(void) {
     int w2 = 320;
     int h2 = 240;
 
-    int y_done = 0;
-
-    int y = 0;
     const int border = 24;
 
     // Iterate on dest buf rows
-    int src_y = 0;
-
     for(int y = 0; y < border; ++y) {
         uint16_t *src_row  = &screen_buf[y * w1];
         uint16_t *dest_row = &dest[y * w2];
@@ -246,7 +223,7 @@ static inline void screen_blit_jth(void) {
 
     for (int y = border, src_y = border; y < h2-border; y+=2, src_y++) {
         uint16_t *src_row  = &screen_buf[src_y * w1];
-        uint32_t *dest_row0 = &dest[y * w2];
+        uint32_t *dest_row0 = (uint32_t *) &dest[y * w2];
         for (int x = 0, xsrc=0; x < w2; x++,xsrc++) {
             uint32_t col = src_row[xsrc];
             dest_row0[x] = (col | (col << 16));
@@ -255,7 +232,7 @@ static inline void screen_blit_jth(void) {
 
     for (int y = border, src_y = border; y < h2-border; y+=2, src_y++) {
         uint16_t *src_row  = &screen_buf[src_y * w1];
-        uint32_t *dest_row1 = &dest[(y + 1) * w2];
+        uint32_t *dest_row1 = (uint32_t *)&dest[(y + 1) * w2];
         for (int x = 0, xsrc=0; x < w2; x++,xsrc++) {
             uint32_t col = src_row[xsrc];
             dest_row1[x] = (col | (col << 16));
@@ -460,9 +437,8 @@ void odroid_audio_mute(bool mute)
 }
 
 
-rg_app_desc_t * init(uint8_t load_state) {
-    odroid_gamepad_state_t joystick;
-
+rg_app_desc_t * init(uint8_t load_state)
+{
     odroid_system_init(APP_ID, AUDIO_SAMPLE_RATE);
     odroid_system_emu_init(&LoadState, &SaveState, &netplay_callback);
 
@@ -490,9 +466,7 @@ rg_app_desc_t * init(uint8_t load_state) {
   	fb.ptr = currentUpdate->buffer;
   	fb.enabled = 1;
     fb.byteorder = 1;
-    // fb.blit_func = &screen_blit;
-    // fb.blit_func = &screen_blit_bilinear;
-    fb.blit_func = &screen_blit_jth;
+    fb.blit_func = &blit;
 
     // Audio
     memset(audiobuffer_emulator, 0, sizeof(audiobuffer_emulator));
@@ -504,7 +478,7 @@ rg_app_desc_t * init(uint8_t load_state) {
     pcm.pos = 0;
 
     memset(audiobuffer_dma, 0, sizeof(audiobuffer_dma));
-    HAL_SAI_Transmit_DMA(&hsai_BlockA1, audiobuffer_dma, sizeof(audiobuffer_dma) / sizeof(audiobuffer_dma[0]));
+    HAL_SAI_Transmit_DMA(&hsai_BlockA1, (uint8_t *) audiobuffer_dma, sizeof(audiobuffer_dma) / sizeof(audiobuffer_dma[0]));
 
     rg_app_desc_t *app = odroid_system_get_app();
 
@@ -573,10 +547,10 @@ void app_main_gb(uint8_t load_state)
         pad_set(PAD_B, joystick.values[ODROID_INPUT_B]);
 
         if (power_pressed != joystick.values[ODROID_INPUT_POWER]) {
-            printf("Power toggle %d=>%d\n", power_pressed, !power_pressed);
+            printf("Power toggle %ld=>%d\n", power_pressed, !power_pressed);
             power_pressed = joystick.values[ODROID_INPUT_POWER];
             if (power_pressed) {
-                printf("Power PRESSED %d\n", power_pressed);
+                printf("Power PRESSED %ld\n", power_pressed);
                 HAL_SAI_DMAStop(&hsai_BlockA1);
                 lcd_backlight_off();
 

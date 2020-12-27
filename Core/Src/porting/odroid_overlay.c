@@ -30,6 +30,7 @@ int odroid_overlay_game_menu()
 #include <math.h>
 
 #include "gw_buttons.h"
+#include "gw_lcd.h"
 #include "bitmaps/font_basic.h"
 #include "odroid_system.h"
 #include "odroid_overlay.h"
@@ -488,7 +489,7 @@ bool speedup_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t eve
     if (event == ODROID_DIALOG_PREV && --app->speedupEnabled < 0) app->speedupEnabled = 2;
     if (event == ODROID_DIALOG_NEXT && ++app->speedupEnabled > 2) app->speedupEnabled = 0;
 
-    sprintf(option->value, "%dx", app->speedupEnabled + 1);
+    sprintf(option->value, "%ldx", app->speedupEnabled + 1);
     return event == ODROID_DIALOG_ENTER;
 }
 

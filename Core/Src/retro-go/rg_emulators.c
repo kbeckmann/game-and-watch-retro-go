@@ -7,6 +7,10 @@
 #include "bitmaps.h"
 #include "gui.h"
 #include "rom_manager.h"
+#include "gw_lcd.h"
+#include "main.h"
+#include "main_gb.h"
+#include "main_nes.h"
 
 static retro_emulator_t emulators[16];
 static int emulators_count = 0;
@@ -110,7 +114,7 @@ void emulator_init(retro_emulator_t *emu)
             retro_emulator_file_t *file = &emu->roms.files[emu->roms.count++];
             // strcpy(file->folder, "/");
             file->emulator = (void*)emu;
-            file->address = rom->flash_address;
+            file->address = (uint8_t *) rom->flash_address;
             file->size = rom->size;
             file->save_address = rom->save_address;
             file->save_size = rom->save_size;
@@ -185,7 +189,7 @@ const uint32_t *emu_get_file_address(retro_emulator_file_t *file)
     // if (file == NULL) return NULL;
     // sprintf(buffer, "%s/%s.%s", file->folder, file->name, file->ext);
     // return (const char*)&buffer;
-    return file->address;
+    return (uint32_t *) file->address;
 }
 
 /*bool emulator_build_file_object(const char *path, retro_emulator_file_t *file)
@@ -305,9 +309,9 @@ void emulator_show_file_info(retro_emulator_file_t *file)
     if (file->checksum > 1)
     {
         if (file->crc_offset)
-            sprintf(choices[4].value, "%08X (%d)", file->checksum, file->crc_offset);
+            sprintf(choices[4].value, "%08lX (%d)", file->checksum, file->crc_offset);
         else
-            sprintf(choices[4].value, "%08X", file->checksum);
+            sprintf(choices[4].value, "%08lX", file->checksum);
     }
 
     odroid_overlay_dialog("Properties", choices, -1);
@@ -321,8 +325,6 @@ void emulator_show_file_menu(retro_emulator_file_t *file)
     // bool has_sram = odroid_sdcard_get_filesize(sram_path) > 0;
     // bool is_fav = favorite_find(file) != NULL;
 
-    char *save_path = "/save";
-    char *sram_path = "/sram";
     bool has_save = 1;
     bool has_sram = 0;
     bool is_fav = 0;
@@ -359,7 +361,6 @@ void emulator_show_file_menu(retro_emulator_file_t *file)
 
 void emulator_start(retro_emulator_file_t *file, bool load_state)
 {
-    const uint32_t address = emu_get_file_address(file);
     printf("Retro-Go: Starting game: %s\n", file->name);
     rom_manager_set_active_file(file);
 

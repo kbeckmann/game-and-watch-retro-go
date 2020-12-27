@@ -41,7 +41,7 @@ void odroid_settings_reset()
 
 char* odroid_settings_string_get(const char *key, const char *default_value)
 {
-    return default_value;
+    return (char *) default_value;
 }
 
 void odroid_settings_string_set(const char *key, const char *value)

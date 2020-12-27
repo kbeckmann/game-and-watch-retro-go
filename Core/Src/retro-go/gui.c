@@ -6,6 +6,7 @@
 
 #include "lupng.h"
 #include "gui.h"
+#include "gw_lcd.h"
 
 #define IMAGE_LOGO_WIDTH    (47)
 #define IMAGE_LOGO_HEIGHT   (51)
@@ -321,7 +322,7 @@ void gui_draw_cover(retro_emulator_file_t *file)
     {
         char path1[128], path2[128], buf_crc[10];
 
-        sprintf(buf_crc, "%08X", file->checksum);
+        sprintf(buf_crc, "%08lX", file->checksum);
         sprintf(path1, "%s/%s/%c/%s.png", ODROID_BASE_PATH_ROMART, emu->dirname, buf_crc[0], buf_crc);
         sprintf(path2, "%s/%s/%c/%s.art", ODROID_BASE_PATH_ROMART, emu->dirname, buf_crc[0], buf_crc);
 

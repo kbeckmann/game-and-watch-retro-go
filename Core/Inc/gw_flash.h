@@ -16,7 +16,7 @@ void OSPI_DisableMemoryMapped(OSPI_HandleTypeDef *hospi);
 void OSPI_Read(OSPI_HandleTypeDef *hospi, uint32_t address, uint8_t *buffer, size_t buffer_size);
 void OSPI_NOR_WriteEnable(OSPI_HandleTypeDef *hospi);
 void OSPI_ChipErase(OSPI_HandleTypeDef *hospi);
-void OSPI_Program(OSPI_HandleTypeDef *hospi, uint32_t address, uint8_t *buffer, size_t buffer_size);
+void OSPI_Program(OSPI_HandleTypeDef *hospi, uint32_t address, const uint8_t *buffer, size_t buffer_size);
 void OSPI_BlockErase(OSPI_HandleTypeDef *hospi, uint32_t address);
 
 #endif

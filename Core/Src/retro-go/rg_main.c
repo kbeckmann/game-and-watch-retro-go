@@ -9,6 +9,7 @@
 #include "rg_favorites.h"
 #include "gui.h"
 #include "githash.h"
+#include "main.h"
 
 #if 0
 #define KEY_SELECTED_TAB  "SelectedTab"

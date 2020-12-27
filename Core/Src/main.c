@@ -69,7 +69,7 @@ SPI_HandleTypeDef hspi2;
 
 /* USER CODE BEGIN PV */
 
-uint8_t logbuf[1024 * 4];
+char logbuf[1024 * 4];
 uint32_t log_idx;
 
 uint32_t boot_buttons;
@@ -131,7 +131,7 @@ __attribute__((optimize("-O0"))) void BSOD(BSOD_t fault, void *pc, void *lr)
   odroid_overlay_draw_text(0, 0, GW_LCD_WIDTH, msg, C_RED, C_BLUE);
 
   // Print each line from the log in reverse
-  end = logbuf + strnlen(logbuf, sizeof(logbuf));
+  end = &logbuf[strnlen(logbuf, sizeof(logbuf))];
   while (y < GW_LCD_HEIGHT) {
     // Max 28 lines
     if (i++ >= 28) {
@@ -155,6 +155,7 @@ __attribute__((optimize("-O0"))) void BSOD(BSOD_t fault, void *pc, void *lr)
     }
   }
 
+  // Wait for a button press (allows a user to hold and release a button when the BSOD occurs)
   uint32_t old_buttons = buttons_get();
   while ((buttons_get() == 0 || (buttons_get() == old_buttons))) {
     __NOP();
@@ -163,6 +164,9 @@ __attribute__((optimize("-O0"))) void BSOD(BSOD_t fault, void *pc, void *lr)
   HAL_NVIC_SystemReset();
 
   // Does not return
+  while (1) {
+    __NOP();
+  }
 }
 
 // Used by assert()
@@ -187,7 +191,7 @@ int _write(int file, char *ptr, int len)
 #endif
 
 
-void store_erase(uint8_t *flash_ptr, size_t size)
+void store_erase(const uint8_t *flash_ptr, size_t size)
 {
   uint32_t i;
 
@@ -215,7 +219,7 @@ void store_erase(uint8_t *flash_ptr, size_t size)
   OSPI_EnableMemoryMappedMode(&hospi1);
 }
 
-void store_save(uint8_t *flash_ptr, uint8_t *data, size_t size)
+void store_save(const uint8_t *flash_ptr, const uint8_t *data, size_t size)
 {
   // Convert mem mapped pointer to flash address
   uint32_t save_address = flash_ptr - &__EXTFLASH_START__;
@@ -390,7 +394,7 @@ int main(void)
   copy_areas2[1] = (uint32_t) &__itcram_hot_start__;
   copy_areas2[2] = (uint32_t) &__itcram_hot_end__;
   copy_areas2[3] = copy_areas2[2] - copy_areas2[1];
-  memcpy_no_check(copy_areas2[1], copy_areas2[0], copy_areas2[3]);
+  memcpy_no_check((uint32_t *) copy_areas2[1], (uint32_t *) copy_areas2[0], copy_areas2[3]);
 
   // Sanity check, sometimes this is triggered
   uint32_t add = 0x90000000;
@@ -1010,7 +1014,7 @@ void MPU_Config(void)
      * The MPU can only handle memory sizes which are a power of 2 */
     MPU_InitStruct.Enable = MPU_REGION_ENABLE;
     MPU_InitStruct.Number = MPU_REGION_NUMBER2;
-    MPU_InitStruct.BaseAddress = &_stack_redzone;
+    MPU_InitStruct.BaseAddress = (uint32_t) &_stack_redzone;
     /* 128B --> 0x06, 256B --> 0x07, 512B --> 0x08, ... */
     MPU_InitStruct.Size = ffs((size_t)&_Stack_Redzone_Size) - 2;
     MPU_InitStruct.SubRegionDisable = 0x0;
@@ -1060,7 +1064,7 @@ __attribute__((optimize("-O0"))) void Error_Handler(void)
   uint32_t stack;
   uint32_t *pStack = &stack;
 
-  BSOD(BSOD_OTHER, pStack[3], 0);
+  BSOD(BSOD_OTHER, (void *) pStack[3], 0);
 
   /* USER CODE END Error_Handler_Debug */
 }

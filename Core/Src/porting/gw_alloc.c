@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdint.h>
+#include <string.h>
 #include <assert.h>
 
 #include "gw_linker.h"
@@ -13,9 +14,9 @@ _sbrk (incr)
     char *        prev_heap_end;
 
     if (heap_end == 0)
-        heap_end = &_heap_start;
+        heap_end = (char *) &_heap_start;
 
-    assert((heap_end + incr) < (&_heap_end));
+    assert((heap_end + incr) < (char *)(&_heap_end));
 
     prev_heap_end = heap_end;
     heap_end += incr;
@@ -77,8 +78,6 @@ void *rg_realloc(void *ptr, size_t size)
     }
 
     uint32_t *p = ((uint32_t *) ptr) - 1;
-
-    size_t old_size = p[0];
 
     _total_alloc_bytes -= p[0];
     _total_alloc_bytes_actual -= p[0] + sizeof(uint32_t);

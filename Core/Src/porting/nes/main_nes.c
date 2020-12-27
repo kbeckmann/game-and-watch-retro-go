@@ -26,17 +26,8 @@
 #define blit blit_5to6
 #endif
 
-static odroid_gamepad_state_t joystick1;
-static odroid_gamepad_state_t joystick2;
-static odroid_gamepad_state_t *localJoystick = &joystick1;
-static odroid_gamepad_state_t *remoteJoystick = &joystick2;
-
 static uint32_t pause_pressed;
 static uint32_t power_pressed;
-
-static bool overscan = true;
-static uint autocrop = false;
-static bool netplay  = false;
 
 static bool fullFrame = 0;
 static uint frameTime = 1000 / 60; // TODO: Handle PAL vs NTSC
@@ -46,21 +37,27 @@ static bool autoload = false;
 
 
 // if i counted correctly this should max be 23077
-char nes_save_buffer[24000] __attribute__((section (".emulator_data")));
+uint8_t nes_save_buffer[24000] __attribute__((section (".emulator_data")));
+
+// TODO: Expose properly
+extern int nes_state_save(uint8_t *flash_ptr, size_t size);
 
 static bool SaveState(char *pathName)
 {
     printf("Saving state...\n");
 
     nes_state_save(nes_save_buffer, 24000);
-    store_save(ACTIVE_FILE->save_address, nes_save_buffer, sizeof(nes_save_buffer));
+    store_save((uint8_t *) ACTIVE_FILE->save_address, nes_save_buffer, sizeof(nes_save_buffer));
 
     return 0;
 }
 
+// TODO: Expose properly
+extern int nes_state_load(uint8_t* flash_ptr, size_t size);
+
 static bool LoadState(char *pathName)
 {
-    nes_state_load(ACTIVE_FILE->save_address, ACTIVE_FILE->save_size);
+    nes_state_load((uint8_t *) ACTIVE_FILE->save_address, ACTIVE_FILE->save_size);
     return true;
 }
 
@@ -235,11 +232,9 @@ static inline void blit_nearest(bitmap_t *bmp, uint8_t *framebuffer) {
 __attribute__((optimize("unroll-loops")))
 static inline void blit_normal(bitmap_t *bmp, uint16_t *framebuffer) {
     const int w1 = bmp->width;
-    const int h1 = bmp->height;
     const int w2 = 320;
     const int h2 = 240;
     const int hpad = 27;
-    int x2, y2;
 
     for (int y = 0; y < h2; y++) {
         uint8_t  *src_row  = bmp->line[y];
@@ -253,7 +248,6 @@ static inline void blit_normal(bitmap_t *bmp, uint16_t *framebuffer) {
 __attribute__((optimize("unroll-loops")))
 static inline void blit_nearest(bitmap_t *bmp, uint16_t *framebuffer) {
     int w1 = bmp->width;
-    int h1 = bmp->height;
     int w2 = WIDTH;
     int h2 = 240;
 
@@ -299,7 +293,6 @@ static inline void blit_nearest(bitmap_t *bmp, uint16_t *framebuffer) {
 __attribute__((optimize("unroll-loops")))
 static void blit_4to5(bitmap_t *bmp, uint16_t *framebuffer) {
     int w1 = bmp->width;
-    int h1 = bmp->height;
     int w2 = WIDTH;
     int h2 = 240;
 
@@ -327,7 +320,6 @@ static void blit_4to5(bitmap_t *bmp, uint16_t *framebuffer) {
 __attribute__((optimize("unroll-loops")))
 static void blit_5to6(bitmap_t *bmp, uint16_t *framebuffer) {
     int w1_adjusted = bmp->width - 4;
-    int h1 = bmp->height;
     int w2 = WIDTH;
     int h2 = 240;
     const int hpad = (WIDTH - 307) / 2;
@@ -363,7 +355,6 @@ static void blit_5to6(bitmap_t *bmp, uint16_t *framebuffer) {
 void osd_blitscreen(bitmap_t *bmp)
 {
     static uint32_t lastFPSTime = 0;
-    static uint32_t lastTime = 0;
     static uint32_t frames = 0;
     uint32_t currentTime = HAL_GetTick();
     uint32_t delta = currentTime - lastFPSTime;
@@ -372,14 +363,12 @@ void osd_blitscreen(bitmap_t *bmp)
 
     if (delta >= 1000) {
         int fps = (10000 * frames) / delta;
-        printf("FPS: %d.%d, frames %d, delta %d ms, skipped %d, vsync_wait_ms %d\n", fps / 10, fps % 10, frames, delta, skippedFrames);
+        printf("FPS: %d.%d, frames %ld, delta %ld ms, skipped %ld\n", fps / 10, fps % 10, frames, delta, skippedFrames);
         frames = 0;
         skippedFrames = 0;
         vsync_wait_ms = 0;
         lastFPSTime = currentTime;
     }
-
-    lastTime = currentTime;
 
     PROFILING_INIT(t_blit);
     PROFILING_START(t_blit);
@@ -435,7 +424,7 @@ void osd_getinput(void)
 
     if (pause_pressed != (buttons & B_PAUSE)) {
         if (pause_pressed) {
-            printf("Pause pressed %d=>%d\n", audio_mute, !audio_mute);
+            printf("Pause pressed %ld=>%d\n", audio_mute, !audio_mute);
 
             odroid_dialog_choice_t options[] = {
                     {100, "Palette", "Default", 1, &palette_update_cb},
@@ -451,10 +440,10 @@ void osd_getinput(void)
     }
 
     if (power_pressed != (buttons & B_POWER)) {
-        printf("Power toggle %d=>%d\n", power_pressed, !power_pressed);
+        printf("Power toggle %ld=>%d\n", power_pressed, !power_pressed);
         power_pressed = buttons & B_POWER;
         if (buttons & B_POWER) {
-            printf("Power PRESSED %d\n", power_pressed);
+            printf("Power PRESSED %ld\n", power_pressed);
             HAL_SAI_DMAStop(&hsai_BlockA1);
 
             if(!(buttons & B_PAUSE)) {
@@ -514,7 +503,7 @@ int app_main_nes(uint8_t load_state)
 
     memset(audiobuffer_dma, 0, sizeof(audiobuffer_dma));
 
-    HAL_SAI_Transmit_DMA(&hsai_BlockA1, audiobuffer_dma, sizeof(audiobuffer_dma) / sizeof(audiobuffer_dma[0]));
+    HAL_SAI_Transmit_DMA(&hsai_BlockA1, (uint8_t *) audiobuffer_dma, sizeof(audiobuffer_dma) / sizeof(audiobuffer_dma[0]));
 
     nofrendo_start(ACTIVE_FILE->name, NES_AUTO, AUDIO_SAMPLE_RATE);
 

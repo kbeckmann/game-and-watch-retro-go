@@ -183,7 +183,7 @@ void OSPI_BlockErase(OSPI_HandleTypeDef *hospi, uint32_t address)
   } while((status & 0x01) == 0x01);
 }
 
-void  _OSPI_Program(OSPI_HandleTypeDef *hospi, uint32_t address, uint8_t *buffer, size_t buffer_size)
+void  _OSPI_Program(OSPI_HandleTypeDef *hospi, uint32_t address, const uint8_t *buffer, size_t buffer_size)
 {
   uint8_t status;
   OSPI_RegularCmdTypeDef  sCommand;
@@ -217,7 +217,7 @@ void  _OSPI_Program(OSPI_HandleTypeDef *hospi, uint32_t address, uint8_t *buffer
     Error_Handler();
   }
 
-  if(HAL_OSPI_Transmit(hospi, buffer, HAL_OSPI_TIMEOUT_DEFAULT_VALUE) != HAL_OK) {
+  if (HAL_OSPI_Transmit(hospi, (uint8_t *) buffer, HAL_OSPI_TIMEOUT_DEFAULT_VALUE) != HAL_OK) {
     Error_Handler();
   }
 
@@ -227,7 +227,7 @@ void  _OSPI_Program(OSPI_HandleTypeDef *hospi, uint32_t address, uint8_t *buffer
   } while((status & 0x01) == 0x01);
 }
 
-void  OSPI_Program(OSPI_HandleTypeDef *hospi, uint32_t address, uint8_t *buffer, size_t buffer_size) {
+void OSPI_Program(OSPI_HandleTypeDef *hospi, uint32_t address, const uint8_t *buffer, size_t buffer_size) {
   unsigned iterations = buffer_size / 256;
   unsigned dest_page = address / 256;
 
