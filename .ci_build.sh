@@ -14,4 +14,4 @@ curl -L -o roms/gb/matrix-rain.gb https://github.com/wtjones/matrix-rain-gb/rele
 
 python3 ./parse_roms.py
 
-make -f Makefile.gb -j
+make -j

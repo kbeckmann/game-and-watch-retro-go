@@ -236,13 +236,13 @@ Core/Inc/githash.h:
 	./githash.sh > $@
 #.PHONY: Core/Inc/githash.h
 
-$(BUILD_DIR)/%.o: %.c Core/Inc/githash.h Makefile.common Makefile.$(TARGET) $(LDSCRIPT) $(SDK_HEADERS) | $(BUILD_DIR)
+$(BUILD_DIR)/%.o: %.c Core/Inc/githash.h Makefile.common Makefile $(LDSCRIPT) $(SDK_HEADERS) | $(BUILD_DIR)
 	$(CC) -c $(CFLAGS) -Wa,-a,-ad,-alms=$(BUILD_DIR)/$(notdir $(<:.c=.lst)) $< -o $@
 
-$(BUILD_DIR)/%.o: %.s Makefile.common Makefile.$(TARGET) $(LDSCRIPT) | $(BUILD_DIR)
+$(BUILD_DIR)/%.o: %.s Makefile.common Makefile $(LDSCRIPT) | $(BUILD_DIR)
 	$(AS) -c $(CFLAGS) $< -o $@
 
-$(BUILD_DIR)/$(TARGET).elf: $(OBJECTS) Makefile.common Makefile.$(TARGET) $(LDSCRIPT)
+$(BUILD_DIR)/$(TARGET).elf: $(OBJECTS) Makefile.common Makefile $(LDSCRIPT)
 	$(CC) $(OBJECTS) $(LDFLAGS) -o $@
 	$(SZ) $@
 	./size.sh $@
@@ -294,8 +294,8 @@ flash_extmem: $(BUILD_DIR)/$(TARGET)_extflash.bin
 
 # Programs both the external and internal flash.
 flash_all:
-	$(MAKE) -f Makefile.$(TARGET) flash_extmem
-	$(MAKE) -f Makefile.$(TARGET) flash
+	$(MAKE) -f Makefile flash_extmem
+	$(MAKE) -f Makefile flash
 .PHONY: flash_all
 
 
