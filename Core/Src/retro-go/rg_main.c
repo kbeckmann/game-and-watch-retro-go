@@ -8,7 +8,6 @@
 #include "rg_emulators.h"
 #include "rg_favorites.h"
 #include "gui.h"
-#include "githash.h"
 #include "main.h"
 
 #if 0
