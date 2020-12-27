@@ -1,3 +1,4 @@
+#pragma once
 #ifndef _GW_BUTTONS_H_
 #define _GW_BUTTONS_H_
 

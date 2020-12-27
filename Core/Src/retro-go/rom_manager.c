@@ -3,6 +3,7 @@
 
 #include "rom_manager.h"
 #include "rg_emulators.h"
+#include "utils.h"
 
 unsigned char *ROM_DATA = NULL;
 unsigned ROM_DATA_LENGTH;
@@ -13,12 +14,12 @@ retro_emulator_file_t *ACTIVE_FILE = NULL;
 
 const rom_system_t systems[] = {
     nes_system,
-    gb_system
+    gb_system,
 };
 
 const rom_manager_t rom_mgr = {
     .systems = systems,
-    .systems_count = 2
+    .systems_count = ARRAY_SIZE(systems),
 };
 
 const rom_system_t *rom_manager_system(const rom_manager_t *mgr, char *name) {
