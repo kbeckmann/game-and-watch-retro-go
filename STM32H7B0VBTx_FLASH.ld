@@ -145,6 +145,8 @@ SECTIONS
     . = ALIGN(4);
     build_gb/nes*.o (.text .text* .rodata .rodata*)
     . = ALIGN(4);
+    build_gb/map*.o (.text .text* .rodata .rodata*)
+    . = ALIGN(4);
     build_gb/rg*.o (.text .text* .rodata .rodata*)
     . = ALIGN(4);
     build_gb/main_gb.o  (.text .text* .rodata .rodata*)
