@@ -69,7 +69,7 @@ class ROMParser():
         for i in range(len(roms)):
             rom = roms[i]
             variable_name = rom_prefix + str(i)
-            is_pal = any(substring in rom.name for substring in ["(E)", "(Europe)", "(A)", "(Australia)"])
+            is_pal = any(substring in rom.name for substring in ["(E)", "(Europe)", "(Sweden)", "(Germany)", "(Italy)", "(France)", "(A)", "(Australia)"])
             region = "REGION_PAL" if is_pal else "REGION_NTSC"
             body += ROM_ENTRY_TEMPLATE.format(
                 name=rom.name,
