@@ -53,7 +53,8 @@ If you are a developer:
 
 ## Known issues (Please do not report these)
 
-- Currently none
+- PAL ROMs are not fully supported on NES
+- Settings are not persistent
 
 
 ## GB Features / todo
