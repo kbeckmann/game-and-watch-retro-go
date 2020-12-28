@@ -33,6 +33,7 @@ With this information, please head over to the [Discord](https://discord.gg/vVcw
 
 # Building steps
 
+- You will need a recent [arm-gcc-none-eabi toolchain](https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-rm/downloads). Please make sure it's installed either in your PATH, or set the environment variable `GCC_PATH` to the `bin` directory inside the extracted directory (e.g. `/opt/gcc-arm-none-eabi-10-2020-q4-major/bin`).
 - In order to run this on a Nintendo® Game & Watch™ [you need to first unlock it](https://github.com/ghidraninja/game-and-watch-backup/).
 - Clone this repo with submodules:
     - `git clone --recurse-submodules https://github.com/kbeckmann/game-and-watch-retro-go`
