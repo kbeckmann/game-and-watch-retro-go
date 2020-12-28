@@ -14,8 +14,8 @@ jobs:
       - name: Build
         run: |
           echo ${GITHUB_TOKEN} | docker login -u ${GITHUB_ACTOR} --password-stdin docker.pkg.github.com
-          docker pull 'docker.pkg.github.com/kbeckmann/ubuntubuilder/ubuntubuilder'
-          docker tag docker.pkg.github.com/kbeckmann/ubuntubuilder/ubuntubuilder:latest ubuntubuilder
-          docker run --rm -v $(pwd):/build -w /build ubuntubuilder sudo ./.ci_build.sh
+          docker pull 'docker.pkg.github.com/kbeckmann/ubuntubuilder/ubuntubuilder-arm'
+          docker tag docker.pkg.github.com/kbeckmann/ubuntubuilder/ubuntubuilder-arm:latest ubuntubuilder-arm
+          docker run --rm -v $(pwd):/build -w /build ubuntubuilder-arm sudo ./.ci_build.sh
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
