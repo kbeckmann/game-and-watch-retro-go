@@ -4,8 +4,11 @@ DEBUG = 1
 
 OPT = -O2 -ggdb
 
-# Comment out for verbose mode
+# To enable verbose, append VERBOSE=1 to make, e.g.:
+# make VERBOSE=1
+ifneq ($(strip $(VERBOSE)),1)
 V = @
+endif
 
 ######################################
 # source
