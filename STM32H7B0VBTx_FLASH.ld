@@ -147,8 +147,6 @@ SECTIONS
     . = ALIGN(4);
     build_gb/rg*.o (.text .text* .rodata .rodata*)
     . = ALIGN(4);
-    build_gb/odroid*.o (.text .text* .rodata .rodata*)
-    . = ALIGN(4);
     build_gb/main_gb.o  (.text .text* .rodata .rodata*)
     . = ALIGN(4);
     build_gb/dis6502.o (.text .text* .rodata .rodata*)
