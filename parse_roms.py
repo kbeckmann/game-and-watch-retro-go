@@ -15,6 +15,7 @@ ROM_ENTRY_TEMPLATE = """\t{{
 \t\t.size={size},
 \t\t.save_address = {save_entry},
 \t\t.save_size = sizeof({save_entry}),
+\t\t.region = {region},
 \t}},"""
 
 SYSTEM_TEMPLATE = """
@@ -68,11 +69,14 @@ class ROMParser():
         for i in range(len(roms)):
             rom = roms[i]
             variable_name = rom_prefix + str(i)
+            is_pal = any(substring in rom.name for substring in ["(E)", "(Europe)", "(A)", "(Australia)"])
+            region = "REGION_PAL" if is_pal else "REGION_NTSC"
             body += ROM_ENTRY_TEMPLATE.format(
                 name=rom.name,
                 size=rom.size,
                 rom_entry=rom_prefix + str(i),
                 save_entry=save_prefix + str(i),
+                region=region,
             )
             body += "\n"
 

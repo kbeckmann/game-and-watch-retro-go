@@ -120,6 +120,7 @@ void emulator_init(retro_emulator_t *emu)
             file->save_size = rom->save_size;
             strcpy(file->name, rom->rom_name);
             strcpy(file->ext, system->extension);
+            file->region = rom->region;
         }
     } else {
         while(1) {

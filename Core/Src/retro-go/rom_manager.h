@@ -10,6 +10,7 @@ typedef struct {
     uint32_t size;
     const uint8_t *save_address;
     uint32_t save_size;
+    rom_region_t region;
 } rom_entry_t;
 
 typedef struct {

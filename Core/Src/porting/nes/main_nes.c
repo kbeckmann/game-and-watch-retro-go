@@ -488,6 +488,8 @@ void osd_loadstate()
 
 int app_main_nes(uint8_t load_state)
 {
+    region_t nes_region;
+
     memset(framebuffer1, 0x0, sizeof(framebuffer1));
     memset(framebuffer2, 0x0, sizeof(framebuffer2));
     odroid_system_init(APP_ID, AUDIO_SAMPLE_RATE);
@@ -503,23 +505,17 @@ int app_main_nes(uint8_t load_state)
 
     memset(audiobuffer_dma, 0, sizeof(audiobuffer_dma));
 
-    region_t region;
-    if (
-        strstr(ACTIVE_FILE->name, "(E)") != NULL ||
-        strstr(ACTIVE_FILE->name, "(Europe)") != NULL ||
-        strstr(ACTIVE_FILE->name, "(A)") != NULL ||
-        strstr(ACTIVE_FILE->name, "(Australia)") != NULL
-    ) {
-        region = NES_PAL;
+    if (ACTIVE_FILE->region == REGION_PAL) {
+        nes_region = NES_PAL;
         frameTime = 1000 / 50;
         HAL_SAI_Transmit_DMA(&hsai_BlockA1, (uint8_t *) audiobuffer_dma,  (2 * AUDIO_SAMPLE_RATE) / 50);
     } else {
-        region = NES_NTSC;
+        nes_region = NES_NTSC;
         frameTime = 1000 / 60;
         HAL_SAI_Transmit_DMA(&hsai_BlockA1, (uint8_t *) audiobuffer_dma, (2 * AUDIO_SAMPLE_RATE) / 60);
     }
 
-    nofrendo_start(ACTIVE_FILE->name, region, AUDIO_SAMPLE_RATE);
+    nofrendo_start(ACTIVE_FILE->name, nes_region, AUDIO_SAMPLE_RATE);
 
     return 0;
 }

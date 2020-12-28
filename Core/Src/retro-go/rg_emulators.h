@@ -4,6 +4,12 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+typedef enum
+{
+    REGION_NTSC = 0,
+    REGION_PAL
+} rom_region_t;
+
 typedef struct {
     char name[128];
     char ext[8];
@@ -14,8 +20,9 @@ typedef struct {
     uint32_t save_size;
     size_t crc_offset;
     uint32_t checksum;
-    bool missing_cover;
     void *emulator;
+    bool missing_cover;
+    rom_region_t region;
 } retro_emulator_file_t;
 
 typedef struct {
