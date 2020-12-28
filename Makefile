@@ -4,6 +4,9 @@ DEBUG = 1
 
 OPT = -O2 -ggdb
 
+# Comment out for verbose mode
+V = @
+
 ######################################
 # source
 ######################################
@@ -110,11 +113,11 @@ C_DEFS += \
 #REQUIRED_FILE=roms/gb/loaded_gb_rom.c
 #REQUIRED_FILE_MSG=Please run ./update_gb_rom.sh to import a GB ROM file
 
-
 include Makefile.common
 
 
 $(BUILD_DIR)/$(TARGET)_extflash.bin: $(BUILD_DIR)/$(TARGET).elf | $(BUILD_DIR)
-	$(BIN) -j ._itcram_hot -j ._ram_exec -j ._extflash $< $(BUILD_DIR)/$(TARGET)_extflash.bin
+	$(V)$(ECHO) [ BIN ] $(notdir $@)
+	$(V)$(BIN) -j ._itcram_hot -j ._ram_exec -j ._extflash $< $(BUILD_DIR)/$(TARGET)_extflash.bin
 
 
