@@ -63,7 +63,7 @@ If you are a developer:
 - [X] Audio volume
 - [X] Power button -> deep sleep (saves and loads state)
 - [X] VSync
-- [X] Sate saving/loading
+- [X] State saving/loading
 - [X] Support multiple ROMs
 - [X] OSD menu
 
@@ -75,7 +75,7 @@ If you are a developer:
 - [X] Audio volume
 - [X] Power button -> deep sleep (saves and loads state)
 - [X] VSync
-- [X] Sate saving/loading
+- [X] State saving/loading
 - [X] Support multiple ROMs
 - [X] OSD menu
 
