@@ -102,21 +102,49 @@ class ROMParser():
 
 
     def generate_save_entry(self, name: str, save_size: int) -> str:
-        return f"uint8_t {name}[{save_size}]  __attribute__((section (\".saveflash\")));\n"
+        return f"uint8_t {name}[{save_size}]  __attribute__((section (\".saveflash\"))) __attribute__((aligned(65536)));\n"
+
+    def get_gameboy_save_size(self, file: str):
+        total_size = 4096
+
+        with open(file, "rb") as f:
+            # cgb
+            f.seek(0x143)
+            cgb = ord(f.read(1))
+
+            if cgb == 0x80 or cgb == 0xc0:
+                total_size += 8 * 4096 # irl
+                total_size += 4 * 4096 # vrl
+            else:
+                total_size += 2 * 4096 # irl 
+                total_size += 2 * 4096 # vrl
+
+            # Sram size
+            f.seek(0x149)
+            total_size += [1, 1, 1, 4, 16, 8][ord(f.read(1))] * 8 * 1024
+            return total_size
+
+        return 0
 
     def generate_system(self, file: str, system_name: str, variable_name: str, extension: str, data_prefix: str, save_prefix: str) -> int:
         f = open(file, "w")
         roms = self.find_roms(system_name, extension, extension)
+        total_save_size = 0
 
-        if extension == "gb":
-            save_size = 192*1024
-        elif extension == "nes":
+        if extension == "nes":
             save_size = 64 * 1024
         else:
             save_size = 0
 
         for i in range(len(roms)):
             rom = roms[i]
+            if extension == "gb":
+                save_size = self.get_gameboy_save_size(rom.path)
+
+            # Aligned
+            aligned_size = 64 * 1024
+            total_save_size += ((save_size + aligned_size) // (aligned_size)) * aligned_size
+
             f.write(self.generate_char_array(data_prefix + str(i), rom))
             f.write(self.generate_save_entry(save_prefix + str(i), save_size))
 
@@ -126,7 +154,7 @@ class ROMParser():
         f.write(SYSTEM_TEMPLATE.format(name=variable_name, system_name=system_name, variable_name=extension + "_roms", extension =extension))
         f.close()
 
-        return len(roms) * save_size
+        return total_save_size
 
 
     def generate_saveflash(self, file: str, size: int):
