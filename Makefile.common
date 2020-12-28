@@ -138,6 +138,7 @@ SZ = $(PREFIX)size
 endif
 HEX = $(CP) -O ihex
 BIN = $(CP) -O binary -S
+ECHO = echo
 
 #######################################
 # CFLAGS
@@ -235,27 +236,31 @@ endef
 $(eval $(foreach obj,$(SDK_C_SOURCES) $(SDK_ASM_SOURCES),$(call sdk_obj_prereq_gen,$(obj))))
 
 Core/Inc/githash.h:
-	./githash.sh > $@
+	$(V)./githash.sh > $@
 .PHONY: Core/Inc/githash.h
 
 Core/Src/main.c: Core/Inc/githash.h
 
 $(BUILD_DIR)/%.o: %.c Makefile.common Makefile $(LDSCRIPT) $(SDK_HEADERS) | $(BUILD_DIR)
-	$(CC) -c $(CFLAGS) -Wa,-a,-ad,-alms=$(BUILD_DIR)/$(notdir $(<:.c=.lst)) $< -o $@
+	$(V)$(ECHO) [ CC ] $(notdir $<)
+	$(V)$(CC) -c $(CFLAGS) -Wa,-a,-ad,-alms=$(BUILD_DIR)/$(notdir $(<:.c=.lst)) $< -o $@
 
 $(BUILD_DIR)/%.o: %.s Makefile.common Makefile $(LDSCRIPT) | $(BUILD_DIR)
-	$(AS) -c $(CFLAGS) $< -o $@
+	$(V)$(ECHO) [ AS ] $(notdir $<)
+	$(V)$(AS) -c $(CFLAGS) $< -o $@
 
 $(BUILD_DIR)/$(TARGET).elf: $(OBJECTS) Makefile.common Makefile $(LDSCRIPT)
-	$(CC) $(OBJECTS) $(LDFLAGS) -o $@
-	$(SZ) $@
-	./size.sh $@
+	$(V)$(ECHO) [ LD ] $(notdir $@)
+	$(V)$(CC) $(OBJECTS) $(LDFLAGS) -o $@
+	$(V)$(SZ) $@
+	$(V)./size.sh $@
 
 $(BUILD_DIR)/%.hex: $(BUILD_DIR)/%.elf | $(BUILD_DIR)
-	$(HEX) $< $@
+	$(V)$(ECHO) [ HEX ] $(notdir $@)
+	$(V)$(HEX) $< $@
 
 $(BUILD_DIR):
-	mkdir $@
+	$(V)mkdir $@
 
 
 #######################################
@@ -313,7 +318,8 @@ gdb: $(BUILD_DIR)/$(TARGET).elf
 # download SDK files
 #######################################
 $(SDK_DIR)/%:
-	wget $(SDK_URL)/$(SDK_VERSION)/$@ -P $(dir $@)
+	$(V)$(ECHO) [ WGET ] $(notdir $@)
+	$(V)wget -q $(SDK_URL)/$(SDK_VERSION)/$@ -P $(dir $@)
 
 .PHONY: download_sdk
 download_sdk: $(SDK_HEADERS) $(SDK_C_SOURCES) $(SDK_ASM_SOURCES)
@@ -322,10 +328,12 @@ download_sdk: $(SDK_HEADERS) $(SDK_C_SOURCES) $(SDK_ASM_SOURCES)
 # clean up
 #######################################
 clean:
-	-rm -fR $(BUILD_DIR)
+	$(V)$(ECHO) [ RM ] $(BUILD_DIR)
+	$(V)-rm -fR $(BUILD_DIR)
 
 distclean: clean
-	rm -rf $(SDK_DIR)
+	$(V)$(ECHO) [ RM ] $(SDK_DIR)
+	$(V)rm -rf $(SDK_DIR)
 
 #######################################
 # dependencies
