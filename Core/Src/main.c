@@ -193,27 +193,42 @@ int _write(int file, char *ptr, int len)
 
 void store_erase(const uint8_t *flash_ptr, size_t size)
 {
-  uint32_t i;
-
   // Only allow pointers in the SAVEFLASH allocated area
   assert((flash_ptr >= &__SAVEFLASH_START__) && ((flash_ptr + size) <= &__SAVEFLASH_END__));
 
   // Convert mem mapped pointer to flash address
   uint32_t save_address = flash_ptr - &__EXTFLASH_START__;
 
-  // Only allow 64kB aligned pointers
-  assert((save_address & (64*1024 - 1)) == 0);
+  // Only allow 4kB aligned pointers
+  assert((save_address & (4*1024 - 1)) == 0);
 
   OSPI_DisableMemoryMapped(&hospi1);
-  OSPI_NOR_WriteEnable(&hospi1);
 
-  size_t blocks = size / (64 * 1024);
-  if ((size & (64*1024 - 1)) != 0) {
-    blocks++;
-  }
+  uint32_t address = save_address;
+  int32_t bytes_left = size;
+  uint32_t erase_size;
 
-  for (i = 0; i < blocks; i++) {
-    OSPI_BlockErase(&hospi1, save_address + i * 64 * 1024);
+  printf("Erasing %ld bytes at 0x%08lx\n", bytes_left, address);
+
+  while (bytes_left > 0) {
+    OSPI_NOR_WriteEnable(&hospi1);
+
+    if (bytes_left >= 64*1024) {
+      printf("Erasing block (64kB): 0x%08lx (%ld left)\n", address, bytes_left);
+      OSPI_BlockErase64(&hospi1, (uint32_t) address);
+      erase_size = 64 * 1024;
+    } else if (bytes_left >= 32*1024) {
+      printf("Erasing block (32kB): 0x%08lx (%ld left)\n", address, bytes_left);
+      OSPI_BlockErase32(&hospi1, (uint32_t) address);
+      erase_size = 32 * 1024;
+    } else {
+      printf("Erasing sector (4kB): 0x%08lx (%ld left)\n", address, bytes_left);
+      OSPI_SectorErase(&hospi1, (uint32_t) address);
+      erase_size = 4 * 1024;
+    }
+
+    bytes_left -= erase_size;
+    address += erase_size;
   }
 
   OSPI_EnableMemoryMappedMode(&hospi1);
@@ -224,8 +239,8 @@ void store_save(const uint8_t *flash_ptr, const uint8_t *data, size_t size)
   // Convert mem mapped pointer to flash address
   uint32_t save_address = flash_ptr - &__EXTFLASH_START__;
 
-  // Only allow 64kB aligned pointers
-  assert((save_address & (64*1024 - 1)) == 0);
+  // Only allow 4kB aligned pointers
+  assert((save_address & (4*1024 - 1)) == 0);
 
   store_erase(flash_ptr, size);
 

@@ -186,7 +186,7 @@ SECTIONS
     *(.extflash_data)
     . = ALIGN(4);
     __extflash_data_end__ = .;
-    . = ALIGN(128K);
+    . = ALIGN(4K);
     __extflash_game_rom_start__ = .;
     *(.extflash_game_rom)
     __extflash_game_rom_end__ = .;

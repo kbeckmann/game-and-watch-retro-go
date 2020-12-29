@@ -147,7 +147,7 @@ void OSPI_ChipErase(OSPI_HandleTypeDef *hospi)
   } while((status & 0x01) == 0x01);
 }
 
-void OSPI_BlockErase(OSPI_HandleTypeDef *hospi, uint32_t address)
+void _OSPI_Erase(OSPI_HandleTypeDef *hospi, uint8_t instruction, uint32_t address)
 {
   uint8_t status;
   OSPI_RegularCmdTypeDef  sCommand;
@@ -155,7 +155,7 @@ void OSPI_BlockErase(OSPI_HandleTypeDef *hospi, uint32_t address)
   memset(&sCommand, 0x0, sizeof(sCommand));
   sCommand.OperationType         = HAL_OSPI_OPTYPE_COMMON_CFG;
   sCommand.FlashId               = 0;
-  sCommand.Instruction           = 0xD8; // BE
+  sCommand.Instruction           = instruction;
   sCommand.InstructionSize       = HAL_OSPI_INSTRUCTION_8_BITS;
   sCommand.Address               = address;
   sCommand.AddressSize           = HAL_OSPI_ADDRESS_24_BITS;
@@ -181,6 +181,24 @@ void OSPI_BlockErase(OSPI_HandleTypeDef *hospi, uint32_t address)
   do {
     OSPI_ReadBytes(hospi, 0x05, &status, 1);
   } while((status & 0x01) == 0x01);
+}
+
+// Erases a 64kB block
+void OSPI_BlockErase64(OSPI_HandleTypeDef *hospi, uint32_t address)
+{
+  _OSPI_Erase(hospi, 0xD8, address); // Block Erase (64kB)
+}
+
+// Erases a 32kB block
+void OSPI_BlockErase32(OSPI_HandleTypeDef *hospi, uint32_t address)
+{
+  _OSPI_Erase(hospi, 0x52, address); // Block Erase (32kB)
+}
+
+// Erases a 4kB sector
+void OSPI_SectorErase(OSPI_HandleTypeDef *hospi, uint32_t address)
+{
+  _OSPI_Erase(hospi, 0x20, address); // Sector Erase (4kB)
 }
 
 void  _OSPI_Program(OSPI_HandleTypeDef *hospi, uint32_t address, const uint8_t *buffer, size_t buffer_size)

@@ -103,7 +103,7 @@ class ROMParser():
 
 
     def generate_save_entry(self, name: str, save_size: int) -> str:
-        return f"uint8_t {name}[{save_size}]  __attribute__((section (\".saveflash\"))) __attribute__((aligned(65536)));\n"
+        return f"uint8_t {name}[{save_size}]  __attribute__((section (\".saveflash\"))) __attribute__((aligned(4096)));\n"
 
     def get_gameboy_save_size(self, file: str):
         total_size = 4096
