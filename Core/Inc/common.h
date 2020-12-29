@@ -7,8 +7,9 @@ extern DMA_HandleTypeDef hdma_sai1_a;
 #define HEIGHT 240
 #define BPP      4
 
+// Default to 50Hz as it results in more samples than at 60Hz
 #define AUDIO_SAMPLE_RATE   (48000)
-#define AUDIO_BUFFER_LENGTH (AUDIO_SAMPLE_RATE / 60)
+#define AUDIO_BUFFER_LENGTH (AUDIO_SAMPLE_RATE / 50)
 
 
 

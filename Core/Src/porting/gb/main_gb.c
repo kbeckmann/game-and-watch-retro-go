@@ -22,6 +22,10 @@
 
 #define NVS_KEY_SAVE_SRAM "sram"
 
+// Use 60Hz for GB
+#define AUDIO_BUFFER_LENGTH_GB (AUDIO_SAMPLE_RATE / 60)
+#define AUDIO_BUFFER_LENGTH_DMA_GB ((2 * AUDIO_SAMPLE_RATE) / 60)
+
 // #define blit screen_blit
 // #define blit screen_blit_bilinear
 // #define blit screen_blit_jth
@@ -469,14 +473,14 @@ static bool advanced_settings_cb(odroid_dialog_choice_t *option, odroid_dialog_e
 void pcm_submit() {
     uint8_t volume = odroid_audio_volume_get();
     uint8_t shift = ODROID_AUDIO_VOLUME_MAX - volume + 1;
-    size_t offset = (dma_state == DMA_TRANSFER_STATE_HF) ? 0 : AUDIO_BUFFER_LENGTH;
+    size_t offset = (dma_state == DMA_TRANSFER_STATE_HF) ? 0 : AUDIO_BUFFER_LENGTH_GB;
 
     if (audio_mute || volume == ODROID_AUDIO_VOLUME_MIN) {
-        for (int i = 0; i < AUDIO_BUFFER_LENGTH; i++) {
+        for (int i = 0; i < AUDIO_BUFFER_LENGTH_GB; i++) {
             audiobuffer_dma[i + offset] = 0;
         }
     } else {
-        for (int i = 0; i < AUDIO_BUFFER_LENGTH; i++) {
+        for (int i = 0; i < AUDIO_BUFFER_LENGTH_GB; i++) {
             audiobuffer_dma[i + offset] = pcm.buf[i] >> shift;
         }
     }
@@ -536,12 +540,12 @@ rg_app_desc_t * init(uint8_t load_state)
     memset(&pcm, 0, sizeof(pcm));
     pcm.hz = AUDIO_SAMPLE_RATE;
     pcm.stereo = 0;
-    pcm.len = AUDIO_BUFFER_LENGTH;
+    pcm.len = AUDIO_BUFFER_LENGTH_GB;
     pcm.buf = (n16*)&audiobuffer_emulator;
     pcm.pos = 0;
 
     memset(audiobuffer_dma, 0, sizeof(audiobuffer_dma));
-    HAL_SAI_Transmit_DMA(&hsai_BlockA1, (uint8_t *) audiobuffer_dma, sizeof(audiobuffer_dma) / sizeof(audiobuffer_dma[0]));
+    HAL_SAI_Transmit_DMA(&hsai_BlockA1, (uint8_t *) audiobuffer_dma, AUDIO_BUFFER_LENGTH_DMA_GB);
 
     rg_app_desc_t *app = odroid_system_get_app();
 
