@@ -154,7 +154,7 @@ class ROMParser():
 
             # Aligned
             aligned_size = 4 * 1024
-            total_save_size += ((save_size + aligned_size) // (aligned_size)) * aligned_size
+            total_save_size += ((save_size + aligned_size - 1) // (aligned_size)) * aligned_size
 
             f.write(self.generate_char_array(data_prefix + str(i), rom))
             f.write(self.generate_save_entry(save_prefix + str(i), save_size))
