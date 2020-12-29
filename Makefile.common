@@ -6,7 +6,11 @@ DEBUG ?= 1
 # optimization
 OPT ?= -Og
 
+# Set to 0 to suppress dirty submodule warning
 CHECK_DIRTY_SUBMODULE ?= 1
+
+# Set to 1 to enable 16MB external flash support
+LARGE_FLASH ?= 0
 
 #######################################
 # paths
@@ -199,6 +203,11 @@ endif
 # Generate dependency information
 CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)"
 
+
+ifeq (${LARGE_FLASH},1)
+CFLAGS += -DLARGE_FLASH=1
+LDFLAGS += -Wl,--defsym=LARGE_FLASH=1
+endif
 
 #######################################
 # LDFLAGS
