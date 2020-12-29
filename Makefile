@@ -44,7 +44,6 @@ Core/Src/porting/crc32.c \
 Core/Src/porting/nes/common.c \
 Core/Src/porting/nes/main_nes.c \
 Core/Src/porting/nes/nofrendo_stm32.c \
-retro-go-stm32/nofrendo-go/components/nofrendo/bitmap.c \
 retro-go-stm32/nofrendo-go/components/nofrendo/cpu/dis6502.c \
 retro-go-stm32/nofrendo-go/components/nofrendo/cpu/nes6502.c \
 retro-go-stm32/nofrendo-go/components/nofrendo/mappers/map000.c \

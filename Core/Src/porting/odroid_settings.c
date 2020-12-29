@@ -24,8 +24,6 @@ static const char* Key_DispOverscan = "DispOverscan";
 static const char* Key_SpriteLimit  = "SpriteLimit";
 // static const char* Key_AudioFilter  = "AudioFilter";
 
-static int unsaved_changes = 0;
-
 void odroid_settings_init()
 {
 
@@ -66,7 +64,7 @@ int32_t odroid_settings_app_int32_get(const char *key, int32_t default_value)
 void odroid_settings_app_int32_set(const char *key, int32_t value)
 {
     char app_key[16];
-    sprintf(app_key, "%.12s.%d", key, odroid_system_get_app()->id);
+    sprintf(app_key, "%.12s.%ld", key, odroid_system_get_app()->id);
     odroid_settings_int32_set(app_key, value);
 }
 

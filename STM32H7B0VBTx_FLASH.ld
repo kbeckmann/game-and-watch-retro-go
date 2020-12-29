@@ -175,8 +175,6 @@ SECTIONS
     . = ALIGN(4);
     build_gb/logo*.o (.text .text* .rodata .rodata*)
     . = ALIGN(4);
-    build_gb/bitmap.o (.text .text* .rodata .rodata*)
-    . = ALIGN(4);
     __extflash_end_start__ = .;
     . = ALIGN(4);
     __extflash_text_start__ = .;
