@@ -113,14 +113,22 @@ class ROMParser():
             f.seek(0x143)
             cgb = ord(f.read(1))
 
-            if cgb == 0x80 or cgb == 0xc0:
+            # 0x80 = Gameboy color but supports old gameboy
+            # 0xc0 = Gameboy color only
+            if cgb & 0x80 or cgb == 0xc0:
+                # Bank 0 + 1-7 for gameboy color work ram
                 total_size += 8 * 4096 # irl
+
+                # Bank 0 + 1 for gameboy color video ram, 2*8KiB
                 total_size += 4 * 4096 # vrl
             else:
+                # Bank 0 + 1 for gameboy classic work ram
                 total_size += 2 * 4096 # irl
+
+                # Bank 0 only for gameboy classic video ram, 1*8KiB
                 total_size += 2 * 4096 # vrl
 
-            # Sram size
+            # Cartridge ram size
             f.seek(0x149)
             total_size += [1, 1, 1, 4, 16, 8][ord(f.read(1))] * 8 * 1024
             return total_size
