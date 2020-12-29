@@ -143,7 +143,7 @@ class ROMParser():
         total_save_size = 0
 
         if folder == "nes":
-            save_size = 64 * 1024
+            save_size = 24 * 1024
         else:
             save_size = 0
 
@@ -153,7 +153,7 @@ class ROMParser():
                 save_size = self.get_gameboy_save_size(rom.path)
 
             # Aligned
-            aligned_size = 64 * 1024
+            aligned_size = 4 * 1024
             total_save_size += ((save_size + aligned_size) // (aligned_size)) * aligned_size
 
             f.write(self.generate_char_array(data_prefix + str(i), rom))
