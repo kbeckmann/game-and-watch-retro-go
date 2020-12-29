@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import os
+from typing import List
 
 ROM_ENTRIES_TEMPLATE = """
 const rom_entry_t {name}[] = {{
@@ -126,7 +127,7 @@ class ROMParser():
 
         return 0
 
-    def generate_system(self, file: str, system_name: str, variable_name: str, folder: str, extensions: list[str], data_prefix: str, save_prefix: str) -> int:
+    def generate_system(self, file: str, system_name: str, variable_name: str, folder: str, extensions: List[str], data_prefix: str, save_prefix: str) -> int:
         f = open(file, "w")
         roms = []
         for e in extensions:
