@@ -2,7 +2,7 @@ TARGET = gb
 
 DEBUG = 1
 
-OPT = -O2 -ggdb
+OPT = -O2 -ggdb3
 
 # To enable verbose, append VERBOSE=1 to make, e.g.:
 # make VERBOSE=1
