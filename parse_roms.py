@@ -126,19 +126,21 @@ class ROMParser():
 
         return 0
 
-    def generate_system(self, file: str, system_name: str, variable_name: str, extension: str, data_prefix: str, save_prefix: str) -> int:
+    def generate_system(self, file: str, system_name: str, variable_name: str, folder: str, extensions: list[str], data_prefix: str, save_prefix: str) -> int:
         f = open(file, "w")
-        roms = self.find_roms(system_name, extension, extension)
+        roms = []
+        for e in extensions:
+            roms += self.find_roms(system_name, folder, e)
         total_save_size = 0
 
-        if extension == "nes":
+        if folder == "nes":
             save_size = 64 * 1024
         else:
             save_size = 0
 
         for i in range(len(roms)):
             rom = roms[i]
-            if extension == "gb":
+            if folder == "gb":
                 save_size = self.get_gameboy_save_size(rom.path)
 
             # Aligned
@@ -148,10 +150,10 @@ class ROMParser():
             f.write(self.generate_char_array(data_prefix + str(i), rom))
             f.write(self.generate_save_entry(save_prefix + str(i), save_size))
 
-        rom_entries = self.generate_rom_entries(extension + "_roms", roms, data_prefix, save_prefix)
+        rom_entries = self.generate_rom_entries(folder + "_roms", roms, data_prefix, save_prefix)
         f.write(rom_entries)
 
-        f.write(SYSTEM_TEMPLATE.format(name=variable_name, system_name=system_name, variable_name=extension + "_roms", extension =extension))
+        f.write(SYSTEM_TEMPLATE.format(name=variable_name, system_name=system_name, variable_name=folder + "_roms", extension =folder))
         f.close()
 
         return total_save_size
@@ -165,8 +167,8 @@ class ROMParser():
 
     def parse(self):
         save_size = 0
-        save_size += self.generate_system("Core/Src/retro-go/gb_roms.c", "Nintendo Gameboy", "gb_system", "gb", "ROM_GB_", "SAVE_GB_")
-        save_size += self.generate_system("Core/Src/retro-go/nes_roms.c", "Nintendo Entertainment System", "nes_system", "nes", "ROM_NES_", "SAVE_NES_")
+        save_size += self.generate_system("Core/Src/retro-go/gb_roms.c", "Nintendo Gameboy", "gb_system", "gb", ["gb", "gbc"], "ROM_GB_", "SAVE_GB_")
+        save_size += self.generate_system("Core/Src/retro-go/nes_roms.c", "Nintendo Entertainment System", "nes_system", "nes", ["nes"], "ROM_NES_", "SAVE_NES_")
 
         self.generate_saveflash("saveflash.ld", save_size)
 

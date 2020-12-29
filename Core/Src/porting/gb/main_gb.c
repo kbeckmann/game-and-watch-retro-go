@@ -527,12 +527,12 @@ rg_app_desc_t * init(uint8_t load_state)
     memset(framebuffer2, 0, sizeof(framebuffer2));
     memset(&fb, 0, sizeof(fb));
     fb.w = GB_WIDTH;
-  	fb.h = GB_HEIGHT;
-  	fb.pixelsize = 2;
-  	fb.pitch = fb.w * fb.pixelsize;
-  	fb.ptr = currentUpdate->buffer;
-  	fb.enabled = 1;
-    fb.byteorder = 1;
+    fb.h = GB_HEIGHT;
+    fb.pixelsize = 2;
+    fb.pitch = fb.w * fb.pixelsize;
+    fb.ptr = currentUpdate->buffer;
+    fb.enabled = 1;
+    fb.byteorder = 0;
     fb.blit_func = &blit;
 
     // Audio
