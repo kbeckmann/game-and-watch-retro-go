@@ -26,7 +26,7 @@ With this information, please head over to the [Discord](https://discord.gg/vVcw
 
 - Do you have any changed files, even if you didn't intentionally change them? Please run `git reset --hard` to ensure an unchanged state.
 - Did you pull but forgot to update the submodule? Run `git submodule update --init --recursive` to ensure that the submodules are in sync.
-- Always run `make -f Makefile.nes -j clean` or `make -f Makefile.gb -j clean` before building something new. The makefile should handle incremental builds, but please do this first before reporting issues.
+- Always run `make -j clean` before building something new. The makefile should handle incremental builds, but please do this first before reporting issues.
 - It is still not working? Try the classic trouble shooting methods: Disconnect power to your debugger and G&W and connect again. Try programming the [Base](https://github.com/ghidraninja/game-and-watch-base) project first to ensure you can actually program your device.
 - Still not working? Ok, head over to #support on the discord and let's see what's going on.
 
@@ -44,7 +44,7 @@ With this information, please head over to the [Discord](https://discord.gg/vVcw
 - Note that `game-and-watch-flashloader` must be placed in the same directory as `game-and-watch-retro-go`, e.g. `/home/user/projects/game-and-watch-flashloader` and `/home/user/projects/game-and-watch-retro-go`.
 - Place GB roms in `roms/gb/` and NES roms in `roms/nes`.
 - Run `python3 parse_roms.py` to import the roms to the project.
-- Build and program external and internal flash: `make -f Makefile.gb -j flash_all`
+- Build and program external and internal flash: `make -j flash_all`
 
 
 If you are a developer:
