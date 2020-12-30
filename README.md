@@ -42,7 +42,7 @@ With this information, please head over to the [Discord](https://discord.gg/vVcw
     - `cd game-and-watch-flashloader`
     - `make -j`
 - Note that `game-and-watch-flashloader` must be placed in the same directory as `game-and-watch-retro-go`, e.g. `/home/user/projects/game-and-watch-flashloader` and `/home/user/projects/game-and-watch-retro-go`.
-- Place GB roms in `roms/gb/` and NES roms in `roms/nes`.
+- Place GB roms in `./roms/gb/` and NES roms in `./roms/nes/`.
 - Build and program external and internal flash: `make -j flash_all`. If you are using the 16MB external flash, build using `make -j LARGE_FLASH=1 flash_all`.
 
 
