@@ -42,7 +42,7 @@ With this information, please head over to the [Discord](https://discord.gg/vVcw
 
 Note: `make -j8` is used as an example. You may use `make -j$(nproc)` on Linux or `make -j$(sysctl -n hw.logicalcpu)` on Mac, or just write the number of threads you want to use, e.g. `make -j8`.
 
-```
+```bash
 # Configure the debug adapter you want to use.
 # stlink is also the default, but you may set it to something else:
 # export ADAPTER=jlink
