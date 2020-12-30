@@ -12,6 +12,8 @@ CHECK_DIRTY_SUBMODULE ?= 1
 # Set to 1 to enable 16MB external flash support
 LARGE_FLASH ?= 0
 
+PYTHON3 ?= /bin/env python3
+
 #######################################
 # paths
 #######################################
@@ -245,6 +247,16 @@ endef
 
 # generate all object prerequisite rules
 $(eval $(foreach obj,$(SDK_C_SOURCES) $(SDK_ASM_SOURCES),$(call sdk_obj_prereq_gen,$(obj))))
+
+# Run parse_roms.py to generate information about the roms
+Core/Src/retro-go/gb_roms.c Core/Src/retro-go/nes_roms.c saveflash.ld &: parse_roms.py
+	$(V)$(ECHO) [ PYTHON3 ] $(notdir $<)
+	$(V)$(PYTHON3) $<
+.PHONY: Core/Src/retro-go/gb_roms.c Core/Src/retro-go/nes_roms.c saveflash.ld
+
+# TODO: Hard-coded dependencies. Possible to solve in a nicer way?
+Core/Src/retro-go/rom_manager.c: Core/Src/retro-go/gb_roms.c Core/Src/retro-go/nes_roms.c
+STM32H7B0VBTx_FLASH.ld: saveflash.ld
 
 Core/Inc/githash.h:
 	$(V)./githash.sh > $@
