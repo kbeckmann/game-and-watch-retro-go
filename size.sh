@@ -1,12 +1,19 @@
 #!/bin/bash
 # Usage: ./size.sh app.elf
 
-objdump=${OBJDUMP:-arm-none-eabi-objdump}
+if [[ "${GCC_PATH}" != "" ]]; then
+	DEFAULT_OBJDUMP=${GCC_PATH}/arm-none-eabi-objdump
+else
+	DEFAULT_OBJDUMP=arm-none-eabi-objdump
+fi
+
+OBJDUMP=${OBJDUMP:-$DEFAULT_OBJDUMP}
+
 elf_file=$1
 
 function get_symbol {
 	name=$1
-	objdump_cmd="$objdump -t $elf_file"
+	objdump_cmd="$OBJDUMP -t $elf_file"
 	size=$($objdump_cmd | grep " $name" | cut -d " " -f1 | tr 'a-f' 'A-F')
 	printf "$((16#${size}))\n"
 }
