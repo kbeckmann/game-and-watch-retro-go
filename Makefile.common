@@ -301,34 +301,34 @@ $(BUILD_DIR):
 #######################################
 
 OPENOCD ?= openocd
-OCDIFACE ?= interface/stlink.cfg
-TRANSPORT ?= hla_swd
+ADAPTER ?= stlink
+FLSHLD_DIR ?= ../game-and-watch-flashloader
+FLASHLOADER ?= $(FLSHLD_DIR)/flash_multi.sh
 
 # Starts openocd and attaches to the target. To be used with 'flashx' and 'gdb'
 openocd:
-	$(OPENOCD) -f $(OCDIFACE) -c "transport select $(TRANSPORT)" -f "target/stm32h7x.cfg" -c "reset_config none; init; halt"
+	$(OPENOCD) -f $(FLSHLD_DIR)/interface_$(ADAPTER).cfg -c "init; halt"
 .PHONY: openocd
 
 
 # Flashes using a new openocd instance
 flash: $(BUILD_DIR)/$(TARGET).elf
-	$(OPENOCD) -f $(OCDIFACE) -c "transport select $(TRANSPORT)" -f "target/stm32h7x.cfg" -c "reset_config none; program $(BUILD_DIR)/$(TARGET).elf reset exit"
+	$(OPENOCD) -f $(FLSHLD_DIR)/interface_$(ADAPTER).cfg -c "program $(BUILD_DIR)/$(TARGET).elf reset exit"
 .PHONY: flash
 
 
 # Flash without building or so
 jflash:
-	$(OPENOCD) -f $(OCDIFACE) -c "transport select $(TRANSPORT)" -f "target/stm32h7x.cfg" -c "reset_config none; program $(BUILD_DIR)/$(TARGET).elf reset exit"
+	$(OPENOCD) -f $(FLSHLD_DIR)/interface_$(ADAPTER).cfg -c "program $(BUILD_DIR)/$(TARGET).elf reset exit"
 .PHONY: jflash
 
 
 # Flashes using an existing openocd instance
 flashx: $(BUILD_DIR)/$(TARGET).elf
-	echo "reset_config none; program $(BUILD_DIR)/$(TARGET).elf; reset run; exit" | nc localhost 4444
+	echo "program $(BUILD_DIR)/$(TARGET).elf; reset run; exit" | nc localhost 4444
 .PHONY: flashx
 
 
-FLASHLOADER ?= ../game-and-watch-flashloader/flash_multi.sh
 flash_extmem: $(BUILD_DIR)/$(TARGET)_extflash.bin
 	$(FLASHLOADER) $(BUILD_DIR)/$(TARGET)_extflash.bin
 .PHONY: flash_extmem
