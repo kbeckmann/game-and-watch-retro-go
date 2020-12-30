@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import argparse
 import os
 from typing import List
 
@@ -140,7 +141,9 @@ class ROMParser():
         roms = []
         for e in extensions:
             roms += self.find_roms(system_name, folder, e)
+
         total_save_size = 0
+        total_rom_size = 0
 
         if folder == "nes":
             save_size = 24 * 1024
@@ -155,6 +158,7 @@ class ROMParser():
             # Aligned
             aligned_size = 4 * 1024
             total_save_size += ((save_size + aligned_size - 1) // (aligned_size)) * aligned_size
+            total_rom_size += rom.size
 
             f.write(self.generate_char_array(data_prefix + str(i), rom))
             f.write(self.generate_save_entry(save_prefix + str(i), save_size))
@@ -165,7 +169,7 @@ class ROMParser():
         f.write(SYSTEM_TEMPLATE.format(name=variable_name, system_name=system_name, variable_name=folder + "_roms", extension =folder))
         f.close()
 
-        return total_save_size
+        return total_save_size, total_rom_size
 
 
     def generate_saveflash(self, file: str, size: int):
@@ -174,13 +178,30 @@ class ROMParser():
         f.close()
 
 
-    def parse(self):
-        save_size = 0
-        save_size += self.generate_system("Core/Src/retro-go/gb_roms.c", "Nintendo Gameboy", "gb_system", "gb", ["gb", "gbc"], "ROM_GB_", "SAVE_GB_")
-        save_size += self.generate_system("Core/Src/retro-go/nes_roms.c", "Nintendo Entertainment System", "nes_system", "nes", ["nes"], "ROM_NES_", "SAVE_NES_")
+    def parse(self, args):
+        total_save_size = 0
+        total_rom_size = 0
+        save_size, rom_size = self.generate_system("Core/Src/retro-go/gb_roms.c", "Nintendo Gameboy", "gb_system", "gb", ["gb", "gbc"], "ROM_GB_", "SAVE_GB_")
+        total_save_size += save_size
+        total_rom_size += rom_size
 
-        self.generate_saveflash("saveflash.ld", save_size)
+        save_size, rom_size = self.generate_system("Core/Src/retro-go/nes_roms.c", "Nintendo Entertainment System", "nes_system", "nes", ["nes"], "ROM_NES_", "SAVE_NES_")
+        total_save_size += save_size
+        total_rom_size += rom_size
+
+        total_size = total_save_size + total_rom_size
+
+        print(f"Save data:\t{total_save_size} bytes\nROM data:\t{total_rom_size} bytes\nTotal:\t\t{total_size} / {args.flash_size} bytes (plus some metadata).")
+        if total_size > args.flash_size:
+            print(f"Error: External flash will overflow!")
+            exit(-1)
+
+        self.generate_saveflash("saveflash.ld", total_save_size)
 
 
 if __name__ == "__main__":
-    ROMParser().parse()
+    parser = argparse.ArgumentParser(description='Import ROMs to the build environment')
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--flash-size', '-s', type=int, default=1024*1024)
+    args = parser.parse_args()
+    ROMParser().parse(args)

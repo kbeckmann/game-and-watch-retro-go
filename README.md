@@ -70,7 +70,9 @@ cd game-and-watch-retro-go
 # cp /path/to/rom.nes ./roms/nes/
 
 # Build and program external and internal flash.
-# Note: If you are using the 16MB external flash, build using: make -j8 LARGE_FLASH=1 flash_all
+# Note: If you are using the 16MB external flash, build using:
+#           make -j8 LARGE_FLASH=1 flash_all
+#       A custom flash size may be specified with the EXTFLASH_SIZE variable.
 
 make -j8 flash_all
 ```

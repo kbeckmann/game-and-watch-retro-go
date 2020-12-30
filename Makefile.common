@@ -12,6 +12,15 @@ CHECK_DIRTY_SUBMODULE ?= 1
 # Set to 1 to enable 16MB external flash support
 LARGE_FLASH ?= 0
 
+# User may override external flash size by setting EXTFLASH_SIZE
+ifeq ($(LARGE_FLASH),1)
+	# 16MB
+	EXTFLASH_SIZE ?= 16777216
+else
+	# 1MB
+	EXTFLASH_SIZE ?= 1048576
+endif
+
 PYTHON3 ?= /usr/bin/env python3
 
 #######################################
@@ -205,11 +214,7 @@ endif
 # Generate dependency information
 CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)"
 
-
-ifeq (${LARGE_FLASH},1)
-CFLAGS += -DLARGE_FLASH=1
-LDFLAGS += -Wl,--defsym=LARGE_FLASH=1
-endif
+LDFLAGS += -Wl,--defsym=__EXTFLASH_TOTAL_LENGTH__=$(EXTFLASH_SIZE)
 
 #######################################
 # LDFLAGS
@@ -251,7 +256,7 @@ $(eval $(foreach obj,$(SDK_C_SOURCES) $(SDK_ASM_SOURCES),$(call sdk_obj_prereq_g
 # Run parse_roms.py to generate information about the roms
 Core/Src/retro-go/gb_roms.c Core/Src/retro-go/nes_roms.c saveflash.ld &: parse_roms.py
 	$(V)$(ECHO) [ PYTHON3 ] $(notdir $<)
-	$(V)$(PYTHON3) $<
+	$(V)$(PYTHON3) $< --flash-size $(EXTFLASH_SIZE)
 .PHONY: Core/Src/retro-go/gb_roms.c Core/Src/retro-go/nes_roms.c saveflash.ld
 
 # TODO: Hard-coded dependencies. Possible to solve in a nicer way?
