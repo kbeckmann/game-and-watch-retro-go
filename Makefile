@@ -1,4 +1,4 @@
-TARGET = gb
+TARGET = gw_retro_go
 
 DEBUG = 1
 

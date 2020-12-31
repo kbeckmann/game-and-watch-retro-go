@@ -27,7 +27,7 @@ PYTHON3 ?= /usr/bin/env python3
 # paths
 #######################################
 # Build path
-BUILD_DIR ?= build_$(TARGET)
+BUILD_DIR ?= build
 
 
 

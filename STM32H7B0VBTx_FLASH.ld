@@ -143,17 +143,17 @@ SECTIONS
     . = ALIGN(4);
     __extflash_odroid_start__ = .;
     . = ALIGN(4);
-    build_gb/nes*.o (.text .text* .rodata .rodata*)
+    build/nes*.o (.text .text* .rodata .rodata*)
     . = ALIGN(4);
-    build_gb/map*.o (.text .text* .rodata .rodata*)
+    build/map*.o (.text .text* .rodata .rodata*)
     . = ALIGN(4);
-    build_gb/rg*.o (.text .text* .rodata .rodata*)
+    build/rg*.o (.text .text* .rodata .rodata*)
     . = ALIGN(4);
-    build_gb/main_gb.o  (.text .text* .rodata .rodata*)
+    build/main_gb.o  (.text .text* .rodata .rodata*)
     . = ALIGN(4);
-    build_gb/dis6502.o (.text .text* .rodata .rodata*)
+    build/dis6502.o (.text .text* .rodata .rodata*)
     . = ALIGN(4);
-    build_gb/cpu.o (.text .text* .rodata .rodata*)
+    build/cpu.o (.text .text* .rodata .rodata*)
     . = ALIGN(4);
     __extflash_odroid_end__ = .;
     __ram_exec_end__ = .;
@@ -163,17 +163,17 @@ SECTIONS
   {
     . = ALIGN(4);
     __extflash_nes_start__ = .;
-    build_gb/rom_*.o (.text .text* .rodata .rodata*)
+    build/rom_*.o (.text .text* .rodata .rodata*)
     . = ALIGN(4);
-    build_gb/miniz.o (.text .text* .rodata .rodata*)
+    build/miniz.o (.text .text* .rodata .rodata*)
     . = ALIGN(4);
-    build_gb/lupng.o (.text .text* .rodata .rodata*)
+    build/lupng.o (.text .text* .rodata .rodata*)
     . = ALIGN(4);
-    build_gb/gui.o (.text .text* .rodata .rodata*)
+    build/gui.o (.text .text* .rodata .rodata*)
     . = ALIGN(4);
-    build_gb/sound.o  (.text .text* .rodata .rodata*)
+    build/sound.o  (.text .text* .rodata .rodata*)
     . = ALIGN(4);
-    build_gb/logo*.o (.text .text* .rodata .rodata*)
+    build/logo*.o (.text .text* .rodata .rodata*)
     . = ALIGN(4);
     __extflash_end_start__ = .;
     . = ALIGN(4);
