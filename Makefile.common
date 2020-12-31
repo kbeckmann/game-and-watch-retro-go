@@ -258,9 +258,9 @@ $(eval $(foreach obj,$(SDK_C_SOURCES) $(SDK_ASM_SOURCES),$(call sdk_obj_prereq_g
 Core/Src/retro-go/gb_roms.c Core/Src/retro-go/nes_roms.c saveflash.ld &: parse_roms.py
 	$(V)$(ECHO) [ PYTHON3 ] $(notdir $<)
 	$(V)$(BASH) -c " \
-		cp -f rom_hashes.txt rom_hashes_old.txt; \
+		cp -f rom_hashes.txt rom_hashes_old.txt 2> /dev/null; \
 		find ./roms -type f -exec sha1sum {} \; > rom_hashes.txt && \
-		diff rom_hashes.txt rom_hashes_old.txt || $(PYTHON3) parse_roms.py --flash-size $(EXTFLASH_SIZE) && \
+		diff rom_hashes.txt rom_hashes_old.txt 2> /dev/null || $(PYTHON3) parse_roms.py --flash-size $(EXTFLASH_SIZE) && \
 		rm -f rom_hashes_old.txt; \
 	"
 .PHONY: Core/Src/retro-go/gb_roms.c Core/Src/retro-go/nes_roms.c saveflash.ld
