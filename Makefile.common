@@ -155,6 +155,7 @@ endif
 HEX = $(CP) -O ihex
 BIN = $(CP) -O binary -S
 ECHO = echo
+BASH ?= /bin/bash
 
 #######################################
 # CFLAGS
@@ -256,7 +257,12 @@ $(eval $(foreach obj,$(SDK_C_SOURCES) $(SDK_ASM_SOURCES),$(call sdk_obj_prereq_g
 # Run parse_roms.py to generate information about the roms
 Core/Src/retro-go/gb_roms.c Core/Src/retro-go/nes_roms.c saveflash.ld &: parse_roms.py
 	$(V)$(ECHO) [ PYTHON3 ] $(notdir $<)
-	$(V)$(PYTHON3) $< --flash-size $(EXTFLASH_SIZE)
+	$(V)$(BASH) -c " \
+		cp -f rom_hashes.txt rom_hashes_old.txt; \
+		find ./roms -type f -exec sha1sum {} \; > rom_hashes.txt && \
+		diff rom_hashes.txt rom_hashes_old.txt || $(PYTHON3) parse_roms.py --flash-size $(EXTFLASH_SIZE) && \
+		rm -f rom_hashes_old.txt; \
+	"
 .PHONY: Core/Src/retro-go/gb_roms.c Core/Src/retro-go/nes_roms.c saveflash.ld
 
 # TODO: Hard-coded dependencies. Possible to solve in a nicer way?
