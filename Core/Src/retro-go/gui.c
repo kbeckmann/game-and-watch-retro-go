@@ -10,19 +10,21 @@
 
 #define IMAGE_LOGO_WIDTH    (47)
 #define IMAGE_LOGO_HEIGHT   (51)
-#define IMAGE_BANNER_WIDTH  (272)
+#define IMAGE_BANNER_WIDTH  (ODROID_SCREEN_WIDTH)
 #define IMAGE_BANNER_HEIGHT (32)
+#define STATUS_HEIGHT (33)
+#define HEADER_HEIGHT (47)
 
 #define CRC_WIDTH    (104)
 #define CRC_X_OFFSET (ODROID_SCREEN_WIDTH - CRC_WIDTH)
-#define CRC_Y_OFFSET (35)
+#define CRC_Y_OFFSET (STATUS_HEIGHT)
 
 #define LIST_WIDTH       (ODROID_SCREEN_WIDTH)
-#define LIST_HEIGHT      (ODROID_SCREEN_HEIGHT - LIST_Y_OFFSET)
-#define LIST_LINE_COUNT  ((ODROID_SCREEN_HEIGHT - LIST_Y_OFFSET) / LIST_LINE_HEIGHT)
-#define LIST_LINE_HEIGHT (odroid_overlay_get_font_size())
+#define LIST_HEIGHT      (ODROID_SCREEN_HEIGHT - STATUS_HEIGHT - HEADER_HEIGHT)
+#define LIST_LINE_HEIGHT (odroid_overlay_get_font_size() + 2)
+#define LIST_LINE_COUNT  (LIST_HEIGHT / LIST_LINE_HEIGHT)
 #define LIST_X_OFFSET    (0)
-#define LIST_Y_OFFSET    (48 + LIST_LINE_HEIGHT)
+#define LIST_Y_OFFSET    (STATUS_HEIGHT)
 
 #define COVER_MAX_HEIGHT (184)
 #define COVER_MAX_WIDTH  (184)
@@ -248,17 +250,17 @@ void gui_draw_navbar()
 
 void gui_draw_header(tab_t *tab)
 {
-    int x_pos = IMAGE_LOGO_WIDTH;
-    int y_pos = IMAGE_LOGO_HEIGHT;
-
-    odroid_overlay_draw_fill_rect(x_pos, 0, ODROID_SCREEN_WIDTH - x_pos, LIST_Y_OFFSET, C_BLACK);
-    odroid_overlay_draw_fill_rect(0, y_pos, ODROID_SCREEN_WIDTH, LIST_Y_OFFSET - y_pos, C_BLACK);
-
-    if (tab->img_logo)
-        odroid_display_write(0, 0, IMAGE_LOGO_WIDTH, IMAGE_LOGO_HEIGHT, tab->img_logo);
-
     if (tab->img_header)
-        odroid_display_write(x_pos + 1, 0, IMAGE_BANNER_WIDTH, IMAGE_BANNER_HEIGHT, tab->img_header);
+        odroid_display_write(0, ODROID_SCREEN_HEIGHT - IMAGE_BANNER_HEIGHT - 15, IMAGE_BANNER_WIDTH, IMAGE_BANNER_HEIGHT, tab->img_header);
+
+    odroid_overlay_draw_fill_rect(0, ODROID_SCREEN_HEIGHT - 15, ODROID_SCREEN_WIDTH, 1, C_GW_YELLOW);
+    odroid_overlay_draw_fill_rect(0, ODROID_SCREEN_HEIGHT - 14, ODROID_SCREEN_WIDTH, 4, C_GW_RED);
+    odroid_overlay_draw_fill_rect(0, ODROID_SCREEN_HEIGHT - 10, ODROID_SCREEN_WIDTH, 2, C_BLACK);
+    odroid_overlay_draw_fill_rect(0, ODROID_SCREEN_HEIGHT - 8, ODROID_SCREEN_WIDTH, 2, C_GW_RED);
+    odroid_overlay_draw_fill_rect(0, ODROID_SCREEN_HEIGHT - 6, ODROID_SCREEN_WIDTH, 2, C_BLACK);
+    odroid_overlay_draw_fill_rect(0, ODROID_SCREEN_HEIGHT - 4, ODROID_SCREEN_WIDTH, 1, C_GW_RED);
+    odroid_overlay_draw_fill_rect(0, ODROID_SCREEN_HEIGHT - 3, ODROID_SCREEN_WIDTH, 2, C_BLACK);
+    odroid_overlay_draw_fill_rect(0, ODROID_SCREEN_HEIGHT - 1, ODROID_SCREEN_WIDTH, 1, C_GW_RED);
 }
 
 // void gui_draw_notice(tab_t *tab)
@@ -269,15 +271,21 @@ void gui_draw_notice(const char *text, uint16_t color)
 
 void gui_draw_status(tab_t *tab)
 {
-    odroid_overlay_draw_battery(ODROID_SCREEN_WIDTH - 27, 3);
+    odroid_overlay_draw_fill_rect(0, 0, ODROID_SCREEN_WIDTH, STATUS_HEIGHT, C_GW_RED);
+    odroid_overlay_draw_fill_rect(0, 1, ODROID_SCREEN_WIDTH, 2, C_BLACK);
+    odroid_overlay_draw_fill_rect(0, 4, ODROID_SCREEN_WIDTH, 2, C_BLACK);
+    odroid_overlay_draw_fill_rect(0, 8, ODROID_SCREEN_WIDTH, 2, C_BLACK);
+
     odroid_overlay_draw_text(
-        IMAGE_LOGO_WIDTH + 11,
-        IMAGE_BANNER_HEIGHT + 3,
-        128,
+        0,
+        18,
+        ODROID_SCREEN_WIDTH,
         tab->status,
-        C_WHITE,
-        C_BLACK
+        C_GW_YELLOW,
+        C_GW_RED
     );
+
+    odroid_overlay_draw_battery(ODROID_SCREEN_WIDTH - 32, 17);
 }
 
 void gui_draw_list(tab_t *tab)
@@ -286,6 +294,8 @@ void gui_draw_list(tab_t *tab)
     int lines = LIST_LINE_COUNT;
     theme_t *theme = &gui_themes[gui.theme % gui_themes_count];
     listbox_t *list = &tab->listbox;
+
+    odroid_overlay_draw_fill_rect(0, LIST_Y_OFFSET, LIST_WIDTH, LIST_HEIGHT, C_BLACK);
 
     for (int i = 0; i < lines; i++) {
         int entry = list->cursor + i - (lines / 2);
@@ -301,9 +311,10 @@ void gui_draw_list(tab_t *tab)
             LIST_Y_OFFSET + i * LIST_LINE_HEIGHT,
             LIST_WIDTH,
             str_buffer,
-            (entry == list->cursor) ? theme->list_selected : theme->list_standard,
-            (int)(16.f / lines * i) << theme->list_background
+            (entry == list->cursor) ? C_GW_YELLOW : C_GW_OPAQUE_YELLOW,
+            C_BLACK
         );
+
     }
 }
 

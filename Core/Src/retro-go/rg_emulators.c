@@ -27,7 +27,7 @@ static void event_handler(gui_event_t event, tab_t *tab)
 
         if (emu->roms.count > 0)
         {
-            sprintf(tab->status, "Games: %d", emu->roms.count);
+            sprintf(tab->status, " Games: %d", emu->roms.count);
             gui_resize_list(tab, emu->roms.count);
 
             for (int i = 0; i < emu->roms.count; i++)
@@ -41,7 +41,7 @@ static void event_handler(gui_event_t event, tab_t *tab)
         }
         else
         {
-            sprintf(tab->status, "No games");
+            sprintf(tab->status, " No games");
             gui_resize_list(tab, 8);
             sprintf(tab->listbox.items[0].text, "Place roms in folder: /roms/%s", emu->dirname);
             sprintf(tab->listbox.items[2].text, "With file extension: .%s", emu->ext);
