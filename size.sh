@@ -33,7 +33,8 @@ function print_usage {
 	usage=$(get_section_length $symbol)
 	length=$(get_symbol $length_symbol)
 	free=$(( $length - $usage ))
-	echo -e "$symbol\t$usage / $length\t($free bytes free)"
+	freehr=$(printf "%.3f" "$(( $free  ))e-6")
+	echo -e "$symbol\t$usage / $length\t($free bytes free ($freehr MB))"
 }
 
 print_usage itcram   __ITCMRAM_LENGTH__
