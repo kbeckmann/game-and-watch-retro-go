@@ -111,6 +111,33 @@ make -j8 flash_all
 - [X] OSD menu
 
 
+# Build and flash using Docker
+
+To reduce the number of potential pitfalls in installation of various software, a Dockerfile is provided containing everything needed to compile and flash retro-go to your Nintendo® Game & Watch™.
+
+Steps to build and flash from a docker container (on Linux, e.g. Archlinux or Ubuntu):
+
+```bash
+# Clone this repo
+git clone --recursive https://github.com/kbeckmann/game-and-watch-retro-go
+
+# cd into it
+cd game-and-watch-retro-go
+
+# Place roms in ./roms/gb and ./roms/nes accordingly
+
+# Build the docker image (takes a while)
+docker build -f Dockerfile --tag kbeckmann/retro-go-builder .
+
+# Run it with usb passthrough. Set your ADAPTER and LARGE_FLASH appropriately.
+docker run --rm -it --privileged -v /dev/bus/usb:/dev/bus/usb kbeckmann/retro-go-builder make ADAPTER=stlink LARGE_FLASH=0 -j$(nproc) flash_all
+
+# In case you get access errors when flashing, you may run sudo inside the docker container. The proper way is to fix the udev rules, but at least this is a way forward in case you are stuck.
+# docker run --rm -it --privileged -v /dev/bus/usb:/dev/bus/usb kbeckmann/retro-go-builder sudo -E make ADAPTER=stlink LARGE_FLASH=0 -j$(nproc) flash_all
+
+```
+
+
 # Contact, discussion
 
 Please join the [Discord](https://discord.gg/vVcwrrHTNJ).
