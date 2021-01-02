@@ -91,7 +91,8 @@ Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal.c \
 
 # SDK ASM sources
 SDK_ASM_SOURCES =  \
-Drivers/CMSIS/Device/ST/STM32H7xx/Source/Templates/gcc/startup_stm32h7b0xx.s
+Drivers/CMSIS/Device/ST/STM32H7xx/Source/Templates/gcc/startup_stm32h7b0xx.s \
+Core/Src/memcpy-armv7m.s
 
 # SDK headers
 SDK_HEADERS = \
@@ -161,7 +162,7 @@ BASH ?= /bin/bash
 # CFLAGS
 #######################################
 # cpu
-CPU = -mcpu=cortex-m7
+CPU = -mcpu=cortex-m7 -mtune=cortex-m7
 
 # fpu
 FPU = -mfpu=fpv5-d16
@@ -170,7 +171,7 @@ FPU = -mfpu=fpv5-d16
 FLOAT-ABI = -mfloat-abi=hard
 
 # mcu
-MCU = $(CPU) -mthumb $(FPU) $(FLOAT-ABI)
+MCU = $(CPU) -mthumb -mno-unaligned-access $(FPU) $(FLOAT-ABI)
 
 # macros for gcc
 # AS defines
@@ -182,7 +183,6 @@ C_DEFS +=  \
 -DSTM32H7B0xx \
 -DVECT_TAB_ITCM \
 -DIS_LITTLE_ENDIAN \
--D_FORTIFY_SOURCE=1 \
 -DDEBUG_RG_ALLOC \
 -DMINIZ_NO_TIME
 

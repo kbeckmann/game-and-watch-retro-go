@@ -36,7 +36,7 @@ int odroid_overlay_game_menu()
 #include "odroid_overlay.h"
 
 // static uint16_t *overlay_buffer = NULL;
-static uint16_t overlay_buffer[ODROID_SCREEN_WIDTH * 32 * 2];
+static uint16_t overlay_buffer[ODROID_SCREEN_WIDTH * 32 * 2]  __attribute__ ((aligned (4)));
 static short dialog_open_depth = 0;
 static short font_size = 8;
 

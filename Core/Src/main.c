@@ -69,7 +69,7 @@ SPI_HandleTypeDef hspi2;
 
 /* USER CODE BEGIN PV */
 
-char logbuf[1024 * 4];
+char logbuf[1024 * 4] __attribute__((aligned(4)));
 uint32_t log_idx;
 
 uint32_t boot_buttons;
