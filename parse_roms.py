@@ -89,15 +89,7 @@ class ROMParser():
         rom_data = ROM.data()
         template = "const uint8_t {name}[]  __attribute__((section (\".extflash_game_rom\"))) = {{\n"
         char_array = template.format(name=name)
-        while True:
-            current_data = rom_data[:8]
-            char_array += "\t"
-            for b in current_data:
-                char_array += hex(b) + ", "
-            rom_data = rom_data[8:]
-            char_array += "\n"
-            if(len(rom_data) == 0):
-                break
+        char_array += ", ".join([hex(x) for x in rom_data])
         char_array += "};\n"
 
         return char_array
