@@ -157,6 +157,7 @@ HEX = $(CP) -O ihex
 BIN = $(CP) -O binary -S
 ECHO = echo
 BASH ?= /bin/bash
+FIND = find
 
 #######################################
 # CFLAGS
@@ -254,16 +255,18 @@ endef
 # generate all object prerequisite rules
 $(eval $(foreach obj,$(SDK_C_SOURCES) $(SDK_ASM_SOURCES),$(call sdk_obj_prereq_gen,$(obj))))
 
+FORCE:
+
 # Run parse_roms.py to generate information about the roms
-Core/Src/retro-go/gb_roms.c Core/Src/retro-go/nes_roms.c $(BUILD_DIR)/saveflash.ld &: parse_roms.py | $(BUILD_DIR)
+$(BUILD_DIR)/rom_hashes.txt: FORCE | $(BUILD_DIR)
+	$(V)$(ECHO) [ Checking roms ROMS ]
+	$(V)./update_rom_hashes.sh build/rom_hashes.txt roms/nes/ roms/gb
+
+$(BUILD_DIR)/saveflash.ld: $(BUILD_DIR)/rom_hashes.txt parse_roms.py | $(BUILD_DIR)
 	$(V)$(ECHO) [ PYTHON3 ] $(notdir $<)
-	$(V)$(BASH) -c " \
-		cp -f $(BUILD_DIR)/rom_hashes.txt $(BUILD_DIR)/rom_hashes_old.txt 2> /dev/null; \
-		find ./roms -type f -exec sha1sum {} \; > $(BUILD_DIR)/rom_hashes.txt && \
-		diff $(BUILD_DIR)/rom_hashes.txt $(BUILD_DIR)/rom_hashes_old.txt 2> /dev/null || $(PYTHON3) parse_roms.py --flash-size $(EXTFLASH_SIZE) && \
-		rm -f $(BUILD_DIR)/rom_hashes_old.txt; \
-	"
-.PHONY: Core/Src/retro-go/gb_roms.c Core/Src/retro-go/nes_roms.c $(BUILD_DIR)/saveflash.ld
+	$(V)$(PYTHON3) parse_roms.py --flash-size $(EXTFLASH_SIZE)
+
+Core/Src/retro-go/gb_roms.c Core/Src/retro-go/nes_roms.c: $(BUILD_DIR)/saveflash.ld | $(BUILD_DIR)
 
 # TODO: Hard-coded dependencies. Possible to solve in a nicer way?
 Core/Src/retro-go/rom_manager.c: Core/Src/retro-go/gb_roms.c Core/Src/retro-go/nes_roms.c
