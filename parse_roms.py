@@ -188,7 +188,7 @@ class ROMParser():
             print(f"Error: External flash will overflow!")
             exit(-1)
 
-        self.generate_saveflash("saveflash.ld", total_save_size)
+        self.generate_saveflash("build/saveflash.ld", total_save_size)
 
 
 if __name__ == "__main__":

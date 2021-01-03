@@ -255,19 +255,19 @@ endef
 $(eval $(foreach obj,$(SDK_C_SOURCES) $(SDK_ASM_SOURCES),$(call sdk_obj_prereq_gen,$(obj))))
 
 # Run parse_roms.py to generate information about the roms
-Core/Src/retro-go/gb_roms.c Core/Src/retro-go/nes_roms.c saveflash.ld &: parse_roms.py
+Core/Src/retro-go/gb_roms.c Core/Src/retro-go/nes_roms.c $(BUILD_DIR)/saveflash.ld &: parse_roms.py | $(BUILD_DIR)
 	$(V)$(ECHO) [ PYTHON3 ] $(notdir $<)
 	$(V)$(BASH) -c " \
-		cp -f rom_hashes.txt rom_hashes_old.txt 2> /dev/null; \
-		find ./roms -type f -exec sha1sum {} \; > rom_hashes.txt && \
-		diff rom_hashes.txt rom_hashes_old.txt 2> /dev/null || $(PYTHON3) parse_roms.py --flash-size $(EXTFLASH_SIZE) && \
-		rm -f rom_hashes_old.txt; \
+		cp -f $(BUILD_DIR)/rom_hashes.txt $(BUILD_DIR)/rom_hashes_old.txt 2> /dev/null; \
+		find ./roms -type f -exec sha1sum {} \; > $(BUILD_DIR)/rom_hashes.txt && \
+		diff $(BUILD_DIR)/rom_hashes.txt $(BUILD_DIR)/rom_hashes_old.txt 2> /dev/null || $(PYTHON3) parse_roms.py --flash-size $(EXTFLASH_SIZE) && \
+		rm -f $(BUILD_DIR)/rom_hashes_old.txt; \
 	"
-.PHONY: Core/Src/retro-go/gb_roms.c Core/Src/retro-go/nes_roms.c saveflash.ld
+.PHONY: Core/Src/retro-go/gb_roms.c Core/Src/retro-go/nes_roms.c $(BUILD_DIR)/saveflash.ld
 
 # TODO: Hard-coded dependencies. Possible to solve in a nicer way?
 Core/Src/retro-go/rom_manager.c: Core/Src/retro-go/gb_roms.c Core/Src/retro-go/nes_roms.c
-STM32H7B0VBTx_FLASH.ld: saveflash.ld
+STM32H7B0VBTx_FLASH.ld: $(BUILD_DIR)/saveflash.ld
 
 Core/Inc/githash.h:
 	$(V)./githash.sh > $@
