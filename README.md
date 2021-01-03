@@ -65,6 +65,8 @@ git clone --recurse-submodules https://github.com/kbeckmann/game-and-watch-retro
 
 cd game-and-watch-retro-go
 
+git clone --depth 1 https://github.com/STMicroelectronics/STM32CubeH7 && ln -s STM32CubeH7/Drivers
+
 # Place GB roms in `./roms/gb/` and NES roms in `./roms/nes/`:
 # cp /path/to/rom.gb ./roms/gb/
 # cp /path/to/rom.nes ./roms/nes/
