@@ -14,7 +14,7 @@
 #include "gnuboy/sound.h"
 #include "gnuboy/regs.h"
 #include "gnuboy/rtc.h"
-#include "gnuboy/defs.h"
+#include "gnuboy/emu.h"
 #include "common.h"
 #include "rom_manager.h"
 
