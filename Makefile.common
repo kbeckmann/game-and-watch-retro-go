@@ -257,12 +257,15 @@ $(eval $(foreach obj,$(SDK_C_SOURCES) $(SDK_ASM_SOURCES),$(call sdk_obj_prereq_g
 
 FORCE:
 
-# Run parse_roms.py to generate information about the roms
-$(BUILD_DIR)/rom_hashes.txt: FORCE | $(BUILD_DIR)
-	$(V)$(ECHO) [ Checking roms ROMS ]
-	$(V)./update_rom_hashes.sh build/rom_hashes.txt roms/nes/ roms/gb
+Core/Inc/githash.h: FORCE | $(BUILD_DIR)
+	$(V)./update_githash.sh $@
 
-$(BUILD_DIR)/saveflash.ld: $(BUILD_DIR)/rom_hashes.txt parse_roms.py | $(BUILD_DIR)
+# Run parse_roms.py to generate information about the roms
+$(BUILD_DIR)/rom_files.txt: FORCE | $(BUILD_DIR)
+	$(V)$(ECHO) [ BASH ] Checking for updated roms
+	$(V)./update_rom_files.sh build/rom_files.txt roms/gb roms/nes
+
+$(BUILD_DIR)/saveflash.ld: $(BUILD_DIR)/rom_files.txt parse_roms.py | $(BUILD_DIR)
 	$(V)$(ECHO) [ PYTHON3 ] $(notdir $<)
 	$(V)$(PYTHON3) parse_roms.py --flash-size $(EXTFLASH_SIZE)
 
@@ -271,10 +274,6 @@ Core/Src/retro-go/gb_roms.c Core/Src/retro-go/nes_roms.c: $(BUILD_DIR)/saveflash
 # TODO: Hard-coded dependencies. Possible to solve in a nicer way?
 Core/Src/retro-go/rom_manager.c: Core/Src/retro-go/gb_roms.c Core/Src/retro-go/nes_roms.c
 STM32H7B0VBTx_FLASH.ld: $(BUILD_DIR)/saveflash.ld
-
-Core/Inc/githash.h:
-	$(V)./githash.sh > $@
-.PHONY: Core/Inc/githash.h
 
 Core/Src/main.c: Core/Inc/githash.h
 Core/Src/retro-go/rg_main.c: Core/Inc/githash.h
@@ -350,8 +349,11 @@ flash_extmem: $(BUILD_DIR)/$(TARGET)_extflash.bin
 
 # Programs both the external and internal flash.
 flash_all:
-	$(MAKE) -f Makefile flash_extmem
-	$(MAKE) -f Makefile flash
+	@# HACK: Ensure that the generated rom files are updated in case building in parallel
+	$(V)$(MAKE) $(BUILD_DIR)/rom_manager.o
+
+	$(V)$(MAKE) flash_extmem
+	$(V)$(MAKE) flash
 .PHONY: flash_all
 
 
