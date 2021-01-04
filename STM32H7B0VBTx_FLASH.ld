@@ -110,7 +110,6 @@ SECTIONS
     . = ALIGN(4);
     *(.itcram_text)
     . = ALIGN(4);
-    __itcram_end__ = .;
   } > ITCMRAM
 
   /* Copied from flash to ram at boot */
@@ -124,6 +123,7 @@ SECTIONS
     *(.itcram_hot_text)
     . = ALIGN(4);
     __itcram_hot_end__ = .;
+    __itcram_end__ = .;
   } >ITCMRAM AT> EXTFLASH
 
   /* Uncached and unbuffered memory for the LCD framebuffers */
