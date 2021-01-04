@@ -20,7 +20,7 @@ Core/Src/gw_buttons.c \
 Core/Src/gw_flash.c \
 Core/Src/gw_lcd.c \
 Core/Src/main.c \
-Core/Src/porting/gb/main_gb.c \
+Core/Src/porting/common.c \
 Core/Src/porting/odroid_audio.c \
 Core/Src/porting/odroid_display.c \
 Core/Src/porting/odroid_input.c \
@@ -28,9 +28,13 @@ Core/Src/porting/odroid_netplay.c \
 Core/Src/porting/odroid_overlay.c \
 Core/Src/porting/odroid_sdcard.c \
 Core/Src/porting/odroid_system.c \
+Core/Src/porting/crc32.c \
 Core/Src/stm32h7xx_hal_msp.c \
 Core/Src/stm32h7xx_it.c \
-Core/Src/system_stm32h7xx.c \
+Core/Src/system_stm32h7xx.c
+
+GNUBOY_C_SOURCES = \
+Core/Src/porting/gb/main_gb.c \
 retro-go-stm32/gnuboy-go/components/gnuboy/cpu.c \
 retro-go-stm32/gnuboy-go/components/gnuboy/debug.c \
 retro-go-stm32/gnuboy-go/components/gnuboy/emu.c \
@@ -40,8 +44,8 @@ retro-go-stm32/gnuboy-go/components/gnuboy/loader.c \
 retro-go-stm32/gnuboy-go/components/gnuboy/mem.c \
 retro-go-stm32/gnuboy-go/components/gnuboy/rtc.c \
 retro-go-stm32/gnuboy-go/components/gnuboy/sound.c \
-Core/Src/porting/crc32.c \
-Core/Src/porting/nes/common.c \
+
+NES_C_SOURCES = \
 Core/Src/porting/nes/main_nes.c \
 Core/Src/porting/nes/nofrendo_stm32.c \
 retro-go-stm32/nofrendo-go/components/nofrendo/cpu/dis6502.c \
@@ -120,6 +124,6 @@ include Makefile.common
 
 $(BUILD_DIR)/$(TARGET)_extflash.bin: $(BUILD_DIR)/$(TARGET).elf | $(BUILD_DIR)
 	$(V)$(ECHO) [ BIN ] $(notdir $@)
-	$(V)$(BIN) -j ._itcram_hot -j ._ram_exec -j ._extflash $< $(BUILD_DIR)/$(TARGET)_extflash.bin
+	$(V)$(BIN) -j ._itcram_hot -j ._ram_exec -j ._extflash -j .overlay_nes -j .overlay_gb $< $(BUILD_DIR)/$(TARGET)_extflash.bin
 
 

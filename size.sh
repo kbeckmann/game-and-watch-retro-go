@@ -28,8 +28,6 @@ function get_section_length {
 function print_usage {
 	symbol=$1
 	length_symbol=$2
-    whitespace1=$3
-    whitespace2=$4
 	usage=$(get_section_length $symbol)
 	length=$(get_symbol $length_symbol)
 	free=$(( $length - $usage ))
@@ -46,7 +44,8 @@ dtc_usage=$(( dtc_size - dtc_free ))
 echo -e "dtcram\t$dtc_usage / $dtc_size ($dtc_free bytes free)"
 
 print_usage ram_uc   __RAM_UC_LENGTH__
-print_usage ram      __RAM_LENGTH__
+print_usage ram      __RAM_CORE_LENGTH__
+print_usage ram_emu  __RAM_EMU_LENGTH__
 print_usage ahbram   __AHBRAM_LENGTH__
 print_usage flash    __FLASH_LENGTH__
 print_usage extflash __EXTFLASH_LENGTH__

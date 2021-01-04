@@ -231,7 +231,7 @@ LIBDIR +=
 LDFLAGS += $(MCU) -specs=nano.specs -T$(LDSCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--gc-sections
 
 # default action: build all
-all: $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET).hex $(BUILD_DIR)/$(TARGET)_extflash.bin
+all: $(BUILD_DIR) $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET).hex $(BUILD_DIR)/$(TARGET)_extflash.bin
 
 #$(REQUIRED_FILE):
 #	$(error $(REQUIRED_FILE_MSG))
@@ -240,8 +240,11 @@ all: $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET).hex $(BUILD_DIR)/$(TARGET
 # build the application
 #######################################
 # list of objects
-OBJECTS = $(addprefix $(BUILD_DIR)/,$(notdir $(C_SOURCES:.c=.o) $(SDK_C_SOURCES:.c=.o)))
-vpath %.c $(sort $(dir $(C_SOURCES) $(SDK_C_SOURCES)))
+OBJECTS = $(addprefix $(BUILD_DIR)/core/,$(notdir $(C_SOURCES:.c=.o) $(SDK_C_SOURCES:.c=.o)))
+GNUBOY_OBJECTS = $(addprefix $(BUILD_DIR)/gnuboy/,$(notdir $(GNUBOY_C_SOURCES:.c=.o)))
+NES_OBJECTS = $(addprefix $(BUILD_DIR)/nes/,$(notdir $(NES_C_SOURCES:.c=.o)))
+
+vpath %.c $(sort $(dir $(C_SOURCES) $(NES_C_SOURCES) $(GNUBOY_C_SOURCES) $(SDK_C_SOURCES)))
 # list of ASM program objects
 OBJECTS += $(addprefix $(BUILD_DIR)/,$(notdir $(SDK_ASM_SOURCES:.s=.o)))
 vpath %.s $(sort $(dir $(SDK_ASM_SOURCES)))
@@ -292,19 +295,27 @@ CheckDirtySubmodules:
 endif
 .PHONY: CheckDirtySubmodules
 
-$(BUILD_DIR)/%.o: %.c Makefile.common Makefile $(LDSCRIPT) $(SDK_HEADERS) | $(BUILD_DIR) CheckDirtySubmodules
-	$(V)$(ECHO) [ CC ] $(notdir $<)
-	$(V)$(CC) -c $(CFLAGS) -Wa,-a,-ad,-alms=$(BUILD_DIR)/$(notdir $(<:.c=.lst)) $< -o $@
-
-$(BUILD_DIR)/%.o: %.s Makefile.common Makefile $(LDSCRIPT) | $(BUILD_DIR) CheckDirtySubmodules
+$(BUILD_DIR)/%.o: %.s Makefile.common Makefile | $(BUILD_DIR) CheckDirtySubmodules
 	$(V)$(ECHO) [ AS ] $(notdir $<)
 	$(V)$(AS) -c $(CFLAGS) $< -o $@
 
-$(BUILD_DIR)/$(TARGET).elf: $(OBJECTS) Makefile.common Makefile $(LDSCRIPT)
+$(BUILD_DIR)/$(TARGET).elf: $(OBJECTS) $(NES_OBJECTS) $(GNUBOY_OBJECTS) Makefile.common Makefile $(LDSCRIPT)
 	$(V)$(ECHO) [ LD ] $(notdir $@)
-	$(V)$(CC) $(OBJECTS) $(LDFLAGS) -o $@
+	$(V)$(CC) $(OBJECTS) $(NES_OBJECTS) $(GNUBOY_OBJECTS) $(LDFLAGS) -o $@
 	$(V)$(SZ) $@
 	$(V)./size.sh $@
+
+$(BUILD_DIR)/core/%.o: %.c Makefile Makefile.common $(SDK_HEADERS) | $(BUILD_DIR) CheckDirtySubmodules
+	$(V)$(ECHO) [ CC core ] $(notdir $<)
+	$(V)$(CC) -c $(CFLAGS) -Wa,-a,-ad,-alms=$(BUILD_DIR)/core/$(notdir $(<:.c=.lst)) $< -o $@
+
+$(BUILD_DIR)/nes/%.o: %.c Makefile Makefile.common $(SDK_HEADERS) | $(BUILD_DIR) CheckDirtySubmodules
+	$(V)$(ECHO) [ CC nes ] $(notdir $<)
+	$(V)$(CC) -c $(CFLAGS) -Wa,-a,-ad,-alms=$(BUILD_DIR)/nes/$(notdir $(<:.c=.lst)) $< -o $@
+
+$(BUILD_DIR)/gnuboy/%.o: %.c Makefile Makefile.common $(SDK_HEADERS) | $(BUILD_DIR) CheckDirtySubmodules
+	$(V)$(ECHO) [ CC gb ] $(notdir $<)
+	$(V)$(CC) -c $(CFLAGS) -Wa,-a,-ad,-alms=$(BUILD_DIR)/gnuboy/$(notdir $(<:.c=.lst)) $< -o $@
 
 $(BUILD_DIR)/%.hex: $(BUILD_DIR)/%.elf | $(BUILD_DIR)
 	$(V)$(ECHO) [ HEX ] $(notdir $@)
@@ -312,6 +323,9 @@ $(BUILD_DIR)/%.hex: $(BUILD_DIR)/%.elf | $(BUILD_DIR)
 
 $(BUILD_DIR):
 	$(V)mkdir $@
+	$(V)mkdir $@/core
+	$(V)mkdir $@/nes
+	$(V)mkdir $@/gnuboy
 
 
 #######################################

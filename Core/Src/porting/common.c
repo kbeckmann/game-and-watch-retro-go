@@ -36,3 +36,21 @@ void HAL_SAI_TxCpltCallback(SAI_HandleTypeDef *hsai)
     dma_counter++;
     dma_state = DMA_TRANSFER_STATE_TC;
 }
+
+
+bool odroid_netplay_quick_start(void)
+{
+    return true;
+}
+
+// TODO: Move to own file
+void odroid_audio_mute(bool mute)
+{
+    if (mute) {
+        for (int i = 0; i < sizeof(audiobuffer_dma) / sizeof(audiobuffer_dma[0]); i++) {
+            audiobuffer_dma[i] = 0;
+        }
+    }
+
+    audio_mute = mute;
+}
