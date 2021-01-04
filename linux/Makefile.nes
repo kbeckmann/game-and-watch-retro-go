@@ -17,6 +17,8 @@ odroid_sdcard.c \
 odroid_system.c \
 odroid_display.c \
 odroid_audio.c \
+gw_lcd.c \
+loaded_nes_rom.c \
 crc32.c \
 porting.c \
 ../retro-go-stm32/nofrendo-go/components/nofrendo/bitmap.c \
@@ -73,7 +75,6 @@ porting.c \
 ../retro-go-stm32/nofrendo-go/components/nofrendo/nes/nes_ppu.c \
 ../retro-go-stm32/nofrendo-go/components/nofrendo/nes/nes_rom.c \
 ../retro-go-stm32/nofrendo-go/components/nofrendo/nes/nes_state.c \
-../roms/nes/loaded_nes_rom.c \
 
 
 PREFIX = 

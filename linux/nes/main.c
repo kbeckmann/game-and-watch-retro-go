@@ -22,6 +22,7 @@
 #define WIDTH  320
 #define HEIGHT 240
 #define BPP      4
+#define SCALE    4
 
 
 #define APP_ID 30
@@ -283,7 +284,7 @@ int init_window(int width, int height)
 
     window = SDL_CreateWindow("emulator",
         SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-        width, height,
+        width * SCALE, height * SCALE,
         0);
     if (!window)
         return 0;

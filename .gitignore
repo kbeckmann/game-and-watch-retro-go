@@ -15,3 +15,5 @@ rom_hashes.txt
 
 Core/Src/retro-go/nes_roms.c
 Core/Src/retro-go/gb_roms.c
+
+linux/loaded_nes_rom.c
