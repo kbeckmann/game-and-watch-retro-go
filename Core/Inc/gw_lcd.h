@@ -19,7 +19,7 @@ typedef uint16_t pixel_t;
 
 
 // To be shared between NES and GB. NES is larger.
-extern uint8_t emulator_framebuffer[(256 + 8) * 240]  __attribute__((section (".emulator_data")));
+extern uint8_t emulator_framebuffer[(256 + 8 + 8) * 240]  __attribute__((section (".emulator_data")));
 
 
 // 0 => framebuffer1
