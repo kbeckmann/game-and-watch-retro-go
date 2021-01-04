@@ -24,6 +24,4 @@ xxd -i < "$INFILE" >> $OUTFILE
 echo "};" >> $OUTFILE
 echo "unsigned int cart_rom_len = $SIZE;" >> $OUTFILE
 
-echo "#define ROM_LENGTH $SIZE" > Core/Inc/rom_info.h
-
 echo "Done!"
