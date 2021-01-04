@@ -158,6 +158,7 @@ BIN = $(CP) -O binary -S
 ECHO = echo
 BASH ?= /bin/bash
 FIND = find
+TOUCH = touch
 
 #######################################
 # CFLAGS
@@ -272,7 +273,9 @@ $(BUILD_DIR)/saveflash.ld: $(BUILD_DIR)/rom_files.txt parse_roms.py | $(BUILD_DI
 Core/Src/retro-go/gb_roms.c Core/Src/retro-go/nes_roms.c: $(BUILD_DIR)/saveflash.ld | $(BUILD_DIR)
 
 # TODO: Hard-coded dependencies. Possible to solve in a nicer way?
-Core/Src/retro-go/rom_manager.c: Core/Src/retro-go/gb_roms.c Core/Src/retro-go/nes_roms.c
+Core/Src/retro-go/rom_manager.c: Core/Src/retro-go/gb_roms.c Core/Src/retro-go/nes_roms.c $(BUILD_DIR)/rom_files.txt
+	$(V)$(TOUCH) $@
+
 STM32H7B0VBTx_FLASH.ld: $(BUILD_DIR)/saveflash.ld
 
 Core/Src/main.c: Core/Inc/githash.h
@@ -351,9 +354,6 @@ flash_extmem: $(BUILD_DIR)/$(TARGET)_extflash.bin
 
 # Programs both the external and internal flash.
 flash_all:
-	@# HACK: Ensure that the generated rom files are updated in case building in parallel
-	$(V)$(MAKE) $(BUILD_DIR)/rom_manager.o
-
 	$(V)$(MAKE) flash_extmem
 	$(V)$(MAKE) flash
 .PHONY: flash_all
