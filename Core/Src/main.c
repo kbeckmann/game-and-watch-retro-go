@@ -1043,14 +1043,12 @@ void MPU_Config(void)
 
     HAL_MPU_ConfigRegion(&MPU_InitStruct);
   }
-  
-#ifdef DISABLE_AHBRAM_DCACHE
-  /** Initializes and configures the Region and the memory to be protected
-  */
+
+  /* Uncached areas lead to unalignment issues. Only protect the first 256+32+8+4 kB */
   MPU_InitStruct.Enable = MPU_REGION_ENABLE;
   MPU_InitStruct.Number = MPU_REGION_NUMBER3;
   MPU_InitStruct.BaseAddress = 0x24000000;
-  MPU_InitStruct.Size = MPU_REGION_SIZE_512KB;
+  MPU_InitStruct.Size = MPU_REGION_SIZE_256KB;
   MPU_InitStruct.SubRegionDisable = 0x0;
   MPU_InitStruct.TypeExtField = MPU_TEX_LEVEL0;
   MPU_InitStruct.AccessPermission = MPU_REGION_FULL_ACCESS;
@@ -1059,8 +1057,26 @@ void MPU_Config(void)
   MPU_InitStruct.IsCacheable = MPU_ACCESS_NOT_CACHEABLE;
   MPU_InitStruct.IsBufferable = MPU_ACCESS_NOT_BUFFERABLE;
 
+  // 0x24000000 -> +256kB
   HAL_MPU_ConfigRegion(&MPU_InitStruct);
-#endif
+
+  // 0x24000000 + 256kB -> +32kB
+  MPU_InitStruct.Number = MPU_REGION_NUMBER4;
+  MPU_InitStruct.BaseAddress = 0x24000000 + 256 * 1024;
+  MPU_InitStruct.Size = MPU_REGION_SIZE_32KB;
+  HAL_MPU_ConfigRegion(&MPU_InitStruct);
+
+  // 0x24000000 + 256kB + 32kB -> +8kB
+  MPU_InitStruct.Number = MPU_REGION_NUMBER5;
+  MPU_InitStruct.BaseAddress = 0x24000000 + (256 + 32) * 1024;
+  MPU_InitStruct.Size = MPU_REGION_SIZE_8KB;
+  HAL_MPU_ConfigRegion(&MPU_InitStruct);
+
+  // 0x24000000 + 256kB + 32kB + 8kB -> +4kB
+  MPU_InitStruct.Number = MPU_REGION_NUMBER6;
+  MPU_InitStruct.BaseAddress = 0x24000000 + (256 + 32 + 8) * 1024;
+  MPU_InitStruct.Size = MPU_REGION_SIZE_4KB;
+  HAL_MPU_ConfigRegion(&MPU_InitStruct);
 
   /* Enables the MPU */
   HAL_MPU_Enable(MPU_HFNMI_PRIVDEF);

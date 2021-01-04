@@ -66,7 +66,8 @@ _Min_Stack_Size = 20 * 1024; /* required amount of stack */
 __NULLPTR_LENGTH__  = 0x100;
 __ITCMRAM_LENGTH__  = 64K;
 __DTCMRAM_LENGTH__  = 128K;
-__RAM_LENGTH__      = 1024K;
+__RAM_UC_LENGTH__   = 304K;
+__RAM_LENGTH__      = 1024K - 304K;
 __AHBRAM_LENGTH__   = 128K;
 __FLASH_LENGTH__    = 128K;
 
@@ -87,7 +88,8 @@ MEMORY
   NULLPTR  (xrw) : ORIGIN = 0x00000000, LENGTH =   __NULLPTR_LENGTH__
   ITCMRAM  (xrw) : ORIGIN = 0x00000000 + __NULLPTR_LENGTH__, LENGTH =   64K - __NULLPTR_LENGTH__
   DTCMRAM  (xrw) : ORIGIN = 0x20000000, LENGTH =  __DTCMRAM_LENGTH__
-  RAM      (xrw) : ORIGIN = 0x24000000, LENGTH = __RAM_LENGTH__
+  RAM_UC   (xrw) : ORIGIN = 0x24000000, LENGTH = __RAM_UC_LENGTH__
+  RAM      (xrw) : ORIGIN = 0x2404c000, LENGTH = __RAM_LENGTH__
   AHBRAM   (xrw) : ORIGIN = 0x30000000, LENGTH =  __AHBRAM_LENGTH__
 
   /* FLASH */
@@ -124,6 +126,14 @@ SECTIONS
     __itcram_hot_end__ = .;
   } >ITCMRAM AT> EXTFLASH
 
+  /* Uncached and unbuffered memory for the LCD framebuffers */
+  ._ram_uc :
+  {
+    __ram_uc_start__ = .;
+    . = ALIGN(4);
+    *(.lcd)
+    __ram_uc_end__ = .;
+  } > RAM_UC
 
   /* Data that should be copied from extflash to axiram */
   /* used by the startup to initialize data */
@@ -146,8 +156,6 @@ SECTIONS
     build/nes*.o (.text .text* .rodata .rodata*)
     . = ALIGN(4);
     build/map*.o (.text .text* .rodata .rodata*)
-    . = ALIGN(4);
-    build/rg*.o (.text .text* .rodata .rodata*)
     . = ALIGN(4);
     build/main_gb.o  (.text .text* .rodata .rodata*)
     . = ALIGN(4);
@@ -200,11 +208,9 @@ SECTIONS
     __saveflash_end__ = .;
   } > SAVEFLASH
 
-
   ._ram :
   {
     . = ALIGN(4);
-    *(.lcd)
     *(.emulator_data)
     *(.emulator_text)
     *(.log_data)
