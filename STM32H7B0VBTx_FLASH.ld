@@ -67,12 +67,17 @@ __NULLPTR_LENGTH__  = 0x100;
 __ITCMRAM_LENGTH__  = 64K;
 __DTCMRAM_LENGTH__  = 128K;
 __RAM_UC_LENGTH__   = 300K;
-__RAM_LENGTH__      = 1024K - 300K;
+__RAM_CORE_LENGTH__ = 100K;
+__RAM_EMU_LENGTH__  = 1024K - __RAM_UC_LENGTH__ - __RAM_CORE_LENGTH__;
 __AHBRAM_LENGTH__   = 128K;
 __FLASH_LENGTH__    = 128K;
 
 __EXTFLASH_START__  = 0x90000000;
 
+__RAM_START__       = 0x24000000;
+__RAM_UC_START__    = __RAM_START__;
+__RAM_CORE_START__  = __RAM_START__ + __RAM_UC_LENGTH__;
+__RAM_EMU_START__    = __RAM_CORE_START__ + __RAM_CORE_LENGTH__;
 
 /* saveflash.ld sets __SAVEFLASH_LENGTH__ */
 INCLUDE build/saveflash.ld
@@ -86,10 +91,11 @@ MEMORY
 {
   /* RAM */
   NULLPTR  (xrw) : ORIGIN = 0x00000000, LENGTH =   __NULLPTR_LENGTH__
-  ITCMRAM  (xrw) : ORIGIN = 0x00000000 + __NULLPTR_LENGTH__, LENGTH =   64K - __NULLPTR_LENGTH__
+  ITCMRAM  (xrw) : ORIGIN = 0x00000000 + __NULLPTR_LENGTH__, LENGTH = __ITCMRAM_LENGTH__ - __NULLPTR_LENGTH__
   DTCMRAM  (xrw) : ORIGIN = 0x20000000, LENGTH =  __DTCMRAM_LENGTH__
-  RAM_UC   (xrw) : ORIGIN = 0x24000000, LENGTH = __RAM_UC_LENGTH__
-  RAM      (xrw) : ORIGIN = 0x24000000 + __RAM_UC_LENGTH__, LENGTH = __RAM_LENGTH__
+  RAM_UC   (xrw) : ORIGIN = __RAM_UC_START__, LENGTH = __RAM_UC_LENGTH__
+  RAM      (xrw) : ORIGIN = __RAM_CORE_START__, LENGTH = __RAM_CORE_LENGTH__
+  RAM_EMU  (xrw) : ORIGIN = __RAM_EMU_START__, LENGTH = __RAM_EMU_LENGTH__
   AHBRAM   (xrw) : ORIGIN = 0x30000000, LENGTH =  __AHBRAM_LENGTH__
 
   /* FLASH */
@@ -150,20 +156,6 @@ SECTIONS
     _sram_data = .;
     *(.ram_data)
     _eram_data = .;
-    . = ALIGN(4);
-    __extflash_odroid_start__ = .;
-    . = ALIGN(4);
-    build/nes*.o (.text .text* .rodata .rodata*)
-    . = ALIGN(4);
-    build/map*.o (.text .text* .rodata .rodata*)
-    . = ALIGN(4);
-    build/main_gb.o  (.text .text* .rodata .rodata*)
-    . = ALIGN(4);
-    build/dis6502.o (.text .text* .rodata .rodata*)
-    . = ALIGN(4);
-    build/cpu.o (.text .text* .rodata .rodata*)
-    . = ALIGN(4);
-    __extflash_odroid_end__ = .;
     __ram_exec_end__ = .;
   } >RAM AT> EXTFLASH
 
@@ -173,15 +165,15 @@ SECTIONS
     __extflash_nes_start__ = .;
     build/rom_*.o (.text .text* .rodata .rodata*)
     . = ALIGN(4);
-    build/miniz.o (.text .text* .rodata .rodata*)
+    build/core/miniz.o (.text .text* .rodata .rodata*)
     . = ALIGN(4);
-    build/lupng.o (.text .text* .rodata .rodata*)
+    build/core/lupng.o (.text .text* .rodata .rodata*)
     . = ALIGN(4);
-    build/gui.o (.text .text* .rodata .rodata*)
+    build/core/gui.o (.text .text* .rodata .rodata*)
     . = ALIGN(4);
-    build/sound.o  (.text .text* .rodata .rodata*)
+    build/core/logo*.o (.text .text* .rodata .rodata*)
     . = ALIGN(4);
-    build/logo*.o (.text .text* .rodata .rodata*)
+    build/core/header*.o (.text .text* .rodata .rodata*)
     . = ALIGN(4);
     __extflash_end_start__ = .;
     . = ALIGN(4);
@@ -200,6 +192,51 @@ SECTIONS
     __extflash_game_rom_end__ = .;
     __extflash_end__ = .;
   } > EXTFLASH
+
+  .overlay_nes __RAM_EMU_START__ : {
+      . = ALIGN(4);
+      build/nes/*.o (.data. data* .text .text* .rodata .rodata*)
+      . = ALIGN(4);
+      _OVERLAY_NES_LOAD_END = .;
+  } AT> EXTFLASH
+  _OVERLAY_NES_LOAD_START = LOADADDR(.overlay_nes);
+  _OVERLAY_NES_SIZE = SIZEOF(.overlay_nes);
+
+  .overlay_nes_bss _OVERLAY_NES_LOAD_END : {
+    . = ALIGN(4);
+    _OVERLAY_NES_BSS_START = .;
+    build/nes/*.o (.bss .bss*)
+    . = ALIGN(4);
+    build/nes/*.o (COMMON)
+    _OVERLAY_NES_BSS_END = .;
+  }
+  _OVERLAY_NES_BSS_SIZE = SIZEOF(.overlay_nes_bss);
+
+  .overlay_gb __RAM_EMU_START__ : {
+    . = ALIGN(4);
+    build/gnuboy/*.o (.data .data* .text .text* .rodata .rodata*)
+    . = ALIGN(4);
+    _OVERLAY_GB_LOAD_END = .;
+  } AT> EXTFLASH
+  _OVERLAY_GB_LOAD_START = LOADADDR(.overlay_gb);
+  _OVERLAY_GB_SIZE = SIZEOF(.overlay_gb);
+
+  .overlay_gb_bss _OVERLAY_GB_LOAD_END : {
+    . = ALIGN(4);
+    _OVERLAY_GB_BSS_START = .;
+    build/gnuboy/*.o (COMMON)
+    . = ALIGN(4);
+    build/gnuboy/*.o (.bss .bss*)
+    _OVERLAY_GB_BSS_END = .;
+  }
+  _OVERLAY_GB_BSS_SIZE = SIZEOF(.overlay_gb_bss);
+
+
+  ._ram_space_check_nes : {
+    . = . + SIZEOF(.overlay_nes);
+    . = . + SIZEOF(.overlay_nes_bss);
+  } >RAM_EMU
+
 
   ._saveflash :
   {
@@ -227,6 +264,7 @@ SECTIONS
     __ahbram_start__ = .;
     . = ALIGN(4);
     *(.audio)
+    *(.ahb)
     . = ALIGN(4);
     __ahbram_end__ = .;
   } > AHBRAM
