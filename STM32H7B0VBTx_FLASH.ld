@@ -67,7 +67,7 @@ __NULLPTR_LENGTH__  = 0x100;
 __ITCMRAM_LENGTH__  = 64K;
 __DTCMRAM_LENGTH__  = 128K;
 __RAM_UC_LENGTH__   = 300K;
-__RAM_CORE_LENGTH__ = 100K;
+__RAM_CORE_LENGTH__ = 68K;
 __RAM_EMU_LENGTH__  = 1024K - __RAM_UC_LENGTH__ - __RAM_CORE_LENGTH__;
 __AHBRAM_LENGTH__   = 128K;
 __FLASH_LENGTH__    = 128K;
@@ -251,11 +251,6 @@ SECTIONS
     *(.emulator_data)
     *(.emulator_text)
     *(.log_data)
-    . = ALIGN(16);
-    _heap_start = . ;
-    . = . + _Heap_Size;
-    . = ALIGN(16);
-    _heap_end = . ;
     __ram_end__ = .;
   } > RAM
 
@@ -376,6 +371,15 @@ SECTIONS
     . = ALIGN(8);
     *(.persistent)
     . = ALIGN(8);
+  } >DTCMRAM
+
+  ._user_heap :
+  {
+    . = ALIGN(16);
+    _heap_start = . ;
+    . = . + _Heap_Size;
+    . = ALIGN(16);
+    _heap_end = . ;
   } >DTCMRAM
 
   /* User_heap_stack section, used to check that there is enough RAM left */
