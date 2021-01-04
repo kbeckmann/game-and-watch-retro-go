@@ -2,7 +2,7 @@ TARGET = retro-go-nes
 
 DEBUG = 1
 #OPT = -Og -ggdb
-OPT = -Og -ggdb -fsanitize=address
+OPT = -O0 -ggdb3 -fsanitize=address
 
 BUILD_DIR = build
 
