@@ -102,13 +102,34 @@ retro-go-stm32/nofrendo-go/components/nofrendo/nes/nes_rom.c \
 retro-go-stm32/nofrendo-go/components/nofrendo/nes/nes_state.c \
 retro-go-stm32/nofrendo-go/components/nofrendo/nes/nes.c
 
+SMSPLUSGX_C_SOURCES = \
+retro-go-stm32/smsplusgx-go/components/smsplus/loadrom.c \
+retro-go-stm32/smsplusgx-go/components/smsplus/render.c \
+retro-go-stm32/smsplusgx-go/components/smsplus/sms.c \
+retro-go-stm32/smsplusgx-go/components/smsplus/state.c \
+retro-go-stm32/smsplusgx-go/components/smsplus/vdp.c \
+retro-go-stm32/smsplusgx-go/components/smsplus/pio.c \
+retro-go-stm32/smsplusgx-go/components/smsplus/tms.c \
+retro-go-stm32/smsplusgx-go/components/smsplus/memz80.c \
+retro-go-stm32/smsplusgx-go/components/smsplus/system.c \
+retro-go-stm32/smsplusgx-go/components/smsplus/cpu/z80.c \
+retro-go-stm32/smsplusgx-go/components/smsplus/sound/emu2413.c \
+retro-go-stm32/smsplusgx-go/components/smsplus/sound/fmintf.c \
+retro-go-stm32/smsplusgx-go/components/smsplus/sound/sn76489.c \
+retro-go-stm32/smsplusgx-go/components/smsplus/sound/sms_sound.c \
+retro-go-stm32/smsplusgx-go/components/smsplus/sound/ym2413.c \
+Core/Src/porting/smsplusgx/main_smsplusgx.c
+
 C_INCLUDES +=  \
 -Iretro-go-stm32/nofrendo-go/components/nofrendo/cpu \
 -Iretro-go-stm32/nofrendo-go/components/nofrendo/mappers \
 -Iretro-go-stm32/nofrendo-go/components/nofrendo/nes \
 -Iretro-go-stm32/nofrendo-go/components/nofrendo \
 -Iretro-go-stm32/components/odroid \
--Iretro-go-stm32/gnuboy-go/components
+-Iretro-go-stm32/gnuboy-go/components \
+-Iretro-go-stm32/smsplusgx-go/components/smsplus \
+-Iretro-go-stm32/smsplusgx-go/components/smsplus/cpu \
+-Iretro-go-stm32/smsplusgx-go/components/smsplus/sound
 
 
 C_DEFS += \
@@ -124,6 +145,6 @@ include Makefile.common
 
 $(BUILD_DIR)/$(TARGET)_extflash.bin: $(BUILD_DIR)/$(TARGET).elf | $(BUILD_DIR)
 	$(V)$(ECHO) [ BIN ] $(notdir $@)
-	$(V)$(BIN) -j ._itcram_hot -j ._ram_exec -j ._extflash -j .overlay_nes -j .overlay_gb $< $(BUILD_DIR)/$(TARGET)_extflash.bin
+	$(V)$(BIN) -j ._itcram_hot -j ._ram_exec -j ._extflash -j .overlay_nes -j .overlay_gb -j .overlay_sms $< $(BUILD_DIR)/$(TARGET)_extflash.bin
 
 

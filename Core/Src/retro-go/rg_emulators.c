@@ -12,9 +12,10 @@
 #include "main.h"
 #include "main_gb.h"
 #include "main_nes.h"
+#include "main_smsplusgx.h"
 
 // Increase when adding new emulators
-#define MAX_EMULATORS 2
+#define MAX_EMULATORS 4
 static retro_emulator_t emulators[MAX_EMULATORS];
 static int emulators_count = 0;
 
@@ -387,6 +388,12 @@ void emulator_start(retro_emulator_file_t *file, bool load_state)
         memset(&_OVERLAY_NES_BSS_START, 0x0, (size_t)&_OVERLAY_NES_BSS_SIZE);
         SCB_CleanDCache_by_Addr((uint32_t *)&__RAM_EMU_START__, (size_t)&_OVERLAY_NES_SIZE);
         app_main_nes(load_state);
+    } else if(strcmp(emu->system_name, "Sega Master System") == 0 ||
+              strcmp(emu->system_name, "Sega Game Gear") == 0) {
+        memcpy(&__RAM_EMU_START__, &_OVERLAY_SMS_LOAD_START, (size_t)&_OVERLAY_SMS_SIZE);
+        memset(&_OVERLAY_SMS_BSS_START, 0x0, (size_t)&_OVERLAY_SMS_BSS_SIZE);
+        SCB_CleanDCache_by_Addr((uint32_t *)&__RAM_EMU_START__, (size_t)&_OVERLAY_SMS_SIZE);
+        app_main_smsplusgx(load_state);
     }
     
 }
@@ -397,8 +404,8 @@ void emulators_init()
     add_emulator("Nintendo Entertainment System", "nes", "nes", "nofrendo-go", 16, logo_nes, header_nes);
     
     // add_emulator("Nintendo Gameboy Color", "gbc", "gbc", "gnuboy-go", 0, logo_gbc, header_gbc);
-    // add_emulator("Sega Master System", "sms", "sms", "smsplusgx-go", 0, logo_sms, header_sms);
-    // add_emulator("Sega Game Gear", "gg", "gg", "smsplusgx-go", 0, logo_gg, header_gg);
+    add_emulator("Sega Master System", "sms", "sms", "smsplusgx-go", 0, logo_sms, header_sms);
+    add_emulator("Sega Game Gear", "gg", "gg", "smsplusgx-go", 0, logo_gg, header_gg);
     // add_emulator("ColecoVision", "col", "col", "smsplusgx-go", 0, logo_col, header_col);
     // add_emulator("PC Engine", "pce", "pce", "huexpress-go", 0, logo_pce, header_pce);
     // add_emulator("Atari Lynx", "lnx", "lnx", "handy-go", 64, logo_lnx, header_lnx);

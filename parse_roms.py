@@ -139,6 +139,10 @@ class ROMParser():
 
         if folder == "nes":
             save_size = 24 * 1024
+        elif folder == "sms":
+            save_size = 60 * 1024
+        elif folder == "gg":
+            save_size = 60 * 1024
         else:
             save_size = 0
 
@@ -178,6 +182,14 @@ class ROMParser():
         total_rom_size += rom_size
 
         save_size, rom_size = self.generate_system("Core/Src/retro-go/nes_roms.c", "Nintendo Entertainment System", "nes_system", "nes", ["nes"], "ROM_NES_", "SAVE_NES_")
+        total_save_size += save_size
+        total_rom_size += rom_size
+
+        save_size, rom_size = self.generate_system("Core/Src/retro-go/sms_roms.c", "Sega Master System", "sms_system", "sms", ["sms"], "ROM_SMS_", "SAVE_SMS_")
+        total_save_size += save_size
+        total_rom_size += rom_size
+
+        save_size, rom_size = self.generate_system("Core/Src/retro-go/gg_roms.c", "Sega Game Gear", "gg_system", "gg", ["gg"], "ROM_GG_", "SAVE_GG_")
         total_save_size += save_size
         total_rom_size += rom_size
 

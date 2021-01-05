@@ -234,14 +234,33 @@ SECTIONS
   }
   _OVERLAY_GB_BSS_SIZE = SIZEOF(.overlay_gb_bss);
 
+  .overlay_sms __RAM_EMU_START__ : {
+      . = ALIGN(4);
+      build/smsplusgx/*.o (.data. data* .text .text* .rodata .rodata*)
+      . = ALIGN(4);
+      _OVERLAY_SMS_LOAD_END = .;
+  } AT> EXTFLASH
+  _OVERLAY_SMS_LOAD_START = LOADADDR(.overlay_sms);
+  _OVERLAY_SMS_SIZE = SIZEOF(.overlay_sms);
+
+  .overlay_sms_bss _OVERLAY_SMS_LOAD_END : {
+    . = ALIGN(4);
+    _OVERLAY_SMS_BSS_START = .;
+    build/smsplusgx/*.o (.bss .bss*)
+    . = ALIGN(4);
+    build/smsplusgx/*.o (COMMON)
+    _OVERLAY_SMS_BSS_END = .;
+  }
+  _OVERLAY_SMS_BSS_SIZE = SIZEOF(.overlay_sms_bss);
+
   /* Place this symbol after the last overlay definition */
   .overlay_end : {
     __extflash_end__ = .;
   } AT> EXTFLASH
 
-  ._ram_space_check_nes : {
-    . = . + SIZEOF(.overlay_nes);
-    . = . + SIZEOF(.overlay_nes_bss);
+  ._ram_space_check_sms : {
+    . = . + SIZEOF(.overlay_sms);
+    . = . + SIZEOF(.overlay_sms_bss);
   } >RAM_EMU
 
 
