@@ -137,6 +137,18 @@ docker run --rm -it --privileged -v /dev/bus/usb:/dev/bus/usb kbeckmann/retro-go
 
 ```
 
+# Backing up and restoring save state files
+
+Save states can be backed up using `./dump_saves.sh build/gw_retro_go.elf`. Make sure to use the elf file that matches what is running on your device! It is a good idea to keep this elf file in case you want to back up at a later time.
+
+This downloads all save states to the local directory `./save_states`. Each save state will be located in `./save_states/<emu>/<rom name>.save`.
+
+After this, it's safe to change roms, pull new code and build & flash the device.
+
+Save states can then be programmed to the device using a newer elf file with new code and roms. To do this, run `./program_saves.sh build/gw_retro_go.elf` - this time with the _new_ elf file that matches what's running on the device. Save this elf file for backup later on.
+
+`program_saves.sh` will upload all save state files that you have backed up that are also included in the elf file. E.g Let's say you back up saves for rom A, B and C. Later on, you add a new rom D but remove A, then build and flash. When running the script, the save states for B and C will be programmed and nothing else.
+
 
 # Contact, discussion
 
