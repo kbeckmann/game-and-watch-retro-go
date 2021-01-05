@@ -34,3 +34,7 @@ extern void * _OVERLAY_GB_LOAD_START[];
 extern uint8_t _OVERLAY_GB_SIZE;
 extern void * _OVERLAY_GB_BSS_START[];
 extern uint8_t _OVERLAY_GB_BSS_SIZE;
+extern void * _OVERLAY_SMS_LOAD_START[];
+extern uint8_t _OVERLAY_SMS_SIZE;
+extern void * _OVERLAY_SMS_BSS_START[];
+extern uint8_t _OVERLAY_SMS_BSS_SIZE;
