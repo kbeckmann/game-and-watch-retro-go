@@ -213,11 +213,11 @@ void store_erase(const uint8_t *flash_ptr, size_t size)
   while (bytes_left > 0) {
     OSPI_NOR_WriteEnable(&hospi1);
 
-    if (bytes_left >= 64*1024) {
+    if ((bytes_left >= 64*1024) && ((address & (64 * 1024 - 1)) == 0)) {
       printf("Erasing block (64kB): 0x%08lx (%ld left)\n", address, bytes_left);
       OSPI_BlockErase64(&hospi1, (uint32_t) address);
       erase_size = 64 * 1024;
-    } else if (bytes_left >= 32*1024) {
+    } else if ((bytes_left >= 32*1024) && ((address & (32 * 1024 - 1)) == 0)) {
       printf("Erasing block (32kB): 0x%08lx (%ld left)\n", address, bytes_left);
       OSPI_BlockErase32(&hospi1, (uint32_t) address);
       erase_size = 32 * 1024;
