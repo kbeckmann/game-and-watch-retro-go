@@ -13,7 +13,9 @@
 #include "main_gb.h"
 #include "main_nes.h"
 
-static retro_emulator_t emulators[16];
+// Increase when adding new emulators
+#define MAX_EMULATORS 2
+static retro_emulator_t emulators[MAX_EMULATORS];
 static int emulators_count = 0;
 
 static void event_handler(gui_event_t event, tab_t *tab)
@@ -84,6 +86,7 @@ static void event_handler(gui_event_t event, tab_t *tab)
 static void add_emulator(const char *system, const char *dirname, const char* ext, const char *part,
                           uint16_t crc_offset, const void *logo, const void *header)
 {
+    assert(emulators_count <= MAX_EMULATORS);
     retro_emulator_t *p = &emulators[emulators_count++];
     strcpy(p->system_name, system);
     strcpy(p->dirname, dirname);
@@ -109,6 +112,7 @@ void emulator_init(retro_emulator_t *emu)
 
     const rom_system_t *system = rom_manager_system(&rom_mgr, emu->system_name);
     if(system) {
+        // TODO: Refactor so we don't need to allocate and copy constant data.
         emu->roms.files = rg_alloc(system->roms_count * sizeof(retro_emulator_file_t), MEM_ANY);
         for(int i=0; i < system->roms_count; i++) {
             const rom_entry_t *rom = &system->roms[i];
@@ -119,8 +123,8 @@ void emulator_init(retro_emulator_t *emu)
             file->size = rom->size;
             file->save_address = rom->save_address;
             file->save_size = rom->save_size;
-            strcpy(file->name, rom->rom_name);
-            strcpy(file->ext, system->extension);
+            file->name = rom->rom_name;
+            file->ext = system->extension;
             file->region = rom->region;
         }
     } else {

@@ -14,7 +14,7 @@ typedef struct {
 } rom_entry_t;
 
 typedef struct {
-    char system_name[64];
+    char *system_name;
     const rom_entry_t *roms;
     char *extension;
     uint32_t roms_count;

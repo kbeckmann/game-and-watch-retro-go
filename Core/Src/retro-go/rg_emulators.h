@@ -11,8 +11,8 @@ typedef enum
 } rom_region_t;
 
 typedef struct {
-    char name[128];
-    char ext[8];
+    const char *name;
+    const char *ext;
     // char folder[32];
     uint8_t *address;
     size_t size;
