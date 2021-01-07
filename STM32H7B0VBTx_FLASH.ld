@@ -190,14 +190,14 @@ SECTIONS
     __extflash_game_rom_start__ = .;
     *(.extflash_game_rom)
     __extflash_game_rom_end__ = .;
-    __extflash_end__ = .;
   } > EXTFLASH
 
   .overlay_nes __RAM_EMU_START__ : {
-      . = ALIGN(4);
-      build/nes/*.o (.data. data* .text .text* .rodata .rodata*)
-      . = ALIGN(4);
-      _OVERLAY_NES_LOAD_END = .;
+    . = ALIGN(4);
+    __ram_emu_nes_start__ = .;
+    build/nes/*.o (.data. data* .text .text* .rodata .rodata*)
+    . = ALIGN(4);
+    _OVERLAY_NES_LOAD_END = .;
   } AT> EXTFLASH
   _OVERLAY_NES_LOAD_START = LOADADDR(.overlay_nes);
   _OVERLAY_NES_SIZE = SIZEOF(.overlay_nes);
@@ -209,11 +209,13 @@ SECTIONS
     . = ALIGN(4);
     build/nes/*.o (COMMON)
     _OVERLAY_NES_BSS_END = .;
+    __ram_emu_nes_end__ = .;
   }
   _OVERLAY_NES_BSS_SIZE = SIZEOF(.overlay_nes_bss);
 
   .overlay_gb __RAM_EMU_START__ : {
     . = ALIGN(4);
+    __ram_emu_gb_start__ = .;
     build/gnuboy/*.o (.data .data* .text .text* .rodata .rodata*)
     . = ALIGN(4);
     _OVERLAY_GB_LOAD_END = .;
@@ -228,9 +230,14 @@ SECTIONS
     . = ALIGN(4);
     build/gnuboy/*.o (.bss .bss*)
     _OVERLAY_GB_BSS_END = .;
+    __ram_emu_gb_end__ = .;
   }
   _OVERLAY_GB_BSS_SIZE = SIZEOF(.overlay_gb_bss);
 
+  /* Place this symbol after the last overlay definition */
+  .overlay_end : {
+    __extflash_end__ = .;
+  } AT> EXTFLASH
 
   ._ram_space_check_nes : {
     . = . + SIZEOF(.overlay_nes);
