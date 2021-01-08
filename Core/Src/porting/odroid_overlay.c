@@ -34,6 +34,7 @@ int odroid_overlay_game_menu()
 #include "bitmaps/font_basic.h"
 #include "odroid_system.h"
 #include "odroid_overlay.h"
+#include "main.h"
 
 // static uint16_t *overlay_buffer = NULL;
 static uint16_t overlay_buffer[ODROID_SCREEN_WIDTH * 32 * 2]  __attribute__ ((aligned (4)));
@@ -290,10 +291,12 @@ int odroid_overlay_dialog(const char *header, odroid_dialog_choice_t *options, i
 
     odroid_overlay_draw_dialog(header, options, sel);
 
-    while (odroid_input_key_is_pressed(ODROID_INPUT_ANY));
+    while (odroid_input_key_is_pressed(ODROID_INPUT_ANY))
+        wdog_refresh();
 
     while (1)
     {
+        wdog_refresh();
         odroid_input_read_gamepad(&joystick);
         if (last_key >= 0) {
             if (!joystick.values[last_key]) {
@@ -558,7 +561,8 @@ int odroid_overlay_game_settings_menu(odroid_dialog_choice_t *extra_options)
     runtime_stats_t stats = odroid_system_get_stats();
 
     odroid_audio_mute(true);
-    while (odroid_input_key_is_pressed(ODROID_INPUT_ANY));
+    while (odroid_input_key_is_pressed(ODROID_INPUT_ANY))
+        wdog_refresh();
     draw_game_status_bar(stats);
 
     int r = odroid_overlay_settings_menu(options);
@@ -580,7 +584,8 @@ int odroid_overlay_game_debug_menu(void)
         ODROID_DIALOG_CHOICE_LAST
     };
 
-    while (odroid_input_key_is_pressed(ODROID_INPUT_ANY));
+    while (odroid_input_key_is_pressed(ODROID_INPUT_ANY))
+        wdog_refresh();
     return odroid_overlay_dialog("Debugging", options, 0);
 }
 
@@ -601,7 +606,8 @@ int odroid_overlay_game_menu(odroid_dialog_choice_t *extra_options)
     runtime_stats_t stats = odroid_system_get_stats();
 
     odroid_audio_mute(true);
-    while (odroid_input_key_is_pressed(ODROID_INPUT_ANY));
+    while (odroid_input_key_is_pressed(ODROID_INPUT_ANY))
+        wdog_refresh();
     draw_game_status_bar(stats);
 
     lcd_sync();

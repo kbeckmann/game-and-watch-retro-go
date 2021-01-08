@@ -558,7 +558,7 @@ void app_main_gb(uint8_t load_state)
 
     while (true)
     {
-
+        wdog_refresh();
 
         odroid_input_read_gamepad(&joystick);
 
