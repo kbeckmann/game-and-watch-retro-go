@@ -747,6 +747,8 @@ void HAL_WWDG_EarlyWakeupCallback(WWDG_HandleTypeDef *hwwdg)
     /* If you end up here, the watchdog is about to bark ! */
     /* Uncomment the following line for catching it while debugging: */
     //__asm("bkpt 1");
+
+    boot_magic_set(BOOT_MAGIC_WATCHDOG);
 }
 
 /* USER CODE END 1 */

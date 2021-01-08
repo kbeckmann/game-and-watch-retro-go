@@ -76,8 +76,6 @@ uint32_t log_idx;
 
 uint32_t boot_buttons;
 
-#define BOOT_MAGIC_STANDBY  0xfedebeda
-#define BOOT_MAGIC_RESET    0x1fa1afe1
 __attribute__((used)) __attribute__((section (".persistent"))) volatile uint32_t boot_magic;
 
 /* USER CODE END PV */
@@ -255,6 +253,16 @@ void store_save(const uint8_t *flash_ptr, const uint8_t *data, size_t size)
   OSPI_EnableMemoryMappedMode(&hospi1);
 }
 
+void boot_magic_set(uint32_t magic)
+{
+  boot_magic = magic;
+}
+
+uint32_t boot_magic_get(void)
+{
+  return boot_magic;
+}
+
 void GW_EnterDeepSleep(void)
 {
   // Stop SAI DMA (audio)
@@ -304,7 +312,7 @@ static void memcpy_no_check(uint32_t *dst, uint32_t *src, size_t len)
 
 void wdog_refresh()
 {
-    HAL_WWDG_Refresh(&hwwdg1);
+  HAL_WWDG_Refresh(&hwwdg1);
 }
 
 /* USER CODE END 0 */
@@ -333,6 +341,9 @@ int main(void)
     break;
   case BOOT_MAGIC_RESET:
     printf("Boot from warm reset. boot_magic=0x%08lx\n", boot_magic);
+    break;
+  case BOOT_MAGIC_WATCHDOG:
+    printf("Boot from watchdog reset! boot_magic=0x%08lx\n", boot_magic);
     break;
   default:
     printf("Boot from brownout? boot_magic=0x%08lx\n", boot_magic);

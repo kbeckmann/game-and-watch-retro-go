@@ -102,6 +102,8 @@ void Error_Handler(void);
 void BSOD(BSOD_t fault, void *pc, void *lr) __attribute__((noreturn));
 void store_erase(const uint8_t *flash_ptr, size_t size);
 void store_save(const uint8_t *flash_ptr, const uint8_t *data, size_t size);
+void boot_magic_set(uint32_t magic);
+uint32_t boot_magic_get(void);
 
 /* USER CODE BEGIN EFP */
 
@@ -135,6 +137,10 @@ void wdog_refresh(void);
 #define BTN_B_Pin GPIO_PIN_5
 #define BTN_B_GPIO_Port GPIOD
 /* USER CODE BEGIN Private defines */
+
+#define BOOT_MAGIC_STANDBY  0xfedebeda
+#define BOOT_MAGIC_RESET    0x1fa1afe1
+#define BOOT_MAGIC_WATCHDOG 0xd066cafe
 
 /* USER CODE END Private defines */
 
