@@ -141,6 +141,7 @@ void wdog_refresh(void);
 #define BOOT_MAGIC_STANDBY  0xfedebeda
 #define BOOT_MAGIC_RESET    0x1fa1afe1
 #define BOOT_MAGIC_WATCHDOG 0xd066cafe
+#define BOOT_MAGIC_BSOD     0xbad00000
 
 /* USER CODE END Private defines */
 

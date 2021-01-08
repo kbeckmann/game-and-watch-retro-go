@@ -162,6 +162,9 @@ __attribute__((optimize("-O0"))) void BSOD(BSOD_t fault, void *pc, void *lr)
     wdog_refresh();
   }
 
+  // Encode the fault type in the boot magic
+  boot_magic = BOOT_MAGIC_BSOD | (fault & 0xffff);
+
   HAL_NVIC_SystemReset();
 
   // Does not return
