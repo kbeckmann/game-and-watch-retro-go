@@ -194,7 +194,7 @@ void retro_loop()
                 }
                 gui_redraw();
             }
-            else if (last_key == ODROID_INPUT_SELECT) {
+            else if (last_key == ODROID_INPUT_VOLUME) {
                 odroid_dialog_choice_t choices[] = {
                     // {0, "---", "", -1, NULL},
                     // {0, "Color theme", "1/10", 1, &color_shift_cb},
