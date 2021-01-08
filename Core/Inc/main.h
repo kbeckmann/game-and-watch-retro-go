@@ -44,7 +44,10 @@ typedef enum {
   BSOD_MEMFAULT,
   BSOD_BUSFAULT,
   BSOD_USAGEFAULT,
+  BSOD_WATCHDOG,
   BSOD_OTHER,
+  
+  BSOD_COUNT,
 } BSOD_t;
 
 /* USER CODE END ET */
@@ -142,6 +145,8 @@ void wdog_refresh(void);
 #define BOOT_MAGIC_RESET    0x1fa1afe1
 #define BOOT_MAGIC_WATCHDOG 0xd066cafe
 #define BOOT_MAGIC_BSOD     0xbad00000
+
+#define BOOT_MAGIC_BSOD_MASK 0xffff0000
 
 /* USER CODE END Private defines */
 

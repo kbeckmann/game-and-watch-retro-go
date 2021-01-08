@@ -71,12 +71,12 @@ WWDG_HandleTypeDef hwwdg1;
 
 /* USER CODE BEGIN PV */
 
-char logbuf[1024 * 4] __attribute__((aligned(4)));
-uint32_t log_idx;
+char logbuf[1024 * 4] __attribute__((section (".persistent"))) __attribute__((aligned(4)));
+uint32_t log_idx __attribute__((section (".persistent")));
+__attribute__((used)) __attribute__((section (".persistent"))) volatile uint32_t boot_magic;
 
 uint32_t boot_buttons;
 
-__attribute__((used)) __attribute__((section (".persistent"))) volatile uint32_t boot_magic;
 
 /* USER CODE END PV */
 
@@ -110,6 +110,7 @@ const char *fault_list[] = {
   [BSOD_MEMFAULT] = "Memfault",
   [BSOD_BUSFAULT] = "Busfault",
   [BSOD_USAGEFAULT] = "Usagefault",
+  [BSOD_WATCHDOG] = "Watchdog",
   [BSOD_OTHER] = "Other",
 };
 
@@ -327,6 +328,7 @@ void wdog_refresh()
 int main(void)
 {
   /* USER CODE BEGIN 1 */
+  uint8_t trigger_wdt_bsod = 0;
 
   for(int i = 0; i < 1000000; i++) {
     __NOP();
@@ -338,18 +340,31 @@ int main(void)
   memset(0x0, '\x41', (size_t)&__NULLPTR_LENGTH__);
 #pragma GCC diagnostic pop
 
+  // Don't reset the logbuf when rebooting from a watchdog reset
+  if (boot_magic != BOOT_MAGIC_WATCHDOG) {
+    log_idx = 0;
+    logbuf[0] = '\0';
+  }
+
   switch (boot_magic) {
   case BOOT_MAGIC_STANDBY:
-    printf("Boot from standby. boot_magic=0x%08lx\n", boot_magic);
+    printf("Boot from standby.\nboot_magic=0x%08lx\n", boot_magic);
     break;
   case BOOT_MAGIC_RESET:
-    printf("Boot from warm reset. boot_magic=0x%08lx\n", boot_magic);
+    printf("Boot from warm reset.\nboot_magic=0x%08lx\n", boot_magic);
     break;
   case BOOT_MAGIC_WATCHDOG:
-    printf("Boot from watchdog reset! boot_magic=0x%08lx\n", boot_magic);
+    printf("Boot from watchdog reset!\nboot_magic=0x%08lx\n", boot_magic);
+    trigger_wdt_bsod = 1;
     break;
   default:
-    printf("Boot from brownout? boot_magic=0x%08lx\n", boot_magic);
+    if ((boot_magic & BOOT_MAGIC_BSOD_MASK) == BOOT_MAGIC_BSOD) {
+      uint16_t fault_idx = boot_magic & 0xffff;
+      const char *fault = (fault_idx < BSOD_COUNT) ? fault_list[fault_idx] : "UNKOWN";
+      printf("Boot from BSOD:\nboot_magic=0x%08lx %s\n", boot_magic, fault);
+    } else {
+      printf("Boot from brownout?\nboot_magic=0x%08lx\n", boot_magic);
+    }
     break;
   }
 
@@ -406,6 +421,10 @@ int main(void)
   }
 
   lcd_init(&hspi2, &hltdc);
+
+  if (trigger_wdt_bsod) {
+    BSOD(BSOD_WATCHDOG, 0, 0);
+  }
 
   /* USER CODE END 2 */
 
