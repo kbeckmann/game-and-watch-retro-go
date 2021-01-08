@@ -51,7 +51,7 @@ function get_number_of_saves {
 
 mkdir -p "$OUTDIR"
 
-for emu in nes gb; do
+for emu in gb nes gg sms; do
     mkdir -p "${OUTDIR}/${emu}"
     COUNT=$(get_number_of_saves SAVE_${emu^^}_)
     for i in $(seq 0 $(( COUNT - 1 ))); do
