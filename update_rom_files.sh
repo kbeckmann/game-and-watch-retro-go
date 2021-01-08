@@ -13,7 +13,7 @@ if [[ ! -e $TMPFILE ]]; then
 	exit 1
 fi
 
-find ${@:2} -type f > "${TMPFILE}" 2> /dev/null
+find ${@:2} -type f | sort > "${TMPFILE}" 2> /dev/null
 
 if ! diff -q ${TMPFILE} ${filelist} > /dev/null 2> /dev/null; then
     echo "Updating file list ${filelist}"
