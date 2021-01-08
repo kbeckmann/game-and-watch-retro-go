@@ -3,11 +3,13 @@
 This is a very quick and dirty port of the [retro-go](https://github.com/ducalex/retro-go) emulator collection that is intended to run on the Nintendo® Game & Watch™ 2020 edition.
 
 Currently playable
-- GB
-- NES
 
+- GB / GBC (Gameboy / Gameboy Color)
+- NES (Nintendo Entertainment System)
+- SMS (Sega Master System)
+- GG (Sega Game Gear)
 
-# How to report issues
+## How to report issues
 
 :exclamation: Please read this before reporting issues.
 
@@ -15,14 +17,13 @@ You may run the script `./report_issue.sh` and follow the steps lined out, or co
 
 Please include the following:
 
-- Which console (NES or GB)
+- Which console
 - The full name of the ROM you are running, e.g. "Super_Tilt_Bro_(E).nes"
 - The git hash of this repo and the submodule. Run the following: `git describe --all --long --dirty=-dirty; cd retro-go-stm32; git describe --all --long --dirty=-dirty`
 
 With this information, please head over to the [Discord](https://discord.gg/vVcwrrHTNJ) and post in the #support channel. If you don't want to use discord for some reason, please create an issue.
 
-
-## Troubleshooting
+### Troubleshooting
 
 - Do you have any changed files, even if you didn't intentionally change them? Please run `git reset --hard` to ensure an unchanged state.
 - Did you pull but forgot to update the submodule? Run `git submodule update --init --recursive` to ensure that the submodules are in sync.
@@ -31,14 +32,14 @@ With this information, please head over to the [Discord](https://discord.gg/vVcw
 - It is still not working? Try the classic trouble shooting methods: Disconnect power to your debugger and G&W and connect again. Try programming the [Base](https://github.com/ghidraninja/game-and-watch-base) project first to ensure you can actually program your device.
 - Still not working? Ok, head over to #support on the discord and let's see what's going on.
 
+## How to build
 
-# How to build
+### Prerequisites
 
-## Prerequisites
-- You will need a recent [arm-gcc-none-eabi toolchain](https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-rm/downloads). **10.2.0 and later are known to work well**. Please make sure it's installed either in your PATH, or set the environment variable `GCC_PATH` to the `bin` directory inside the extracted directory (e.g. `/opt/gcc-arm-none-eabi-10-2020-q4-major/bin`).
+- You will need a recent [arm-gcc-none-eabi toolchain](https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-rm/downloads). **10.2.0 and later are known to work well**. Please make sure it's installed either in your PATH, or set the environment variable `GCC_PATH` to the `bin` directory inside the extracted directory (e.g. `/opt/gcc-arm-none-eabi-10-2020-q4-major/bin`, `/Applications/ARM/bin` for macOS).
 - In order to run this on a Nintendo® Game & Watch™ [you need to first unlock it](https://github.com/ghidraninja/game-and-watch-backup/).
 
-## Building
+### Building
 
 Note: `make -j8` is used as an example. You may use `make -j$(nproc)` on Linux or `make -j$(sysctl -n hw.logicalcpu)` on Mac, or just write the number of threads you want to use, e.g. `make -j8`.
 
@@ -65,9 +66,11 @@ git clone --recurse-submodules https://github.com/kbeckmann/game-and-watch-retro
 
 cd game-and-watch-retro-go
 
-# Place GB roms in `./roms/gb/` and NES roms in `./roms/nes/`:
+# Place GB roms in `./roms/gb/`, NES roms in `./roms/nes/`, SMS roms in `./roms/sms/`, GG roms in `./roms/gg/`:
 # cp /path/to/rom.gb ./roms/gb/
 # cp /path/to/rom.nes ./roms/nes/
+# cp /path/to/rom.sms ./roms/sms/
+# cp /path/to/rom.nes ./roms/gg/
 
 # Build and program external and internal flash.
 # Note: If you are using the 16MB external flash, build using:
@@ -77,16 +80,15 @@ cd game-and-watch-retro-go
 make -j8 flash_all
 ```
 
-## If you are a developer
+### If you are a developer
+
 - If you need to change the project settings and generate c-code from stm32cubemx, make sure to not have a dirty working copy as the tool will overwrite files that will need to be perhaps partially reverted. Also update Makefile.common in case new drivers are used.
 
-
-## Known issues (Please do not report these)
+### Known issues (Please do not report these)
 
 - Settings are not persistent
 
-
-## GB Features / todo
+### GB Features / todo
 
 - [x] Key input support
 - [x] Audio support (works well!)
@@ -98,8 +100,8 @@ make -j8 flash_all
 - [X] Support multiple ROMs
 - [X] OSD menu
 
+### NES Features / todo
 
-## NES Features / todo
 - [x] Key input support
 - [x] Audio support (works well)
 - [x] Video support (uses indexed colors w/ a configurable palette)
@@ -110,8 +112,7 @@ make -j8 flash_all
 - [X] Support multiple ROMs
 - [X] OSD menu
 
-
-# Build and flash using Docker
+## Build and flash using Docker
 
 To reduce the number of potential pitfalls in installation of various software, a Dockerfile is provided containing everything needed to compile and flash retro-go to your Nintendo® Game & Watch™.
 
@@ -137,7 +138,7 @@ docker run --rm -it --privileged -v /dev/bus/usb:/dev/bus/usb kbeckmann/retro-go
 
 ```
 
-# Backing up and restoring save state files
+## Backing up and restoring save state files
 
 Save states can be backed up using `./dump_saves.sh build/gw_retro_go.elf`. Make sure to use the elf file that matches what is running on your device! It is a good idea to keep this elf file in case you want to back up at a later time.
 
@@ -149,13 +150,10 @@ Save states can then be programmed to the device using a newer elf file with new
 
 `program_saves.sh` will upload all save state files that you have backed up that are also included in the elf file. E.g Let's say you back up saves for rom A, B and C. Later on, you add a new rom D but remove A, then build and flash. When running the script, the save states for B and C will be programmed and nothing else.
 
-
-# Contact, discussion
+## Contact, discussion
 
 Please join the [Discord](https://discord.gg/vVcwrrHTNJ).
 
-
-# LICENSE
+## LICENSE
 
 This project is licensed under the GPLv2. Some components are also available under the MIT license. Respective copyrights apply to each component.
-
