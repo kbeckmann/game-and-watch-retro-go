@@ -412,6 +412,8 @@ void osd_getinput(void)
 {
     uint16 pad0 = 0;
 
+    wdog_refresh();
+
     uint32_t buttons = buttons_get();
     if(buttons & B_GAME) pad0 |= INP_PAD_START;
     if(buttons & B_TIME) pad0 |= INP_PAD_SELECT;

@@ -107,6 +107,7 @@ void store_save(const uint8_t *flash_ptr, const uint8_t *data, size_t size);
 
 void GW_EnterDeepSleep(void);
 uint32_t GW_GetBootButtons(void);
+void wdog_refresh(void);
 
 /* USER CODE END EFP */
 

@@ -125,6 +125,7 @@ void retro_loop()
 
     while (true)
     {
+        wdog_refresh();
         if (gui.selected != selected_tab_last)
         {
             int direction = (gui.selected - selected_tab_last) < 0 ? -1 : 1;

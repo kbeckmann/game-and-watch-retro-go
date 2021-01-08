@@ -67,6 +67,8 @@ DMA_HandleTypeDef hdma_sai1_a;
 
 SPI_HandleTypeDef hspi2;
 
+WWDG_HandleTypeDef hwwdg1;
+
 /* USER CODE BEGIN PV */
 
 char logbuf[1024 * 4] __attribute__((aligned(4)));
@@ -92,6 +94,7 @@ static void MX_SAI1_Init(void);
 static void MX_RTC_Init(void);
 static void MX_DAC1_Init(void);
 static void MX_DAC2_Init(void);
+static void MX_WWDG1_Init(void);
 static void MX_NVIC_Init(void);
 /* USER CODE BEGIN PFP */
 
@@ -158,7 +161,7 @@ __attribute__((optimize("-O0"))) void BSOD(BSOD_t fault, void *pc, void *lr)
   // Wait for a button press (allows a user to hold and release a button when the BSOD occurs)
   uint32_t old_buttons = buttons_get();
   while ((buttons_get() == 0 || (buttons_get() == old_buttons))) {
-    __NOP();
+    wdog_refresh();
   }
 
   HAL_NVIC_SystemReset();
@@ -267,7 +270,10 @@ void GW_EnterDeepSleep(void)
 
   // Delay 500ms to give us a chance to attach a debugger in case
   // we end up in a suspend-loop.
-  HAL_Delay(500);
+  for (int i = 0; i < 10; i++) {
+      wdog_refresh();
+      HAL_Delay(50);
+  }
 
   HAL_PWR_EnterSTANDBYMode();
 
@@ -294,6 +300,11 @@ static void memcpy_no_check(uint32_t *dst, uint32_t *src, size_t len)
   while (dst != end) {
     *(dst++) = *(src++);
   }
+}
+
+void wdog_refresh()
+{
+    HAL_WWDG_Refresh(&hwwdg1);
 }
 
 /* USER CODE END 0 */
@@ -365,6 +376,7 @@ int main(void)
   MX_RTC_Init();
   MX_DAC1_Init();
   MX_DAC2_Init();
+  MX_WWDG1_Init();
 
   /* Initialize interrupts */
   MX_NVIC_Init();
@@ -374,7 +386,10 @@ int main(void)
   boot_buttons = buttons_get();
 
   // Keep this
-  HAL_Delay(500);
+  for (int i = 0; i < 10; i++) {
+      wdog_refresh();
+      HAL_Delay(50);
+  }
 
   lcd_init(&hspi2, &hltdc);
 
@@ -885,6 +900,36 @@ static void MX_SPI2_Init(void)
   /* USER CODE BEGIN SPI2_Init 2 */
 
   /* USER CODE END SPI2_Init 2 */
+
+}
+
+/**
+  * @brief WWDG1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_WWDG1_Init(void)
+{
+
+  /* USER CODE BEGIN WWDG1_Init 0 */
+
+  /* USER CODE END WWDG1_Init 0 */
+
+  /* USER CODE BEGIN WWDG1_Init 1 */
+
+  /* USER CODE END WWDG1_Init 1 */
+  hwwdg1.Instance = WWDG1;
+  hwwdg1.Init.Prescaler = WWDG_PRESCALER_128;
+  hwwdg1.Init.Window = 127;
+  hwwdg1.Init.Counter = 127;
+  hwwdg1.Init.EWIMode = WWDG_EWI_ENABLE;
+  if (HAL_WWDG_Init(&hwwdg1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN WWDG1_Init 2 */
+
+  /* USER CODE END WWDG1_Init 2 */
 
 }
 

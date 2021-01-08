@@ -46,6 +46,8 @@ void lcd_backlight_on()
 
 void lcd_init(SPI_HandleTypeDef *spi, LTDC_HandleTypeDef *ltdc)
 {
+  wdog_refresh();
+
   // Turn display *off* completely.
   lcd_backlight_off();
 
@@ -62,6 +64,7 @@ void lcd_init(SPI_HandleTypeDef *spi, LTDC_HandleTypeDef *ltdc)
   // Turn off CS
   HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_RESET);
   HAL_Delay(100);
+  wdog_refresh();
 
 
 // Wake
@@ -73,7 +76,6 @@ void lcd_init(SPI_HandleTypeDef *spi, LTDC_HandleTypeDef *ltdc)
   // also assert CS, not sure where to put this yet
   HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
   HAL_Delay(7);
-
 
 
 // HAL_SPI_Transmit(spi, (uint8_t *)"\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55", 10, 100);
@@ -89,6 +91,7 @@ void lcd_init(SPI_HandleTypeDef *spi, LTDC_HandleTypeDef *ltdc)
   HAL_Delay(2);
   HAL_SPI_Transmit(spi, (uint8_t *)"\x08\x80", 2, 100);
   HAL_Delay(2);
+  wdog_refresh();
   
   // CS
   HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
@@ -160,6 +163,7 @@ void lcd_init(SPI_HandleTypeDef *spi, LTDC_HandleTypeDef *ltdc)
   HAL_Delay(2);
   // CS
   HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
+  wdog_refresh();
 
   HAL_LTDC_SetAddress(ltdc,(uint32_t) &framebuffer1, 0);
 

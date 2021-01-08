@@ -625,6 +625,31 @@ void HAL_SPI_MspDeInit(SPI_HandleTypeDef* hspi)
 
 }
 
+/**
+* @brief WWDG MSP Initialization
+* This function configures the hardware resources used in this example
+* @param hwwdg: WWDG handle pointer
+* @retval None
+*/
+void HAL_WWDG_MspInit(WWDG_HandleTypeDef* hwwdg)
+{
+  if(hwwdg->Instance==WWDG1)
+  {
+  /* USER CODE BEGIN WWDG1_MspInit 0 */
+
+  /* USER CODE END WWDG1_MspInit 0 */
+    /* Peripheral clock enable */
+    __HAL_RCC_WWDG1_CLK_ENABLE();
+    /* WWDG1 interrupt Init */
+    HAL_NVIC_SetPriority(WWDG_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(WWDG_IRQn);
+  /* USER CODE BEGIN WWDG1_MspInit 1 */
+
+  /* USER CODE END WWDG1_MspInit 1 */
+  }
+
+}
+
 extern DMA_HandleTypeDef hdma_sai1_a;
 
 static uint32_t SAI1_client =0;
@@ -714,6 +739,15 @@ void HAL_SAI_MspDeInit(SAI_HandleTypeDef* hsai)
 }
 
 /* USER CODE BEGIN 1 */
+
+void HAL_WWDG_EarlyWakeupCallback(WWDG_HandleTypeDef *hwwdg)
+{
+    UNUSED(hwwdg);
+
+    /* If you end up here, the watchdog is about to bark ! */
+    /* Uncomment the following line for catching it while debugging: */
+    //__asm("bkpt 1");
+}
 
 /* USER CODE END 1 */
 
