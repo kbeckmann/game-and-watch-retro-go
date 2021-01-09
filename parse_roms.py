@@ -167,12 +167,6 @@ class ROMParser():
 
         return total_save_size, total_rom_size
 
-
-    def generate_saveflash(self, file: str, size: int):
-        f = open(file, "w")
-        f.write(f"__SAVEFLASH_LENGTH__ = {size};\n")
-        f.close()
-
     def write_if_changed(self, path: str, data: str):
         old_data = None
         if os.path.exists(path):
@@ -215,8 +209,7 @@ class ROMParser():
             print(f"Error: External flash will overflow!")
             exit(-1)
 
-        self.generate_saveflash("build/saveflash.ld", total_save_size)
-
+        self.write_if_changed("build/saveflash.ld", f"__SAVEFLASH_LENGTH__ = {total_save_size};\n")
         self.write_if_changed("build/config.h", build_config)
 
 
