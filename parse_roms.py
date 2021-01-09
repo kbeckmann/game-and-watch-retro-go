@@ -173,6 +173,15 @@ class ROMParser():
         f.write(f"__SAVEFLASH_LENGTH__ = {size};\n")
         f.close()
 
+    def write_if_changed(self, path: str, data: str):
+        old_data = None
+        if os.path.exists(path):
+            with open(path) as f:
+                old_data = f.read()
+
+        if data != old_data:
+            with open(path, "w") as f:
+                f.write(data)
 
     def parse(self, args):
         total_save_size = 0
@@ -208,8 +217,7 @@ class ROMParser():
 
         self.generate_saveflash("build/saveflash.ld", total_save_size)
 
-        with open("build/config.h", "w") as f:
-            f.write(build_config)
+        self.write_if_changed("build/config.h", build_config)
 
 
 if __name__ == "__main__":
