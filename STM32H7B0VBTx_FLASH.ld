@@ -236,6 +236,7 @@ SECTIONS
 
   .overlay_sms __RAM_EMU_START__ : {
       . = ALIGN(4);
+    __ram_emu_sms_start__ = .;
       build/smsplusgx/*.o (.data. data* .text .text* .rodata .rodata*)
       . = ALIGN(4);
       _OVERLAY_SMS_LOAD_END = .;
@@ -249,6 +250,7 @@ SECTIONS
     build/smsplusgx/*.o (.bss .bss*)
     . = ALIGN(4);
     build/smsplusgx/*.o (COMMON)
+    __ram_emu_sms_end__ = .;
     _OVERLAY_SMS_BSS_END = .;
   }
   _OVERLAY_SMS_BSS_SIZE = SIZEOF(.overlay_sms_bss);
