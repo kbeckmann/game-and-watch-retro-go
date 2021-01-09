@@ -169,8 +169,6 @@ SECTIONS
     . = ALIGN(4);
     build/core/lupng.o (.text .text* .rodata .rodata*)
     . = ALIGN(4);
-    build/core/gui.o (.text .text* .rodata .rodata*)
-    . = ALIGN(4);
     build/core/logo*.o (.text .text* .rodata .rodata*)
     . = ALIGN(4);
     build/core/header*.o (.text .text* .rodata .rodata*)

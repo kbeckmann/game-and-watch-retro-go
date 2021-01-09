@@ -406,6 +406,12 @@ void emulator_start(retro_emulator_file_t *file, bool load_state)
 
 void emulators_init()
 {
+#if !( defined(ENABLE_EMULATOR_GB) || defined(ENABLE_EMULATOR_NES) || defined(ENABLE_EMULATOR_GG) || defined(ENABLE_EMULATOR_SMS) )
+    // Add gameboy as a placeholder in case no emulator is built.
+    add_emulator("Nintendo Gameboy", "gb", "gb", "gnuboy-go", 0, logo_gb, header_gb);
+#endif
+
+
 #ifdef ENABLE_EMULATOR_GB
     add_emulator("Nintendo Gameboy", "gb", "gb", "gnuboy-go", 0, logo_gb, header_gb);
     // add_emulator("Nintendo Gameboy Color", "gbc", "gbc", "gnuboy-go", 0, logo_gbc, header_gbc);
