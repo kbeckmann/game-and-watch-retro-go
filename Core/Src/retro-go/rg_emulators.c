@@ -379,33 +379,50 @@ void emulator_start(retro_emulator_file_t *file, bool load_state)
     retro_emulator_t *emu = file->emulator;
     // TODO: Make this cleaner
     if(strcmp(emu->system_name, "Nintendo Gameboy") == 0) {
+#ifdef ENABLE_EMULATOR_GB
         memcpy(&__RAM_EMU_START__, &_OVERLAY_GB_LOAD_START, (size_t)&_OVERLAY_GB_SIZE);
         memset(&_OVERLAY_GB_BSS_START, 0x0, (size_t)&_OVERLAY_GB_BSS_SIZE);
         SCB_CleanDCache_by_Addr((uint32_t *)&__RAM_EMU_START__, (size_t)&_OVERLAY_GB_SIZE);
         app_main_gb(load_state);
+#endif
     } else if(strcmp(emu->system_name, "Nintendo Entertainment System") == 0) {
+#ifdef ENABLE_EMULATOR_NES
         memcpy(&__RAM_EMU_START__, &_OVERLAY_NES_LOAD_START, (size_t)&_OVERLAY_NES_SIZE);
         memset(&_OVERLAY_NES_BSS_START, 0x0, (size_t)&_OVERLAY_NES_BSS_SIZE);
         SCB_CleanDCache_by_Addr((uint32_t *)&__RAM_EMU_START__, (size_t)&_OVERLAY_NES_SIZE);
         app_main_nes(load_state);
+#endif
     } else if(strcmp(emu->system_name, "Sega Master System") == 0 ||
               strcmp(emu->system_name, "Sega Game Gear") == 0) {
+#if defined(ENABLE_EMULATOR_SMS) || defined(ENABLE_EMULATOR_GG)
         memcpy(&__RAM_EMU_START__, &_OVERLAY_SMS_LOAD_START, (size_t)&_OVERLAY_SMS_SIZE);
         memset(&_OVERLAY_SMS_BSS_START, 0x0, (size_t)&_OVERLAY_SMS_BSS_SIZE);
         SCB_CleanDCache_by_Addr((uint32_t *)&__RAM_EMU_START__, (size_t)&_OVERLAY_SMS_SIZE);
         app_main_smsplusgx(load_state);
+#endif
     }
     
 }
 
 void emulators_init()
 {
+#ifdef ENABLE_EMULATOR_GB
     add_emulator("Nintendo Gameboy", "gb", "gb", "gnuboy-go", 0, logo_gb, header_gb);
-    add_emulator("Nintendo Entertainment System", "nes", "nes", "nofrendo-go", 16, logo_nes, header_nes);
-    
     // add_emulator("Nintendo Gameboy Color", "gbc", "gbc", "gnuboy-go", 0, logo_gbc, header_gbc);
+#endif
+
+#ifdef ENABLE_EMULATOR_NES
+    add_emulator("Nintendo Entertainment System", "nes", "nes", "nofrendo-go", 16, logo_nes, header_nes);
+#endif
+    
+#ifdef ENABLE_EMULATOR_SMS
     add_emulator("Sega Master System", "sms", "sms", "smsplusgx-go", 0, logo_sms, header_sms);
+#endif
+
+#ifdef ENABLE_EMULATOR_GG
     add_emulator("Sega Game Gear", "gg", "gg", "smsplusgx-go", 0, logo_gg, header_gg);
+#endif
+
     // add_emulator("ColecoVision", "col", "col", "smsplusgx-go", 0, logo_col, header_col);
     // add_emulator("PC Engine", "pce", "pce", "huexpress-go", 0, logo_pce, header_pce);
     // add_emulator("Atari Lynx", "lnx", "lnx", "handy-go", 64, logo_lnx, header_lnx);

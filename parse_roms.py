@@ -177,21 +177,27 @@ class ROMParser():
     def parse(self, args):
         total_save_size = 0
         total_rom_size = 0
+        build_config = ""
+
         save_size, rom_size = self.generate_system("Core/Src/retro-go/gb_roms.c", "Nintendo Gameboy", "gb_system", "gb", ["gb", "gbc"], "ROM_GB_", "SAVE_GB_")
         total_save_size += save_size
         total_rom_size += rom_size
+        build_config += "#define ENABLE_EMULATOR_GB\n" if rom_size > 0 else ""
 
         save_size, rom_size = self.generate_system("Core/Src/retro-go/nes_roms.c", "Nintendo Entertainment System", "nes_system", "nes", ["nes"], "ROM_NES_", "SAVE_NES_")
         total_save_size += save_size
         total_rom_size += rom_size
+        build_config += "#define ENABLE_EMULATOR_NES\n" if rom_size > 0 else ""
 
         save_size, rom_size = self.generate_system("Core/Src/retro-go/sms_roms.c", "Sega Master System", "sms_system", "sms", ["sms"], "ROM_SMS_", "SAVE_SMS_")
         total_save_size += save_size
         total_rom_size += rom_size
+        build_config += "#define ENABLE_EMULATOR_SMS\n" if rom_size > 0 else ""
 
         save_size, rom_size = self.generate_system("Core/Src/retro-go/gg_roms.c", "Sega Game Gear", "gg_system", "gg", ["gg"], "ROM_GG_", "SAVE_GG_")
         total_save_size += save_size
         total_rom_size += rom_size
+        build_config += "#define ENABLE_EMULATOR_GG\n" if rom_size > 0 else ""
 
         total_size = total_save_size + total_rom_size
 
@@ -201,6 +207,9 @@ class ROMParser():
             exit(-1)
 
         self.generate_saveflash("build/saveflash.ld", total_save_size)
+
+        with open("build/config.h", "w") as f:
+            f.write(build_config)
 
 
 if __name__ == "__main__":

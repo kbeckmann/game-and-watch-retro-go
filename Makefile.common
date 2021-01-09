@@ -211,6 +211,9 @@ C_INCLUDES +=  \
 -Iretro-go-stm32/components/miniz \
 -Iretro-go-stm32/components/lupng \
 
+# Force include the configuration
+CFLAGS += -include $(BUILD_DIR)/config.h
+
 # compile gcc flags
 ASFLAGS += $(MCU) $(AS_DEFS) $(AS_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections
 
@@ -274,7 +277,7 @@ $(BUILD_DIR)/rom_files.txt: FORCE | $(BUILD_DIR)
 	$(V)$(ECHO) [ BASH ] Checking for updated roms
 	$(V)./update_rom_files.sh build/rom_files.txt roms/gb roms/nes roms/sms roms/gg
 
-$(BUILD_DIR)/saveflash.ld: $(BUILD_DIR)/rom_files.txt parse_roms.py | $(BUILD_DIR)
+$(BUILD_DIR)/saveflash.ld $(BUILD_DIR)/config.h &: $(BUILD_DIR)/rom_files.txt parse_roms.py | $(BUILD_DIR)
 	$(V)$(ECHO) [ PYTHON3 ] $(notdir $<)
 	$(V)$(PYTHON3) parse_roms.py --flash-size $(EXTFLASH_SIZE)
 
@@ -300,7 +303,7 @@ CheckDirtySubmodules:
 endif
 .PHONY: CheckDirtySubmodules
 
-$(BUILD_DIR)/%.o: %.s Makefile.common Makefile | $(BUILD_DIR) CheckDirtySubmodules
+$(BUILD_DIR)/%.o: %.s Makefile.common Makefile $(BUILD_DIR)/config.h | $(BUILD_DIR) CheckDirtySubmodules
 	$(V)$(ECHO) [ AS ] $(notdir $<)
 	$(V)$(AS) -c $(CFLAGS) $< -o $@
 
@@ -310,19 +313,19 @@ $(BUILD_DIR)/$(TARGET).elf: $(OBJECTS) $(NES_OBJECTS) $(GNUBOY_OBJECTS) $(SMSPLU
 	$(V)$(SZ) $@
 	$(V)./size.sh $@
 
-$(BUILD_DIR)/core/%.o: %.c Makefile Makefile.common $(SDK_HEADERS) | $(BUILD_DIR) CheckDirtySubmodules
+$(BUILD_DIR)/core/%.o: %.c Makefile Makefile.common $(SDK_HEADERS) $(BUILD_DIR)/config.h | $(BUILD_DIR) CheckDirtySubmodules
 	$(V)$(ECHO) [ CC core ] $(notdir $<)
 	$(V)$(CC) -c $(CFLAGS) -Wa,-a,-ad,-alms=$(BUILD_DIR)/core/$(notdir $(<:.c=.lst)) $< -o $@
 
-$(BUILD_DIR)/nes/%.o: %.c Makefile Makefile.common $(SDK_HEADERS) | $(BUILD_DIR) CheckDirtySubmodules
+$(BUILD_DIR)/nes/%.o: %.c Makefile Makefile.common $(SDK_HEADERS) $(BUILD_DIR)/config.h | $(BUILD_DIR) CheckDirtySubmodules
 	$(V)$(ECHO) [ CC nes ] $(notdir $<)
 	$(V)$(CC) -c $(CFLAGS) -Wa,-a,-ad,-alms=$(BUILD_DIR)/nes/$(notdir $(<:.c=.lst)) $< -o $@
 
-$(BUILD_DIR)/gnuboy/%.o: %.c Makefile Makefile.common $(SDK_HEADERS) | $(BUILD_DIR) CheckDirtySubmodules
+$(BUILD_DIR)/gnuboy/%.o: %.c Makefile Makefile.common $(SDK_HEADERS) $(BUILD_DIR)/config.h | $(BUILD_DIR) CheckDirtySubmodules
 	$(V)$(ECHO) [ CC gb ] $(notdir $<)
 	$(V)$(CC) -c $(CFLAGS) -Wa,-a,-ad,-alms=$(BUILD_DIR)/gnuboy/$(notdir $(<:.c=.lst)) $< -o $@
 
-$(BUILD_DIR)/smsplusgx/%.o: %.c Makefile Makefile.common $(SDK_HEADERS) | $(BUILD_DIR) CheckDirtySubmodules
+$(BUILD_DIR)/smsplusgx/%.o: %.c Makefile Makefile.common $(SDK_HEADERS) $(BUILD_DIR)/config.h | $(BUILD_DIR) CheckDirtySubmodules
 	$(V)$(ECHO) [ CC sms ] $(notdir $<)
 	$(V)$(CC) -c $(CFLAGS) -Wa,-a,-ad,-alms=$(BUILD_DIR)/smsplusgx/$(notdir $(<:.c=.lst)) $< -o $@
 
