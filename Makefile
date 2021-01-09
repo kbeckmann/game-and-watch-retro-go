@@ -137,9 +137,6 @@ C_DEFS += \
 -DDISABLE_AHBRAM_DCACHE
 
 
-#REQUIRED_FILE=roms/gb/loaded_gb_rom.c
-#REQUIRED_FILE_MSG=Please run ./update_gb_rom.sh to import a GB ROM file
-
 include Makefile.common
 
 
