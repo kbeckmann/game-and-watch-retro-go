@@ -10,4 +10,10 @@ curl -L -o roms/nes/pwn.nes https://github.com/Vector35/PwnAdventureZ/blob/maste
 # GB
 curl -L -o roms/gb/matrix-rain.gb https://github.com/wtjones/matrix-rain-gb/releases/download/0.0.3/matrix-rain.gb
 
+# GG
+touch roms/gg/placehonder.gg
+
+# SMS
+touch roms/sms/placehonder.sms
+
 make -j $(nproc)
