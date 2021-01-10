@@ -164,9 +164,11 @@ void odroid_overlay_draw_fill_rect(int x, int y, int width, int height, uint16_t
 void odroid_overlay_draw_battery(int x_pos, int y_pos)
 {
     uint16_t percentage = odroid_input_read_battery().percentage;
+    odroid_battery_charge_state_t battery_state = odroid_input_read_battery().state;
     uint16_t color_fill = C_GW_YELLOW;
     uint16_t color_border = C_GW_YELLOW;
     uint16_t color_empty = C_GW_RED;
+    uint16_t color_battery = C_BLACK;
     uint16_t width_fill = 20.f / 100 * percentage;
     uint16_t width_empty = 20 - width_fill;
 
@@ -179,6 +181,19 @@ void odroid_overlay_draw_battery(int x_pos, int y_pos)
     odroid_overlay_draw_rect(x_pos + 22, y_pos + 2, 2, 6, 1, color_border);
     odroid_overlay_draw_fill_rect(x_pos + 1, y_pos + 1, width_fill, 8, color_fill);
     odroid_overlay_draw_fill_rect(x_pos + 1 + width_fill, y_pos + 1, width_empty, 8, color_empty);
+
+    switch (battery_state)
+    {
+        case ODROID_BATTERY_CHARGE_STATE_BATTERY_MISSING:
+            break;
+        case ODROID_BATTERY_CHARGE_STATE_CHARGING:
+            odroid_overlay_draw_fill_rect(x_pos + 22/2 - 1, y_pos + 10/2 - 3, 2, 6, color_battery);
+        case ODROID_BATTERY_CHARGE_STATE_DISCHARGING:
+            odroid_overlay_draw_fill_rect(x_pos + 22/2 - 3, y_pos + 10/2 - 1, 6, 2, color_battery);
+            break;
+        case ODROID_BATTERY_CHARGE_STATE_FULL:
+            break;
+    }
 }
 
 static int get_dialog_items_count(odroid_dialog_choice_t *options)

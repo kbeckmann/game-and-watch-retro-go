@@ -31,6 +31,7 @@
 
 #include "odroid_colors.h"
 #include "odroid_overlay.h"
+#include "bq24072.h"
 
 #include <string.h>
 #include <assert.h>
@@ -473,6 +474,8 @@ int main(void)
   if(*ptr == 0x88888888) {
     Error_Handler();
   }
+
+  bq24072_init();
 
   // Launch the emulator
   app_main();
