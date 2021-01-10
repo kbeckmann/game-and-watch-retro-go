@@ -20,6 +20,7 @@ Core/Src/gw_buttons.c \
 Core/Src/gw_flash.c \
 Core/Src/gw_lcd.c \
 Core/Src/main.c \
+Core/Src/bq24072.c \
 Core/Src/porting/common.c \
 Core/Src/porting/odroid_audio.c \
 Core/Src/porting/odroid_display.c \

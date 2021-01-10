@@ -1,6 +1,7 @@
 #include "odroid_system.h"
 #include "odroid_input.h"
 #include "gw_buttons.h"
+#include "bq24072.h"
 /*typedef enum
 {
        ODROID_INPUT_UP = 0,
@@ -74,10 +75,17 @@ bool odroid_input_key_is_pressed(odroid_gamepad_key_t key)
 
 odroid_battery_state_t odroid_input_read_battery()
 {
-    odroid_battery_state_t ret = {
-        .millivolts = 1337,
-        .percentage = 42,
-    };
+    odroid_battery_state_t ret;
+
+    ret.millivolts = 0;
+    ret.percentage = bq24072_get_percent_filtered();
+    switch (bq24072_get_state())
+    {
+        case BQ24072_STATE_MISSING:         ret.state = ODROID_BATTERY_CHARGE_STATE_BATTERY_MISSING;    break;
+        case BQ24072_STATE_CHARGING:        ret.state = ODROID_BATTERY_CHARGE_STATE_CHARGING;           break;
+        case BQ24072_STATE_DISCHARGING:     ret.state = ODROID_BATTERY_CHARGE_STATE_DISCHARGING;        break;
+        case BQ24072_STATE_FULL:            ret.state = ODROID_BATTERY_CHARGE_STATE_FULL;               break;
+    }
 
     return ret;
 }

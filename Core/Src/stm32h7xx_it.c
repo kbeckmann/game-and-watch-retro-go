@@ -23,6 +23,7 @@
 #include "stm32h7xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "bq24072.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -242,9 +243,16 @@ void EXTI2_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI2_IRQn 0 */
 
+  if(__HAL_GPIO_EXTI_GET_FLAG(GPIO_PIN_2))
+  {
+    bq24072_handle_power_good();
+  }
+
   /* USER CODE END EXTI2_IRQn 0 */
   HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_2);
   /* USER CODE BEGIN EXTI2_IRQn 1 */
+
+  __HAL_GPIO_EXTI_CLEAR_FLAG(GPIO_PIN_2);
 
   /* USER CODE END EXTI2_IRQn 1 */
 }
@@ -284,9 +292,16 @@ void EXTI9_5_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI9_5_IRQn 0 */
 
+  if(__HAL_GPIO_EXTI_GET_FLAG(GPIO_PIN_7))
+  {
+    bq24072_handle_charging();
+  }
+
   /* USER CODE END EXTI9_5_IRQn 0 */
   HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_7);
   /* USER CODE BEGIN EXTI9_5_IRQn 1 */
+
+  __HAL_GPIO_EXTI_CLEAR_FLAG(GPIO_PIN_7);
 
   /* USER CODE END EXTI9_5_IRQn 1 */
 }
@@ -297,6 +312,8 @@ void EXTI9_5_IRQHandler(void)
 void TIM1_UP_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM1_UP_IRQn 0 */
+
+  bq24072_poll();
 
   /* USER CODE END TIM1_UP_IRQn 0 */
   HAL_TIM_IRQHandler(&htim1);
