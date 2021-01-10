@@ -22,3 +22,5 @@ linux/loaded_gb_rom.c
 linux/loaded_nes_rom.c
 
 save_states
+
+**/.DS_Store
