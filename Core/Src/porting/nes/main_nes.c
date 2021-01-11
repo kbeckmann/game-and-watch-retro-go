@@ -31,6 +31,7 @@ static uint32_t power_pressed;
 
 static bool fullFrame = 0;
 static uint frameTime = 1000 / 60;
+static uint samplesPerFrame;
 static uint32_t vsync_wait_ms = 0;
 
 static bool autoload = false;
@@ -41,6 +42,8 @@ uint8_t nes_save_buffer[24000];
 
 // TODO: Expose properly
 extern int nes_state_save(uint8_t *flash_ptr, size_t size);
+
+void nes_audio_submit(int16_t *buffer, int audioSamples);
 
 static bool SaveState(char *pathName)
 {
@@ -123,7 +126,7 @@ void osd_setpalette(rgb_t *pal)
 
 static uint32_t skippedFrames = 0;
 
-void osd_wait_for_vsync()
+void osd_vsync()
 {
     static uint32_t skipFrames = 0;
     static uint32_t lastSyncTime = 0;
@@ -131,13 +134,17 @@ void osd_wait_for_vsync()
 
     uint32_t elapsed = get_elapsed_time_since(lastSyncTime);
 
+    rg_app_desc_t *app = odroid_system_get_app();
     if (skipFrames == 0) {
-        rg_app_desc_t *app = odroid_system_get_app();
         if (elapsed > frameTime) skipFrames = 1;
         if (app->speedupEnabled) skipFrames += app->speedupEnabled * 2;
     } else if (skipFrames > 0) {
         skipFrames--;
         skippedFrames++;
+    }
+
+    if (!app->speedupEnabled) {
+        nes_audio_submit(nes_getptr()->apu->buffer, nes_getptr()->apu->samples_per_frame);
     }
 
     // Tick before submitting audio/syncing
@@ -158,12 +165,12 @@ void osd_wait_for_vsync()
     lastSyncTime = get_elapsed_time();
 }
 
-void osd_audioframe(int audioSamples)
+void nes_audio_submit(int16_t *buffer, int audioSamples)
 {
     if (odroid_system_get_app()->speedupEnabled)
         return;
 
-    apu_process(audiobuffer_emulator, audioSamples); //get audio data
+    // apu_process(audiobuffer_emulator, audioSamples, false); //get audio data
 
     size_t offset = (dma_state == DMA_TRANSFER_STATE_HF) ? 0 : audioSamples;
 
@@ -181,7 +188,7 @@ void osd_audioframe(int audioSamples)
 
     // Write to DMA buffer and lower the volume to 1/4
     for (int i = 0; i < audioSamples; i++) {
-        audiobuffer_dma[i + offset] = audiobuffer_emulator[i] >> shift;
+        audiobuffer_dma[i + offset] = buffer[i] >> shift;
     }
 }
 
@@ -510,14 +517,16 @@ int app_main_nes(uint8_t load_state)
     if (ACTIVE_FILE->region == REGION_PAL) {
         nes_region = NES_PAL;
         frameTime = 1000 / 50;
+        samplesPerFrame = (AUDIO_SAMPLE_RATE) / 50;
         HAL_SAI_Transmit_DMA(&hsai_BlockA1, (uint8_t *) audiobuffer_dma,  (2 * AUDIO_SAMPLE_RATE) / 50);
     } else {
         nes_region = NES_NTSC;
         frameTime = 1000 / 60;
+        samplesPerFrame = (AUDIO_SAMPLE_RATE) / 60;
         HAL_SAI_Transmit_DMA(&hsai_BlockA1, (uint8_t *) audiobuffer_dma, (2 * AUDIO_SAMPLE_RATE) / 60);
     }
 
-    nofrendo_start(ACTIVE_FILE->name, nes_region, AUDIO_SAMPLE_RATE);
+    nofrendo_start(ACTIVE_FILE->name, nes_region, AUDIO_SAMPLE_RATE, false);
 
     return 0;
 }
