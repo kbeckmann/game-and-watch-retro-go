@@ -165,8 +165,6 @@ SECTIONS
     __extflash_nes_start__ = .;
     build/rom_*.o (.text .text* .rodata .rodata*)
     . = ALIGN(4);
-    build/core/miniz.o (.text .text* .rodata .rodata*)
-    . = ALIGN(4);
     build/core/lupng.o (.text .text* .rodata .rodata*)
     . = ALIGN(4);
     build/core/logo*.o (.text .text* .rodata .rodata*)
