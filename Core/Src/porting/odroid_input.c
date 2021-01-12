@@ -2,6 +2,8 @@
 #include "odroid_input.h"
 #include "gw_buttons.h"
 #include "bq24072.h"
+#include "main.h"
+
 /*typedef enum
 {
        ODROID_INPUT_UP = 0,
@@ -55,6 +57,12 @@ void update_gamepad_state(odroid_gamepad_state_t *state, uint32_t buttons, odroi
 
 void odroid_input_wait_for_key(odroid_gamepad_key_t key, bool pressed)
 {
+    odroid_gamepad_state_t joystick;
+
+    do {
+        odroid_input_read_gamepad(&joystick);
+        wdog_refresh();
+    } while (joystick.values[key] != (pressed ? 1 : 0));
 }
 
 bool odroid_input_key_is_pressed(odroid_gamepad_key_t key)
