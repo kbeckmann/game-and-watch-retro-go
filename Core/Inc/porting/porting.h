@@ -14,6 +14,8 @@
 #include <math.h>
 #include <limits.h>
 
+#include "crc32.h"
+
 #define IEXTFLASH_ATTR
 #define DEXTFLASH_ATTR
 

@@ -206,10 +206,11 @@ AS_INCLUDES +=
 # C includes
 C_INCLUDES +=  \
 -ICore/Inc \
--ICore/Src/porting/gb \
--ICore/Src/porting/nes \
--ICore/Src/porting/smsplusgx \
--ICore/Src/retro-go \
+-ICore/Inc/porting \
+-ICore/Inc/porting/gb \
+-ICore/Inc/porting/nes \
+-ICore/Inc/porting/smsplusgx \
+-ICore/Inc/retro-go \
 -IDrivers/STM32H7xx_HAL_Driver/Inc \
 -IDrivers/STM32H7xx_HAL_Driver/Inc/Legacy \
 -IDrivers/CMSIS/Device/ST/STM32H7xx/Include \
