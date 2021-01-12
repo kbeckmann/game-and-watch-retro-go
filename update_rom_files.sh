@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 if [ -z $2 ]; then
-	echo "Usage: `basename $0` <file list> <rom directory> [<rom directory>] ..."
+	echo "Usage: $(basename $0) <file list> <rom directory> [<rom directory>] ..."
 	exit 1
 fi
 

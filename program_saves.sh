@@ -29,7 +29,7 @@ if [[ -z ${OPENOCD} ]]; then
 fi
 
 if [[ $# -lt 1 ]]; then
-    echo "Usage: $0 <currently_running_binary.elf> [backup directory]"
+    echo "Usage: $(basename $0) <currently_running_binary.elf> [backup directory]"
     echo "This will program all save states from the backup directory that match what is included in the elf file"
     exit 1
 fi

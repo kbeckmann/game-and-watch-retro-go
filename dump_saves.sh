@@ -28,7 +28,7 @@ if [[ -z ${OPENOCD} ]]; then
 fi
 
 if [[ $# -lt 1 ]]; then
-    echo "Usage: $0 <currently_running_binary.elf> [backup directory]"
+    echo "Usage: $(basename $0) <currently_running_binary.elf> [backup directory]"
     echo "This will dump all save states from the device to the backup directory"
     exit 1
 fi

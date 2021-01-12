@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 if [ -z $1 ]; then
-    echo "Usage: `basename $0` <githash.h>"
+    echo "Usage: $(basename $0) <githash.h>"
     exit 1
 fi
 
