@@ -292,7 +292,7 @@ void gui_draw_list(tab_t *tab)
 {
     int columns = LIST_WIDTH / odroid_overlay_get_font_width();
     int lines = LIST_LINE_COUNT;
-    theme_t *theme = &gui_themes[gui.theme % gui_themes_count];
+    // theme_t *theme = &gui_themes[gui.theme % gui_themes_count];
     listbox_t *list = &tab->listbox;
 
     odroid_overlay_draw_fill_rect(0, LIST_Y_OFFSET, LIST_WIDTH, LIST_HEIGHT, C_BLACK);
