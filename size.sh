@@ -31,7 +31,7 @@ function print_usage {
 	usage=$(get_section_length $symbol)
 	length=$(get_symbol $length_symbol)
 	free=$(( $length - $usage ))
-	freehr=$(printf "%.3f" "$(( $free  ))e-6")
+	freehr=$(printf "%.3f" "$(( ($free * 1000000) / 1024 / 1024 ))e-6")
 	echo -e "$symbol\t$usage / $length\t($free bytes free ($freehr MB))"
 }
 
