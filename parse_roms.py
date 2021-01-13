@@ -25,7 +25,7 @@ const rom_system_t {name} = {{
 \t.system_name = "{system_name}",
 \t.roms = {variable_name},
 \t.extension = "{extension}",
-\t.roms_count = {variable_name}_count
+\t.roms_count = {roms_count},
 }};
 """
 
@@ -162,7 +162,12 @@ class ROMParser():
         rom_entries = self.generate_rom_entries(folder + "_roms", roms, data_prefix, save_prefix)
         f.write(rom_entries)
 
-        f.write(SYSTEM_TEMPLATE.format(name=variable_name, system_name=system_name, variable_name=folder + "_roms", extension =folder))
+        f.write(SYSTEM_TEMPLATE.format(
+            name=variable_name,
+            system_name=system_name,
+            variable_name=folder + "_roms",
+            extension=folder,
+            roms_count=len(roms)))
         f.close()
 
         return total_save_size, total_rom_size
