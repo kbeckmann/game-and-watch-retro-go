@@ -133,7 +133,7 @@ SECTIONS
   } >ITCMRAM AT> EXTFLASH
 
   /* Uncached and unbuffered memory for the LCD framebuffers */
-  ._ram_uc :
+  ._ram_uc (NOLOAD) :
   {
     __ram_uc_start__ = .;
     . = ALIGN(4);
@@ -262,14 +262,14 @@ SECTIONS
   } >RAM_EMU
 
 
-  ._saveflash :
+  ._saveflash (NOLOAD) :
   {
     __saveflash_start__ = .;
     *(.saveflash)
     __saveflash_end__ = .;
   } > SAVEFLASH
 
-  ._ram :
+  ._ram (NOLOAD) :
   {
     . = ALIGN(4);
     *(.emulator_data)
@@ -278,7 +278,7 @@ SECTIONS
     __ram_end__ = .;
   } > RAM
 
-  ._ahbram :
+  ._ahbram (NOLOAD) :
   {
     __ahbram_start__ = .;
     . = ALIGN(4);
@@ -390,7 +390,7 @@ SECTIONS
     __bss_end__ = _ebss;
   } >DTCMRAM
 
-  ._persistent :
+  ._persistent (NOLOAD) :
   {
     . = ALIGN(8);
     *(.persistent)
