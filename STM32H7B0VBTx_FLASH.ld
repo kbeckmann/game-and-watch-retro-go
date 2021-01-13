@@ -273,8 +273,6 @@ SECTIONS
   {
     . = ALIGN(4);
     *(.emulator_data)
-    *(.emulator_text)
-    *(.log_data)
     __ram_end__ = .;
   } > RAM
 

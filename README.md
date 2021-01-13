@@ -28,7 +28,7 @@ With this information, please head over to the [Discord](https://discord.gg/vVcw
 - Do you have any changed files, even if you didn't intentionally change them? Please run `git reset --hard` to ensure an unchanged state.
 - Did you pull but forgot to update the submodule? Run `git submodule update --init --recursive` to ensure that the submodules are in sync.
 - Always run `make clean` before building something new. The makefile should handle incremental builds, but please do this first before reporting issues.
-- If you have limited resources, remove the `-j$(nproc)` flag from the `make` command, i.e. run `make flash_all`.
+- If you have limited resources, remove the `-j$(nproc)` flag from the `make` command, i.e. run `make flash`.
 - It is still not working? Try the classic trouble shooting methods: Disconnect power to your debugger and G&W and connect again. Try programming the [Base](https://github.com/ghidraninja/game-and-watch-base) project first to ensure you can actually program your device.
 - Still not working? Ok, head over to #support on the discord and let's see what's going on.
 
@@ -74,10 +74,10 @@ cd game-and-watch-retro-go
 
 # Build and program external and internal flash.
 # Note: If you are using the 16MB external flash, build using:
-#           make -j8 LARGE_FLASH=1 flash_all
+#           make -j8 LARGE_FLASH=1 flash
 #       A custom flash size may be specified with the EXTFLASH_SIZE variable.
 
-make -j8 flash_all
+make -j8 flash
 ```
 
 ### If you are a developer
@@ -131,10 +131,10 @@ cd game-and-watch-retro-go
 docker build -f Dockerfile --tag kbeckmann/retro-go-builder .
 
 # Run it with usb passthrough. Set your ADAPTER and LARGE_FLASH appropriately.
-docker run --rm -it --privileged -v /dev/bus/usb:/dev/bus/usb kbeckmann/retro-go-builder make ADAPTER=stlink LARGE_FLASH=0 -j$(nproc) flash_all
+docker run --rm -it --privileged -v /dev/bus/usb:/dev/bus/usb kbeckmann/retro-go-builder make ADAPTER=stlink LARGE_FLASH=0 -j$(nproc) flash
 
 # In case you get access errors when flashing, you may run sudo inside the docker container. The proper way is to fix the udev rules, but at least this is a way forward in case you are stuck.
-# docker run --rm -it --privileged -v /dev/bus/usb:/dev/bus/usb kbeckmann/retro-go-builder sudo -E make ADAPTER=stlink LARGE_FLASH=0 -j$(nproc) flash_all
+# docker run --rm -it --privileged -v /dev/bus/usb:/dev/bus/usb kbeckmann/retro-go-builder sudo -E make ADAPTER=stlink LARGE_FLASH=0 -j$(nproc) flash
 
 ```
 

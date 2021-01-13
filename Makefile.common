@@ -155,21 +155,22 @@ PREFIX = arm-none-eabi-
 # The gcc compiler bin path can be either defined in make command via GCC_PATH variable (> make GCC_PATH=xxx)
 # either it can be added to the PATH environment variable.
 ifdef GCC_PATH
-CC = $(GCC_PATH)/$(PREFIX)gcc
-AS = $(GCC_PATH)/$(PREFIX)gcc -x assembler-with-cpp
-CP = $(GCC_PATH)/$(PREFIX)objcopy
-SZ = $(GCC_PATH)/$(PREFIX)size
+CC  = $(GCC_PATH)/$(PREFIX)gcc
+AS  = $(GCC_PATH)/$(PREFIX)gcc -x assembler-with-cpp
+CP  = $(GCC_PATH)/$(PREFIX)objcopy
+SZ  = $(GCC_PATH)/$(PREFIX)size
+GDB = $(GCC_PATH)/$(PREFIX)gdb
 else
-CC = $(PREFIX)gcc
-AS = $(PREFIX)gcc -x assembler-with-cpp
-CP = $(PREFIX)objcopy
-SZ = $(PREFIX)size
+CC  = $(PREFIX)gcc
+AS  = $(PREFIX)gcc -x assembler-with-cpp
+CP  = $(PREFIX)objcopy
+SZ  = $(PREFIX)size
+GDB = $(PREFIX)gdb
 endif
-HEX = $(CP) -O ihex
-BIN = $(CP) -O binary -S
-ECHO = echo
-BASH ?= /bin/bash
-FIND = find
+
+HEX   = $(CP) -O ihex
+BIN   = $(CP) -O binary -S
+ECHO  = echo
 TOUCH = touch
 
 #######################################
@@ -249,7 +250,7 @@ LIBDIR +=
 LDFLAGS += $(MCU) -specs=nano.specs -T$(LDSCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--gc-sections
 
 # default action: build all
-all: $(BUILD_DIR) $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET).hex $(BUILD_DIR)/$(TARGET)_extflash.bin
+all: $(BUILD_DIR) $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET)_extflash.bin $(BUILD_DIR)/$(TARGET)_intflash.bin
 
 #######################################
 # build the application
@@ -337,10 +338,6 @@ $(BUILD_DIR)/smsplusgx/%.o: %.c Makefile Makefile.common $(SDK_HEADERS) $(BUILD_
 	$(V)$(ECHO) [ CC sms ] $(notdir $<)
 	$(V)$(CC) -c $(CFLAGS) -Wa,-a,-ad,-alms=$(BUILD_DIR)/smsplusgx/$(notdir $(<:.c=.lst)) $< -o $@
 
-$(BUILD_DIR)/%.hex: $(BUILD_DIR)/%.elf | $(BUILD_DIR)
-	$(V)$(ECHO) [ HEX ] $(notdir $@)
-	$(V)$(HEX) $< $@
-
 $(BUILD_DIR):
 	$(V)mkdir $@
 	$(V)mkdir $@/core
@@ -358,43 +355,34 @@ ADAPTER ?= stlink
 FLSHLD_DIR ?= ../game-and-watch-flashloader
 FLASHLOADER ?= $(FLSHLD_DIR)/flash_multi.sh
 
-# Starts openocd and attaches to the target. To be used with 'flashx' and 'gdb'
+# Starts openocd and attaches to the target. To be used with 'flash_intflash_nc' and 'gdb'
 openocd:
 	$(OPENOCD) -f $(FLSHLD_DIR)/interface_$(ADAPTER).cfg -c "init; halt"
 .PHONY: openocd
 
-
-# Flashes using a new openocd instance
-flash: $(BUILD_DIR)/$(TARGET).elf
-	$(OPENOCD) -f $(FLSHLD_DIR)/interface_$(ADAPTER).cfg -c "program $(BUILD_DIR)/$(TARGET).elf reset exit"
-.PHONY: flash
-
-
-# Flash without building or so
-jflash:
-	$(OPENOCD) -f $(FLSHLD_DIR)/interface_$(ADAPTER).cfg -c "program $(BUILD_DIR)/$(TARGET).elf reset exit"
-.PHONY: jflash
-
+# Programs the internal flash using a new OpenOCD instance
+flash_intflash: $(BUILD_DIR)/$(TARGET)_intflash.bin
+	$(OPENOCD) -f $(FLSHLD_DIR)/interface_$(ADAPTER).cfg -c "program $< 0x08000000 verify reset exit"
+.PHONY: flash_intflash
 
 # Flashes using an existing openocd instance
-flashx: $(BUILD_DIR)/$(TARGET).elf
-	echo "program $(BUILD_DIR)/$(TARGET).elf; reset run; exit" | nc localhost 4444
+flash_intflash_nc: $(BUILD_DIR)/$(TARGET)_intflash.bin
+	echo "program $< 0x08000000 verify reset" | nc -c localhost 4444
 .PHONY: flashx
 
-
-flash_extmem: $(BUILD_DIR)/$(TARGET)_extflash.bin
+flash_extflash: $(BUILD_DIR)/$(TARGET)_extflash.bin
 	$(FLASHLOADER) $(BUILD_DIR)/$(TARGET)_extflash.bin
-.PHONY: flash_extmem
-
+.PHONY: flash_extflash
 
 # Programs both the external and internal flash.
-flash_all:
-	$(V)$(MAKE) flash_extmem
-	$(V)$(MAKE) flash
-.PHONY: flash_all
+flash:
+	$(V)$(MAKE) flash_extflash
+	$(V)$(MAKE) flash_intflash
+.PHONY: flash
 
+# Alias for flash
+flash_all: flash
 
-GDB ?= $(PREFIX)gdb
 gdb: $(BUILD_DIR)/$(TARGET).elf
 	$(GDB) $< -ex "target extended-remote :3333"
 .PHONY: gdb

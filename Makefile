@@ -145,4 +145,8 @@ $(BUILD_DIR)/$(TARGET)_extflash.bin: $(BUILD_DIR)/$(TARGET).elf | $(BUILD_DIR)
 	$(V)$(ECHO) [ BIN ] $(notdir $@)
 	$(V)$(BIN) -j ._itcram_hot -j ._ram_exec -j ._extflash -j .overlay_nes -j .overlay_gb -j .overlay_sms $< $(BUILD_DIR)/$(TARGET)_extflash.bin
 
+$(BUILD_DIR)/$(TARGET)_intflash.bin: $(BUILD_DIR)/$(TARGET).elf | $(BUILD_DIR)
+	$(V)$(ECHO) [ BIN ] $(notdir $@)
+	$(V)$(BIN) -j .isr_vector -j .text -j .rodata -j .ARM.extab -j .preinit_array -j .init_array -j .fini_array -j .data $< $(BUILD_DIR)/$(TARGET)_intflash.bin
+
 
