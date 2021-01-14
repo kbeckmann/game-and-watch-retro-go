@@ -7,7 +7,7 @@ on:
 
 
 jobs:
-  docker:
+  docker-ci:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -19,3 +19,10 @@ jobs:
           docker run --rm -v $(pwd):/build -w /build ubuntubuilder-arm sudo -E ./.ci_build.sh
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  docker-builder:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build
+        run: docker build -f Dockerfile --tag kbeckmann/retro-go-builder .
