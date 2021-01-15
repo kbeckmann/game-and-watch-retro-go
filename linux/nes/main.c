@@ -82,28 +82,8 @@ void osd_setpalette(rgb_t *pal)
 }
 
 
-void osd_wait_for_vsync()
+void osd_vsync()
 {
-}
-
-
-void osd_audioframe(int audioSamples)
-{
-    // printf("%d\n", audioSamples);
-    if (odroid_system_get_app()->speedupEnabled)
-        return;
-
-    apu_process(audioBufferA, audioSamples); //get audio data
-
-    //16 bit mono -> 32-bit (16 bit r+l)
-    // for (int i = audioSamples - 1; i >= 0; --i)
-    // {
-    //     int16_t sample = audioBufferA[i];
-    //     audioBufferA[i*2] = sample;
-    //     audioBufferA[i*2+1] = sample;
-    // }
-
-    pendingSamples = audioSamples;
 }
 
 
@@ -336,7 +316,7 @@ int main(int argc, char *argv[])
     printf("Nofrendo start!\n");
 
     // nofrendo_start("Rom name (E).nes", NES_PAL, AUDIO_SAMPLE_RATE);
-    nofrendo_start("Rom name (USA).nes", NES_NTSC, AUDIO_SAMPLE_RATE);
+    nofrendo_start("Rom name (USA).nes", NES_NTSC, AUDIO_SAMPLE_RATE, false);
 
     SDL_Quit();
 
