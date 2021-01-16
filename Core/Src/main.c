@@ -139,7 +139,7 @@ __attribute__((optimize("-O0"))) void BSOD(BSOD_t fault, void *pc, void *lr)
   odroid_overlay_draw_text(0, 0, GW_LCD_WIDTH, msg, C_RED, C_BLUE);
 
   // Print each line from the log in reverse
-  end = &logbuf[strnlen(logbuf, sizeof(logbuf))];
+  end = &logbuf[strnlen(logbuf, sizeof(logbuf)) - 1];
   while (y < GW_LCD_HEIGHT) {
     // Max 28 lines
     if (i++ >= 28) {
@@ -150,11 +150,20 @@ __attribute__((optimize("-O0"))) void BSOD(BSOD_t fault, void *pc, void *lr)
     start = logbuf;
     while (start < end) {
       line = start;
-      start = strnstr(start, "\n", end - start) + 1;
-      end[0] = '\x00';
+      start = strnstr(start, "\n", end - start);
+      if (start == NULL) {
+        break;
+      } else {
+        // Move past \n
+        start += 1;
+      }
     }
+
+    // Terminate the previous line
+    end[0] = '\x00';
+
     end = line;
-    
+
     y += odroid_overlay_draw_text(0, y, GW_LCD_WIDTH, line, C_WHITE, C_BLUE);
 
     if (line == logbuf) {
