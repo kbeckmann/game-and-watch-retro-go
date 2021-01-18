@@ -203,15 +203,18 @@ void blit_sms(bitmap_t *bmp, uint16_t *framebuffer) {	/* 256 x 192 -> 320 x 230 
 
 void sms_pcm_submit() {
     uint8_t volume = odroid_audio_volume_get();
-    uint8_t shift = ODROID_AUDIO_VOLUME_MAX - volume + 1;
+    int32_t factor = volume_tbl[volume];
     size_t offset = (dma_state == DMA_TRANSFER_STATE_HF) ? 0 : AUDIO_BUFFER_LENGTH_SMS;
     if (audio_mute || volume == ODROID_AUDIO_VOLUME_MIN) {
-        for (int i = 0; i < AUDIO_BUFFER_LENGTH_SMS; i++)
+        for (int i = 0; i < AUDIO_BUFFER_LENGTH_SMS; i++) {
             audiobuffer_dma[i + offset] = 0;
+        }
     } else {
-        for (int i = 0; i < AUDIO_BUFFER_LENGTH_SMS; i++)
+        for (int i = 0; i < AUDIO_BUFFER_LENGTH_SMS; i++) {
             /* mix left & right */
-            audiobuffer_dma[i + offset] = (sms_snd.output[0][i] + sms_snd.output[1][i]) >> (shift + 1);
+            int32_t sample = (sms_snd.output[0][i] + sms_snd.output[1][i]);
+            audiobuffer_dma[i + offset] = (sample * factor) >> 16;
+        }
     }
 }
 

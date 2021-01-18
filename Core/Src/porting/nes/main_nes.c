@@ -176,7 +176,7 @@ void nes_audio_submit(int16_t *buffer, int audioSamples)
 
     // MUST shift with at least 1 place, or it will brownout.
     uint8_t volume = odroid_audio_volume_get();
-    uint8_t shift = ODROID_AUDIO_VOLUME_MAX - volume + 1;
+    int32_t factor = volume_tbl[volume];
 
     if (volume == ODROID_AUDIO_VOLUME_MIN) {
         // mute
@@ -186,9 +186,10 @@ void nes_audio_submit(int16_t *buffer, int audioSamples)
         return;
     }
 
-    // Write to DMA buffer and lower the volume to 1/4
+    // Write to DMA buffer and lower the volume accordingly
     for (int i = 0; i < audioSamples; i++) {
-        audiobuffer_dma[i + offset] = buffer[i] >> shift;
+        int32_t sample = buffer[i];
+        audiobuffer_dma[i + offset] = (sample * factor) >> 16;
     }
 }
 
