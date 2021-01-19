@@ -203,7 +203,7 @@ void blit_sms(bitmap_t *bmp, uint16_t *framebuffer) {	/* 256 x 192 -> 320 x 230 
 
 void sms_pcm_submit() {
     uint8_t volume = odroid_audio_volume_get();
-    int32_t factor = volume_tbl[volume];
+    int32_t factor = volume_tbl[volume] / 2; // Divide by 2 to prevent overflow in stereo mixing
     size_t offset = (dma_state == DMA_TRANSFER_STATE_HF) ? 0 : AUDIO_BUFFER_LENGTH_SMS;
     if (audio_mute || volume == ODROID_AUDIO_VOLUME_MIN) {
         for (int i = 0; i < AUDIO_BUFFER_LENGTH_SMS; i++) {
