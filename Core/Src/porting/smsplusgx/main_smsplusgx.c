@@ -160,19 +160,19 @@ void blit_sms(bitmap_t *bmp, uint16_t *framebuffer) {	/* 256 x 192 -> 320 x 230 
         }
 
         /* Last column, x_src = 255 */
-	uint8_t *src_col = &bmp->data[(y_src + bmp->viewport.y) * bmp->pitch + x_src];
-	uint32_t b0 = palette_spaced[src_col[bmp->pitch * 0] & 0x1f];
-	uint32_t b1 = palette_spaced[src_col[bmp->pitch * 1] & 0x1f];
-	uint32_t b2 = palette_spaced[src_col[bmp->pitch * 2] & 0x1f];
-	uint32_t b3 = palette_spaced[src_col[bmp->pitch * 3] & 0x1f];
-	uint32_t b4 = palette_spaced[src_col[bmp->pitch * 4] & 0x1f];
+        uint8_t *src_col = &bmp->data[(y_src + bmp->viewport.y) * bmp->pitch + x_src];
+        uint32_t b0 = palette_spaced[src_col[bmp->pitch * 0] & 0x1f];
+        uint32_t b1 = palette_spaced[src_col[bmp->pitch * 1] & 0x1f];
+        uint32_t b2 = palette_spaced[src_col[bmp->pitch * 2] & 0x1f];
+        uint32_t b3 = palette_spaced[src_col[bmp->pitch * 3] & 0x1f];
+        uint32_t b4 = palette_spaced[src_col[bmp->pitch * 4] & 0x1f];
 
-	framebuffer[((y_dst + 0) * WIDTH) + x_dst] = CONV(b0);
-	framebuffer[((y_dst + 1) * WIDTH) + x_dst] = CONV((b0+b1+b1+b1)>>2);
-	framebuffer[((y_dst + 2) * WIDTH) + x_dst] = CONV((b1+b2)>>1);
-	framebuffer[((y_dst + 3) * WIDTH) + x_dst] = CONV((b2+b3)>>1);
-	framebuffer[((y_dst + 4) * WIDTH) + x_dst] = CONV((b3+b3+b3+b4)>>2);
-	framebuffer[((y_dst + 5) * WIDTH) + x_dst] = CONV(b4);
+        framebuffer[((y_dst + 0) * WIDTH) + x_dst] = CONV(b0);
+        framebuffer[((y_dst + 1) * WIDTH) + x_dst] = CONV((b0+b1+b1+b1)>>2);
+        framebuffer[((y_dst + 2) * WIDTH) + x_dst] = CONV((b1+b2)>>1);
+        framebuffer[((y_dst + 3) * WIDTH) + x_dst] = CONV((b2+b3)>>1);
+        framebuffer[((y_dst + 4) * WIDTH) + x_dst] = CONV((b3+b3+b3+b4)>>2);
+        framebuffer[((y_dst + 5) * WIDTH) + x_dst] = CONV(b4);
     }
 
     y_src = 0;		   /* First & last row */
@@ -233,7 +233,6 @@ int app_main_smsplusgx(uint8_t load_state)
     sms.use_fm = 0;
 
     // sms.dummy = framebuffer[0]; //A normal cart shouldn't access this memory ever. Point it to vram just in case.
-    // sms.sram = malloc(SRAM_SIZE);
 
     bitmap.width = SMS_WIDTH;
     bitmap.height = SMS_HEIGHT;
@@ -252,16 +251,6 @@ int app_main_smsplusgx(uint8_t load_state)
 
     consoleIsSMS = sms.console == CONSOLE_SMS || sms.console == CONSOLE_SMS2;
     consoleIsGG  = sms.console == CONSOLE_GG || sms.console == CONSOLE_GGMS;
-
-    // if (consoleIsSMS) odroid_system_set_app_id(APP_ID + 1);
-    // if (consoleIsGG)  odroid_system_set_app_id(APP_ID + 2);
-
-#if 0
-    if (app->startAction == ODROID_START_ACTION_RESUME)
-    {
-        odroid_system_emu_load_state(0);
-    }
-#endif
 
     const int refresh_rate = (sms.display == DISPLAY_NTSC) ? FPS_NTSC : FPS_PAL;
     const int frameTime = get_frame_time(refresh_rate);
