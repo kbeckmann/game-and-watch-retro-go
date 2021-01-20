@@ -109,6 +109,7 @@ void retro_loop()
 {
     tab_t *tab = gui_get_current_tab();
     int last_key = -1;
+    int repeat = 0;
     int selected_tab_last = -1;
 
     // Read the initial state as to not trigger on button held down during boot
@@ -165,11 +166,7 @@ void retro_loop()
                 gui_draw_status(tab);
         }
 
-        if (last_key >= 0) {
-            if (!gui.joystick.values[last_key]) {
-                last_key = -1;
-            }
-        } else {
+        if ((last_key < 0) || ((repeat >= 30) && (repeat % 10 == 0))) {
             for (int i = 0; i < ODROID_INPUT_MAX; i++)
                 if (gui.joystick.values[i]) last_key = i;
 
@@ -210,21 +207,25 @@ void retro_loop()
             }
             else if (last_key == ODROID_INPUT_UP) {
                 gui_scroll_list(tab, LINE_UP);
+                repeat++;
             }
             else if (last_key == ODROID_INPUT_DOWN) {
                 gui_scroll_list(tab, LINE_DOWN);
+                repeat++;
             }
             else if (last_key == ODROID_INPUT_LEFT) {
                 gui.selected--;
                 if(gui.selected < 0) {
                     gui.selected = gui.tabcount - 1;
                 }
+                repeat++;
             }
             else if (last_key == ODROID_INPUT_RIGHT) {
                 gui.selected++;
                 if(gui.selected >= gui.tabcount) {
                     gui.selected = 0;
                 }
+                repeat++;
             }
             else if (last_key == ODROID_INPUT_A) {
                 gui_event(KEY_PRESS_A, tab);
@@ -236,6 +237,14 @@ void retro_loop()
                 GW_EnterDeepSleep();
             }
         }
+        if (repeat > 0)
+            repeat++;
+        if (last_key >= 0) {
+            if (!gui.joystick.values[last_key]) {
+                last_key = -1;
+                repeat = 0;
+            }
+        }
 
         if (gui.joystick.bitmask) {
             gui.idle_counter = 0;
@@ -244,7 +253,7 @@ void retro_loop()
         }
 
         gui_redraw();
-        HAL_Delay(15);
+        HAL_Delay(20);
     }
 }
 

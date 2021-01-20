@@ -299,6 +299,7 @@ int odroid_overlay_dialog(const char *header, odroid_dialog_choice_t *options, i
     int sel = selected < 0 ? (options_count + selected) : selected;
     int sel_old = sel;
     int last_key = -1;
+    int repeat = 0;
     bool select = false;
     odroid_gamepad_state_t joystick;
 
@@ -313,19 +314,16 @@ int odroid_overlay_dialog(const char *header, odroid_dialog_choice_t *options, i
     {
         wdog_refresh();
         odroid_input_read_gamepad(&joystick);
-        if (last_key >= 0) {
-            if (!joystick.values[last_key]) {
-                last_key = -1;
-            }
-        }
-        else {
+        if (last_key < 0 || ((repeat >= 30) && (repeat % 10 == 0))) {
             if (joystick.values[ODROID_INPUT_UP]) {
                 last_key = ODROID_INPUT_UP;
                 if (--sel < 0) sel = options_count - 1;
+                repeat++;
             }
             else if (joystick.values[ODROID_INPUT_DOWN]) {
                 last_key = ODROID_INPUT_DOWN;
                 if (++sel > options_count - 1) sel = 0;
+                repeat++;
             }
             else if (joystick.values[ODROID_INPUT_B]) {
                 last_key = ODROID_INPUT_B;
@@ -350,6 +348,7 @@ int odroid_overlay_dialog(const char *header, odroid_dialog_choice_t *options, i
                         select = options[sel].update_cb(&options[sel], ODROID_DIALOG_PREV);
                         sel_old = -1;
                     }
+                    repeat++;
                 }
                 else if (joystick.values[ODROID_INPUT_RIGHT]) {
                     last_key = ODROID_INPUT_RIGHT;
@@ -357,6 +356,7 @@ int odroid_overlay_dialog(const char *header, odroid_dialog_choice_t *options, i
                         select = options[sel].update_cb(&options[sel], ODROID_DIALOG_NEXT);
                         sel_old = -1;
                     }
+                    repeat++;
                 }
                 else if (joystick.values[ODROID_INPUT_A]) {
                     last_key = ODROID_INPUT_A;
@@ -371,6 +371,14 @@ int odroid_overlay_dialog(const char *header, odroid_dialog_choice_t *options, i
                 if (select) {
                     break;
                 }
+            }
+        }
+        if (repeat > 0)
+            repeat++;
+        if (last_key >= 0) {
+            if (!joystick.values[last_key]) {
+                last_key = -1;
+                repeat = 0;
             }
         }
         if (sel_old != sel)
