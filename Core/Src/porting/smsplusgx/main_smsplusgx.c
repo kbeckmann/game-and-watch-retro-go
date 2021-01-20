@@ -267,6 +267,10 @@ int app_main_smsplusgx(uint8_t load_state)
     const int frameTime = get_frame_time(refresh_rate);
     bool fullFrame = false;
 
+    void (*blit)(bitmap_t *, uint16_t *) = blit_sms;
+    if (sms.console == CONSOLE_GG)
+        blit = blit_gg;
+
     // Video
     memset(framebuffer1, 0, sizeof(framebuffer1));
     memset(framebuffer2, 0, sizeof(framebuffer2));
@@ -364,19 +368,8 @@ int app_main_smsplusgx(uint8_t load_state)
                                     ((0b0000000000011111 & p));
             }
 
-            if(active_framebuffer == 0) {
-                if (consoleIsSMS)
-                    blit_sms(&bitmap, framebuffer1);
-                if (consoleIsGG)
-                    blit_gg(&bitmap, framebuffer1);
-                active_framebuffer = 1;
-            } else {
-                if (consoleIsSMS)
-                    blit_sms(&bitmap, framebuffer2);
-                if (consoleIsGG)
-                    blit_gg(&bitmap, framebuffer2);
-                active_framebuffer = 0;
-            }
+            blit(&bitmap, (active_framebuffer == 0 ? framebuffer1 : framebuffer2));
+            active_framebuffer ^= 1; // swap framebuffers
 
             HAL_LTDC_Reload(&hltdc, LTDC_RELOAD_VERTICAL_BLANKING);
         }
