@@ -320,7 +320,7 @@ void gui_draw_list(tab_t *tab)
 
 void gui_draw_cover(retro_emulator_file_t *file)
 {
-    retro_emulator_t *emu = (retro_emulator_t *)file->emulator;
+    retro_emulator_t *emu = file_to_emu(file);
 
     if (gp_buffer == NULL)
         gp_buffer = rg_alloc(gp_buffer_size, MEM_ANY);

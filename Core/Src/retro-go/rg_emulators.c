@@ -19,6 +19,13 @@
 static retro_emulator_t emulators[MAX_EMULATORS];
 static int emulators_count = 0;
 
+retro_emulator_t *file_to_emu(retro_emulator_file_t *file) {
+    for (int i = 0; i < MAX_EMULATORS; i++)
+        if (emulators[i].system == file->system)
+            return &emulators[i];
+    return NULL;
+}
+
 static void event_handler(gui_event_t event, tab_t *tab)
 {
     retro_emulator_t *emu = (retro_emulator_t *)tab->arg;
@@ -37,7 +44,7 @@ static void event_handler(gui_event_t event, tab_t *tab)
             for (int i = 0; i < emu->roms.count; i++)
             {
                 strcpy(tab->listbox.items[i].text, emu->roms.files[i].name);
-                tab->listbox.items[i].arg = &emu->roms.files[i];
+                tab->listbox.items[i].arg = (void *)&emu->roms.files[i];
             }
 
             gui_sort_list(tab, 0);
@@ -112,22 +119,10 @@ void emulator_init(retro_emulator_t *emu)
 
 
     const rom_system_t *system = rom_manager_system(&rom_mgr, emu->system_name);
-    if(system) {
-        // TODO: Refactor so we don't need to allocate and copy constant data.
-        emu->roms.files = rg_alloc(system->roms_count * sizeof(retro_emulator_file_t), MEM_ANY);
-        for(int i=0; i < system->roms_count; i++) {
-            const rom_entry_t *rom = &system->roms[i];
-            retro_emulator_file_t *file = &emu->roms.files[emu->roms.count++];
-            // strcpy(file->folder, "/");
-            file->emulator = (void*)emu;
-            file->address = (uint8_t *) rom->flash_address;
-            file->size = rom->size;
-            file->save_address = rom->save_address;
-            file->save_size = rom->save_size;
-            file->name = rom->rom_name;
-            file->ext = system->extension;
-            file->region = rom->region;
-        }
+    if (system) {
+        emu->system = system;
+        emu->roms.files = system->roms;
+        emu->roms.count = system->roms_count;
     } else {
         while(1) {
             lcd_backlight_on();
@@ -376,7 +371,7 @@ void emulator_start(retro_emulator_file_t *file, bool load_state)
     // odroid_settings_commit();
 
     // odroid_system_switch_app(((retro_emulator_t *)file->emulator)->partition);
-    retro_emulator_t *emu = file->emulator;
+    retro_emulator_t *emu = file_to_emu(file);
     // TODO: Make this cleaner
     if(strcmp(emu->system_name, "Nintendo Gameboy") == 0) {
 #ifdef ENABLE_EMULATOR_GB
