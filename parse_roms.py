@@ -5,20 +5,26 @@ import os
 from typing import List
 
 ROM_ENTRIES_TEMPLATE = """
-const rom_entry_t {name}[] = {{
+const retro_emulator_file_t {name}[] = {{
 {body}
 }};
 const uint32_t {name}_count = {rom_count};
 """
 
 ROM_ENTRY_TEMPLATE = """\t{{
-\t\t.rom_name = "{name}",
-\t\t.flash_address = {rom_entry},
-\t\t.size={size},
+\t\t.name = "{name}",
+\t\t.ext = "{extension}",
+\t\t.address = {rom_entry},
+\t\t.size = {size},
 \t\t.save_address = {save_entry},
 \t\t.save_size = sizeof({save_entry}),
+\t\t.system = &{system},
 \t\t.region = {region},
 \t}},"""
+
+SYSTEM_PROTO_TEMPLATE = """
+extern const rom_system_t {name};
+"""
 
 SYSTEM_TEMPLATE = """
 const rom_system_t {name} = {{
@@ -30,10 +36,11 @@ const rom_system_t {name} = {{
 """
 
 class ROM:
-    def __init__(self, system_name: str, filepath: str):
+    def __init__(self, system_name: str, filepath: str, extension: str):
         self.name = (os.path.splitext(os.path.basename(filepath))[0])
         self.path = filepath
         self.size = os.path.getsize(filepath)
+        self.ext = extension
 
     def __str__(self) -> str:
         return self.name + " " + str(self.size)
@@ -48,6 +55,7 @@ class ROM:
 
 class ROMParser():
     def find_roms(self, system_name: str, folder: str, extension: str) -> [ROM]:
+        ext = extension
         if not extension.startswith("."):
             extension = "." + extension
         script_path = os.path.dirname(os.path.realpath(__file__))
@@ -61,12 +69,12 @@ class ROMParser():
                 continue
 
             rom_path = os.path.join(roms_path, rom)
-            found_roms.append(ROM(system_name, rom_path))
+            found_roms.append(ROM(system_name, rom_path, ext))
 
         return found_roms
 
 
-    def generate_rom_entries(self, name: str, roms: [ROM], rom_prefix: str, save_prefix: str) -> str:
+    def generate_rom_entries(self, name: str, roms: [ROM], rom_prefix: str, save_prefix: str, system: str) -> str:
         body = ""
         for i in range(len(roms)):
             rom = roms[i]
@@ -79,6 +87,8 @@ class ROMParser():
                 rom_entry=rom_prefix + str(i),
                 save_entry=save_prefix + str(i),
                 region=region,
+                extension=rom.ext,
+                system=system,
             )
             body += "\n"
 
@@ -146,6 +156,9 @@ class ROMParser():
         else:
             save_size = 0
 
+        f.write(SYSTEM_PROTO_TEMPLATE.format(
+            name=variable_name))
+
         for i in range(len(roms)):
             rom = roms[i]
             if folder == "gb":
@@ -159,7 +172,7 @@ class ROMParser():
             f.write(self.generate_char_array(data_prefix + str(i), rom))
             f.write(self.generate_save_entry(save_prefix + str(i), save_size))
 
-        rom_entries = self.generate_rom_entries(folder + "_roms", roms, data_prefix, save_prefix)
+        rom_entries = self.generate_rom_entries(folder + "_roms", roms, data_prefix, save_prefix, variable_name)
         f.write(rom_entries)
 
         f.write(SYSTEM_TEMPLATE.format(

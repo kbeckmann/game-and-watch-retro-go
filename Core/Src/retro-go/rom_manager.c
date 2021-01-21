@@ -5,7 +5,7 @@
 #include "rg_emulators.h"
 #include "utils.h"
 
-unsigned char *ROM_DATA = NULL;
+const unsigned char *ROM_DATA = NULL;
 unsigned ROM_DATA_LENGTH;
 retro_emulator_file_t *ACTIVE_FILE = NULL;
 
@@ -14,11 +14,11 @@ retro_emulator_file_t *ACTIVE_FILE = NULL;
 #include "sms_roms.c"
 #include "gg_roms.c"
 
-const rom_system_t systems[] = {
-    nes_system,
-    gb_system,
-    sms_system,
-    gg_system,
+const rom_system_t *systems[] = {
+    &nes_system,
+    &gb_system,
+    &sms_system,
+    &gg_system,
 };
 
 const rom_manager_t rom_mgr = {
@@ -28,8 +28,8 @@ const rom_manager_t rom_mgr = {
 
 const rom_system_t *rom_manager_system(const rom_manager_t *mgr, char *name) {
     for(int i=0; i < mgr->systems_count; i++) {
-        if(strcmp(mgr->systems[i].system_name, name) == 0) {
-            return &mgr->systems[i];
+        if(strcmp(mgr->systems[i]->system_name, name) == 0) {
+            return mgr->systems[i];
         }
     }
     return NULL;
