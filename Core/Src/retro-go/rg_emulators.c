@@ -1,6 +1,7 @@
 #include <odroid_system.h>
 #include <string.h>
 #include <assert.h>
+#include <stdio.h>
 
 #include "gw_linker.h"
 #include "rg_emulators.h"
@@ -43,7 +44,7 @@ static void event_handler(gui_event_t event, tab_t *tab)
 
             for (int i = 0; i < emu->roms.count; i++)
             {
-                strcpy(tab->listbox.items[i].text, emu->roms.files[i].name);
+                tab->listbox.items[i].text = emu->roms.files[i].name;
                 tab->listbox.items[i].arg = (void *)&emu->roms.files[i];
             }
 
@@ -54,9 +55,11 @@ static void event_handler(gui_event_t event, tab_t *tab)
         {
             sprintf(tab->status, " No games");
             gui_resize_list(tab, 8);
-            sprintf(tab->listbox.items[0].text, "Place roms in folder: /roms/%s", emu->dirname);
-            sprintf(tab->listbox.items[2].text, "With file extension: .%s", emu->ext);
-            sprintf(tab->listbox.items[4].text, "Use SELECT and START to navigate.");
+            size_t len = 0;
+            tab->listbox.items[0].text = asnprintf(NULL, &len, "Place roms in folder: /roms/%s", emu->dirname);
+            len = 0;
+            tab->listbox.items[2].text = asnprintf(NULL, &len, "With file extension: .%s", emu->ext);
+            tab->listbox.items[4].text = "Use SELECT and START to navigate.";
             tab->listbox.cursor = 3;
             tab->is_empty = true;
         }
