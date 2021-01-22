@@ -314,7 +314,7 @@ int odroid_overlay_dialog(const char *header, odroid_dialog_choice_t *options, i
     {
         wdog_refresh();
         odroid_input_read_gamepad(&joystick);
-        if (last_key < 0 || ((repeat >= 30) && (repeat % 10 == 0))) {
+        if (last_key < 0 || ((repeat >= 30) && (repeat % 5 == 0))) {
             if (joystick.values[ODROID_INPUT_UP]) {
                 last_key = ODROID_INPUT_UP;
                 if (--sel < 0) sel = options_count - 1;
