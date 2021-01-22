@@ -249,8 +249,8 @@ int app_main_smsplusgx(uint8_t load_state)
     memset(audiobuffer_dma, 0, sizeof(audiobuffer_dma));
     HAL_SAI_Transmit_DMA(&hsai_BlockA1, (uint8_t *)audiobuffer_dma, AUDIO_BUFFER_LENGTH_DMA_SMS);
 
-    consoleIsSMS = sms.console == CONSOLE_SMS || sms.console == CONSOLE_SMS2;
-    consoleIsGG  = sms.console == CONSOLE_GG || sms.console == CONSOLE_GGMS;
+    consoleIsSMS = sms.console == CONSOLE_SMS || sms.console == CONSOLE_SMS2 || sms.console == CONSOLE_GGMS;
+    consoleIsGG  = sms.console == CONSOLE_GG;
 
     const int refresh_rate = (sms.display == DISPLAY_NTSC) ? FPS_NTSC : FPS_PAL;
     const int frameTime = get_frame_time(refresh_rate);
