@@ -31,7 +31,7 @@ typedef struct {
 } theme_t;
 
 typedef struct {
-    char text[128];
+    const char * text;
     int enabled;
     int id;
     int arg_type;
