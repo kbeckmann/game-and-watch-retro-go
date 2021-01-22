@@ -166,7 +166,7 @@ void retro_loop()
                 gui_draw_status(tab);
         }
 
-        if ((last_key < 0) || ((repeat >= 30) && (repeat % 10 == 0))) {
+        if ((last_key < 0) || ((repeat >= 30) && (repeat % 5 == 0))) {
             for (int i = 0; i < ODROID_INPUT_MAX; i++)
                 if (gui.joystick.values[i]) last_key = i;
 
