@@ -57,7 +57,7 @@ for emu in gb nes gg sms; do
     mkdir -p "${INDIR}/${emu}"
     COUNT=$(get_number_of_saves SAVE_$(echo ${emu} | awk '{print toupper($0)}')_)
     for i in $(seq 0 $(( COUNT - 1 ))); do
-        name=$(${GDB} "${ELF}" --batch -q -ex "printf \"%s\n\", ${emu}_roms[${i}].rom_name")
+        name=$(${GDB} "${ELF}" --batch -q -ex "printf \"%s\n\", ${emu}_roms[${i}].name")
         # Note that 0x90000000 is subtracted from the address.
         address=$(${GDB} "${ELF}" --batch -q -ex "printf \"%ld\n\", ${emu}_roms[${i}].save_address - 0x90000000")
         size=$(${GDB} "${ELF}" --batch -q -ex "printf \"%d\n\", ${emu}_roms[${i}].save_size")
