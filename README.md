@@ -130,6 +130,8 @@ cd game-and-watch-retro-go
 
 # Place roms in ./roms/gb and ./roms/nes accordingly
 
+# for MacOS users, run make download_sdk
+
 # Build the docker image (takes a while)
 docker build -f Dockerfile --tag kbeckmann/retro-go-builder .
 
