@@ -44,29 +44,20 @@ void lcd_backlight_on()
   lcd_backlight_set(255);
 }
 
-void lcd_init(SPI_HandleTypeDef *spi, LTDC_HandleTypeDef *ltdc)
+void lcd_deinit(SPI_HandleTypeDef *spi)
 {
-  wdog_refresh();
-
-  // Turn display *off* completely.
-  lcd_backlight_off();
-
+  // Chip select low.
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_RESET);
   // 3.3v power to display *SET* to disable supply.
   HAL_GPIO_WritePin(GPIOD, GPIO_PIN_1, GPIO_PIN_SET);
+  // Disable 1.8v.
   HAL_GPIO_WritePin(GPIOD, GPIO_PIN_4, GPIO_PIN_RESET);
-
-
-  // TURN OFF CHIP SELECT
-  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_RESET);
-  // TURN OFF PD8
+  // Pull reset line(?) low. (Flakey without this)
   HAL_GPIO_WritePin(GPIOD, GPIO_PIN_8, GPIO_PIN_RESET);
+}
 
-  // Turn off CS
-  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_RESET);
-  HAL_Delay(100);
-  wdog_refresh();
-
-
+void lcd_init(SPI_HandleTypeDef *spi, LTDC_HandleTypeDef *ltdc)
+{
 // Wake
 // Enable 3.3v
   HAL_GPIO_WritePin(GPIOD, GPIO_PIN_1, GPIO_PIN_RESET);
@@ -169,9 +160,6 @@ void lcd_init(SPI_HandleTypeDef *spi, LTDC_HandleTypeDef *ltdc)
 
   memset(framebuffer1, 0, sizeof(framebuffer1));
   memset(framebuffer2, 0, sizeof(framebuffer2));
-
-  // Finally enable the backlight
-  lcd_backlight_on();
 }
 
 void HAL_LTDC_ReloadEventCallback (LTDC_HandleTypeDef *hltdc) {

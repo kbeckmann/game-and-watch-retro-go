@@ -18,7 +18,7 @@
 #include "common.h"
 #include "rom_manager.h"
 
-#define APP_ID 20
+#define ODROID_APPID_GB 1
 
 #define NVS_KEY_SAVE_SRAM "sram"
 
@@ -490,7 +490,7 @@ void pcm_submit() {
 
 rg_app_desc_t * init(uint8_t load_state)
 {
-    odroid_system_init(APP_ID, AUDIO_SAMPLE_RATE);
+    odroid_system_init(ODROID_APPID_GB, AUDIO_SAMPLE_RATE);
     odroid_system_emu_init(&LoadState, &SaveState, &netplay_callback);
 
     // Hack: Use the same buffer twice
@@ -534,8 +534,7 @@ rg_app_desc_t * init(uint8_t load_state)
 
     emu_init();
 
-    //pal_set_dmg(odroid_settings_Palette_get());
-    pal_set_dmg(2);
+    pal_set_dmg(odroid_settings_Palette_get());
 
     // Don't load state if the pause button is held while booting
     uint32_t boot_buttons = GW_GetBootButtons();
@@ -602,8 +601,6 @@ void app_main_gb(uint8_t load_state)
             if (power_pressed) {
                 printf("Power PRESSED %ld\n", power_pressed);
                 HAL_SAI_DMAStop(&hsai_BlockA1);
-                lcd_backlight_off();
-
                 if(!joystick.values[ODROID_INPUT_VOLUME]) {
                     // Always save as long as PAUSE is not pressed
                     SaveState("");

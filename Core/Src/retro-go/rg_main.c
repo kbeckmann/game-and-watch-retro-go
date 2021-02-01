@@ -257,9 +257,11 @@ void retro_loop()
     }
 }
 
+#define ODROID_APPID_LAUNCHER 0
+
 void app_main(void)
 {
-    odroid_system_init(0, 32000);
+    odroid_system_init(ODROID_APPID_LAUNCHER, 32000);
     // odroid_display_clear(0);
 
     emulators_init();

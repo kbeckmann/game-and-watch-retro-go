@@ -27,7 +27,7 @@ extern uint8_t emulator_framebuffer[(256 + 8 + 8) * 240]  __attribute__((section
 extern uint32_t active_framebuffer;
 
 
-
+void lcd_deinit(SPI_HandleTypeDef *spi);
 void lcd_init(SPI_HandleTypeDef *spi, LTDC_HandleTypeDef *ltdc);
 void lcd_backlight_set(uint8_t brightness);
 void lcd_backlight_on();

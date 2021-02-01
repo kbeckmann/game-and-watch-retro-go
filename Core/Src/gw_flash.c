@@ -249,7 +249,7 @@ void  _OSPI_Program(OSPI_HandleTypeDef *hospi, uint32_t address, const uint8_t *
 }
 
 void OSPI_Program(OSPI_HandleTypeDef *hospi, uint32_t address, const uint8_t *buffer, size_t buffer_size) {
-  unsigned iterations = buffer_size / 256;
+  unsigned iterations = (buffer_size + 255) / 256;
   unsigned dest_page = address / 256;
 
   for(int i = 0; i < iterations; i++) {

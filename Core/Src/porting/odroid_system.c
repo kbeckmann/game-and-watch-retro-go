@@ -25,6 +25,12 @@ void odroid_system_panic(const char *reason, const char *function, const char *f
 
 void odroid_system_init(int appId, int sampleRate)
 {
+    currentApp.id = appId;
+
+    odroid_settings_init();
+    odroid_audio_init(sampleRate);
+    odroid_display_init();
+
     printf("%s: System ready!\n\n", __func__);
 }
 
