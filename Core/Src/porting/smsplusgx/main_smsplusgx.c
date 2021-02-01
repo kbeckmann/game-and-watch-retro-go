@@ -10,7 +10,7 @@
 #include "rom_manager.h"
 #include "common.h"
 
-#define APP_ID 30
+#define APP_ID 3
 
 #define SMS_WIDTH 256
 #define SMS_HEIGHT 192
@@ -320,8 +320,6 @@ int app_main_smsplusgx(uint8_t load_state)
             if (power_pressed) {
                 printf("Power PRESSED %ld\n", power_pressed);
                 HAL_SAI_DMAStop(&hsai_BlockA1);
-                lcd_backlight_off();
-
                 if(!joystick.values[ODROID_INPUT_VOLUME]) {
                     // Always save as long as PAUSE is not pressed
                     SaveState(NULL);

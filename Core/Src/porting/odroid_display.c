@@ -6,6 +6,9 @@
 
 static const uint8_t backlightLevels[] = {128, 144, 160, 192, 255};
 static odroid_display_backlight_t backlightLevel = ODROID_BACKLIGHT_LEVEL4;
+static odroid_display_rotation_t rotationMode = ODROID_DISPLAY_ROTATION_OFF;
+static odroid_display_scaling_t scalingMode = ODROID_DISPLAY_SCALING_FILL;
+static odroid_display_filter_t filterMode = ODROID_DISPLAY_FILTER_OFF;
 
 short odroid_display_queue_update(odroid_video_frame_t *frame, odroid_video_frame_t *previousFrame)
 {
@@ -47,3 +50,15 @@ void odroid_display_set_backlight(odroid_display_backlight_t level)
     odroid_settings_Backlight_set(level);
 }
 
+
+void odroid_display_init()
+{
+    backlightLevel = odroid_settings_Backlight_get();
+    lcd_backlight_set(backlightLevels[backlightLevel]);
+
+    scalingMode = odroid_settings_DisplayScaling_get();
+    filterMode = odroid_settings_DisplayFilter_get();
+    rotationMode = odroid_settings_DisplayRotation_get();
+
+    printf("LCD init done.\n");
+}

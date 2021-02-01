@@ -15,7 +15,7 @@
 #include "common.h"
 #include "rom_manager.h"
 
-#define APP_ID 30
+#define ODROID_APPID_NES 2
 
 // #define blit blit_nearest
 // #define blit blit_normal
@@ -455,7 +455,6 @@ void osd_getinput(void)
         if (buttons & B_POWER) {
             printf("Power PRESSED %ld\n", power_pressed);
             HAL_SAI_DMAStop(&hsai_BlockA1);
-
             if(!(buttons & B_PAUSE)) {
                 SaveState("");
             }
@@ -502,7 +501,7 @@ int app_main_nes(uint8_t load_state)
 
     memset(framebuffer1, 0x0, sizeof(framebuffer1));
     memset(framebuffer2, 0x0, sizeof(framebuffer2));
-    odroid_system_init(APP_ID, AUDIO_SAMPLE_RATE);
+    odroid_system_init(ODROID_APPID_NES, AUDIO_SAMPLE_RATE);
     odroid_system_emu_init(&LoadState, &SaveState, NULL);
 
     uint32_t buttons = GW_GetBootButtons();

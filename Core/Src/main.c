@@ -214,7 +214,10 @@ int _write(int file, char *ptr, int len)
 void store_erase(const uint8_t *flash_ptr, size_t size)
 {
   // Only allow pointers in the SAVEFLASH allocated area
-  assert((flash_ptr >= &__SAVEFLASH_START__) && ((flash_ptr + size) <= &__SAVEFLASH_END__));
+  assert(
+    ((flash_ptr >= &__SAVEFLASH_START__) && ((flash_ptr + size) <= &__SAVEFLASH_END__)) ||
+    ((flash_ptr >= &__configflash_start__) && ((flash_ptr + size) <= &__configflash_end__))
+  );
 
   // Convert mem mapped pointer to flash address
   uint32_t save_address = flash_ptr - &__EXTFLASH_START__;
@@ -262,6 +265,11 @@ void store_save(const uint8_t *flash_ptr, const uint8_t *data, size_t size)
   // Only allow 4kB aligned pointers
   assert((save_address & (4*1024 - 1)) == 0);
 
+  int diff = memcmp((void*)flash_ptr, data, size);
+  if (diff == 0) {
+    return;
+  }
+
   store_erase(flash_ptr, size);
 
   OSPI_DisableMemoryMapped(&hospi1);
@@ -291,6 +299,9 @@ void GW_EnterDeepSleep(void)
   HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN1_LOW);
 
   lcd_backlight_off();
+
+  // Deinit the LCD, save power.
+  lcd_deinit(&hspi2);
 
   // Leave a trace in RAM that we entered standby mode
   boot_magic = BOOT_MAGIC_STANDBY;
