@@ -2,6 +2,7 @@
 
 import argparse
 import os
+import subprocess
 from typing import List
 
 ROM_ENTRIES_TEMPLATE = """
@@ -41,16 +42,16 @@ class ROM:
         self.path = filepath
         self.size = os.path.getsize(filepath)
         self.ext = extension
+        obj = "".join([i if i.isalnum() else "_" for i in os.path.basename(filepath)])
+        symbol_path = os.path.dirname(filepath) + "/" + obj
+        self.obj_path = "build/roms/" + obj + ".o"
+        self.symbol = "_binary_" + "".join([i if i.isalnum() else "_" for i in symbol_path]) + "_start"
 
     def __str__(self) -> str:
         return self.name + " " + str(self.size)
 
     def __repr__(self):
         return str(self)
-
-    def data(self) -> bytes:
-        with open(self.path, "rb") as f:
-            return f.read()
 
 
 class ROMParser():
@@ -74,17 +75,16 @@ class ROMParser():
         return found_roms
 
 
-    def generate_rom_entries(self, name: str, roms: [ROM], rom_prefix: str, save_prefix: str, system: str) -> str:
+    def generate_rom_entries(self, name: str, roms: [ROM], save_prefix: str, system: str) -> str:
         body = ""
         for i in range(len(roms)):
             rom = roms[i]
-            variable_name = rom_prefix + str(i)
             is_pal = any(substring in rom.name for substring in ["(E)", "(Europe)", "(Sweden)", "(Germany)", "(Italy)", "(France)", "(A)", "(Australia)"])
             region = "REGION_PAL" if is_pal else "REGION_NTSC"
             body += ROM_ENTRY_TEMPLATE.format(
                 name=rom.name,
                 size=rom.size,
-                rom_entry=rom_prefix + str(i),
+                rom_entry=rom.symbol,
                 save_entry=save_prefix + str(i),
                 region=region,
                 extension=rom.ext,
@@ -95,15 +95,16 @@ class ROMParser():
         return ROM_ENTRIES_TEMPLATE.format(name=name, body=body, rom_count=len(roms))
 
 
-    def generate_char_array(self, name: str, ROM: ROM) -> str:
-        rom_data = ROM.data()
-        template = "const uint8_t {name}[]  __attribute__((section (\".extflash_game_rom\"))) = {{\n"
-        char_array = template.format(name=name)
-        char_array += ", ".join([hex(x) for x in rom_data])
-        char_array += "};\n"
-
-        return char_array
-
+    def generate_object_file(self, ROM: ROM) -> str:
+        # convert rom to an .o file and place the data in the .extflash_game_rom section
+        prefix = ""
+        if "GCC_PATH" in os.environ:
+            prefix = os.environ["GCC_PATH"]
+        subprocess.run([ os.path.join(prefix, "arm-none-eabi-objcopy"), "--rename-section", ".data=.extflash_game_rom,alloc,load,readonly,data,contents", \
+                         "-I", "binary", "-O", "elf32-littlearm", ROM.path, ROM.obj_path ])
+        subprocess.run([ os.path.join(prefix, "arm-none-eabi-ar"), "-cru", "build/roms.a", ROM.obj_path ])
+        template = "extern const uint8_t {name}[];\n"
+        return template.format(name=ROM.symbol)
 
     def generate_save_entry(self, name: str, save_size: int) -> str:
         return f"uint8_t {name}[{save_size}]  __attribute__((section (\".saveflash\"))) __attribute__((aligned(4096)));\n"
@@ -138,7 +139,7 @@ class ROMParser():
 
         return 0
 
-    def generate_system(self, file: str, system_name: str, variable_name: str, folder: str, extensions: List[str], data_prefix: str, save_prefix: str) -> int:
+    def generate_system(self, file: str, system_name: str, variable_name: str, folder: str, extensions: List[str], save_prefix: str) -> int:
         f = open(file, "w")
         roms = []
         for e in extensions:
@@ -169,10 +170,10 @@ class ROMParser():
             total_save_size += ((save_size + aligned_size - 1) // (aligned_size)) * aligned_size
             total_rom_size += rom.size
 
-            f.write(self.generate_char_array(data_prefix + str(i), rom))
+            f.write(self.generate_object_file(rom))
             f.write(self.generate_save_entry(save_prefix + str(i), save_size))
 
-        rom_entries = self.generate_rom_entries(folder + "_roms", roms, data_prefix, save_prefix, variable_name)
+        rom_entries = self.generate_rom_entries(folder + "_roms", roms, save_prefix, variable_name)
         f.write(rom_entries)
 
         f.write(SYSTEM_TEMPLATE.format(
@@ -200,22 +201,22 @@ class ROMParser():
         total_rom_size = 0
         build_config = ""
 
-        save_size, rom_size = self.generate_system("Core/Src/retro-go/gb_roms.c", "Nintendo Gameboy", "gb_system", "gb", ["gb", "gbc"], "ROM_GB_", "SAVE_GB_")
+        save_size, rom_size = self.generate_system("Core/Src/retro-go/gb_roms.c", "Nintendo Gameboy", "gb_system", "gb", ["gb", "gbc"], "SAVE_GB_")
         total_save_size += save_size
         total_rom_size += rom_size
         build_config += "#define ENABLE_EMULATOR_GB\n" if rom_size > 0 else ""
 
-        save_size, rom_size = self.generate_system("Core/Src/retro-go/nes_roms.c", "Nintendo Entertainment System", "nes_system", "nes", ["nes"], "ROM_NES_", "SAVE_NES_")
+        save_size, rom_size = self.generate_system("Core/Src/retro-go/nes_roms.c", "Nintendo Entertainment System", "nes_system", "nes", ["nes"], "SAVE_NES_")
         total_save_size += save_size
         total_rom_size += rom_size
         build_config += "#define ENABLE_EMULATOR_NES\n" if rom_size > 0 else ""
 
-        save_size, rom_size = self.generate_system("Core/Src/retro-go/sms_roms.c", "Sega Master System", "sms_system", "sms", ["sms"], "ROM_SMS_", "SAVE_SMS_")
+        save_size, rom_size = self.generate_system("Core/Src/retro-go/sms_roms.c", "Sega Master System", "sms_system", "sms", ["sms"], "SAVE_SMS_")
         total_save_size += save_size
         total_rom_size += rom_size
         build_config += "#define ENABLE_EMULATOR_SMS\n" if rom_size > 0 else ""
 
-        save_size, rom_size = self.generate_system("Core/Src/retro-go/gg_roms.c", "Sega Game Gear", "gg_system", "gg", ["gg"], "ROM_GG_", "SAVE_GG_")
+        save_size, rom_size = self.generate_system("Core/Src/retro-go/gg_roms.c", "Sega Game Gear", "gg_system", "gg", ["gg"], "SAVE_GG_")
         total_save_size += save_size
         total_rom_size += rom_size
         build_config += "#define ENABLE_EMULATOR_GG\n" if rom_size > 0 else ""
@@ -236,4 +237,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--flash-size', '-s', type=int, default=1024*1024)
     args = parser.parse_args()
+
+    if not os.path.isdir("build/roms"):
+        os.mkdir("build/roms", 0o755)
+
     ROMParser().parse(args)
