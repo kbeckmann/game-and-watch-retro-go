@@ -266,6 +266,8 @@ vpath %.c $(sort $(dir $(C_SOURCES) $(NES_C_SOURCES) $(GNUBOY_C_SOURCES) $(SMSPL
 OBJECTS += $(addprefix $(BUILD_DIR)/,$(notdir $(SDK_ASM_SOURCES:.s=.o)))
 vpath %.s $(sort $(dir $(SDK_ASM_SOURCES)))
 
+OBJECTS += $(addprefix $(BUILD_DIR)/,roms.a)
+
 # function used to generate prerequisite rules for SDK objects
 define sdk_obj_prereq_gen
 $(BUILD_DIR)/$(patsubst %.c,%.o,$(patsubst %.s,%.o,$(notdir $1))): $1
@@ -286,17 +288,16 @@ $(BUILD_DIR)/rom_files.txt: FORCE | $(BUILD_DIR)
 	$(V)$(ECHO) [ BASH ] Checking for updated roms
 	$(V)./update_rom_files.sh build/rom_files.txt roms/gb roms/nes roms/sms roms/gg
 
-$(BUILD_DIR)/saveflash.ld $(BUILD_DIR)/config.h &: $(BUILD_DIR)/rom_files.txt parse_roms.py | $(BUILD_DIR)
+$(BUILD_DIR)/roms.a: $(BUILD_DIR)/rom_files.txt parse_roms.py
 	$(V)$(ECHO) [ PYTHON3 ] $(notdir $<)
 	$(V)$(PYTHON3) parse_roms.py --flash-size $(EXTFLASH_SIZE)
 
-Core/Src/retro-go/gb_roms.c Core/Src/retro-go/nes_roms.c: $(BUILD_DIR)/saveflash.ld | $(BUILD_DIR)
-
-# TODO: Hard-coded dependencies. Possible to solve in a nicer way?
-Core/Src/retro-go/rom_manager.c: Core/Src/retro-go/gb_roms.c Core/Src/retro-go/nes_roms.c $(BUILD_DIR)/rom_files.txt
-	$(V)$(TOUCH) $@
-
+$(BUILD_DIR)/config.h: $(BUILD_DIR)/roms.a
+$(BUILD_DIR)/saveflash.ld: $(BUILD_DIR)/roms.a
 STM32H7B0VBTx_FLASH.ld: $(BUILD_DIR)/saveflash.ld
+
+# rom_manager.c depends on the different *_roms.c files but they only change when roms.a changes
+$(BUILD_DIR)/core/rom_manager.o: Core/Src/retro-go/rom_manager.c $(BUILD_DIR)/roms.a
 
 Core/Src/main.c: Core/Inc/githash.h
 Core/Src/retro-go/rg_main.c: Core/Inc/githash.h
