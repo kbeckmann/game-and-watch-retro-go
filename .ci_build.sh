@@ -10,10 +10,11 @@ curl -L -o roms/nes/pwn.nes https://github.com/Vector35/PwnAdventureZ/blob/maste
 # GB
 curl -L -o roms/gb/matrix-rain.gb https://github.com/wtjones/matrix-rain-gb/releases/download/0.0.3/matrix-rain.gb
 
-# GG
-touch roms/gg/placehonder.gg
 
-# SMS
-touch roms/sms/placehonder.sms
+# Download and install GG and SMS open source demoscene ROM
+curl -L -o sega_tween.zip https://files.scene.org/get/demos/artists/ben_ryves/sega_tween.zip
+unzip sega_tween.zip
+cp 'Sega Tween (Normal).gg' roms/gg
+cp 'Sega Tween (Normal).sms' roms/sms
 
 make -j $(nproc)
