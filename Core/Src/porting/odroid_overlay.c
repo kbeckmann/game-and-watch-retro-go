@@ -621,7 +621,8 @@ int odroid_overlay_game_menu(odroid_dialog_choice_t *extra_options)
         {30, "Reload", "", 1, NULL},
         {40, "Options", "", 1, NULL},
         // {50, "Tools", "", 1, NULL},
-        {100, "Quit", "", 1, NULL},
+        {90, "Power off", "", 1, NULL},
+        {100, "Quit to menu", "", 1, NULL},
         ODROID_DIALOG_CHOICE_LAST
     };
 
@@ -644,6 +645,7 @@ int odroid_overlay_game_menu(odroid_dialog_choice_t *extra_options)
         case 30: odroid_system_emu_load_state(0); break; // TODO: Reload emulator?
         case 40: odroid_overlay_game_settings_menu(extra_options); break;
         case 50: odroid_overlay_game_debug_menu(); break;
+        case 90: GW_EnterDeepSleep(); break;
         case 100: odroid_system_switch_app(0); break;
     }
 
