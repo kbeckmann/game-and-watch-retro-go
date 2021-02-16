@@ -221,21 +221,6 @@ void LoadCartPCE() {
 	if ((pceRomFlags[IDX].Flags & US_ENCODED) || PCE.ROM_DATA[0x1FFF] < 0xE0) {
 		printf("This rom is probably US encrypted, Not supported!!!\n");
 		assert(0);
-/*
-   			unsigned char inverted_nibble[16] = {
-   				0, 8, 4, 12, 2, 10, 6, 14,
-   				1, 9, 5, 13, 3, 11, 7, 15
-   			};
-
-   			for (int x = 0; x < PCE.ROM_SIZE * 0x2000; x++) {
-   				unsigned char temp = PCE.ROM_DATA[x] & 15;
-
-   				PCE.ROM_DATA[x] &= ~0x0F;
-   				PCE.ROM_DATA[x] |= inverted_nibble[PCE.ROM_DATA[x] >> 4];
-
-   				PCE.ROM_DATA[x] &= ~0xF0;
-   				PCE.ROM_DATA[x] |= inverted_nibble[temp] << 4;
-   			}*/
    	}
 
 	if (pceRomFlags[IDX].Flags & TWO_PART_ROM) PCE.ROM_SIZE = 0x30;
@@ -358,11 +343,12 @@ void pce_osd_gfx_blit() {
         lastFPSTime = currentTime;
     }
 
+    // Calculate no. of active Tiles and Sprites
     for(int j=0;j<2048;j++) {
-        if (TILE_CACHE[j]==1) tileCount++;
+        if (TILE_CACHE[j]) tileCount++;
      }
     for(int j=0;j<512;j++) {
-    	if (SPR_CACHE[j]==1) sprCount++;
+    	if (SPR_CACHE[j]) sprCount++;
     }
 
     uint16_t *framebuffer_active = (active_framebuffer == 0 ? framebuffer1 : framebuffer2);
@@ -371,6 +357,7 @@ void pce_osd_gfx_blit() {
     	x2=0;
     	uint8_t *fbTmp = fb_buffer1+(y*XBUF_WIDTH);
     	if (current_width<=GW_LCD_WIDTH) {
+
     		// Horizontal - Scale up
         	for(int x=0;x<current_width;x++) {
 //        		uint8_t *fbTmp = fb_buffer1+(y*XBUF_WIDTH+x);
@@ -449,15 +436,17 @@ int app_main_pce(uint8_t load_state) {
     printf("Sound initialized\n");
     pce_snd_init();
 
+    // Init PCE Core
     pce_init();
-
     LoadCartPCE();
     ResetPCE();
 
     // If user select "RESUME" in main menu
     if (load_state) LoadState(NULL);
 
-    printf("SF2?: %d\n", PCE.SF2);
+    if (PCE.SF2) {
+    	printf("SF2 is not supported at this moment.\n", PCE.SF2);
+    }
     assert(!PCE.SF2);
 
     // Main emulator loop
