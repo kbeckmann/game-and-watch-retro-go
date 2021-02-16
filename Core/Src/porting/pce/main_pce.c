@@ -445,7 +445,7 @@ int app_main_pce(uint8_t load_state) {
     if (load_state) LoadState(NULL);
 
     if (PCE.SF2) {
-    	printf("SF2 is not supported at this moment.\n", PCE.SF2);
+    	printf("SF2 is not supported at this moment!\n");
     }
     assert(!PCE.SF2);
 

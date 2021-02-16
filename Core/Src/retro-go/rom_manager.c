@@ -4,7 +4,6 @@
 #include "rom_manager.h"
 #include "rg_emulators.h"
 #include "utils.h"
-#define ARRAY_SIZE(x) (sizeof(x)/sizeof((x)[0]))
 
 const unsigned char *ROM_DATA = NULL;
 unsigned ROM_DATA_LENGTH;
