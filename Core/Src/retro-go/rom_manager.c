@@ -4,6 +4,7 @@
 #include "rom_manager.h"
 #include "rg_emulators.h"
 #include "utils.h"
+#define ARRAY_SIZE(x) (sizeof(x)/sizeof((x)[0]))
 
 const unsigned char *ROM_DATA = NULL;
 unsigned ROM_DATA_LENGTH;
@@ -13,12 +14,14 @@ retro_emulator_file_t *ACTIVE_FILE = NULL;
 #include "nes_roms.c"
 #include "sms_roms.c"
 #include "gg_roms.c"
+#include "pce_roms.c"
 
 const rom_system_t *systems[] = {
     &nes_system,
     &gb_system,
     &sms_system,
     &gg_system,
+    &pce_system
 };
 
 const rom_manager_t rom_mgr = {

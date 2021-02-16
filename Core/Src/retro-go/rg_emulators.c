@@ -14,9 +14,10 @@
 #include "main_gb.h"
 #include "main_nes.h"
 #include "main_smsplusgx.h"
+#include "main_pce.h"
 
 // Increase when adding new emulators
-#define MAX_EMULATORS 4
+#define MAX_EMULATORS 5
 static retro_emulator_t emulators[MAX_EMULATORS];
 static int emulators_count = 0;
 
@@ -398,13 +399,20 @@ void emulator_start(retro_emulator_file_t *file, bool load_state)
         SCB_CleanDCache_by_Addr((uint32_t *)&__RAM_EMU_START__, (size_t)&_OVERLAY_SMS_SIZE);
         app_main_smsplusgx(load_state);
 #endif
-    }
+    } else if(strcmp(emu->system_name, "PC Engine") == 0) {
+#ifdef ENABLE_EMULATOR_PCE
+      memcpy(&__RAM_EMU_START__, &_OVERLAY_PCE_LOAD_START, (size_t)&_OVERLAY_PCE_SIZE);
+      memset(&_OVERLAY_PCE_BSS_START, 0x0, (size_t)&_OVERLAY_PCE_BSS_SIZE);
+      SCB_CleanDCache_by_Addr((uint32_t *)&__RAM_EMU_START__, (size_t)&_OVERLAY_PCE_SIZE);
+      app_main_pce(load_state);
+#endif
+  }
     
 }
 
 void emulators_init()
 {
-#if !( defined(ENABLE_EMULATOR_GB) || defined(ENABLE_EMULATOR_NES) || defined(ENABLE_EMULATOR_GG) || defined(ENABLE_EMULATOR_SMS) )
+#if !( defined(ENABLE_EMULATOR_GB) || defined(ENABLE_EMULATOR_NES) || defined(ENABLE_EMULATOR_GG) || defined(ENABLE_EMULATOR_SMS) || defined(ENABLE_EMULATOR_PCE) )
     // Add gameboy as a placeholder in case no emulator is built.
     add_emulator("Nintendo Gameboy", "gb", "gb", "gnuboy-go", 0, logo_gb, header_gb);
 #endif
@@ -425,6 +433,10 @@ void emulators_init()
 
 #ifdef ENABLE_EMULATOR_GG
     add_emulator("Sega Game Gear", "gg", "gg", "smsplusgx-go", 0, logo_gg, header_gg);
+#endif
+
+#ifdef ENABLE_EMULATOR_PCE
+    add_emulator("PC Engine", "pce", "pce", "huexpress-go", 0, logo_nes, header_pce);
 #endif
 
     // add_emulator("ColecoVision", "col", "col", "smsplusgx-go", 0, logo_col, header_col);

@@ -40,3 +40,9 @@ extern void * _OVERLAY_SMS_LOAD_START[];
 extern uint8_t _OVERLAY_SMS_SIZE;
 extern void * _OVERLAY_SMS_BSS_START[];
 extern uint8_t _OVERLAY_SMS_BSS_SIZE;
+extern void * _OVERLAY_PCE_LOAD_START[];
+extern uint8_t _OVERLAY_PCE_SIZE;
+extern void * _OVERLAY_PCE_BSS_START[];
+extern uint8_t _OVERLAY_PCE_BSS_SIZE;
+
+

@@ -121,7 +121,15 @@ retro-go-stm32/smsplusgx-go/components/smsplus/sound/sms_sound.c \
 retro-go-stm32/smsplusgx-go/components/smsplus/sound/ym2413.c \
 Core/Src/porting/smsplusgx/main_smsplusgx.c
 
+PCE_C_SOURCES = \
+retro-go-stm32/huexpress-go/components/huexpress/engine/gfx.c \
+retro-go-stm32/huexpress-go/components/huexpress/engine/h6280.c \
+retro-go-stm32/huexpress-go/components/huexpress/engine/hard_pce.c \
+Core/Src/porting/pce/sound_pce.c \
+Core/Src/porting/pce/main_pce.c 
+
 C_INCLUDES +=  \
+-ICore/Inc \
 -Iretro-go-stm32/nofrendo-go/components/nofrendo/cpu \
 -Iretro-go-stm32/nofrendo-go/components/nofrendo/mappers \
 -Iretro-go-stm32/nofrendo-go/components/nofrendo/nes \
@@ -130,8 +138,8 @@ C_INCLUDES +=  \
 -Iretro-go-stm32/gnuboy-go/components \
 -Iretro-go-stm32/smsplusgx-go/components/smsplus \
 -Iretro-go-stm32/smsplusgx-go/components/smsplus/cpu \
--Iretro-go-stm32/smsplusgx-go/components/smsplus/sound
-
+-Iretro-go-stm32/smsplusgx-go/components/smsplus/sound \
+-Iretro-go-stm32/huexpress-go/components/huexpress/engine 
 
 C_DEFS += \
 -DIS_LITTLE_ENDIAN \
@@ -143,10 +151,9 @@ include Makefile.common
 
 $(BUILD_DIR)/$(TARGET)_extflash.bin: $(BUILD_DIR)/$(TARGET).elf | $(BUILD_DIR)
 	$(V)$(ECHO) [ BIN ] $(notdir $@)
-	$(V)$(BIN) -j ._itcram_hot -j ._ram_exec -j ._extflash -j .overlay_nes -j .overlay_gb -j .overlay_sms $< $(BUILD_DIR)/$(TARGET)_extflash.bin
+	$(V)$(BIN) -j ._itcram_hot -j ._ram_exec -j ._extflash -j .overlay_nes -j .overlay_gb -j .overlay_sms -j .overlay_pce $< $(BUILD_DIR)/$(TARGET)_extflash.bin
 
 $(BUILD_DIR)/$(TARGET)_intflash.bin: $(BUILD_DIR)/$(TARGET).elf | $(BUILD_DIR)
 	$(V)$(ECHO) [ BIN ] $(notdir $@)
 	$(V)$(BIN) -j .isr_vector -j .text -j .rodata -j .ARM.extab -j .preinit_array -j .init_array -j .fini_array -j .data $< $(BUILD_DIR)/$(TARGET)_intflash.bin
-
 
