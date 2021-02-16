@@ -3,6 +3,9 @@
 #include "sound_pce.h"
 #include "pce.h"
 
+// Dont forget to change in main.c as well
+#define AUDIO_SAMPLE_RATE   (22050)
+
 static const uint8_t vol_tbl[32] = {
     100 >> 8, 451 >> 8, 508 >> 8, 573 >> 8, 646 >> 8, 728 >> 8, 821 >> 8, 925 >> 8,
     1043 >> 8, 1175 >> 8, 1325 >> 8, 1493 >> 8, 1683 >> 8, 1898 >> 8, 2139 >> 8, 2411 >> 8,
@@ -170,59 +173,28 @@ psg_update_chan(sample_t *buf, int ch, size_t dwSize)
         memset(buf, 0, (void*)buf_end - (void*)buf);
     }
 }
-// Dont forget to change in main.c as well
-#define AUDIO_SAMPLE_RATE   (22050)
-// #define AUDIO_BUFFER_LENGTH  (AUDIO_SAMPLE_RATE / 60)
-//#define AUDIO_BUFFER_LENGTH  (AUDIO_SAMPLE_RATE / 60)
 
-//static short audioBuffer[AUDIO_BUFFER_LENGTH * 2];
-
-/*
-static void
-audioTask(void *arg)
-{
-    printf("%s: STARTED\n", __func__);
-
-    while (1)
-    {
-        snd_update(audioBuffer, AUDIO_BUFFER_LENGTH);
-        odroid_audio_submit(audioBuffer, AUDIO_BUFFER_LENGTH);
-    }
-
-    vTaskDelete(NULL);
-}*/
-
-void osd_snd_init(void)
-{
+void osd_snd_init(void) {
     host.sound.stereo = true;
     host.sound.freq = AUDIO_SAMPLE_RATE;
     host.sound.sample_size = 1;
-
     //xTaskCreatePinnedToCore(&audioTask, "audioTask", 1024 * 2, NULL, 5, NULL, 1);
 }
 
-int
-pce_snd_init(void)
-{
+int pce_snd_init(void) {
     noise_rand[4] = 0x51F63101;
     noise_rand[5] = 0x1F631042;
-
     osd_snd_init();
-
     return 0;
 }
 
 
-void
-pce_snd_term(void)
-{
+void pce_snd_term(void) {
     osd_snd_shutdown();
 }
 
 
-void
-pce_snd_update(int16_t *output, unsigned length)
-{
+void pce_snd_update(int16_t *output, unsigned length) {
     int lvol = (PCE.PSG.volume >> 4);
     int rvol = (PCE.PSG.volume & 0x0F);
 
@@ -232,8 +204,7 @@ pce_snd_update(int16_t *output, unsigned length)
 
     memset(output, 0, length * 2);
 
-    for (int i = 0; i < PSG_CHANNELS; i++)
-    {
+    for (int i = 0; i < PSG_CHANNELS; i++) {
     	psg_update_chan((void*)mix_buffer, i, length);
         /*for (int j = 0; j < length; j += 2) {
             output[j] += (uint8_t)mix_buffer[j] * lvol;

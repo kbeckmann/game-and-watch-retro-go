@@ -14,6 +14,8 @@
 #include "common.h"
 #include "sound_pce.h"
 
+//#define PCE_SHOW_DEBUG
+
 #define APP_ID 4
 
 //#define XBUF_WIDTH 	(480 + 32)
@@ -56,7 +58,6 @@ static uint skipFrames = 0;
 static uint8_t *fb_buffer1;
 static uint globalLastElapseTime = 0;
 static int framePerSecond=0;
-static int frameSkipTest = 0;
 
 // TODO: Move to lcd.c/h
 extern LTDC_HandleTypeDef hltdc;
@@ -318,18 +319,15 @@ void init_color_pals() {
 	set_color(255, 0x3f, 0x3f, 0x3f);
 }
 
-void pce_osd_gfx_blit() {
-	if (frameSkipTest==1) {
-		frameSkipTest=0;
-		memset(emulator_framebuffer_pce,0,sizeof(emulator_framebuffer_pce));
-		return;
-	} else {
-		frameSkipTest++;
-	}
-
-	int sprCount=0, tileCount=0;
+void pce_osd_gfx_blit(bool drawFrame) {
     static uint32_t lastFPSTime = 0;
     static uint32_t frames = 0;
+	if (!drawFrame) {
+		memset(emulator_framebuffer_pce,0,sizeof(emulator_framebuffer_pce));
+		return;
+	}
+	int sprCount=0, tileCount=0;
+
     uint32_t currentTime = HAL_GetTick();
     uint32_t delta = currentTime - lastFPSTime;
 
@@ -352,8 +350,8 @@ void pce_osd_gfx_blit() {
     }
 
     uint16_t *framebuffer_active = (active_framebuffer == 0 ? framebuffer1 : framebuffer2);
-    int x2=0;
-    for(int y=0;y<GW_LCD_HEIGHT;y++) {
+    int x2=0,y=0;
+    for(y=0;y<current_height;y++) {
     	x2=0;
     	uint8_t *fbTmp = fb_buffer1+(y*XBUF_WIDTH);
     	if (current_width<=GW_LCD_WIDTH) {
@@ -376,6 +374,13 @@ void pce_osd_gfx_blit() {
             		x2++;
         		}
         	}
+    	}
+    }
+    // Temporary, Y scaling is not implemented yet
+    for(y=y;y<GW_LCD_HEIGHT;y++) {
+    	uint8_t *fbTmp = fb_buffer1+(y*XBUF_WIDTH);
+    	for(int x=0;x<GW_LCD_WIDTH;x++) {
+        	framebuffer_active[y*GW_LCD_WIDTH+x];
     	}
     }
 
@@ -423,7 +428,8 @@ int app_main_pce(uint8_t load_state) {
     // Init Graphics
     init_color_pals();
     const int refresh_rate = FPS_NTSC;
-    const int frameTime = get_frame_time(refresh_rate);
+    sprintf(pce_log,"%d",refresh_rate);
+    const int frameTime = 1000 / refresh_rate;
     bool fullFrame = false;
     memset(framebuffer1, 0, sizeof(framebuffer1));
     memset(framebuffer2, 0, sizeof(framebuffer2));
@@ -498,9 +504,7 @@ int app_main_pce(uint8_t load_state) {
         }
 
         bool drawFrame = !skipFrames;
-        if (drawFrame) {
-            pce_osd_gfx_blit();
-        }
+        pce_osd_gfx_blit(drawFrame);
 
         // Tick before submitting audio/syncing
        	odroid_system_tick(!drawFrame, fullFrame, get_elapsed_time_since(startTime));
@@ -515,12 +519,12 @@ int app_main_pce(uint8_t load_state) {
         	uint elapseT = get_elapsed_time_since(startTime);
         	globalLastElapseTime = elapseT;
             if (elapseT > frameTime) {
-            	skipFrames = 1;
+            	 //skipFrames = 1; // Disabled, it seems getting better performance when disable the skip.
             } else {
             	while ((frameTime-elapseT)>0) {
             		elapseT = get_elapsed_time_since(startTime);
-            		//HAL_Delay(frameTime-elapseT-2);
-            		__NOP();
+            		//HAL_Delay(frameTime-elapseT);
+            		__NOP(); // Using __NOP seems giving a better audio
             	}
             }
             //if (app->speedupEnabled) skipFrames += app->speedupEnabled * 2.5;
