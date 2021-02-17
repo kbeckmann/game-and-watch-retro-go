@@ -14,7 +14,7 @@
 #include "common.h"
 #include "sound_pce.h"
 
-//#define PCE_SHOW_DEBUG
+#define PCE_SHOW_DEBUG
 
 #define APP_ID 4
 
@@ -55,7 +55,6 @@ static uint8_t emulator_framebuffer_pce[XBUF_WIDTH * XBUF_HEIGHT];
 static uint8_t OBJ_CACHE_buf[0x10000];
 static uint8_t PCE_EXRAM_BUF[0x8000];
 static uint skipFrames = 0;
-static uint8_t *fb_buffer1;
 static uint globalLastElapseTime = 0;
 static int framePerSecond=0;
 
@@ -326,12 +325,9 @@ void pce_osd_gfx_blit(bool drawFrame) {
 		memset(emulator_framebuffer_pce,0,sizeof(emulator_framebuffer_pce));
 		return;
 	}
-	int sprCount=0, tileCount=0;
-
+	
     uint32_t currentTime = HAL_GetTick();
     uint32_t delta = currentTime - lastFPSTime;
-
-    fb_buffer1 = osd_gfx_framebuffer();
 
     frames++;
     if (delta >= 1000) {
@@ -341,46 +337,62 @@ void pce_osd_gfx_blit(bool drawFrame) {
         lastFPSTime = currentTime;
     }
 
+#ifdef PCE_SHOW_DEBUG1
     // Calculate no. of active Tiles and Sprites
+	int sprCount=0, tileCount=0;
     for(int j=0;j<2048;j++) {
         if (TILE_CACHE[j]) tileCount++;
      }
     for(int j=0;j<512;j++) {
     	if (SPR_CACHE[j]) sprCount++;
     }
+#endif 
 
+	uint8_t *emuFrameBuffer = osd_gfx_framebuffer();
     uint16_t *framebuffer_active = (active_framebuffer == 0 ? framebuffer1 : framebuffer2);
-    int x2=0,y=0;
-    for(y=0;y<current_height;y++) {
+    int x2=0,y=0, offsetY;
+	int xScaleDownModulo = 0;
+	int xScaleUpModulo = 0;
+	uint8_t *fbTmp;
+	if (GW_LCD_WIDTH<current_width) xScaleDownModulo = current_width/(current_width-GW_LCD_WIDTH);
+	if (GW_LCD_WIDTH>current_width) xScaleUpModulo = current_width/(GW_LCD_WIDTH-current_width);
+	int renderHeight = (current_height<=GW_LCD_HEIGHT)?current_height:GW_LCD_HEIGHT;
+	
+    for(y=0;y<renderHeight;y++) {
     	x2=0;
-    	uint8_t *fbTmp = fb_buffer1+(y*XBUF_WIDTH);
-    	if (current_width<=GW_LCD_WIDTH) {
-
+    	fbTmp = emuFrameBuffer+(y*XBUF_WIDTH);
+		offsetY = y*GW_LCD_WIDTH;
+    	if (xScaleUpModulo) {
     		// Horizontal - Scale up
         	for(int x=0;x<current_width;x++) {
-//        		uint8_t *fbTmp = fb_buffer1+(y*XBUF_WIDTH+x);
-        		framebuffer_active[y*GW_LCD_WIDTH+x2]=mypalette[fbTmp[x]];
+        		framebuffer_active[offsetY+x2]=mypalette[fbTmp[x]];
         		x2++;
-        		if ((x+1)%(current_width/(GW_LCD_WIDTH-current_width))==0) {
-            		framebuffer_active[y*GW_LCD_WIDTH+x2]=mypalette[fbTmp[x]];
+        		if ((x+1)%xScaleUpModulo)==0) {
+            		framebuffer_active[offsetY+x2]=mypalette[fbTmp[x]];
         			x2++;
         		}
         	}
-    	} else {
+    	} else if (xScaleDownModulo) {
     		// Horizontal - Scale down
         	for(int x=0;x<current_width;x++) {
-        		if (x%(current_width/(current_width-GW_LCD_WIDTH))!=0) {
-        			framebuffer_active[y*GW_LCD_WIDTH+x2]=mypalette[fbTmp[x]];
+        		if (x%xScaleDownModulo!=0) {
+        			framebuffer_active[offsetY+x2]=mypalette[fbTmp[x]];
             		x2++;
         		}
         	}
-    	}
+    	} else {
+			// No scaling, 1:1 
+			for(int x=0;x<current_width;x++) {
+       			framebuffer_active[offsetY+x]=mypalette[fbTmp[x]];
+        	}
+		}
     }
-    // Temporary, Y scaling is not implemented yet
-    for(y=y;y<GW_LCD_HEIGHT;y++) {
-    	uint8_t *fbTmp = fb_buffer1+(y*XBUF_WIDTH);
+    // Temporary, Y scaling is not yet implemented 
+    for(;y<GW_LCD_HEIGHT;y++) {
+    	fbTmp = emuFrameBuffer+(y*XBUF_WIDTH);
+		offsetY = y*GW_LCD_WIDTH;
     	for(int x=0;x<GW_LCD_WIDTH;x++) {
-        	framebuffer_active[y*GW_LCD_WIDTH+x];
+        	framebuffer_active[offsetY+x];
     	}
     }
 
