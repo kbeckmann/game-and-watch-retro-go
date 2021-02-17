@@ -14,10 +14,9 @@
 #include "common.h"
 #include "sound_pce.h"
 
-#define PCE_SHOW_DEBUG
-
 #define APP_ID 4
 
+//#define PCE_SHOW_DEBUG
 //#define XBUF_WIDTH 	(480 + 32)
 //#define XBUF_HEIGHT	(242 + 32)
 //#define GW_LCD_WIDTH  (320)
@@ -55,7 +54,6 @@ static uint8_t emulator_framebuffer_pce[XBUF_WIDTH * XBUF_HEIGHT];
 static uint8_t OBJ_CACHE_buf[0x10000];
 static uint8_t PCE_EXRAM_BUF[0x8000];
 static uint skipFrames = 0;
-static uint globalLastElapseTime = 0;
 static int framePerSecond=0;
 
 // TODO: Move to lcd.c/h
@@ -367,7 +365,7 @@ void pce_osd_gfx_blit(bool drawFrame) {
         	for(int x=0;x<current_width;x++) {
         		framebuffer_active[offsetY+x2]=mypalette[fbTmp[x]];
         		x2++;
-        		if ((x+1)%xScaleUpModulo)==0) {
+        		if ((x+1)%xScaleUpModulo==0) {
             		framebuffer_active[offsetY+x2]=mypalette[fbTmp[x]];
         			x2++;
         		}
@@ -392,7 +390,7 @@ void pce_osd_gfx_blit(bool drawFrame) {
     	fbTmp = emuFrameBuffer+(y*XBUF_WIDTH);
 		offsetY = y*GW_LCD_WIDTH;
     	for(int x=0;x<GW_LCD_WIDTH;x++) {
-        	framebuffer_active[offsetY+x];
+        	framebuffer_active[offsetY+x]=0;
     	}
     }
 
@@ -434,7 +432,7 @@ void pce_pcm_submit() {
 int app_main_pce(uint8_t load_state) {
     odroid_system_init(APP_ID, AUDIO_SAMPLE_RATE);
     odroid_system_emu_init(&LoadState, &SaveState, &netplay_callback);
-    //rg_app_desc_t *app = odroid_system_get_app();
+    rg_app_desc_t *app = odroid_system_get_app();
     pce_log[0]=0;
 
     // Init Graphics
@@ -451,21 +449,17 @@ int app_main_pce(uint8_t load_state) {
     // Init Sound
     memset(audiobuffer_dma, 0, sizeof(audiobuffer_dma));
     HAL_SAI_Transmit_DMA(&hsai_BlockA1, (uint8_t *)audiobuffer_dma, AUDIO_BUFFER_LENGTH_PCE * 2 );
-    printf("Sound initialized\n");
     pce_snd_init();
+    printf("Sound initialized\n");
 
     // Init PCE Core
     pce_init();
     LoadCartPCE();
     ResetPCE();
+    printf("PCE Core initialized\n");
 
     // If user select "RESUME" in main menu
     if (load_state) LoadState(NULL);
-
-    if (PCE.SF2) {
-    	printf("SF2 is not supported at this moment!\n");
-    }
-    assert(!PCE.SF2);
 
     // Main emulator loop
     uint32_t power_pressed = 0;
@@ -502,10 +496,10 @@ int app_main_pce(uint8_t load_state) {
                     // Always save as long as PAUSE is not pressed
                     SaveState(NULL);
                 }
-
                 GW_EnterDeepSleep();
             }
         }
+
         pce_input_read(&joystick);
 
         for (Scanline = 0; Scanline < 263; ++Scanline) {
@@ -518,30 +512,19 @@ int app_main_pce(uint8_t load_state) {
         bool drawFrame = !skipFrames;
         pce_osd_gfx_blit(drawFrame);
 
-        // Tick before submitting audio/syncing
-       	odroid_system_tick(!drawFrame, fullFrame, get_elapsed_time_since(startTime));
-
-       	//if (!app->speedupEnabled) {
-       		pce_pcm_submit();
-
-       	//}
-
         // See if we need to skip a frame to keep up
         if (skipFrames == 0) {
-        	uint elapseT = get_elapsed_time_since(startTime);
-        	globalLastElapseTime = elapseT;
-            if (elapseT > frameTime) {
-            	 //skipFrames = 1; // Disabled, it seems getting better performance when disable the skip.
-            } else {
-            	while ((frameTime-elapseT)>0) {
-            		elapseT = get_elapsed_time_since(startTime);
-            		//HAL_Delay(frameTime-elapseT);
-            		__NOP(); // Using __NOP seems giving a better audio
-            	}
-            }
-            //if (app->speedupEnabled) skipFrames += app->speedupEnabled * 2.5;
+        	if (get_elapsed_time_since(startTime) > frameTime) skipFrames = 1;
+        	if (app->speedupEnabled) skipFrames += app->speedupEnabled * 2.5;
         } else if (skipFrames > 0) {
             skipFrames--;
+        }
+
+        // Tick before submitting audio/syncing
+        odroid_system_tick(!drawFrame, fullFrame, get_elapsed_time_since(startTime));
+
+        if (!app->speedupEnabled) {
+        	pce_pcm_submit();
         }
 
         // Prevent overflow
