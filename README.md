@@ -8,6 +8,7 @@ Currently playable
 - NES (Nintendo Entertainment System)
 - SMS (Sega Master System)
 - GG (Sega Game Gear)
+- PCE (PC Engine / TurboGrafx-16)
 
 ## How to report issues
 
@@ -66,11 +67,12 @@ git clone --recurse-submodules https://github.com/kbeckmann/game-and-watch-retro
 
 cd game-and-watch-retro-go
 
-# Place GB roms in `./roms/gb/`, NES roms in `./roms/nes/`, SMS roms in `./roms/sms/`, GG roms in `./roms/gg/`:
+# Place GB roms in `./roms/gb/`, NES roms in `./roms/nes/`, SMS roms in `./roms/sms/`, GG roms in `./roms/gg/`, PCE roms in `./roms/pce/`:
 # cp /path/to/rom.gb ./roms/gb/
 # cp /path/to/rom.nes ./roms/nes/
 # cp /path/to/rom.sms ./roms/sms/
 # cp /path/to/rom.nes ./roms/gg/
+# cp /path/to/pce.nes ./roms/pce/
 
 # On a Mac running make < v4 you have to manually download the HAL package using :
 # % make download_sdk
