@@ -256,15 +256,36 @@ SECTIONS
     _OVERLAY_SMS_BSS_END = .;
   }
   _OVERLAY_SMS_BSS_SIZE = SIZEOF(.overlay_sms_bss);
+  
+   .overlay_pce __RAM_EMU_START__ : {
+      . = ALIGN(4);
+    __ram_emu_pce_start__ = .;
+      build/pce/*.o (.data. data* .text .text* .rodata .rodata*)
+      . = ALIGN(4);
+      _OVERLAY_PCE_LOAD_END = .;
+  } AT> EXTFLASH
+  _OVERLAY_PCE_LOAD_START = LOADADDR(.overlay_pce);
+  _OVERLAY_PCE_SIZE = SIZEOF(.overlay_pce);
+
+  .overlay_pce_bss _OVERLAY_PCE_LOAD_END : {
+    . = ALIGN(4);
+    _OVERLAY_PCE_BSS_START = .;
+    build/pce/*.o (.bss .bss*)
+    . = ALIGN(4);
+    build/pce/*.o (COMMON)
+    __ram_emu_pce_end__ = .;
+    _OVERLAY_PCE_BSS_END = .;
+  }
+  _OVERLAY_PCE_BSS_SIZE = SIZEOF(.overlay_pce_bss);
 
   /* Place this symbol after the last overlay definition */
   .overlay_end : {
     __extflash_end__ = .;
   } AT> EXTFLASH
 
-  ._ram_space_check_sms : {
-    . = . + SIZEOF(.overlay_sms);
-    . = . + SIZEOF(.overlay_sms_bss);
+  ._ram_space_check_pce : {
+    . = . + SIZEOF(.overlay_pce);
+    . = . + SIZEOF(.overlay_pce_bss);
   } >RAM_EMU
 
   ._saveflash (NOLOAD) :

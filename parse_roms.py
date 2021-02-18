@@ -154,6 +154,8 @@ class ROMParser():
             save_size = 60 * 1024
         elif folder == "gg":
             save_size = 60 * 1024
+        elif folder == "pce":
+            save_size = 76 * 1024
         else:
             save_size = 0
 
@@ -220,6 +222,11 @@ class ROMParser():
         total_save_size += save_size
         total_rom_size += rom_size
         build_config += "#define ENABLE_EMULATOR_GG\n" if rom_size > 0 else ""
+
+        save_size, rom_size = self.generate_system("Core/Src/retro-go/pce_roms.c", "PC Engine", "pce_system", "pce", ["pce"], "SAVE_PCE_")
+        total_save_size += save_size
+        total_rom_size += rom_size
+        build_config += "#define ENABLE_EMULATOR_PCE\n" if rom_size > 0 else ""
 
         total_size = total_save_size + total_rom_size
 

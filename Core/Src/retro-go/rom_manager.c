@@ -13,12 +13,14 @@ retro_emulator_file_t *ACTIVE_FILE = NULL;
 #include "nes_roms.c"
 #include "sms_roms.c"
 #include "gg_roms.c"
+#include "pce_roms.c"
 
 const rom_system_t *systems[] = {
     &nes_system,
     &gb_system,
     &sms_system,
     &gg_system,
+    &pce_system
 };
 
 const rom_manager_t rom_mgr = {
