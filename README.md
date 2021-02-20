@@ -74,8 +74,8 @@ cd game-and-watch-retro-go
 # cp /path/to/rom.nes ./roms/gg/
 # cp /path/to/pce.nes ./roms/pce/
 
-# On a Mac running make < v4 you have to manually download the HAL package using :
-# % make download_sdk
+# On a Mac running make < v4 you have to manually download the HAL package by running:
+# make download_sdk
 
 # Build and program external and internal flash.
 # Note: If you are using the 16MB external flash, build using:
