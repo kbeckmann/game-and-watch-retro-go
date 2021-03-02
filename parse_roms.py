@@ -101,7 +101,7 @@ class ROMParser():
         if "GCC_PATH" in os.environ:
             prefix = os.environ["GCC_PATH"]
         subprocess.run([ os.path.join(prefix, "arm-none-eabi-objcopy"), "--rename-section", ".data=.extflash_game_rom,alloc,load,readonly,data,contents", \
-                         "-I", "binary", "-O", "elf32-littlearm", ROM.path, ROM.obj_path ])
+                         "-I", "binary", "-O", "elf32-littlearm", "-B", "armv7e-m", ROM.path, ROM.obj_path ])
         subprocess.run([ os.path.join(prefix, "arm-none-eabi-ar"), "-cru", "build/roms.a", ROM.obj_path ])
         template = "extern const uint8_t {name}[];\n"
         return template.format(name=ROM.symbol)
