@@ -79,7 +79,7 @@ void lcd_init(SPI_HandleTypeDef *spi, LTDC_HandleTypeDef *ltdc)
 
   HAL_Delay(10);
   HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_RESET);
-  HAL_Delay(2);
+  HAL_Delay(45);
   HAL_SPI_Transmit(spi, (uint8_t *)"\x08\x80", 2, 100);
   HAL_Delay(2);
   wdog_refresh();
