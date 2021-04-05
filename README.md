@@ -80,6 +80,9 @@ cd game-and-watch-retro-go
 # Build and program external and internal flash.
 # Note: If you are using the 16MB external flash, build using:
 #           make -j8 LARGE_FLASH=1 flash
+# Note: If you are using another custom size flash, you can set FLASH_SIZE variable. 2MB, 4MB, 8MB, 16MB, 32MB, 64MB are supported.
+# Example for 64MB, build using:
+#           make -j8 LARGE_FLASH=1 FLASH_SIZE=64 flash
 #       A custom flash size may be specified with the EXTFLASH_SIZE variable.
 
 make -j8 flash
