@@ -210,10 +210,13 @@ SECTIONS
     build/nes/*.o (.bss .bss*)
     . = ALIGN(4);
     build/nes/*.o (COMMON)
+    . = ALIGN(4);
+    _NES_ROM_UNPACK_BUFFER = .;
     _OVERLAY_NES_BSS_END = .;
     __ram_emu_nes_end__ = .;
   }
   _OVERLAY_NES_BSS_SIZE = SIZEOF(.overlay_nes_bss);
+  _NES_ROM_UNPACK_BUFFER_SIZE = __RAM_EMU_START__ + __RAM_EMU_LENGTH__ - _NES_ROM_UNPACK_BUFFER;
 
   .overlay_gb __RAM_EMU_START__ : {
     . = ALIGN(4);
