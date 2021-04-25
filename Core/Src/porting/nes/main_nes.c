@@ -32,8 +32,6 @@
 static uint32_t pause_pressed;
 static uint32_t power_pressed;
 
-unsigned char NES_ROM_DATA[512000];
-
 static bool fullFrame = 0;
 static uint frameTime = 1000 / 60;
 static uint samplesPerFrame;
@@ -487,10 +485,14 @@ size_t osd_getromdata(unsigned char **data)
 
     if (memcmp(&src[0], ROM_LZ4_MAGIC, 4) == 0) {
         /* dest pointer to the ROM data in the internal RAM (raw) */
-        unsigned char *dest = NES_ROM_DATA;
+        unsigned char *dest = (unsigned char *) &_NES_ROM_UNPACK_BUFFER;
         uint32_t lz4_compressed_size;
         uint32_t lz4_uncompressed_size;
         int32_t rom_size_src;
+        uint32_t available_size = (uint32_t) &_NES_ROM_UNPACK_BUFFER_SIZE;
+
+        printf("LZ4 compressed ROM detected.\n");
+        printf("Uncompressing to %p. %d bytes available.\n", dest, available_size);
 
         memcpy(&lz4_uncompressed_size, &src[6], sizeof(lz4_uncompressed_size));
 
@@ -498,11 +500,11 @@ size_t osd_getromdata(unsigned char **data)
         rom_size_src = lz4_depack(&src[19], dest, lz4_compressed_size);
         assert (rom_size_src < lz4_uncompressed_size);
 
-        *data = NES_ROM_DATA;
+        *data = dest;
 
         return rom_size_src;
     } else {
-        *data = ROM_DATA;
+        *data = (unsigned char *) ROM_DATA;
 
         return ROM_DATA_LENGTH;
     }
