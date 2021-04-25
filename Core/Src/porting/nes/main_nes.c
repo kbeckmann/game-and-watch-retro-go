@@ -482,35 +482,30 @@ void osd_getinput(void)
 
 size_t osd_getromdata(unsigned char **data)
 {
-    *data = ROM_DATA;
+    /* src pointer to the ROM data in the external flash (raw or LZ4) */
+    const unsigned char *src = ROM_DATA;
 
-   /* src pointer to the ROM data in the external flash (raw or LZ4) */
-   const unsigned char *src = (unsigned char *) ROM_DATA;
+    if (memcmp(&src[0], ROM_LZ4_MAGIC, 4) == 0) {
+        /* dest pointer to the ROM data in the internal RAM (raw) */
+        unsigned char *dest = NES_ROM_DATA;
+        uint32_t lz4_compressed_size;
+        uint32_t lz4_uncompressed_size;
+        int32_t rom_size_src;
 
-   /* dest pointer to the ROM data in the internal RAM (raw) */
-   unsigned char       *dest = (unsigned char *) NES_ROM_DATA;
-   
-	
-	if ( memcmp(&src[0], ROM_LZ4_MAGIC, 4) == 0  ) {
-	
-		uint32_t lz4_compressed_size;
-		uint32_t lz4_uncompressed_size;
-		int32_t rom_size_src;
+        memcpy(&lz4_uncompressed_size, &src[6], sizeof(lz4_uncompressed_size));
 
-		memcpy(&lz4_uncompressed_size, &src[6], sizeof(lz4_uncompressed_size));
+        lz4_compressed_size = ROM_DATA_LENGTH - 19;
+        rom_size_src = lz4_depack(&src[19], dest, lz4_compressed_size);
+        assert (rom_size_src < lz4_uncompressed_size);
 
-		lz4_compressed_size = ROM_DATA_LENGTH - 19;
+        *data = NES_ROM_DATA;
 
-		rom_size_src = lz4_depack(&src[19], dest, lz4_compressed_size);
-		
- 		assert (rom_size_src < lz4_uncompressed_size);
-		
-		 *data = NES_ROM_DATA;
-		return rom_size_src;
-	  
-	}  else
-		
-    return ROM_DATA_LENGTH;
+        return rom_size_src;
+    } else {
+        *data = ROM_DATA;
+
+        return ROM_DATA_LENGTH;
+    }
 }
 
 uint osd_getromcrc()
