@@ -38,7 +38,11 @@ const rom_system_t {name} = {{
 
 class ROM:
     def __init__(self, system_name: str, filepath: str, extension: str):
-        self.name = (os.path.splitext(os.path.basename(filepath))[0])
+        # Remove .lz4 from the name in case it ends with that
+        stripped_filepath = os.path.splitext(os.path.basename(filepath))[0] \
+                            if filepath.endswith(".lz4") else os.path.basename(filepath)
+
+        self.name = os.path.splitext(stripped_filepath)[0]
         self.path = filepath
         self.size = os.path.getsize(filepath)
         self.ext = extension
@@ -48,7 +52,7 @@ class ROM:
         self.symbol = "_binary_" + "".join([i if i.isalnum() else "_" for i in symbol_path]) + "_start"
 
     def __str__(self) -> str:
-        return self.name + " " + str(self.size)
+        return f"name: {self.name} size: {self.size} ext: {self.ext}"
 
     def __repr__(self):
         return str(self)
@@ -139,11 +143,40 @@ class ROMParser():
 
         return 0
 
-    def generate_system(self, file: str, system_name: str, variable_name: str, folder: str, extensions: List[str], save_prefix: str) -> int:
+    def generate_system(self, file: str, system_name: str, variable_name: str, folder: str, extensions: List[str], save_prefix: str, compress: bool=False) -> int:
         f = open(file, "w")
-        roms = []
+
+        roms_raw = []
         for e in extensions:
-            roms += self.find_roms(system_name, folder, e)
+            roms_raw += self.find_roms(system_name, folder, e)
+
+        roms_lz4 = []
+        for e in extensions:
+            roms_lz4 += self.find_roms(system_name, folder, e + ".lz4")
+
+        def contains_rom_by_name(rom: ROM, roms: list[ROM]):
+            for r in roms:
+                if r.name == rom.name:
+                    return True
+            return False
+
+        if compress:
+            lz4_path = os.environ["LZ4_PATH"] if "LZ4_PATH" in os.environ else "lz4"
+            for r in roms_raw:
+                if not contains_rom_by_name(r, roms_lz4):
+                    subprocess.run([lz4_path, "--best", "--content-size", "--no-frame-crc", r.path, r.path + ".lz4"])
+            # Re-generate the lz4 rom list
+            roms_lz4 = []
+            for e in extensions:
+                roms_lz4 += self.find_roms(system_name, folder, e + ".lz4")
+
+
+        # Create a list with all LZ4-compressed roms and roms that
+        # don't have a compressed counterpart.
+        roms = roms_lz4[:]
+        for r in roms_raw:
+            if not contains_rom_by_name(r, roms_lz4):
+                roms.append(r)
 
         total_save_size = 0
         total_rom_size = 0
@@ -208,7 +241,7 @@ class ROMParser():
         total_rom_size += rom_size
         build_config += "#define ENABLE_EMULATOR_GB\n" if rom_size > 0 else ""
 
-        save_size, rom_size = self.generate_system("Core/Src/retro-go/nes_roms.c", "Nintendo Entertainment System", "nes_system", "nes", ["nes"], "SAVE_NES_")
+        save_size, rom_size = self.generate_system("Core/Src/retro-go/nes_roms.c", "Nintendo Entertainment System", "nes_system", "nes", ["nes"], "SAVE_NES_", args.compress)
         total_save_size += save_size
         total_rom_size += rom_size
         build_config += "#define ENABLE_EMULATOR_NES\n" if rom_size > 0 else ""
@@ -243,6 +276,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Import ROMs to the build environment')
     parser = argparse.ArgumentParser()
     parser.add_argument('--flash-size', '-s', type=int, default=1024*1024)
+    parser.add_argument('--compress', dest='compress', action='store_true')
+    parser.add_argument('--no-compress', dest='compress', action='store_false')
+    parser.set_defaults(compress=True)
     args = parser.parse_args()
 
     if not os.path.isdir("build/roms"):
