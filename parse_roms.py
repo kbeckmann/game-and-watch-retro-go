@@ -154,7 +154,6 @@ class ROMParser():
         for e in extensions:
             roms_lz4 += self.find_roms(system_name, folder, e + ".lz4")
 
-      #  def contains_rom_by_name(rom: ROM, roms: list[ROM]):
         def contains_rom_by_name(rom, roms):        
             for r in roms:
                 if r.name == rom.name:
