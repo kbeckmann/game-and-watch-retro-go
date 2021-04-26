@@ -163,7 +163,6 @@ class ROMParser():
         if compress:
             lz4_path = os.environ["LZ4_PATH"] if "LZ4_PATH" in os.environ else "lz4"
             for r in roms_raw:
-                print(r)
                 if not contains_rom_by_name(r, roms_lz4):
                     subprocess.run([lz4_path, "--best", "--content-size", "--no-frame-crc", r.path, r.path + ".lz4"])
             # Re-generate the lz4 rom list
