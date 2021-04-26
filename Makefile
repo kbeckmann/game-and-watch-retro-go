@@ -49,6 +49,7 @@ retro-go-stm32/gnuboy-go/components/gnuboy/sound.c \
 NES_C_SOURCES = \
 Core/Src/porting/nes/main_nes.c \
 Core/Src/porting/nes/nofrendo_stm32.c \
+Core/Src/porting/lib/lz4_depack.c \
 retro-go-stm32/nofrendo-go/components/nofrendo/cpu/dis6502.c \
 retro-go-stm32/nofrendo-go/components/nofrendo/cpu/nes6502.c \
 retro-go-stm32/nofrendo-go/components/nofrendo/mappers/map000.c \
@@ -130,6 +131,7 @@ Core/Src/porting/pce/main_pce.c
 
 C_INCLUDES +=  \
 -ICore/Inc \
+-ICore/Src/porting/lib \
 -Iretro-go-stm32/nofrendo-go/components/nofrendo/cpu \
 -Iretro-go-stm32/nofrendo-go/components/nofrendo/mappers \
 -Iretro-go-stm32/nofrendo-go/components/nofrendo/nes \
