@@ -1,6 +1,5 @@
 
 #include <stdlib.h>
-#include <string.h>
 
 #include "lz4_depack.h"
 
