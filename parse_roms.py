@@ -195,10 +195,6 @@ class ROMParser():
         f.write(SYSTEM_PROTO_TEMPLATE.format(
             name=variable_name))
 
-        if len(roms) == 0:
-            print("No roms found! Please add at least one rom to one of the the directories in roms/")
-            exit(-1)
-
         for i in range(len(roms)):
             rom = roms[i]
             if folder == "gb":
@@ -266,6 +262,10 @@ class ROMParser():
         build_config += "#define ENABLE_EMULATOR_PCE\n" if rom_size > 0 else ""
 
         total_size = total_save_size + total_rom_size
+
+        if total_size == 0:
+            print("No roms found! Please add at least one rom to one of the the directories in roms/")
+            exit(-1)
 
         print(f"Save data:\t{total_save_size} bytes\nROM data:\t{total_rom_size} bytes\nTotal:\t\t{total_size} / {args.flash_size} bytes (plus some metadata).")
         if total_size > args.flash_size:
