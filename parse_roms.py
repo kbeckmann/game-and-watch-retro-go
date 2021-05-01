@@ -195,10 +195,6 @@ class ROMParser():
         f.write(SYSTEM_PROTO_TEMPLATE.format(
             name=variable_name))
 
-        if len(roms) == 0:
-            print("No roms found! Please add at least one rom to one of the the directories in roms/")
-            exit(-1)
-
         for i in range(len(roms)):
             rom = roms[i]
             if folder == "gb":
