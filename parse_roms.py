@@ -3,6 +3,8 @@
 import argparse
 import os
 import subprocess
+import tempfile
+
 from typing import List
 
 ROM_ENTRIES_TEMPLATE = """
@@ -116,7 +118,8 @@ class ROMParser():
     def get_gameboy_save_size(self, file: str):
         total_size = 4096
 
-        with open(file, "rb") as f:
+        rom_file_raw = file.rstrip(".lz4")
+        with open(rom_file_raw, "rb") as f:
             # cgb
             f.seek(0x143)
             cgb = ord(f.read(1))
@@ -139,6 +142,7 @@ class ROMParser():
             # Cartridge ram size
             f.seek(0x149)
             total_size += [1, 1, 1, 4, 16, 8][ord(f.read(1))] * 8 * 1024
+            print(total_size)
             return total_size
 
         return 0
@@ -162,9 +166,43 @@ class ROMParser():
 
         if compress:
             lz4_path = os.environ["LZ4_PATH"] if "LZ4_PATH" in os.environ else "lz4"
+            split_path = os.environ["LZ4_PATH"] if "LZ4_PATH" in os.environ else "split"
+
             for r in roms_raw:
                 if not contains_rom_by_name(r, roms_lz4):
-                    subprocess.run([lz4_path, "--best", "--content-size", "--no-frame-crc", r.path, r.path + ".lz4"])
+
+                    #NES LZ4 compression
+                    if  "nes_system" in variable_name:
+                        subprocess.run([lz4_path, "--best", "--content-size", "--no-frame-crc", r.path, r.path + ".lz4"])
+
+                    #GB/GBC LZ4 compression
+                    if "gb_system" in variable_name:
+
+                        # Create temp directory to build
+                        tmp_dir = tempfile.TemporaryDirectory(dir="./")
+
+                         # split the ROM in banks
+                        subprocess.run([split_path, "-b16384", r.path, tmp_dir.name+"/trunk_"])
+
+                        #compress all banks
+                        cmd=lz4_path + " --best --content-size --no-frame-crc -m " + tmp_dir.name + "/*"
+                        cout=subprocess.check_output(cmd,stderr=subprocess.STDOUT,shell=True)
+
+                        # Get ordered by name all banks
+                        lz4_files_list = sorted(os.listdir(tmp_dir.name))
+
+                        #keep only lz4 files
+                        lz4_files_short = [ f for f in lz4_files_list if os.path.splitext(f)[1] == ".lz4"]
+                        lz4_files = [tmp_dir.name+"/"+s for s in lz4_files_short]
+
+                        #create rom lz4 file (concatenate all banks)
+                        with open(r.path + ".lz4",'wb') as lz4_out_file:
+                            for fname in lz4_files:
+                                with open(fname,'rb') as bank_file:
+                                    lz4_out_file.write(bank_file.read())
+
+                        tmp_dir.cleanup()
+
             # Re-generate the lz4 rom list
             roms_lz4 = []
             for e in extensions:
@@ -236,7 +274,7 @@ class ROMParser():
         total_rom_size = 0
         build_config = ""
 
-        save_size, rom_size = self.generate_system("Core/Src/retro-go/gb_roms.c", "Nintendo Gameboy", "gb_system", "gb", ["gb", "gbc"], "SAVE_GB_")
+        save_size, rom_size = self.generate_system("Core/Src/retro-go/gb_roms.c", "Nintendo Gameboy", "gb_system", "gb", ["gb", "gbc"], "SAVE_GB_", args.compress)
         total_save_size += save_size
         total_rom_size += rom_size
         build_config += "#define ENABLE_EMULATOR_GB\n" if rom_size > 0 else ""
