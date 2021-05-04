@@ -51,7 +51,7 @@ static bool saveSRAM = false;
 static int  saveSRAM_Timer = 0;
 
 // 3 pages
-uint8_t state_save_buffer[192 * 1024];
+//uint8_t state_save_buffer[192 * 1024];
 
 
 // --- MAIN
@@ -83,9 +83,6 @@ static inline void screen_blit(void) {
         skippedFrames = 0;
         lastFPSTime = currentTime;
     }
-
-
-
 
     int w1 = currentUpdate->width;
     int h1 = currentUpdate->height;
@@ -356,14 +353,21 @@ static inline void screen_blit_jth(void) {
 //     */
 // }
 
+#define STATE_SAVE_BUFFER_LENGHT 1024 * 192
 
 static bool SaveState(char *pathName)
 {
     printf("Saving state...\n");
 
-    memset(state_save_buffer, '\x00', sizeof(state_save_buffer));
-    size_t size = gb_state_save(state_save_buffer, sizeof(state_save_buffer));
-    store_save(ACTIVE_FILE->save_address, state_save_buffer, size);
+        /* ROM banks cache temporary to create state save buffer */
+    //  memset(state_save_buffer, '\x00', sizeof(state_save_buffer));
+   //   size_t size = gb_state_save(state_save_buffer, sizeof(state_save_buffer));
+    //  store_save(ACTIVE_FILE->save_address, state_save_buffer, size);
+
+      memset(GB_ROM_SRAM_CACHE,  '\x00', STATE_SAVE_BUFFER_LENGHT);
+      size_t size = gb_state_save(GB_ROM_SRAM_CACHE, STATE_SAVE_BUFFER_LENGHT);
+      store_save(ACTIVE_FILE->save_address, GB_ROM_SRAM_CACHE, size);
+      gb_loader_restore_cache();
 
     return 0;
 }
