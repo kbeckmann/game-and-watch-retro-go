@@ -147,7 +147,7 @@ class ROMParser():
 
         return 0
 
-    def generate_system(self, file: str, system_name: str, variable_name: str, folder: str, extensions: List[str], save_prefix: str, compress: bool=False) -> int:
+    def generate_system(self, file: str, system_name: str, variable_name: str, folder: str, extensions: List[str], save_prefix: str, compress: bool=False,compress_gb_speed: bool=False) -> int:
         f = open(file, "w")
 
         roms_raw = []
@@ -179,35 +179,111 @@ class ROMParser():
                     if "gb_system" in variable_name:
 
                         # Create temp directory to build
-                        tmp_dir = tempfile.TemporaryDirectory(dir="./")
+                        tmp_dir_inst = tempfile.TemporaryDirectory(dir='./')
+                        tmp_dir=tmp_dir_inst.name
 
                          # split the ROM in banks
-                        subprocess.run([split_path, "-b16384", r.path, tmp_dir.name+"/trunk_"])
+                        prefix =  tmp_dir+"/bank_"
+                        subprocess.run(["split", "-b16384","-d", r.path, prefix])
+
+                         # Get all banks ordered by name
+                        tmp_files_list = sorted(os.listdir(tmp_dir))
+                        bank_files      = [tmp_dir+"/"+s for s in tmp_files_list]
+
+                        # determine number of banks
+                        banks_nb = len(bank_files)
 
                         #compress all banks
-                        cmd=lz4_path + " --best --content-size --no-frame-crc -m " + tmp_dir.name + "/*"
+                        cmd=lz4_path + " --best --content-size --no-frame-crc -m " + tmp_dir+"/*"
                         cout=subprocess.check_output(cmd,stderr=subprocess.STDOUT,shell=True)
 
-                        # Get ordered by name all banks
-                        lz4_files_list = sorted(os.listdir(tmp_dir.name))
+                        # Get all banks compressed  ordered by name
+                        tmp_files_list = sorted(os.listdir(tmp_dir))
 
                         #keep only lz4 files
-                        lz4_files_short = [ f for f in lz4_files_list if os.path.splitext(f)[1] == ".lz4"]
-                        lz4_files = [tmp_dir.name+"/"+s for s in lz4_files_short]
+                        lz4_files_short = [ flz4 for flz4 in tmp_files_list if os.path.splitext(flz4)[1] == ".lz4"]
+                        lz4_files = [tmp_dir+"/"+s for s in lz4_files_short]
+
+                        compress_it = [True] * banks_nb
+
+                        # For ROM having continous bank switching we can use 'partial' compression
+                        # a mix of comcompressed and uncompress
+                        # compress empty banks and the bigger compress ratio
+
+                        #keep bank0 uncompressed
+                        compress_it[0] = False
+
+                         # START : ALTERNATIVE COMPRESSION STRATEGY
+                         # the larger banks only are compressed.
+                         # It shoul fit exactly in the cache reducing the SWAP cache feequency to 0.
+                         # any empty bank is compressed (=98bytes). considered never used by MBC.
+
+                        ## Ths is the cache size used as a compression credit
+                        # TODO : can we the value from the linker ?
+                        compression_credit = 26
+
+                        if  compress_gb_speed:
+                            compress_size = [ os.path.getsize(flz4) for flz4 in lz4_files[1:]]
+
+                            # to keep empty banks compressed (size=98)
+                            compress_size = [i for i in compress_size if i > 98]
+
+                            ordered_size = sorted(compress_size)
+
+                            if compression_credit > len(ordered_size):
+                                compression_credit = len(ordered_size) -1
+
+                            compress_threshold = ordered_size[int(compression_credit)]
+
+                            for idx, flz4 in enumerate(lz4_files):
+                                if os.path.getsize(flz4)  >= compress_threshold:
+                                    compress_it[idx] = False
+                         # END : ALTERNATIVE COMPRESSION STRATEGY
 
                         #create rom lz4 file (concatenate all banks)
                         with open(r.path + ".lz4",'wb') as lz4_out_file:
-                            for fname in lz4_files:
-                                with open(fname,'rb') as bank_file:
-                                    lz4_out_file.write(bank_file.read())
 
-                        tmp_dir.cleanup()
+                            for idx, bank_is_compressed in enumerate(compress_it):
+
+                                # Add compressed bank
+                                if bank_is_compressed == True:
+                                    with open(lz4_files[idx],'rb') as bank_file:
+                                        lz4_out_file.write(bank_file.read())
+
+                                # Add uncompressed bank
+                                else :
+                                    with open(bank_files[idx],'rb') as bank_file:
+
+                                        #### Write header ###
+                                         # write MAGIC WORD \x04\x22\x4D\x18
+                                        # write FLG,BD,HC \x68\x40\x00
+
+                                        lz4_header =  b'\x04\x22\x4D\x18\x68\x40'
+                                        lz4_out_file.write(lz4_header)
+
+                                        #write uncompressed frame size
+                                        content_size_hc = b'\x00\x40\x00\x00\x00\x00\x00\x00\x25'
+                                        lz4_out_file.write(content_size_hc)
+
+                                        #### Write block data ###
+                                        #0x8000 flag uncompressed block
+                                        #0x4000 16384 bytes
+                                        block_size=b'\x00\x40\x00\x80'
+                                        lz4_out_file.write(block_size)
+                                        lz4_out_file.write(bank_file.read())
+
+                                        #### Write footer ###
+                                        # write END_MARK 0x0000
+                                        lz4_footer =   b'\x00\x00\x00\x00'
+                                        lz4_out_file.write(lz4_footer)
+
+                        tmp_dir_inst.cleanup()
+
 
             # Re-generate the lz4 rom list
             roms_lz4 = []
             for e in extensions:
                 roms_lz4 += self.find_roms(system_name, folder, e + ".lz4")
-
 
         # Create a list with all LZ4-compressed roms and roms that
         # don't have a compressed counterpart.
@@ -274,7 +350,7 @@ class ROMParser():
         total_rom_size = 0
         build_config = ""
 
-        save_size, rom_size = self.generate_system("Core/Src/retro-go/gb_roms.c", "Nintendo Gameboy", "gb_system", "gb", ["gb", "gbc"], "SAVE_GB_", args.compress)
+        save_size, rom_size = self.generate_system("Core/Src/retro-go/gb_roms.c", "Nintendo Gameboy", "gb_system", "gb", ["gb", "gbc"], "SAVE_GB_", args.compress, args.compress_gb_speed)
         total_save_size += save_size
         total_rom_size += rom_size
         build_config += "#define ENABLE_EMULATOR_GB\n" if rom_size > 0 else ""
@@ -316,7 +392,10 @@ if __name__ == "__main__":
     parser.add_argument('--flash-size', '-s', type=int, default=1024*1024)
     parser.add_argument('--compress', dest='compress', action='store_true')
     parser.add_argument('--no-compress', dest='compress', action='store_false')
-    parser.set_defaults(compress=True)
+    parser.add_argument('--compress_gb_speed', dest='compress_gb_speed', action='store_true')
+    parser.add_argument('--no-compress_gb_speed', dest='compress_gb_speed', action='store_true')
+
+    parser.set_defaults(compress=True,compress_gb_speed=False)
     args = parser.parse_args()
 
     if not os.path.isdir("build/roms"):
