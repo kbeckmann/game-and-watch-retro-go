@@ -108,7 +108,8 @@ Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal.c \
 # SDK ASM sources
 SDK_ASM_SOURCES =  \
 Drivers/CMSIS/Device/ST/STM32H7xx/Source/Templates/gcc/startup_stm32h7b0xx.s \
-Core/Src/memcpy-armv7m.s
+Core/Src/memcpy-armv7m.s \
+Core/Src/porting/lib/unlz4.s
 
 # SDK headers
 SDK_HEADERS = \
