@@ -36,6 +36,9 @@ const rom_system_t {name} = {{
 }};
 """
 
+# TODO: Find a better way to find this before building
+MAX_COMPRESSED_NES_SIZE = 0x00081000
+
 class ROM:
     def __init__(self, system_name: str, filepath: str, extension: str):
         # Remove .lz4 from the name in case it ends with that
@@ -163,6 +166,9 @@ class ROMParser():
         if compress:
             lz4_path = os.environ["LZ4_PATH"] if "LZ4_PATH" in os.environ else "lz4"
             for r in roms_raw:
+                if os.stat(r.path).st_size > MAX_COMPRESSED_NES_SIZE:
+                    print(f"INFO: {r.name} is too large to compress, skipping compression!")
+                    continue
                 if not contains_rom_by_name(r, roms_lz4):
                     subprocess.run([lz4_path, "--best", "--content-size", "--no-frame-crc", r.path, r.path + ".lz4"])
             # Re-generate the lz4 rom list
