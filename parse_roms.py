@@ -142,7 +142,6 @@ class ROMParser():
             # Cartridge ram size
             f.seek(0x149)
             total_size += [1, 1, 1, 4, 16, 8][ord(f.read(1))] * 8 * 1024
-            print(total_size)
             return total_size
 
         return 0
