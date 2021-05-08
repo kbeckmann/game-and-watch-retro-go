@@ -9,13 +9,32 @@ OPT ?= -Og
 # Set to 0 to suppress dirty submodule warning
 CHECK_DIRTY_SUBMODULE ?= 1
 
-# Set to 1 to enable 16MB external flash support
+# Set to 1 to enable bigger external flash support
 LARGE_FLASH ?= 0
+
+# Set custom flash size. 16MB by default
+FLASH_SIZE ?= 16
 
 # User may override external flash size by setting EXTFLASH_SIZE
 ifeq ($(LARGE_FLASH),1)
-	# 16MB
-	EXTFLASH_SIZE ?= 16777216
+	ifeq ($(FLASH_SIZE),2)
+		# 2MB
+		EXTFLASH_SIZE ?= 2097152
+	else ifeq ($(FLASH_SIZE),4)
+		# 4MB
+		EXTFLASH_SIZE ?= 4194304
+	else ifeq ($(FLASH_SIZE),8)
+		# 8MB
+		EXTFLASH_SIZE ?= 8388608
+	else ifeq ($(FLASH_SIZE),32)
+		# 32MB
+		EXTFLASH_SIZE ?= 33554432
+	else ifeq ($(FLASH_SIZE),64)
+		# 64MB
+		EXTFLASH_SIZE ?= 67108864
+	else
+		# 16MB
+		EXTFLASH_SIZE ?= 16777216
 else
 	# 1MB
 	EXTFLASH_SIZE ?= 1048576
