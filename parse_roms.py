@@ -170,7 +170,7 @@ class ROMParser():
                     print(f"INFO: {r.name} is too large to compress, skipping compression!")
                     continue
                 if not contains_rom_by_name(r, roms_lz4):
-                    subprocess.run([lz4_path, "--best", "--content-size", "--no-frame-crc", r.path, r.path + ".lz4"])
+                    subprocess.run([lz4_path, "-9", "--content-size", "--no-frame-crc", r.path, r.path + ".lz4"])
             # Re-generate the lz4 rom list
             roms_lz4 = []
             for e in extensions:
