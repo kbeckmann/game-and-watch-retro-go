@@ -172,7 +172,7 @@ class ROMParser():
 
                     #NES LZ4 compression
                     if  "nes_system" in variable_name:
-                        subprocess.run([lz4_path, "--best", "--content-size", "--no-frame-crc", r.path, r.path + ".lz4"])
+                        subprocess.run([lz4_path, "-9", "--content-size", "--no-frame-crc", r.path, r.path + ".lz4"])
 
                     #GB/GBC LZ4 compression
                     if "gb_system" in variable_name:
@@ -193,7 +193,7 @@ class ROMParser():
                         banks_nb = len(bank_files)
 
                         #compress all banks
-                        cmd=lz4_path + " --best --content-size --no-frame-crc -m " + tmp_dir+"/*"
+                        cmd=lz4_path + " -9 --content-size --no-frame-crc -m " + tmp_dir+"/*"
                         cout=subprocess.check_output(cmd,stderr=subprocess.STDOUT,shell=True)
 
                         # Get all banks compressed  ordered by name
@@ -392,7 +392,7 @@ if __name__ == "__main__":
     parser.add_argument('--compress', dest='compress', action='store_true')
     parser.add_argument('--no-compress', dest='compress', action='store_false')
     parser.add_argument('--compress_gb_speed', dest='compress_gb_speed', action='store_true')
-    parser.add_argument('--no-compress_gb_speed', dest='compress_gb_speed', action='store_true')
+    parser.add_argument('--no-compress_gb_speed', dest='compress_gb_speed', action='store_false')
 
     parser.set_defaults(compress=True,compress_gb_speed=False)
     args = parser.parse_args()
