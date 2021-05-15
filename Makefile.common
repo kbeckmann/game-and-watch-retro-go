@@ -332,7 +332,7 @@ endif
 
 ifeq (${CHECK_TOOLS},1)
 CheckTools:
-	$(V)$(CC) -v 2>&1 | grep "gcc version 10" > /dev/null || \
+	$(V)$(CC) -v 2>&1 | grep "gcc version 1[01]" > /dev/null || \
 		( \
 			echo -e "\n\n\nPlease use GCC version 10\n\n\nYou are using:" && \
 			$(CC) -v 2>&1 | grep "gcc version" ; \
