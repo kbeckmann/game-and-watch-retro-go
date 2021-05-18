@@ -1,3 +1,6 @@
+extern const unsigned char header_sg1000[];
+extern const unsigned char logo_sg1000[];
+
 extern const unsigned char header_col[];
 extern const unsigned char logo_col[];
 

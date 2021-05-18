@@ -392,6 +392,11 @@ class ROMParser():
         total_rom_size += rom_size
         build_config += "#define ENABLE_EMULATOR_COL\n" if rom_size > 0 else ""
 
+        save_size, rom_size = self.generate_system("Core/Src/retro-go/sg1000_roms.c", "Sega SG-1000", "sg1000_system", "sg", ["sg"], "SAVE_SG1000_")
+        total_save_size += save_size
+        total_rom_size += rom_size
+        build_config += "#define ENABLE_EMULATOR_SG1000\n" if rom_size > 0 else ""
+
         save_size, rom_size = self.generate_system("Core/Src/retro-go/pce_roms.c", "PC Engine", "pce_system", "pce", ["pce"], "SAVE_PCE_")
         total_save_size += save_size
         total_rom_size += rom_size

@@ -17,7 +17,7 @@
 #include "main_pce.h"
 
 // Increase when adding new emulators
-#define MAX_EMULATORS 6
+#define MAX_EMULATORS 7
 static retro_emulator_t emulators[MAX_EMULATORS];
 static int emulators_count = 0;
 
@@ -393,13 +393,16 @@ void emulator_start(retro_emulator_file_t *file, bool load_state)
 #endif
     } else if(strcmp(emu->system_name, "Sega Master System") == 0 ||
               strcmp(emu->system_name, "Sega Game Gear") == 0     ||
-              strcmp(emu->system_name, "Colecovision") == 0) {
-#if defined(ENABLE_EMULATOR_SMS) || defined(ENABLE_EMULATOR_GG) || defined(ENABLE_EMULATOR_COL)
+              strcmp(emu->system_name, "Sega SG-1000") == 0       ||
+              strcmp(emu->system_name, "Colecovision") == 0 ) {
+#if defined(ENABLE_EMULATOR_SMS) || defined(ENABLE_EMULATOR_GG) || defined(ENABLE_EMULATOR_COL) || defined(ENABLE_EMULATOR_SG1000)
         memcpy(&__RAM_EMU_START__, &_OVERLAY_SMS_LOAD_START, (size_t)&_OVERLAY_SMS_SIZE);
         memset(&_OVERLAY_SMS_BSS_START, 0x0, (size_t)&_OVERLAY_SMS_BSS_SIZE);
         SCB_CleanDCache_by_Addr((uint32_t *)&__RAM_EMU_START__, (size_t)&_OVERLAY_SMS_SIZE);
-        if (! strcmp(emu->system_name, "Colecovision")) app_main_smsplusgx(load_state, 1);
-        else app_main_smsplusgx(load_state, 0);
+        if (! strcmp(emu->system_name, "Colecovision")) app_main_smsplusgx(load_state, SMSPLUSGX_ENGINE_COLECO);
+        else
+        if (! strcmp(emu->system_name, "Sega SG-1000")) app_main_smsplusgx(load_state, SMSPLUSGX_ENGINE_SG1000);
+        else                                            app_main_smsplusgx(load_state, SMSPLUSGX_ENGINE_OTHERS);
 #endif
     } else if(strcmp(emu->system_name, "PC Engine") == 0) {
 #ifdef ENABLE_EMULATOR_PCE
@@ -414,7 +417,7 @@ void emulator_start(retro_emulator_file_t *file, bool load_state)
 
 void emulators_init()
 {
-#if !( defined(ENABLE_EMULATOR_GB) || defined(ENABLE_EMULATOR_NES) || defined(ENABLE_EMULATOR_GG) || defined(ENABLE_EMULATOR_SMS) || defined(ENABLE_EMULATOR_COL) || defined(ENABLE_EMULATOR_PCE) )
+#if !( defined(ENABLE_EMULATOR_GB) || defined(ENABLE_EMULATOR_NES) || defined(ENABLE_EMULATOR_GG) || defined(ENABLE_EMULATOR_SMS) || defined(ENABLE_EMULATOR_COL) || defined(ENABLE_EMULATOR_SG1000) || defined(ENABLE_EMULATOR_PCE) )
     // Add gameboy as a placeholder in case no emulator is built.
     add_emulator("Nintendo Gameboy", "gb", "gb", "gnuboy-go", 0, logo_gb, header_gb);
 #endif
@@ -439,6 +442,10 @@ void emulators_init()
 
 #ifdef ENABLE_EMULATOR_COL
     add_emulator("Colecovision", "col", "col", "smsplusgx-go", 0, logo_col, header_col);
+#endif
+
+#ifdef ENABLE_EMULATOR_SG1000
+    add_emulator("Sega SG-1000", "sg", "sg", "smsplusgx-go", 0, logo_sg1000, header_sg1000);
 #endif
 
 #ifdef ENABLE_EMULATOR_PCE

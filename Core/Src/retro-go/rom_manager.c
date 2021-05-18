@@ -14,6 +14,7 @@ retro_emulator_file_t *ACTIVE_FILE = NULL;
 #include "sms_roms.c"
 #include "gg_roms.c"
 #include "col_roms.c"
+#include "sg1000_roms.c"
 #include "pce_roms.c"
 
 const rom_system_t *systems[] = {
@@ -22,6 +23,7 @@ const rom_system_t *systems[] = {
     &sms_system,
     &gg_system,
     &col_system,
+    &sg1000_system,
     &pce_system
 };
 

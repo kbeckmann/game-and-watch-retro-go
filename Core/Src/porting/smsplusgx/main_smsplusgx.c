@@ -9,6 +9,7 @@
 #include "shared.h"
 #include "rom_manager.h"
 #include "common.h"
+#include "main_smsplusgx.h"
 
 #define APP_ID 3
 
@@ -33,8 +34,10 @@ static uint32_t palette_spaced[32];
 
 static uint skipFrames = 0;
 
-static bool consoleIsGG = false;
+static bool consoleIsGG  = false;
 static bool consoleIsSMS = false;
+static bool consoleIsCOL = false;
+static bool consoleIsSG  = false;
 
 // TODO: Move to lcd.c/h
 extern LTDC_HandleTypeDef hltdc;
@@ -45,7 +48,7 @@ unsigned int crc32_le(unsigned int crc, unsigned char const * buf,unsigned int l
 // --- MAIN
 
 static int 
-load_rom_from_flash(uint8_t is_coleco)
+load_rom_from_flash(uint8_t emu_engine)
 {
     static uint8 sram[0x8000];
     cart.rom = (uint8 *)ROM_DATA;
@@ -55,8 +58,11 @@ load_rom_from_flash(uint8_t is_coleco)
     cart.crc = crc32_le(0, cart.rom, cart.size);
     cart.loaded = 1;
 
-    if (is_coleco) {
+    if (emu_engine == SMSPLUSGX_ENGINE_COLECO) {
       option.console = 6; // Force Coleco
+    } else
+    if (emu_engine == SMSPLUSGX_ENGINE_SG1000) {
+      option.console = 5; // Force SG1000
     }
     set_config();
     printf("%s: OK. cart.size=%d, cart.crc=%#010lx\n", __func__, (int)cart.size, cart.crc);
@@ -278,20 +284,19 @@ static void sms_update_keys( odroid_gamepad_state_t* joystick )
   if (joystick->values[ODROID_INPUT_A])      input.pad[0] |= INPUT_BUTTON2;
   if (joystick->values[ODROID_INPUT_B])      input.pad[0] |= INPUT_BUTTON1;
 
-  if (consoleIsSMS)
+  if (consoleIsGG)
   {
       if (joystick->values[ODROID_INPUT_SELECT]) input.system |= INPUT_PAUSE;
       if (joystick->values[ODROID_INPUT_START])  input.system |= INPUT_START;
   }
-  else if (consoleIsGG)
-  {
-      if (joystick->values[ODROID_INPUT_SELECT]) input.system |= INPUT_PAUSE;
-      if (joystick->values[ODROID_INPUT_START])  input.system |= INPUT_START;
-  }
-  else // Coleco 
+  else if (consoleIsCOL) // Coleco 
   {
       if (joystick->values[ODROID_INPUT_SELECT]) coleco.keypad[0] = 10;  // Coleco '*'
       if (joystick->values[ODROID_INPUT_START])  coleco.keypad[0] = 1;   // Coleco '1'
+  }
+  else { // Default like SMS
+      if (joystick->values[ODROID_INPUT_SELECT]) input.system |= INPUT_PAUSE;
+      if (joystick->values[ODROID_INPUT_START])  input.system |= INPUT_START;
   }
 
   if (power_pressed != joystick->values[ODROID_INPUT_POWER]) {
@@ -348,6 +353,8 @@ app_main_smsplusgx(uint8_t load_state, uint8_t is_coleco)
 
     consoleIsSMS = sms.console == CONSOLE_SMS || sms.console == CONSOLE_SMS2;
     consoleIsGG  = sms.console == CONSOLE_GG || sms.console == CONSOLE_GGMS;
+    consoleIsCOL = sms.console == CONSOLE_COLECO;
+    consoleIsSG  = sms.console == CONSOLE_SG1000;
 
     const int refresh_rate = (sms.display == DISPLAY_NTSC) ? FPS_NTSC : FPS_PAL;
     const int frameTime = get_frame_time(refresh_rate);
