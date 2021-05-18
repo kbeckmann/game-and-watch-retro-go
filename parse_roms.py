@@ -316,6 +316,8 @@ class ROMParser():
             save_size = 60 * 1024
         elif folder == "gg":
             save_size = 60 * 1024
+        elif folder == "col":
+            save_size = 60 * 1024
         elif folder == "pce":
             save_size = 76 * 1024
         else:
@@ -384,6 +386,11 @@ class ROMParser():
         total_save_size += save_size
         total_rom_size += rom_size
         build_config += "#define ENABLE_EMULATOR_GG\n" if rom_size > 0 else ""
+
+        save_size, rom_size = self.generate_system("Core/Src/retro-go/col_roms.c", "Colecovision", "col_system", "col", ["col"], "SAVE_COL_")
+        total_save_size += save_size
+        total_rom_size += rom_size
+        build_config += "#define ENABLE_EMULATOR_COL\n" if rom_size > 0 else ""
 
         save_size, rom_size = self.generate_system("Core/Src/retro-go/pce_roms.c", "PC Engine", "pce_system", "pce", ["pce"], "SAVE_PCE_")
         total_save_size += save_size

@@ -17,7 +17,7 @@
 #include "main_pce.h"
 
 // Increase when adding new emulators
-#define MAX_EMULATORS 5
+#define MAX_EMULATORS 6
 static retro_emulator_t emulators[MAX_EMULATORS];
 static int emulators_count = 0;
 
@@ -392,12 +392,14 @@ void emulator_start(retro_emulator_file_t *file, bool load_state)
         app_main_nes(load_state);
 #endif
     } else if(strcmp(emu->system_name, "Sega Master System") == 0 ||
-              strcmp(emu->system_name, "Sega Game Gear") == 0) {
-#if defined(ENABLE_EMULATOR_SMS) || defined(ENABLE_EMULATOR_GG)
+              strcmp(emu->system_name, "Sega Game Gear") == 0     ||
+              strcmp(emu->system_name, "Colecovision") == 0) {
+#if defined(ENABLE_EMULATOR_SMS) || defined(ENABLE_EMULATOR_GG) || defined(ENABLE_EMULATOR_COL)
         memcpy(&__RAM_EMU_START__, &_OVERLAY_SMS_LOAD_START, (size_t)&_OVERLAY_SMS_SIZE);
         memset(&_OVERLAY_SMS_BSS_START, 0x0, (size_t)&_OVERLAY_SMS_BSS_SIZE);
         SCB_CleanDCache_by_Addr((uint32_t *)&__RAM_EMU_START__, (size_t)&_OVERLAY_SMS_SIZE);
-        app_main_smsplusgx(load_state);
+        if (! strcmp(emu->system_name, "Colecovision")) app_main_smsplusgx(load_state, 1);
+        else app_main_smsplusgx(load_state, 0);
 #endif
     } else if(strcmp(emu->system_name, "PC Engine") == 0) {
 #ifdef ENABLE_EMULATOR_PCE
@@ -412,7 +414,7 @@ void emulator_start(retro_emulator_file_t *file, bool load_state)
 
 void emulators_init()
 {
-#if !( defined(ENABLE_EMULATOR_GB) || defined(ENABLE_EMULATOR_NES) || defined(ENABLE_EMULATOR_GG) || defined(ENABLE_EMULATOR_SMS) || defined(ENABLE_EMULATOR_PCE) )
+#if !( defined(ENABLE_EMULATOR_GB) || defined(ENABLE_EMULATOR_NES) || defined(ENABLE_EMULATOR_GG) || defined(ENABLE_EMULATOR_SMS) || defined(ENABLE_EMULATOR_COL) || defined(ENABLE_EMULATOR_PCE) )
     // Add gameboy as a placeholder in case no emulator is built.
     add_emulator("Nintendo Gameboy", "gb", "gb", "gnuboy-go", 0, logo_gb, header_gb);
 #endif
@@ -433,6 +435,10 @@ void emulators_init()
 
 #ifdef ENABLE_EMULATOR_GG
     add_emulator("Sega Game Gear", "gg", "gg", "smsplusgx-go", 0, logo_gg, header_gg);
+#endif
+
+#ifdef ENABLE_EMULATOR_COL
+    add_emulator("Colecovision", "col", "col", "smsplusgx-go", 0, logo_col, header_col);
 #endif
 
 #ifdef ENABLE_EMULATOR_PCE
