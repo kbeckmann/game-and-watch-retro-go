@@ -66,7 +66,7 @@ _Min_Stack_Size = 20 * 1024; /* required amount of stack */
 __NULLPTR_LENGTH__  = 0x100;
 __ITCMRAM_LENGTH__  = 64K;
 __DTCMRAM_LENGTH__  = 128K;
-__RAM_UC_LENGTH__   = 300K;
+__RAM_UC_LENGTH__   = 306K;
 __RAM_CORE_LENGTH__ = 68K;
 __RAM_EMU_LENGTH__  = 1024K - __RAM_UC_LENGTH__ - __RAM_CORE_LENGTH__;
 __AHBRAM_LENGTH__   = 128K;
@@ -144,6 +144,7 @@ SECTIONS
     __ram_uc_start__ = .;
     . = ALIGN(4);
     *(.lcd)
+    *(.audio)
     __ram_uc_end__ = .;
   } > RAM_UC
 
@@ -317,7 +318,6 @@ SECTIONS
   {
     __ahbram_start__ = .;
     . = ALIGN(4);
-    *(.audio)
     *(.ahb)
     . = ALIGN(4);
     __ahbram_end__ = .;

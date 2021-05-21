@@ -1288,7 +1288,7 @@ void MPU_Config(void)
     HAL_MPU_ConfigRegion(&MPU_InitStruct);
   }
 
-  /* Uncached areas lead to unalignment issues. Only protect the first 256+32+8+4 kB */
+  /* Uncached areas lead to unalignment issues. Only protect the first 256+32+16+2 kB */
   MPU_InitStruct.Enable = MPU_REGION_ENABLE;
   MPU_InitStruct.Number = MPU_REGION_NUMBER3;
   MPU_InitStruct.BaseAddress = 0x24000000;
@@ -1310,16 +1310,16 @@ void MPU_Config(void)
   MPU_InitStruct.Size = MPU_REGION_SIZE_32KB;
   HAL_MPU_ConfigRegion(&MPU_InitStruct);
 
-  // 0x24000000 + 256kB + 32kB -> +8kB
+  // 0x24000000 + 256kB + 32kB -> +16kB
   MPU_InitStruct.Number = MPU_REGION_NUMBER5;
   MPU_InitStruct.BaseAddress = 0x24000000 + (256 + 32) * 1024;
-  MPU_InitStruct.Size = MPU_REGION_SIZE_8KB;
+  MPU_InitStruct.Size = MPU_REGION_SIZE_16KB;
   HAL_MPU_ConfigRegion(&MPU_InitStruct);
 
-  // 0x24000000 + 256kB + 32kB + 8kB -> +4kB
+  // 0x24000000 + 256kB + 32kB + 16kB -> +2kB
   MPU_InitStruct.Number = MPU_REGION_NUMBER6;
-  MPU_InitStruct.BaseAddress = 0x24000000 + (256 + 32 + 8) * 1024;
-  MPU_InitStruct.Size = MPU_REGION_SIZE_4KB;
+  MPU_InitStruct.BaseAddress = 0x24000000 + (256 + 32 + 16) * 1024;
+  MPU_InitStruct.Size = MPU_REGION_SIZE_2KB;
   HAL_MPU_ConfigRegion(&MPU_InitStruct);
 
   /* Enables the MPU */
