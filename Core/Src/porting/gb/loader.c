@@ -19,6 +19,9 @@
 
 #include <odroid_system.h>
 
+#include "lz4_depack.h"
+#include <assert.h>
+
 static const byte mbc_table[256] =
 {
 	0, 1, 1, 1, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 3,
@@ -198,40 +201,17 @@ static svar_t svars[] =
 
 #define BANK_SIZE 0x4000
 
-#ifdef GB_CACHE_ROM
-
 #define BANK_NUM  32
 uint8_t banks[BANK_NUM][BANK_SIZE];
 
-#endif
 
 // TODO: Revisit this later as memory might run out when loading
 
 int IRAM_ATTR rom_loadbank(short bank)
 {
+	// Never used if the compressed ROM is completely unpacked into RAM (all banks are already preloaded)
 	const size_t OFFSET = bank * BANK_SIZE;
-
-#ifdef GB_CACHE_ROM
-	printf("bank_load: loading bank %d.\n", bank);
-	rom.bank[bank] = banks[bank % BANK_NUM];
-	if (rom.bank[bank] == NULL) {
-		for (int i = BANK_NUM-1; i > 0; i--) {
-			if (rom.bank[i]) {
-				printf("bank_load: reclaiming bank %d.\n", i);
-				rom.bank[bank] = rom.bank[i];
-				rom.bank[i] = NULL;
-				break;
-			}
-		}
-	}
-
-
-	// TODO: check bounds (famous last words :D)
-	memcpy(rom.bank[bank], &ROM_DATA[OFFSET], BANK_SIZE);
-#else
-	// uncached
 	rom.bank[bank] = &ROM_DATA[OFFSET];
-#endif
 	return 0;
 }
 
@@ -240,7 +220,43 @@ uint8_t sram[8192 * 16] __attribute__((section (".ahb")));
 
 static int gb_rom_load()
 {
-	rom_loadbank(0);
+    /* src pointer to the ROM data in the external flash (raw or LZ4) */
+    const unsigned char *src = ROM_DATA;
+	const bool is_compressed = memcmp(&src[0], LZ4_MAGIC, LZ4_MAGIC_SIZE) == 0;
+    if (is_compressed) {
+        /* dest pointer to the ROM data in the internal RAM (raw) */
+        unsigned char *dest = (unsigned char *)&banks;
+        uint32_t lz4_original_size;
+        int32_t lz4_uncompressed_size;
+        uint32_t available_size = sizeof(banks);
+
+        printf("LZ4 compressed ROM detected.\n");
+        printf("Uncompressing to %p. %ld bytes available.\n", dest, available_size);
+
+        /* get the content size to uncompress */
+        lz4_original_size = lz4_get_original_size(src);
+
+        /* Check if there is enough memory to uncompress it */
+        assert(available_size >= lz4_original_size);
+
+        /* Uncompress the content to RAM */
+        lz4_uncompressed_size = lz4_uncompress(src, dest);
+
+        printf("Uncompressed size: %ld bytes.\n", lz4_uncompressed_size);
+
+        /* Check if the uncompressed content size is as expected */
+        assert(lz4_original_size == lz4_uncompressed_size);
+
+		/* Update ROM banks references to point to the unpacked ROM data */
+		uint8_t bank_number = lz4_uncompressed_size >> 14;
+        /* Make sure all the ROM banks fit in the allocated table */
+        assert(bank_number <= BANK_NUM);
+		for (int bank = 0; bank < bank_number; bank++) {
+			rom.bank[bank] = banks[bank];
+		}
+    } else {
+		rom_loadbank(0);
+    }
 
 	byte *header = rom.bank[0];
 
@@ -304,19 +320,21 @@ static int gb_rom_load()
 	mbc.rombank = 1;
 	mbc.rambank = 0;
 
-	int preload = mbc.romsize < 64 ? mbc.romsize : 64;
+	if (!is_compressed) {
+		int preload = mbc.romsize < 64 ? mbc.romsize : 64;
 
-	// RAYMAN stutters too much if we don't fully preload it
-	if (strncmp(rom.name, "RAYMAN", 6) == 0)
-	{
-		printf("loader: Special preloading for Rayman 1/2\n");
-		preload = mbc.romsize - 8;
-	}
+		// RAYMAN stutters too much if we don't fully preload it
+		if (strncmp(rom.name, "RAYMAN", 6) == 0)
+		{
+			printf("loader: Special preloading for Rayman 1/2\n");
+			preload = mbc.romsize - 8;
+		}
 
-	printf("loader: Preloading the first %d banks\n", preload);
-	for (int i = 1; i < preload; i++)
-	{
-		rom_loadbank(i);
+		printf("loader: Preloading the first %d banks\n", preload);
+		for (int i = 1; i < preload; i++)
+		{
+			rom_loadbank(i);
+		}
 	}
 
 	// Apply game-specific hacks

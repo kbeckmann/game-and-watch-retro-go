@@ -38,6 +38,7 @@ const rom_system_t {name} = {{
 
 # TODO: Find a better way to find this before building
 MAX_COMPRESSED_NES_SIZE = 0x00081000
+MAX_COMPRESSED_GB_SIZE = 0x00080000
 
 class ROM:
     def __init__(self, system_name: str, filepath: str, extension: str):
@@ -166,7 +167,10 @@ class ROMParser():
         if compress:
             lz4_path = os.environ["LZ4_PATH"] if "LZ4_PATH" in os.environ else "lz4"
             for r in roms_raw:
-                if os.stat(r.path).st_size > MAX_COMPRESSED_NES_SIZE:
+                if folder == "nes" and os.stat(r.path).st_size > MAX_COMPRESSED_NES_SIZE:
+                    print(f"INFO: {r.name} is too large to compress, skipping compression!")
+                    continue
+                if folder == "gb" and os.stat(r.path).st_size > MAX_COMPRESSED_GB_SIZE:
                     print(f"INFO: {r.name} is too large to compress, skipping compression!")
                     continue
                 if not contains_rom_by_name(r, roms_lz4):
@@ -204,7 +208,10 @@ class ROMParser():
         for i in range(len(roms)):
             rom = roms[i]
             if folder == "gb":
-                save_size = self.get_gameboy_save_size(rom.path)
+                if rom.path.endswith(".lz4"):
+                    save_size = self.get_gameboy_save_size(rom.path[:-4])
+                else:
+                    save_size = self.get_gameboy_save_size(rom.path)
 
             # Aligned
             aligned_size = 4 * 1024
@@ -242,7 +249,7 @@ class ROMParser():
         total_rom_size = 0
         build_config = ""
 
-        save_size, rom_size = self.generate_system("Core/Src/retro-go/gb_roms.c", "Nintendo Gameboy", "gb_system", "gb", ["gb", "gbc"], "SAVE_GB_")
+        save_size, rom_size = self.generate_system("Core/Src/retro-go/gb_roms.c", "Nintendo Gameboy", "gb_system", "gb", ["gb", "gbc"], "SAVE_GB_", args.compress)
         total_save_size += save_size
         total_rom_size += rom_size
         build_config += "#define ENABLE_EMULATOR_GB\n" if rom_size > 0 else ""

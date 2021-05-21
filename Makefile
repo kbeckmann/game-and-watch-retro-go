@@ -30,6 +30,7 @@ Core/Src/porting/odroid_overlay.c \
 Core/Src/porting/odroid_sdcard.c \
 Core/Src/porting/odroid_system.c \
 Core/Src/porting/crc32.c \
+Core/Src/porting/lib/lz4_depack.c \
 Core/Src/stm32h7xx_hal_msp.c \
 Core/Src/stm32h7xx_it.c \
 Core/Src/system_stm32h7xx.c
@@ -49,7 +50,6 @@ retro-go-stm32/gnuboy-go/components/gnuboy/sound.c \
 NES_C_SOURCES = \
 Core/Src/porting/nes/main_nes.c \
 Core/Src/porting/nes/nofrendo_stm32.c \
-Core/Src/porting/lib/lz4_depack.c \
 retro-go-stm32/nofrendo-go/components/nofrendo/cpu/dis6502.c \
 retro-go-stm32/nofrendo-go/components/nofrendo/cpu/nes6502.c \
 retro-go-stm32/nofrendo-go/components/nofrendo/mappers/map000.c \
