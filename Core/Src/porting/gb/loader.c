@@ -84,10 +84,11 @@ static const byte ramsize_table[] =
 	} while(0)
 
 // TODO: Jeopardy: What is bounds checking
+// Write directly to external flash. This is OK as gb_state_save writes 4kB chunks
 #define _fwrite(_buffer, _size, _nmemb)                           \
 	do {                                                          \
 		printf("_fwrite(%p, %d)\n", (ptr), (_size) * (_nmemb)); \
-		memcpy((ptr), (_buffer), (_size) * (_nmemb));             \
+		store_save((ptr), (_buffer), (_size) * (_nmemb)); \
 		ptr += (_size) * (_nmemb);                                \
 	} while(0)
 
