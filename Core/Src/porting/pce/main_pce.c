@@ -419,7 +419,7 @@ void pce_pcm_submit() {
     	for (int i = 0; i < AUDIO_BUFFER_LENGTH_PCE; i++) {
     		int32_t sample = (audioBuffer_pce[i*2] + audioBuffer_pce[i*2+1]);
     		//int32_t sample = (audioBuffer_pce[i*2] );
-    		audiobuffer_dma[offset + i] = (sample * factor) >> 16;
+    		audiobuffer_dma[offset + i] = (sample * factor) >> 8;
         }
     }
     static dma_transfer_state_t last_dma_state = DMA_TRANSFER_STATE_HF;
