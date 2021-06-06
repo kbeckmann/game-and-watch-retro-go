@@ -1,8 +1,8 @@
 # Emulator collection for Nintendo® Game & Watch™
 
-This is a very quick and dirty port of the [retro-go](https://github.com/ducalex/retro-go) emulator collection that is intended to run on the Nintendo® Game & Watch™ 2020 edition.
+This is a port of the [retro-go](https://github.com/ducalex/retro-go) emulator collection that is intended to run on the Nintendo® Game & Watch™: Super Mario Bros. 2020 edition.
 
-Currently playable
+Supported emulators:
 
 - GB / GBC (Gameboy / Gameboy Color)
 - NES (Nintendo Entertainment System)
@@ -18,7 +18,7 @@ You may run the script `./report_issue.sh` and follow the steps lined out, or co
 
 Please include the following:
 
-- Which console
+- Name of the emulator (nes, gb, etc.)
 - The full name of the ROM you are running, e.g. "Super_Tilt_Bro_(E).nes"
 - The git hash of this repo and the submodule. Run the following: `git describe --all --long --dirty=-dirty; cd retro-go-stm32; git describe --all --long --dirty=-dirty`
 
@@ -28,8 +28,8 @@ With this information, please head over to the [Discord](https://discord.gg/vVcw
 
 - Do you have any changed files, even if you didn't intentionally change them? Please run `git reset --hard` to ensure an unchanged state.
 - Did you pull but forgot to update the submodule? Run `git submodule update --init --recursive` to ensure that the submodules are in sync.
-- Always run `make clean` before building something new. The makefile should handle incremental builds, but please do this first before reporting issues.
-- If you have limited resources, remove the `-j$(nproc)` flag from the `make` command, i.e. run `make flash`.
+- Run `make clean` and then build again. The makefile should handle incremental builds, but please try this first before reporting issues.
+- If you have limited resources on your computer, remove the `-j$(nproc)` flag from the `make` command, i.e. run `make flash`.
 - It is still not working? Try the classic trouble shooting methods: Disconnect power to your debugger and G&W and connect again. Try programming the [Base](https://github.com/ghidraninja/game-and-watch-base) project first to ensure you can actually program your device.
 - Still not working? Ok, head over to #support on the discord and let's see what's going on.
 
@@ -37,7 +37,7 @@ With this information, please head over to the [Discord](https://discord.gg/vVcw
 
 ### Prerequisites
 
-- You will need a recent [arm-gcc-none-eabi toolchain](https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-rm/downloads). **10.2.0 and later are known to work well**. Please make sure it's installed either in your PATH, or set the environment variable `GCC_PATH` to the `bin` directory inside the extracted directory (e.g. `/opt/gcc-arm-none-eabi-10-2020-q4-major/bin`, `/Applications/ARM/bin` for macOS).
+- You will need version 10 or later of [arm-gcc-none-eabi toolchain](https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-rm/downloads). **10.2.0 and later are known to work well**. Please make sure it's installed either in your PATH, or set the environment variable `GCC_PATH` to the `bin` directory inside the extracted directory (e.g. `/opt/gcc-arm-none-eabi-10-2020-q4-major/bin`, `/Applications/ARM/bin` for macOS).
 - In order to run this on a Nintendo® Game & Watch™ [you need to first unlock it](https://github.com/ghidraninja/game-and-watch-backup/).
 
 ### Building
@@ -67,7 +67,7 @@ git clone --recurse-submodules https://github.com/kbeckmann/game-and-watch-retro
 
 cd game-and-watch-retro-go
 
-# Place GB roms in `./roms/gb/`, NES roms in `./roms/nes/`, SMS roms in `./roms/sms/`, GG roms in `./roms/gg/`, PCE roms in `./roms/pce/`:
+# Place roms in the appropriate folders:
 # cp /path/to/rom.gb ./roms/gb/
 # cp /path/to/rom.nes ./roms/nes/
 # cp /path/to/rom.sms ./roms/sms/
@@ -89,37 +89,9 @@ make -j8 flash
 
 - If you need to change the project settings and generate c-code from stm32cubemx, make sure to not have a dirty working copy as the tool will overwrite files that will need to be perhaps partially reverted. Also update Makefile.common in case new drivers are used.
 
-### Known issues (Please do not report these)
-
-- Settings are not persistent
-
-### GB Features / todo
-
-- [x] Key input support
-- [x] Audio support (works well!)
-- [x] Video support (uses RGB565 color mode)
-- [X] Audio volume
-- [X] Power button -> deep sleep (saves and loads state)
-- [X] VSync
-- [X] State saving/loading
-- [X] Support multiple ROMs
-- [X] OSD menu
-
-### NES Features / todo
-
-- [x] Key input support
-- [x] Audio support (works well)
-- [x] Video support (uses indexed colors w/ a configurable palette)
-- [X] Audio volume
-- [X] Power button -> deep sleep (saves and loads state)
-- [X] VSync
-- [X] State saving/loading
-- [X] Support multiple ROMs
-- [X] OSD menu
-
 ## Build and flash using Docker
 
-To reduce the number of potential pitfalls in installation of various software, a Dockerfile is provided containing everything needed to compile and flash retro-go to your Nintendo® Game & Watch™.
+To reduce the number of potential pitfalls in installation of various software, a Dockerfile is provided containing everything needed to compile and flash retro-go to your Nintendo® Game & Watch™. Note that Linux is required as a host OS in order to flash the target.
 
 Steps to build and flash from a docker container (on Linux, e.g. Archlinux or Ubuntu):
 
@@ -154,6 +126,14 @@ After this, it's safe to change roms, pull new code and build & flash the device
 Save states can then be programmed to the device using a newer elf file with new code and roms. To do this, run `./program_saves.sh build/gw_retro_go.elf` - this time with the _new_ elf file that matches what's running on the device. Save this elf file for backup later on.
 
 `program_saves.sh` will upload all save state files that you have backed up that are also included in the elf file. E.g Let's say you back up saves for rom A, B and C. Later on, you add a new rom D but remove A, then build and flash. When running the script, the save states for B and C will be programmed and nothing else.
+
+## Upgrading the flash
+
+The Nintendo® Game & Watch™ comes with a 1MB external flash. This can be upgraded.
+
+The flash operates at 1.8V so make sure the one you change to also matches this.
+
+The recommended flash to upgrade to is MX25U12835FM2I-10G. It's 16MB, the commands are compatible with the stock firmware and it's also the largest flash that comes in the same package as the original.
 
 ## Contact, discussion
 
