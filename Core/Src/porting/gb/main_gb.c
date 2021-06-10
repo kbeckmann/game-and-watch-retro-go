@@ -486,7 +486,7 @@ void pcm_submit() {
     } else {
         for (int i = 0; i < AUDIO_BUFFER_LENGTH_GB; i++) {
             int32_t sample = pcm.buf[i];
-            audiobuffer_dma[i + offset] = (sample * factor) >> 16;
+            audiobuffer_dma[i + offset] = (sample * factor) >> 8;
         }
     }
 }
