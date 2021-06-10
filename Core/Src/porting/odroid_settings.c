@@ -45,7 +45,7 @@ static const persistent_config_t persistent_config_default = {
 
     .backlight = ODROID_BACKLIGHT_LEVEL4,
     .start_action = ODROID_START_ACTION_RESUME,
-    .volume = ODROID_AUDIO_VOLUME_MAX - 2, // Try not to destroy people's ears
+    .volume = ODROID_AUDIO_VOLUME_MAX,
     .font_size = 8,
     .startup_app = 0,
     .app = {

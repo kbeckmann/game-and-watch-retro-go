@@ -9,9 +9,6 @@ OPT ?= -Og
 # Set to 0 to suppress dirty submodule warning
 CHECK_DIRTY_SUBMODULE ?= 1
 
-# Set to 0 to skip tools check
-CHECK_TOOLS ?= 1
-
 # Set to 1 to enable 16MB external flash support
 LARGE_FLASH ?= 0
 
@@ -169,19 +166,17 @@ PREFIX = arm-none-eabi-
 # The gcc compiler bin path can be either defined in make command via GCC_PATH variable (> make GCC_PATH=xxx)
 # either it can be added to the PATH environment variable.
 ifdef GCC_PATH
-CC   = $(GCC_PATH)/$(PREFIX)gcc
-AS   = $(GCC_PATH)/$(PREFIX)gcc -x assembler-with-cpp
-CP   = $(GCC_PATH)/$(PREFIX)objcopy
-SZ   = $(GCC_PATH)/$(PREFIX)size
-GDB  = $(GCC_PATH)/$(PREFIX)gdb
-DUMP = $(GCC_PATH)/$(PREFIX)objdump
+CC  = $(GCC_PATH)/$(PREFIX)gcc
+AS  = $(GCC_PATH)/$(PREFIX)gcc -x assembler-with-cpp
+CP  = $(GCC_PATH)/$(PREFIX)objcopy
+SZ  = $(GCC_PATH)/$(PREFIX)size
+GDB = $(GCC_PATH)/$(PREFIX)gdb
 else
-CC   = $(PREFIX)gcc
-AS   = $(PREFIX)gcc -x assembler-with-cpp
-CP   = $(PREFIX)objcopy
-SZ   = $(PREFIX)size
-GDB  = $(PREFIX)gdb
-DUMP = $(PREFIX)objdump
+CC  = $(PREFIX)gcc
+AS  = $(PREFIX)gcc -x assembler-with-cpp
+CP  = $(PREFIX)objcopy
+SZ  = $(PREFIX)size
+GDB = $(PREFIX)gdb
 endif
 
 HEX   = $(CP) -O ihex
@@ -331,38 +326,11 @@ CheckDirtySubmodules:
 endif
 .PHONY: CheckDirtySubmodules
 
-ifeq (${CHECK_TOOLS},1)
-CheckTools:
-	$(V)$(CC) -v 2>&1 | grep "gcc version 1[01]" > /dev/null || \
-		( \
-			echo -e "\n\n\nPlease use GCC version 10\n\n\nYou are using:" && \
-			$(CC) -v 2>&1 | grep "gcc version" ; \
-			echo -e "\n\n\n" && \
-			exit 1 \
-		)
-
-	$(V)$(CP) --info | grep "elf32-littlearm" > /dev/null || \
-		( \
-			echo -e "\n\n\nobjcopy seems to be missing or not suport elf32-littlearm. Please install binutils.\n\n\n" && \
-			exit 1 \
-		)
-
-	$(V)$(DUMP) --help | grep "armv7e-m" > /dev/null || \
-		( \
-			echo -e "\n\n\nobjdump seems to be missing or not suport armv7e-m. Please install binutils.\n\n\n" && \
-			exit 1 \
-		)
-
-else
-CheckTools:
-endif
-.PHONY: CheckTools
-
 $(BUILD_DIR)/%.o: %.s Makefile.common Makefile $(BUILD_DIR)/config.h | $(BUILD_DIR) CheckDirtySubmodules
 	$(V)$(ECHO) [ AS ] $(notdir $<)
 	$(V)$(AS) -c $(CFLAGS) $< -o $@
 
-$(BUILD_DIR)/$(TARGET).elf: CheckTools $(OBJECTS) $(NES_OBJECTS) $(GNUBOY_OBJECTS) $(SMSPLUSGX_OBJECTS) $(PCE_OBJECTS) Makefile.common Makefile $(LDSCRIPT)
+$(BUILD_DIR)/$(TARGET).elf: $(OBJECTS) $(NES_OBJECTS) $(GNUBOY_OBJECTS) $(SMSPLUSGX_OBJECTS) $(PCE_OBJECTS) Makefile.common Makefile $(LDSCRIPT)
 	$(V)$(ECHO) [ LD ] $(notdir $@)
 	$(V)$(CC) $(OBJECTS) $(NES_OBJECTS) $(GNUBOY_OBJECTS) $(SMSPLUSGX_OBJECTS) $(PCE_OBJECTS) $(LDFLAGS) -o $@
 	$(V)$(SZ) $@

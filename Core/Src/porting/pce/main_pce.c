@@ -42,9 +42,9 @@
 
 typedef struct
 {
-    uint len;
-    char key[16];
-    void *ptr;
+	uint len;
+	char key[16];
+	void *ptr;
 } svar_t;
 
 static uint16_t mypalette[256];
@@ -64,50 +64,50 @@ const char SAVESTATE_HEADER[8] = "PCE_V004";
 
 const svar_t SaveStateVars[] =
 {
-    // Arrays
-    SVAR_A("RAM", PCE.RAM),      SVAR_A("VRAM", PCE.VRAM),  SVAR_A("SPRAM", PCE.SPRAM),
-    SVAR_A("PAL", PCE.Palette),  SVAR_A("MMR", PCE.MMR),
+	// Arrays
+	SVAR_A("RAM", PCE.RAM),      SVAR_A("VRAM", PCE.VRAM),  SVAR_A("SPRAM", PCE.SPRAM),
+	SVAR_A("PAL", PCE.Palette),  SVAR_A("MMR", PCE.MMR),
 
-    // CPU registers
-    SVAR_2("CPU.PC", reg_pc),    SVAR_1("CPU.A", reg_a),    SVAR_1("CPU.X", reg_x),
-    SVAR_1("CPU.Y", reg_y),      SVAR_1("CPU.P", reg_p),    SVAR_1("CPU.S", reg_s),
+	// CPU registers
+	SVAR_2("CPU.PC", reg_pc),    SVAR_1("CPU.A", reg_a),    SVAR_1("CPU.X", reg_x),
+	SVAR_1("CPU.Y", reg_y),      SVAR_1("CPU.P", reg_p),    SVAR_1("CPU.S", reg_s),
 
-    // Misc
-    SVAR_4("Cycles", Cycles),                   SVAR_4("MaxCycles", PCE.MaxCycles),
-    SVAR_1("SF2", PCE.SF2),
+	// Misc
+	SVAR_4("Cycles", Cycles),                   SVAR_4("MaxCycles", PCE.MaxCycles),
+	SVAR_1("SF2", PCE.SF2),
 
-    // IRQ
-    SVAR_1("irq_mask", PCE.irq_mask),           SVAR_1("irq_status", PCE.irq_status),
+	// IRQ
+	SVAR_1("irq_mask", PCE.irq_mask),           SVAR_1("irq_status", PCE.irq_status),
 
-    // PSG
-    SVAR_1("psg.ch", PCE.PSG.ch),               SVAR_1("psg.vol", PCE.PSG.volume),
-    SVAR_1("psg.lfo_f", PCE.PSG.lfo_freq),      SVAR_1("psg.lfo_c", PCE.PSG.lfo_ctrl),
-    SVAR_N("psg.ch0", PCE.PSG.chan[0], 40),     SVAR_N("psg.ch1", PCE.PSG.chan[1], 40),
-    SVAR_N("psg.ch2", PCE.PSG.chan[2], 40),     SVAR_N("psg.ch3", PCE.PSG.chan[3], 40),
-    SVAR_N("psg.ch4", PCE.PSG.chan[4], 40),     SVAR_N("psg.ch5", PCE.PSG.chan[5], 40),
+	// PSG
+	SVAR_1("psg.ch", PCE.PSG.ch),               SVAR_1("psg.vol", PCE.PSG.volume),
+	SVAR_1("psg.lfo_f", PCE.PSG.lfo_freq),      SVAR_1("psg.lfo_c", PCE.PSG.lfo_ctrl),
+	SVAR_N("psg.ch0", PCE.PSG.chan[0], 40),     SVAR_N("psg.ch1", PCE.PSG.chan[1], 40),
+	SVAR_N("psg.ch2", PCE.PSG.chan[2], 40),     SVAR_N("psg.ch3", PCE.PSG.chan[3], 40),
+	SVAR_N("psg.ch4", PCE.PSG.chan[4], 40),     SVAR_N("psg.ch5", PCE.PSG.chan[5], 40),
 
-    // VCE
-    SVAR_A("vce_regs", PCE.VCE.regs),           SVAR_2("vce_reg", PCE.VCE.reg),
+	// VCE
+	SVAR_A("vce_regs", PCE.VCE.regs),           SVAR_2("vce_reg", PCE.VCE.reg),
 
-    // VDC
-    SVAR_A("vdc_regs", PCE.VDC.regs),           SVAR_1("vdc_reg", PCE.VDC.reg),
-    SVAR_1("vdc_status", PCE.VDC.status),       SVAR_1("vdc_satb", PCE.VDC.satb),
-    SVAR_4("vdc_pending_irqs", PCE.VDC.pending_irqs),
+	// VDC
+	SVAR_A("vdc_regs", PCE.VDC.regs),           SVAR_1("vdc_reg", PCE.VDC.reg),
+	SVAR_1("vdc_status", PCE.VDC.status),       SVAR_1("vdc_satb", PCE.VDC.satb),
+	SVAR_4("vdc_pending_irqs", PCE.VDC.pending_irqs),
 
-    // Timer
-    SVAR_4("timer_reload", PCE.Timer.reload),   SVAR_4("timer_running", PCE.Timer.running),
-    SVAR_4("timer_counter", PCE.Timer.counter), SVAR_4("timer_next", PCE.Timer.cycles_counter),
+	// Timer
+	SVAR_4("timer_reload", PCE.Timer.reload),   SVAR_4("timer_running", PCE.Timer.running),
+	SVAR_4("timer_counter", PCE.Timer.counter), SVAR_4("timer_next", PCE.Timer.cycles_counter),
 
-    SVAR_END
+	SVAR_END
 };
 
 uint8_t *osd_gfx_framebuffer(void){
-    return emulator_framebuffer_pce + FB_INTERNAL_OFFSET;
+	return emulator_framebuffer_pce + FB_INTERNAL_OFFSET;
 }
 
 void* osd_alloc(size_t size) {
-    assert(size==0x10000);
-    return OBJ_CACHE_buf;
+	assert(size==0x10000);
+	return OBJ_CACHE_buf;
 }
 
 void osd_gfx_set_mode(int width, int height) {
@@ -132,21 +132,21 @@ static bool SaveState(char *pathName) {
     uint8_t *pce_save_buf = emulator_framebuffer_pce;
     memset(pce_save_buf, 0x00, 76*1024); // 76K save size
 
-    uint8_t *pce_save_header=(uint8_t *)SAVESTATE_HEADER;
+	uint8_t *pce_save_header=(uint8_t *)SAVESTATE_HEADER;
     for(int i=0;i<sizeof(SAVESTATE_HEADER);i++) {
-        pce_save_buf[pos]=pce_save_header[i];
-        pos++;
+    	pce_save_buf[pos]=pce_save_header[i];
+    	pos++;
     }
     pce_save_buf[pos]=0; pos++;
     uint32_t *crc_ptr = (uint32_t *)(pce_save_buf + pos);
     crc_ptr[0] = PCE.ROM_CRC; pos+=sizeof(uint32_t);
 
     for (int i = 0; SaveStateVars[i].len > 0; i++) {
-        uint8_t *pce_save_ptr = (uint8_t *)SaveStateVars[i].ptr;
-        for(int j=0;j<SaveStateVars[i].len;j++) {
-            pce_save_buf[pos]=pce_save_ptr[j];
-            pos++;
-        }
+		uint8_t *pce_save_ptr = (uint8_t *)SaveStateVars[i].ptr;
+    	for(int j=0;j<SaveStateVars[i].len;j++) {
+    		pce_save_buf[pos]=pce_save_ptr[j];
+    		pos++;
+    	}
     }
     assert(pos<76*1024);
     store_save(ACTIVE_FILE->save_address, pce_save_buf, 76*1024);
@@ -156,139 +156,139 @@ static bool SaveState(char *pathName) {
 }
 
 static bool LoadState(char *pathName) {
-    uint8_t *pce_save_buf = (uint8_t *)ACTIVE_FILE->save_address;
-    if (ACTIVE_FILE->save_size==0) return true;
-    sprintf(pce_log,"%ld",ACTIVE_FILE->save_size);
+	uint8_t *pce_save_buf = (uint8_t *)ACTIVE_FILE->save_address;
+	if (ACTIVE_FILE->save_size==0) return true;
+	sprintf(pce_log,"%ld",ACTIVE_FILE->save_size);
 
-    pce_save_buf+=sizeof(SAVESTATE_HEADER) + 1;
+	pce_save_buf+=sizeof(SAVESTATE_HEADER) + 1;
 
-    uint32_t *crc_ptr = (uint32_t *)pce_save_buf;
-    sprintf(pce_log,"%08lX",crc_ptr[0]);
-    if (crc_ptr[0]!=PCE.ROM_CRC) {
-        return true;
-    }
+	uint32_t *crc_ptr = (uint32_t *)pce_save_buf;
+	sprintf(pce_log,"%08lX",crc_ptr[0]);
+	if (crc_ptr[0]!=PCE.ROM_CRC) {
+		return true;
+	}
 
-    pce_save_buf+=sizeof(uint32_t);
+	pce_save_buf+=sizeof(uint32_t);
 
 
-    int pos=0;
-    for (int i = 0; SaveStateVars[i].len > 0; i++) {
-        printf("Loading %s (%d)\n", SaveStateVars[i].key, SaveStateVars[i].len);
-        uint8_t *pce_save_ptr = (uint8_t *)SaveStateVars[i].ptr;
-        for(int j=0;j<SaveStateVars[i].len;j++) {
-            pce_save_ptr[j] = pce_save_buf[pos];
-            pos++;
-        }
-    }
-    for(int i = 0; i < 8; i++) {
-        pce_bank_set(i, PCE.MMR[i]);
-    }
-    gfx_clear_cache();
-    osd_gfx_set_mode(IO_VDC_SCREEN_WIDTH, IO_VDC_SCREEN_HEIGHT);
+	int pos=0;
+	for (int i = 0; SaveStateVars[i].len > 0; i++) {
+		printf("Loading %s (%d)\n", SaveStateVars[i].key, SaveStateVars[i].len);
+		uint8_t *pce_save_ptr = (uint8_t *)SaveStateVars[i].ptr;
+		for(int j=0;j<SaveStateVars[i].len;j++) {
+			pce_save_ptr[j] = pce_save_buf[pos];
+			pos++;
+		}
+	}
+	for(int i = 0; i < 8; i++) {
+		pce_bank_set(i, PCE.MMR[i]);
+	}
+	gfx_clear_cache();
+	osd_gfx_set_mode(IO_VDC_SCREEN_WIDTH, IO_VDC_SCREEN_HEIGHT);
     return true;
 }
 
 void LoadCartPCE() {
-    int offset;
-    PCE.ROM = (uint8 *)ROM_DATA;
-    offset = ROM_DATA_LENGTH & 0x1fff;
+	int offset;
+	PCE.ROM = (uint8 *)ROM_DATA;
+	offset = ROM_DATA_LENGTH & 0x1fff;
     PCE.ROM_SIZE = (ROM_DATA_LENGTH - offset) / 0x2000;
-     PCE.ROM_DATA = PCE.ROM + offset;
-       PCE.ROM_CRC = crc32_le(0, PCE.ROM, ROM_DATA_LENGTH);
-       uint IDX = 0;
-       uint ROM_MASK = 1;
+ 	PCE.ROM_DATA = PCE.ROM + offset;
+   	PCE.ROM_CRC = crc32_le(0, PCE.ROM, ROM_DATA_LENGTH);
+   	uint IDX = 0;
+   	uint ROM_MASK = 1;
 
-       while (ROM_MASK < PCE.ROM_SIZE) ROM_MASK <<= 1;
-       ROM_MASK--;
+   	while (ROM_MASK < PCE.ROM_SIZE) ROM_MASK <<= 1;
+   	ROM_MASK--;
 
 #ifdef PCE_SHOW_DEBUG
-       printf("Rom Size: %d, B1:%X, B2:%X, B3:%X, B4:%X" , ROM_DATA_LENGTH, PCE.ROM[0], PCE.ROM[1],PCE.ROM[2],PCE.ROM[3]);
+   	printf("Rom Size: %d, B1:%X, B2:%X, B3:%X, B4:%X" , ROM_DATA_LENGTH, PCE.ROM[0], PCE.ROM[1],PCE.ROM[2],PCE.ROM[3]);
 #endif
 
-       for (int index = 0; index < KNOWN_ROM_COUNT; index++) {
-           if (PCE.ROM_CRC == pceRomFlags[index].crc) {
-               IDX = index;
-               break;
-           }
-       }
+   	for (int index = 0; index < KNOWN_ROM_COUNT; index++) {
+   		if (PCE.ROM_CRC == pceRomFlags[index].crc) {
+   			IDX = index;
+   			break;
+   		}
+   	}
 
-       printf("Game Name: %s\n", pceRomFlags[IDX].Name);
-       printf("Game Region: %s\n", (pceRomFlags[IDX].Flags & JAP) ? "Japan" : "USA");
+   	printf("Game Name: %s\n", pceRomFlags[IDX].Name);
+   	printf("Game Region: %s\n", (pceRomFlags[IDX].Flags & JAP) ? "Japan" : "USA");
 
-       // US Encrypted
-    if ((pceRomFlags[IDX].Flags & US_ENCODED) || PCE.ROM_DATA[0x1FFF] < 0xE0) {
-        printf("This rom is probably US encrypted, Not supported!!!\n");
-        assert(0);
-       }
+   	// US Encrypted
+	if ((pceRomFlags[IDX].Flags & US_ENCODED) || PCE.ROM_DATA[0x1FFF] < 0xE0) {
+		printf("This rom is probably US encrypted, Not supported!!!\n");
+		assert(0);
+   	}
 
-    if (pceRomFlags[IDX].Flags & TWO_PART_ROM) PCE.ROM_SIZE = 0x30;
+	if (pceRomFlags[IDX].Flags & TWO_PART_ROM) PCE.ROM_SIZE = 0x30;
 
-    // Game ROM
-    for (int i = 0; i < 0x80; i++) {
-        if (PCE.ROM_SIZE == 0x30) {
-            switch (i & 0x70) {
-            case 0x00:
-            case 0x10:
-            case 0x50:
-                MemoryMapR[i] = PCE.ROM_DATA + (i & ROM_MASK) * 0x2000;
-                break;
-            case 0x20:
-            case 0x60:
-                MemoryMapR[i] = PCE.ROM_DATA + ((i - 0x20) & ROM_MASK) * 0x2000;
-                break;
-            case 0x30:
-            case 0x70:
-                MemoryMapR[i] = PCE.ROM_DATA + ((i - 0x10) & ROM_MASK) * 0x2000;
-                break;
-            case 0x40:
-                MemoryMapR[i] = PCE.ROM_DATA + ((i - 0x20) & ROM_MASK) * 0x2000;
-                break;
-            }
-        } else {
-            MemoryMapR[i] = PCE.ROM_DATA + (i & ROM_MASK) * 0x2000;
-        }
-        MemoryMapW[i] = PCE.NULLRAM;
-    }
+	// Game ROM
+	for (int i = 0; i < 0x80; i++) {
+		if (PCE.ROM_SIZE == 0x30) {
+			switch (i & 0x70) {
+			case 0x00:
+			case 0x10:
+			case 0x50:
+				MemoryMapR[i] = PCE.ROM_DATA + (i & ROM_MASK) * 0x2000;
+				break;
+			case 0x20:
+			case 0x60:
+				MemoryMapR[i] = PCE.ROM_DATA + ((i - 0x20) & ROM_MASK) * 0x2000;
+				break;
+			case 0x30:
+			case 0x70:
+				MemoryMapR[i] = PCE.ROM_DATA + ((i - 0x10) & ROM_MASK) * 0x2000;
+				break;
+			case 0x40:
+				MemoryMapR[i] = PCE.ROM_DATA + ((i - 0x20) & ROM_MASK) * 0x2000;
+				break;
+			}
+		} else {
+			MemoryMapR[i] = PCE.ROM_DATA + (i & ROM_MASK) * 0x2000;
+		}
+		MemoryMapW[i] = PCE.NULLRAM;
+	}
 
-    // Allocate the card's onboard ram
-    if (pceRomFlags[IDX].Flags & ONBOARD_RAM) {
-        PCE.ExRAM = PCE.ExRAM ?: PCE_EXRAM_BUF;
-        MemoryMapR[0x40] = MemoryMapW[0x40] = PCE.ExRAM;
-        MemoryMapR[0x41] = MemoryMapW[0x41] = PCE.ExRAM + 0x2000;
-        MemoryMapR[0x42] = MemoryMapW[0x42] = PCE.ExRAM + 0x4000;
-        MemoryMapR[0x43] = MemoryMapW[0x43] = PCE.ExRAM + 0x6000;
-    }
+	// Allocate the card's onboard ram
+	if (pceRomFlags[IDX].Flags & ONBOARD_RAM) {
+		PCE.ExRAM = PCE.ExRAM ?: PCE_EXRAM_BUF;
+		MemoryMapR[0x40] = MemoryMapW[0x40] = PCE.ExRAM;
+		MemoryMapR[0x41] = MemoryMapW[0x41] = PCE.ExRAM + 0x2000;
+		MemoryMapR[0x42] = MemoryMapW[0x42] = PCE.ExRAM + 0x4000;
+		MemoryMapR[0x43] = MemoryMapW[0x43] = PCE.ExRAM + 0x6000;
+	}
 
-    // Mapper for roms >= 1.5MB (SF2, homebrews)
-    if (PCE.ROM_SIZE >= 192)
-        MemoryMapW[0x00] = PCE.IOAREA;
+	// Mapper for roms >= 1.5MB (SF2, homebrews)
+	if (PCE.ROM_SIZE >= 192)
+		MemoryMapW[0x00] = PCE.IOAREA;
 }
 
 void ResetPCE() {
-    gfx_clear_cache();
-    pce_reset();
+	gfx_clear_cache();
+	pce_reset();
 
 }
 
 static inline void pce_timer_run(void) {
-    PCE.Timer.cycles_counter -= CYCLES_PER_LINE;
+	PCE.Timer.cycles_counter -= CYCLES_PER_LINE;
 
-    // Trigger when it underflows
-    if (PCE.Timer.cycles_counter > CYCLES_PER_TIMER_TICK) {
-        PCE.Timer.cycles_counter += CYCLES_PER_TIMER_TICK;
-        if (PCE.Timer.running) {
-            // Trigger when it underflows from 0
-            if (PCE.Timer.counter > 0x7F) {
-                PCE.Timer.counter = PCE.Timer.reload;
-                PCE.irq_status |= INT_TIMER;
-            }
-            PCE.Timer.counter--;
-        }
-    }
+	// Trigger when it underflows
+	if (PCE.Timer.cycles_counter > CYCLES_PER_TIMER_TICK) {
+		PCE.Timer.cycles_counter += CYCLES_PER_TIMER_TICK;
+		if (PCE.Timer.running) {
+			// Trigger when it underflows from 0
+			if (PCE.Timer.counter > 0x7F) {
+				PCE.Timer.counter = PCE.Timer.reload;
+				PCE.irq_status |= INT_TIMER;
+			}
+			PCE.Timer.counter--;
+		}
+	}
 }
 
 void pce_input_read(odroid_gamepad_state_t* out_state) {
-    unsigned char rc = 0;
+	unsigned char rc = 0;
     if (out_state->values[ODROID_INPUT_LEFT])   rc |= JOY_LEFT;
     if (out_state->values[ODROID_INPUT_RIGHT])  rc |= JOY_RIGHT;
     if (out_state->values[ODROID_INPUT_UP])     rc |= JOY_UP;
@@ -303,33 +303,33 @@ void pce_input_read(odroid_gamepad_state_t* out_state) {
 void set_color(int index, uint8_t r, uint8_t g, uint8_t b) {
     uint16_t col = 0xffff;
     if (index != 255)  {
-        col = COLOR_RGB(r,g,b);
+    	col = COLOR_RGB(r,g,b);
     }
     mypalette[index] = col;
 }
 
 void init_color_pals() {
-    for (int i = 0; i < 255; i++) {
-        // GGGRR RBB
-          set_color(i, (i & 0x1C)>>2, (i & 0xE0) >> 5, (i & 0x03) );
-    }
-    set_color(255, 0x3f, 0x3f, 0x3f);
+	for (int i = 0; i < 255; i++) {
+		// GGGRR RBB
+	  	set_color(i, (i & 0x1C)>>2, (i & 0xE0) >> 5, (i & 0x03) );
+	}
+	set_color(255, 0x3f, 0x3f, 0x3f);
 }
 
 void pce_osd_gfx_blit(bool drawFrame) {
     static uint32_t lastFPSTime = 0;
     static uint32_t frames = 0;
-    if (!drawFrame) {
-        memset(emulator_framebuffer_pce,0,sizeof(emulator_framebuffer_pce));
-        return;
-    }
-
+	if (!drawFrame) {
+		memset(emulator_framebuffer_pce,0,sizeof(emulator_framebuffer_pce));
+		return;
+	}
+	
     uint32_t currentTime = HAL_GetTick();
     uint32_t delta = currentTime - lastFPSTime;
 
     frames++;
     if (delta >= 1000) {
-        framePerSecond = (10000 * frames) / delta;
+    	framePerSecond = (10000 * frames) / delta;
         //printf("FPS: %d.%d, frames %ld, delta %ld ms\n", framePerSecond / 10, framePerSecond % 10, frames, delta);
         frames = 0;
         lastFPSTime = currentTime;
@@ -337,61 +337,61 @@ void pce_osd_gfx_blit(bool drawFrame) {
 
 #ifdef PCE_SHOW_DEBUG1
     // Calculate no. of active Tiles and Sprites
-    int sprCount=0, tileCount=0;
+	int sprCount=0, tileCount=0;
     for(int j=0;j<2048;j++) {
         if (TILE_CACHE[j]) tileCount++;
      }
     for(int j=0;j<512;j++) {
-        if (SPR_CACHE[j]) sprCount++;
+    	if (SPR_CACHE[j]) sprCount++;
     }
-#endif
+#endif 
 
-    uint8_t *emuFrameBuffer = osd_gfx_framebuffer();
+	uint8_t *emuFrameBuffer = osd_gfx_framebuffer();
     uint16_t *framebuffer_active = (active_framebuffer == 0 ? framebuffer1 : framebuffer2);
     int x2=0,y=0, offsetY;
-    int xScaleDownModulo = 0;
-    int xScaleUpModulo = 0;
-    uint8_t *fbTmp;
-    if (GW_LCD_WIDTH<current_width) xScaleDownModulo = current_width/(current_width-GW_LCD_WIDTH);
-    if (GW_LCD_WIDTH>current_width) xScaleUpModulo = current_width/(GW_LCD_WIDTH-current_width);
-    int renderHeight = (current_height<=GW_LCD_HEIGHT)?current_height:GW_LCD_HEIGHT;
-
+	int xScaleDownModulo = 0;
+	int xScaleUpModulo = 0;
+	uint8_t *fbTmp;
+	if (GW_LCD_WIDTH<current_width) xScaleDownModulo = current_width/(current_width-GW_LCD_WIDTH);
+	if (GW_LCD_WIDTH>current_width) xScaleUpModulo = current_width/(GW_LCD_WIDTH-current_width);
+	int renderHeight = (current_height<=GW_LCD_HEIGHT)?current_height:GW_LCD_HEIGHT;
+	
     for(y=0;y<renderHeight;y++) {
-        x2=0;
-        fbTmp = emuFrameBuffer+(y*XBUF_WIDTH);
-        offsetY = y*GW_LCD_WIDTH;
-        if (xScaleUpModulo) {
-            // Horizontal - Scale up
-            for(int x=0;x<current_width;x++) {
-                framebuffer_active[offsetY+x2]=mypalette[fbTmp[x]];
-                x2++;
-                if ((x+1)%xScaleUpModulo==0) {
-                    framebuffer_active[offsetY+x2]=mypalette[fbTmp[x]];
-                    x2++;
-                }
-            }
-        } else if (xScaleDownModulo) {
-            // Horizontal - Scale down
-            for(int x=0;x<current_width;x++) {
-                if (x%xScaleDownModulo!=0) {
-                    framebuffer_active[offsetY+x2]=mypalette[fbTmp[x]];
-                    x2++;
-                }
-            }
-        } else {
-            // No scaling, 1:1
-            for(int x=0;x<current_width;x++) {
-                   framebuffer_active[offsetY+x]=mypalette[fbTmp[x]];
-            }
-        }
+    	x2=0;
+    	fbTmp = emuFrameBuffer+(y*XBUF_WIDTH);
+		offsetY = y*GW_LCD_WIDTH;
+    	if (xScaleUpModulo) {
+    		// Horizontal - Scale up
+        	for(int x=0;x<current_width;x++) {
+        		framebuffer_active[offsetY+x2]=mypalette[fbTmp[x]];
+        		x2++;
+        		if ((x+1)%xScaleUpModulo==0) {
+            		framebuffer_active[offsetY+x2]=mypalette[fbTmp[x]];
+        			x2++;
+        		}
+        	}
+    	} else if (xScaleDownModulo) {
+    		// Horizontal - Scale down
+        	for(int x=0;x<current_width;x++) {
+        		if (x%xScaleDownModulo!=0) {
+        			framebuffer_active[offsetY+x2]=mypalette[fbTmp[x]];
+            		x2++;
+        		}
+        	}
+    	} else {
+			// No scaling, 1:1 
+			for(int x=0;x<current_width;x++) {
+       			framebuffer_active[offsetY+x]=mypalette[fbTmp[x]];
+        	}
+		}
     }
-    // Temporary, Y scaling is not yet implemented
+    // Temporary, Y scaling is not yet implemented 
     for(;y<GW_LCD_HEIGHT;y++) {
-        fbTmp = emuFrameBuffer+(y*XBUF_WIDTH);
-        offsetY = y*GW_LCD_WIDTH;
-        for(int x=0;x<GW_LCD_WIDTH;x++) {
-            framebuffer_active[offsetY+x]=0;
-        }
+    	fbTmp = emuFrameBuffer+(y*XBUF_WIDTH);
+		offsetY = y*GW_LCD_WIDTH;
+    	for(int x=0;x<GW_LCD_WIDTH;x++) {
+        	framebuffer_active[offsetY+x]=0;
+    	}
     }
 
 #ifdef PCE_SHOW_DEBUG
@@ -416,15 +416,15 @@ void pce_pcm_submit() {
             audiobuffer_dma[offset + i] = 0;
         }
     } else {
-        for (int i = 0; i < AUDIO_BUFFER_LENGTH_PCE; i++) {
-            int32_t sample = (audioBuffer_pce[i*2] + audioBuffer_pce[i*2+1]);
-            //int32_t sample = (audioBuffer_pce[i*2] );
-            audiobuffer_dma[offset + i] = (sample * factor) >> 8;
+    	for (int i = 0; i < AUDIO_BUFFER_LENGTH_PCE; i++) {
+    		int32_t sample = (audioBuffer_pce[i*2] + audioBuffer_pce[i*2+1]);
+    		//int32_t sample = (audioBuffer_pce[i*2] );
+    		audiobuffer_dma[offset + i] = (sample * factor) >> 16;
         }
     }
     static dma_transfer_state_t last_dma_state = DMA_TRANSFER_STATE_HF;
     while (dma_state == last_dma_state) {
-        __NOP();
+    	__NOP();
     }
     last_dma_state = dma_state;
 }
@@ -514,8 +514,8 @@ int app_main_pce(uint8_t load_state) {
 
         // See if we need to skip a frame to keep up
         if (skipFrames == 0) {
-            if (get_elapsed_time_since(startTime) > frameTime) skipFrames = 1;
-            if (app->speedupEnabled) skipFrames += app->speedupEnabled * 2.5;
+        	if (get_elapsed_time_since(startTime) > frameTime) skipFrames = 1;
+        	if (app->speedupEnabled) skipFrames += app->speedupEnabled * 2.5;
         } else if (skipFrames > 0) {
             skipFrames--;
         }
@@ -524,7 +524,7 @@ int app_main_pce(uint8_t load_state) {
         odroid_system_tick(!drawFrame, fullFrame, get_elapsed_time_since(startTime));
 
         if (!app->speedupEnabled) {
-            pce_pcm_submit();
+        	pce_pcm_submit();
         }
 
         // Prevent overflow

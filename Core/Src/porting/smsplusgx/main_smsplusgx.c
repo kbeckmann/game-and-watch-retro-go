@@ -213,7 +213,7 @@ void sms_pcm_submit() {
         for (int i = 0; i < AUDIO_BUFFER_LENGTH_SMS; i++) {
             /* mix left & right */
             int32_t sample = (sms_snd.output[0][i] + sms_snd.output[1][i]);
-            audiobuffer_dma[i + offset] = (sample * factor) >> 8;
+            audiobuffer_dma[i + offset] = (sample * factor) >> 16;
         }
     }
 }
