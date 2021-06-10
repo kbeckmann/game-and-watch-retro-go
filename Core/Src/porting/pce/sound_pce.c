@@ -205,14 +205,14 @@ void pce_snd_update(int16_t *output, unsigned length) {
     memset(output, 0, length * 2);
 
     for (int i = 0; i < PSG_CHANNELS; i++) {
-    	psg_update_chan((void*)mix_buffer, i, length);
+        psg_update_chan((void*)mix_buffer, i, length);
         /*for (int j = 0; j < length; j += 2) {
             output[j] += (uint8_t)mix_buffer[j] * lvol;
             output[j + 1] += (uint8_t)mix_buffer[j + 1] * rvol;
         }*/
 
         for (int j = 0; j < length; j += 2) {
-        	output[j] += mix_buffer[j] * lvol;
+            output[j] += mix_buffer[j] * lvol;
             output[j + 1] += mix_buffer[j + 1] * rvol;
         }
     }

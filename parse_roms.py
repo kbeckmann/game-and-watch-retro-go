@@ -38,6 +38,9 @@ const rom_system_t {name} = {{
 }};
 """
 
+# TODO: Find a better way to find this before building
+MAX_COMPRESSED_NES_SIZE = 0x00081000
+
 class ROM:
     def __init__(self, system_name: str, filepath: str, extension: str):
         # Remove .lz4 from the name in case it ends with that
@@ -172,6 +175,9 @@ class ROMParser():
 
                     #NES LZ4 compression
                     if  "nes_system" in variable_name:
+                        if os.stat(r.path).st_size > MAX_COMPRESSED_NES_SIZE:
+                            print(f"INFO: {r.name} is too large to compress, skipping compression!")
+                            continue
                         subprocess.run([lz4_path, "-9", "--content-size", "--no-frame-crc", r.path, r.path + ".lz4"])
 
                     #GB/GBC LZ4 compression
@@ -278,7 +284,6 @@ class ROMParser():
 
                         tmp_dir_inst.cleanup()
 
-
             # Re-generate the lz4 rom list
             roms_lz4 = []
             for e in extensions:
@@ -375,6 +380,10 @@ class ROMParser():
         build_config += "#define ENABLE_EMULATOR_PCE\n" if rom_size > 0 else ""
 
         total_size = total_save_size + total_rom_size
+
+        if total_size == 0:
+            print("No roms found! Please add at least one rom to one of the the directories in roms/")
+            exit(-1)
 
         print(f"Save data:\t{total_save_size} bytes\nROM data:\t{total_rom_size} bytes\nTotal:\t\t{total_size} / {args.flash_size} bytes (plus some metadata).")
         if total_size > args.flash_size:

@@ -192,7 +192,7 @@ void nes_audio_submit(int16_t *buffer, int audioSamples)
     // Write to DMA buffer and lower the volume accordingly
     for (int i = 0; i < audioSamples; i++) {
         int32_t sample = buffer[i];
-        audiobuffer_dma[i + offset] = (sample * factor) >> 16;
+        audiobuffer_dma[i + offset] = (sample * factor) >> 8;
     }
 }
 
