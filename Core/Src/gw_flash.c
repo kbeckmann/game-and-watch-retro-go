@@ -366,3 +366,21 @@ void OSPI_EnableMemoryMappedMode(OSPI_HandleTypeDef *spi) {
     Error_Handler();
   }
 }
+
+void OSPI_SetQuadEnable(OSPI_HandleTypeDef *hospi, uint8_t enable)
+{
+  // WRSR - Write Status Register
+  // Set Quad Enable bit (6) in status register. Other bits = 0.
+  uint8_t wr_status = enable ? (1 << 6) : 0;
+  uint8_t rd_status = 0xff;
+
+  // Enable write to be allowed to change the status register
+  OSPI_NOR_WriteEnable(hospi);
+
+  // Loop until rd_status is updated
+  while (rd_status != wr_status) {
+    OSPI_WriteBytes(hospi, 0x01, 0, &wr_status, 1, SPI_MODE);
+    OSPI_ReadBytes(hospi, 0x05, &rd_status, 1);
+  }
+}
+

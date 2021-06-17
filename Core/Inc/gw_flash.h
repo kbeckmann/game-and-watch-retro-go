@@ -20,5 +20,6 @@ void OSPI_Program(OSPI_HandleTypeDef *hospi, uint32_t address, const uint8_t *bu
 void OSPI_BlockErase64(OSPI_HandleTypeDef *hospi, uint32_t address);
 void OSPI_BlockErase32(OSPI_HandleTypeDef *hospi, uint32_t address);
 void OSPI_SectorErase(OSPI_HandleTypeDef *hospi, uint32_t address);
+void OSPI_SetQuadEnable(OSPI_HandleTypeDef *hospi, uint8_t enable);
 
 #endif

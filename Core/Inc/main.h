@@ -103,7 +103,10 @@ extern RTC_HandleTypeDef hrtc;
 
 void Error_Handler(void);
 void BSOD(BSOD_t fault, void *pc, void *lr) __attribute__((noreturn));
-void flash_readid(uint8_t idcode[3]);
+
+void flash_read_jedec_id(uint8_t *data);
+void flash_read_status_reg(uint8_t *data);
+void flash_set_quad_enable(uint8_t enable);
 void store_erase(const uint8_t *flash_ptr, size_t size);
 void store_save(const uint8_t *flash_ptr, const uint8_t *data, size_t size);
 void boot_magic_set(uint32_t magic);
