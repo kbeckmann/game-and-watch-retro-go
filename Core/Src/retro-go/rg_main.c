@@ -11,6 +11,15 @@
 #include "githash.h"
 #include "main.h"
 
+static const uint8_t *flash_manufacturer_str(uint8_t manufacturer)
+{
+    switch (manufacturer) {
+        case 0xC2: return "Macronix";
+        case 0x9D: return "ISSI";
+        default:   return "Unknown";
+    }
+}
+
 #if 0
 #define KEY_SELECTED_TAB  "SelectedTab"
 #define KEY_GUI_THEME     "ColorTheme"
@@ -177,6 +186,7 @@ void retro_loop()
                     {0, "", "kbeckmann", 1, NULL},
                     {0, "", "stacksmashing", 1, NULL},
                     {0, "", "", -1, NULL},
+                    {2, "Debug menu", "", 1, NULL},
                     {1, "Reset settings", "", 1, NULL},
                     {0, "Close", "", 1, NULL},
                     ODROID_DIALOG_CHOICE_LAST
@@ -184,11 +194,30 @@ void retro_loop()
 
                 int sel = odroid_overlay_dialog("Retro-Go", choices, -1);
                 if (sel == 1) {
+                    // Reset settings
                     if (odroid_overlay_confirm("Reset all settings? (TODO)", false) == 1) {
                         odroid_settings_reset();
                         odroid_system_switch_app(0); // reset
                     }
+                } else if (sel == 2) {
+                    uint8_t rdid[3];
+                    uint8_t rdid_str[16];
+                    // Debug menu
+
+                    // Read and print RDID/idcode of the external flash
+                    flash_readid(rdid);
+                    snprintf(rdid_str, sizeof(rdid_str), "%02X %02X %02X", rdid[0], rdid[1], rdid[2]);
+
+                    odroid_dialog_choice_t debuginfo[] = {
+                        {0, "Flash JEDEC ID", rdid_str, 1, NULL},
+                        {0, "Flash manufacturer", flash_manufacturer_str(rdid[0]), 1, NULL},
+                        {0, "Close", "", 1, NULL},
+                        ODROID_DIALOG_CHOICE_LAST
+                    };
+
+                    odroid_overlay_dialog("Debug", debuginfo, -1);
                 }
+
                 gui_redraw();
             }
             else if (last_key == ODROID_INPUT_VOLUME) {

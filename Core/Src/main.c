@@ -210,6 +210,12 @@ int _write(int file, char *ptr, int len)
 }
 #endif
 
+void flash_readid(uint8_t idcode[3])
+{
+  OSPI_DisableMemoryMapped(&hospi1);
+  OSPI_ReadBytes(&hospi1, 0x9F, idcode, sizeof(idcode));
+  OSPI_EnableMemoryMappedMode(&hospi1);
+}
 
 void store_erase(const uint8_t *flash_ptr, size_t size)
 {
@@ -471,6 +477,10 @@ int main(void)
   OSPI_Init(&hospi1, quad_mode);
 
   OSPI_EnableMemoryMappedMode(&hospi1);
+
+  uint8_t rdid[3] = {0};
+  flash_readid(rdid);
+  printf("Flash RDID: %02X %02X %02X\n", rdid[0], rdid[1], rdid[2]);
 
   // Copy instructions and data from extflash to axiram
   void *copy_areas[3];
