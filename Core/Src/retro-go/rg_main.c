@@ -221,7 +221,7 @@ void retro_loop()
                         {0, "------------------", "", 1, NULL},
                         {1, "Set Quad Enable", "", 1, NULL},
                         {2, "Clear Quad Enable", "", 1, NULL},
-                        {1, "------------------", "", 1, NULL},
+                        {0, "------------------", "", 1, NULL},
                         {0, "Close", "", 1, NULL},
                         ODROID_DIALOG_CHOICE_LAST
                     };
