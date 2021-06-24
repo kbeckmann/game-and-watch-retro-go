@@ -497,6 +497,9 @@ rg_app_desc_t * init(uint8_t load_state)
     odroid_system_init(ODROID_APPID_GB, AUDIO_SAMPLE_RATE);
     odroid_system_emu_init(&LoadState, &SaveState, &netplay_callback);
 
+    // bzhxx : fix LCD glitch at the start by cleaning up the buffer emulator
+    memset(emulator_framebuffer, 0x0, sizeof(emulator_framebuffer));
+
     // Hack: Use the same buffer twice
     update1.buffer = emulator_framebuffer;
     update2.buffer = emulator_framebuffer;
