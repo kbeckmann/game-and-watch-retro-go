@@ -50,10 +50,6 @@ static uint skipFrames = 0;
 static bool saveSRAM = false;
 static int  saveSRAM_Timer = 0;
 
-// 3 pages
-uint8_t state_save_buffer[192 * 1024];
-
-
 // --- MAIN
 
 
@@ -83,9 +79,6 @@ static inline void screen_blit(void) {
         skippedFrames = 0;
         lastFPSTime = currentTime;
     }
-
-
-
 
     int w1 = currentUpdate->width;
     int h1 = currentUpdate->height;
@@ -356,14 +349,20 @@ static inline void screen_blit_jth(void) {
 //     */
 // }
 
+#define STATE_SAVE_BUFFER_LENGTH 1024 * 192
 
 static bool SaveState(char *pathName)
 {
     printf("Saving state...\n");
 
-    memset(state_save_buffer, '\x00', sizeof(state_save_buffer));
-    size_t size = gb_state_save(state_save_buffer, sizeof(state_save_buffer));
-    store_save(ACTIVE_FILE->save_address, state_save_buffer, size);
+    // Use GB_ROM_SRAM_CACHE (which points to _GB_ROM_UNPACK_BUFFER)
+    // as a temporary save buffer.
+    memset(GB_ROM_SRAM_CACHE,  '\x00', STATE_SAVE_BUFFER_LENGTH);
+    size_t size = gb_state_save(GB_ROM_SRAM_CACHE, STATE_SAVE_BUFFER_LENGTH);
+    store_save(ACTIVE_FILE->save_address, GB_ROM_SRAM_CACHE, size);
+
+    // Restore the cache that was overwritten above.
+    gb_loader_restore_cache();
 
     return 0;
 }
@@ -492,6 +491,9 @@ rg_app_desc_t * init(uint8_t load_state)
 {
     odroid_system_init(ODROID_APPID_GB, AUDIO_SAMPLE_RATE);
     odroid_system_emu_init(&LoadState, &SaveState, &netplay_callback);
+
+    // bzhxx : fix LCD glitch at the start by cleaning up the buffer emulator
+    memset(emulator_framebuffer, 0x0, sizeof(emulator_framebuffer));
 
     // Hack: Use the same buffer twice
     update1.buffer = emulator_framebuffer;

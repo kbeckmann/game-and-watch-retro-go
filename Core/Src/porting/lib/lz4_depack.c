@@ -129,7 +129,7 @@ lz4_depack(const void *src, void *dst, unsigned long packed_size)
 /*
 lz4_uncompress() and lz4_get_original_size() are from bzhxx.
 free of use, as-is without any warranty. don't use it!
-/* 
+*/
 
 /*
  LZ4 uncompress function

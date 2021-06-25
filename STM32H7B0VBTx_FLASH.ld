@@ -234,10 +234,12 @@ SECTIONS
     build/gnuboy/*.o (COMMON)
     . = ALIGN(4);
     build/gnuboy/*.o (.bss .bss*)
+    _GB_ROM_UNPACK_BUFFER = .;
     _OVERLAY_GB_BSS_END = .;
     __ram_emu_gb_end__ = .;
   }
   _OVERLAY_GB_BSS_SIZE = SIZEOF(.overlay_gb_bss);
+   _GB_ROM_UNPACK_BUFFER_SIZE = __RAM_EMU_START__ + __RAM_EMU_LENGTH__ - _GB_ROM_UNPACK_BUFFER;
 
   .overlay_sms __RAM_EMU_START__ : {
       . = ALIGN(4);

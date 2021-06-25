@@ -22,6 +22,7 @@ SIZE=$(wc -c "$INFILE" | awk '{print $1}')
 echo "const unsigned char cart_rom[] __attribute__((section (\".extflash_game_rom\"))) = {" > $OUTFILE
 xxd -i < "$INFILE" >> $OUTFILE
 echo "};" >> $OUTFILE
+echo "unsigned int ROM_DATA_LENGTH = $SIZE;" >> $OUTFILE
 echo "unsigned int cart_rom_len = $SIZE;" >> $OUTFILE
 
 echo "Done!"
