@@ -4,11 +4,13 @@ This is a port of the [retro-go](https://github.com/ducalex/retro-go) emulator c
 
 Supported emulators:
 
-- GB / GBC (Gameboy / Gameboy Color)
-- NES (Nintendo Entertainment System)
-- SMS (Sega Master System)
-- GG (Sega Game Gear)
-- PCE (PC Engine / TurboGrafx-16)
+- ColecoVision (col)
+- Gameboy / Gameboy Color (gb/gbc)
+- Nintendo Entertainment System (nes)
+- PC Engine / TurboGrafx-16 (pce)
+- Sega Game Gear (gg)
+- Sega Master System (sms)
+- Sega SG-1000 (sg)
 
 ## How to report issues
 
