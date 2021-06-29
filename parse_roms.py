@@ -318,6 +318,8 @@ class ROMParser():
             save_size = 60 * 1024
         elif folder == "col":
             save_size = 60 * 1024
+        elif folder == "sg":
+            save_size = 60 * 1024
         elif folder == "pce":
             save_size = 76 * 1024
         else:
