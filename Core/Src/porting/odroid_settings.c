@@ -211,7 +211,7 @@ void odroid_settings_StartupApp_set(int32_t value)
 }
 
 
-void *odroid_settings_StartupFile_get()
+void* odroid_settings_StartupFile_get()
 {
     return persistent_config_ram.startup_file;
 }
