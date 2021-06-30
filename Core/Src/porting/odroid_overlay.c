@@ -636,6 +636,9 @@ int odroid_overlay_game_menu(odroid_dialog_choice_t *extra_options)
 
     int r = odroid_overlay_dialog("Retro-Go", choices, 0);
 
+    // Clear startup file so we boot into the retro-go gui
+    odroid_settings_StartupFile_set(NULL);
+
     switch (r)
     {
         case 10: odroid_system_emu_save_state(0); break;

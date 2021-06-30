@@ -462,7 +462,7 @@ void osd_getinput(void)
                 SaveState("");
             }
 
-            GW_EnterDeepSleep();
+            odroid_system_sleep();
         }
     }
 

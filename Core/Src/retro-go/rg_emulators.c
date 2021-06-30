@@ -110,6 +110,8 @@ static void add_emulator(const char *system, const char *dirname, const char* ex
     p->crc_offset = crc_offset;
 
     gui_add_tab(dirname, logo, header, p, event_handler);
+
+    emulator_init(p);
 }
 
 void emulator_init(retro_emulator_t *emu)
@@ -456,4 +458,17 @@ void emulators_init()
     // add_emulator("PC Engine", "pce", "pce", "huexpress-go", 0, logo_pce, header_pce);
     // add_emulator("Atari Lynx", "lnx", "lnx", "handy-go", 64, logo_lnx, header_lnx);
     // add_emulator("Atari 2600", "a26", "a26", "stella-go", 0, logo_a26, header_a26);
+}
+
+bool emulator_is_file_valid(retro_emulator_file_t *file)
+{
+    for (int i = 0; i < emulators_count; i++) {
+        for (int j = 0; j < emulators[i].roms.count; j++) {
+            if (&emulators[i].roms.files[j] == file) {
+                return true;
+            }
+        }
+    }
+
+    return false;
 }

@@ -496,7 +496,8 @@ int app_main_pce(uint8_t load_state) {
                     // Always save as long as PAUSE is not pressed
                     SaveState(NULL);
                 }
-                GW_EnterDeepSleep();
+
+                odroid_system_sleep();
             }
         }
 

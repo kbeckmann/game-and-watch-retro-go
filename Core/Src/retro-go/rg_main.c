@@ -318,5 +318,11 @@ void app_main(void)
     emulators_init();
     // favorites_init();
 
-    retro_loop();
+    // Start the previously running emulator directly if it's a valid pointer.
+    retro_emulator_file_t *file = odroid_settings_StartupFile_get();
+    if (emulator_is_file_valid(file)) {
+        emulator_start(file, true);
+    } else {
+        retro_loop();
+    }
 }

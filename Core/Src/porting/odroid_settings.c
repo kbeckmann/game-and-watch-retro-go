@@ -33,6 +33,7 @@ typedef struct persistent_config {
     uint8_t volume;
     uint8_t font_size;
     uint8_t startup_app;
+    void *startup_file;
 
     app_config_t app[ODROID_APPID_COUNT];
 
@@ -206,6 +207,17 @@ int32_t odroid_settings_StartupApp_get()
 void odroid_settings_StartupApp_set(int32_t value)
 {
     persistent_config_ram.startup_app = value;
+    odroid_settings_commit();
+}
+
+
+void *odroid_settings_StartupFile_get()
+{
+    return persistent_config_ram.startup_file;
+}
+void odroid_settings_StartupFile_set(void *value)
+{
+    persistent_config_ram.startup_file = value;
     odroid_settings_commit();
 }
 

@@ -1,6 +1,7 @@
 #include <assert.h>
 
 #include "odroid_system.h"
+#include "rom_manager.h"
 
 static panic_trace_t *panicTrace = (void *)0x0;
 
@@ -110,4 +111,11 @@ runtime_stats_t odroid_system_get_stats()
     counters.resetTime = get_elapsed_time();
 
     return statistics;
+}
+
+void odroid_system_sleep(void)
+{
+    odroid_settings_StartupFile_set(ACTIVE_FILE);
+
+    GW_EnterDeepSleep();
 }

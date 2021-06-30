@@ -326,7 +326,8 @@ static void sms_update_keys( odroid_gamepad_state_t* joystick )
             // Always save as long as PAUSE is not pressed
             SaveState(NULL);
         }
-        GW_EnterDeepSleep();
+
+        odroid_system_sleep();
     }
   }
 }
