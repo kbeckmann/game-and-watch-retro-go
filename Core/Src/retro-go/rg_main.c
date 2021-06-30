@@ -10,6 +10,7 @@
 #include "gui.h"
 #include "githash.h"
 #include "main.h"
+#include "gw_buttons.h"
 
 static const uint8_t *flash_manufacturer_str(uint8_t manufacturer)
 {
@@ -319,8 +320,10 @@ void app_main(void)
     // favorites_init();
 
     // Start the previously running emulator directly if it's a valid pointer.
+    // If the user holds down any key more than the power button,
+    // start the retro-go gui as a fallback.
     retro_emulator_file_t *file = odroid_settings_StartupFile_get();
-    if (emulator_is_file_valid(file)) {
+    if (emulator_is_file_valid(file) && ((GW_GetBootButtons() & ~B_POWER) == 0)) {
         emulator_start(file, true);
     } else {
         retro_loop();
