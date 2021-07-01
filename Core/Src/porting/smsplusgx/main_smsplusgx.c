@@ -334,8 +334,18 @@ static void sms_update_keys( odroid_gamepad_state_t* joystick )
 
 
 int 
-app_main_smsplusgx(uint8_t load_state, uint8_t is_coleco)
+app_main_smsplusgx(uint8_t load_state, uint8_t start_paused, uint8_t is_coleco)
 {
+    uint32_t pause_pressed = 0;
+    uint8_t pause_after_frames;
+
+    if (start_paused) {
+        pause_after_frames = 2;
+        odroid_audio_mute(true);
+    } else {
+        pause_after_frames = 0;
+    }
+
     odroid_system_init(APP_ID, AUDIO_SAMPLE_RATE);
     odroid_system_emu_init(&LoadState, &SaveState, &netplay_callback);
 
@@ -393,18 +403,22 @@ app_main_smsplusgx(uint8_t load_state, uint8_t is_coleco)
         odroid_gamepad_state_t joystick;
         odroid_input_read_gamepad(&joystick);
 
-        if (joystick.values[ODROID_INPUT_VOLUME]) {
+        if (pause_pressed != joystick.values[ODROID_INPUT_VOLUME]) {
+            if (pause_pressed) {
 
-            // TODO: Sync framebuffers in a nicer way
-            lcd_sync();
+                // TODO: Sync framebuffers in a nicer way
+                lcd_sync();
 
-            odroid_dialog_choice_t options[] = {
-                ODROID_DIALOG_CHOICE_LAST
-            };
-            odroid_overlay_game_menu(options);
-            memset(framebuffer1, 0x0, sizeof(framebuffer1));
-            memset(framebuffer2, 0x0, sizeof(framebuffer2));
+                odroid_dialog_choice_t options[] = {
+                    ODROID_DIALOG_CHOICE_LAST
+                };
+                odroid_overlay_game_menu(options);
+                memset(framebuffer1, 0x0, sizeof(framebuffer1));
+                memset(framebuffer2, 0x0, sizeof(framebuffer2));
+            }
+            pause_pressed = joystick.values[ODROID_INPUT_VOLUME];
         }
+
         uint startTime = get_elapsed_time();
         bool drawFrame = !skipFrames;
 
@@ -436,6 +450,14 @@ app_main_smsplusgx(uint8_t load_state, uint8_t is_coleco)
                 __NOP();
             }
             last_dma_state = dma_state;
+        }
+
+        // Render frames before faking a pause button press
+        if (pause_after_frames > 0) {
+            pause_after_frames--;
+            if (pause_after_frames == 0) {
+                pause_pressed = B_PAUSE;
+            }
         }
     }
 }

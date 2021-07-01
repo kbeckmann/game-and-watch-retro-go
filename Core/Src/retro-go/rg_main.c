@@ -324,7 +324,7 @@ void app_main(void)
     // start the retro-go gui as a fallback.
     retro_emulator_file_t *file = odroid_settings_StartupFile_get();
     if (emulator_is_file_valid(file) && ((GW_GetBootButtons() & ~B_POWER) == 0)) {
-        emulator_start(file, true);
+        emulator_start(file, true, true);
     } else {
         retro_loop();
     }

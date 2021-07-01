@@ -43,7 +43,7 @@ typedef struct {
 
 void emulators_init();
 void emulator_init(retro_emulator_t *emu);
-void emulator_start(retro_emulator_file_t *file, bool load_state);
+void emulator_start(retro_emulator_file_t *file, bool load_state, bool start_paused);
 void emulator_show_file_menu(retro_emulator_file_t *file);
 void emulator_show_file_info(retro_emulator_file_t *file);
 void emulator_crc32_file(retro_emulator_file_t *file);

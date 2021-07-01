@@ -538,52 +538,33 @@ rg_app_desc_t * init(uint8_t load_state)
 
     pal_set_dmg(odroid_settings_Palette_get());
 
-    // Don't load state if the pause button is held while booting
-    uint32_t boot_buttons = GW_GetBootButtons();
-    pause_pressed = (boot_buttons & B_PAUSE);
-    power_pressed = (boot_buttons & B_POWER);
-
     if (load_state) {
         LoadState("");
     }
+
     return app;
 }
 
-void app_main_gb(uint8_t load_state)
+void app_main_gb(uint8_t load_state, uint8_t start_paused)
 {
     rg_app_desc_t *app = init(load_state);
     odroid_gamepad_state_t joystick;
-
+    uint8_t pause_after_frames;
 
     const int frameTime = get_frame_time(60);
+
+    if (start_paused) {
+        pause_after_frames = 2;
+        odroid_audio_mute(true);
+    } else {
+        pause_after_frames = 0;
+    }
 
     while (true)
     {
         wdog_refresh();
 
         odroid_input_read_gamepad(&joystick);
-
-        if (joystick.values[ODROID_INPUT_VOLUME]) {
-
-            // TODO: Sync framebuffers in a nicer way
-            lcd_sync();
-
-            odroid_dialog_choice_t options[] = {
-                {300, "Palette", "7/7", !hw.cgb, &palette_update_cb},
-                // {301, "More...", "", 1, &advanced_settings_cb},
-                ODROID_DIALOG_CHOICE_LAST
-            };
-            odroid_overlay_game_menu(options);
-
-        }
-        // else if (joystick.values[ODROID_INPUT_VOLUME]) {
-        //     odroid_dialog_choice_t options[] = {
-        //         {100, "Palette", "7/7", !hw.cgb, &palette_update_cb},
-        //         // {101, "More...", "", 1, &advanced_settings_cb},
-        //         ODROID_DIALOG_CHOICE_LAST
-        //     };
-        //     odroid_overlay_game_settings_menu(options);
-        // }
 
         uint startTime = get_elapsed_time();
         bool drawFrame = !skipFrames;
@@ -596,6 +577,21 @@ void app_main_gb(uint8_t load_state)
         pad_set(PAD_START, joystick.values[ODROID_INPUT_START]);
         pad_set(PAD_A, joystick.values[ODROID_INPUT_A]);
         pad_set(PAD_B, joystick.values[ODROID_INPUT_B]);
+
+        if (pause_pressed != joystick.values[ODROID_INPUT_VOLUME]) {
+            if (pause_pressed) {
+                // TODO: Sync framebuffers in a nicer way
+                lcd_sync();
+
+                odroid_dialog_choice_t options[] = {
+                    {300, "Palette", "7/7", !hw.cgb, &palette_update_cb},
+                    // {301, "More...", "", 1, &advanced_settings_cb},
+                    ODROID_DIALOG_CHOICE_LAST
+                };
+                odroid_overlay_game_menu(options);
+            }
+            pause_pressed = joystick.values[ODROID_INPUT_VOLUME];
+        }
 
         if (power_pressed != joystick.values[ODROID_INPUT_POWER]) {
             printf("Power toggle %ld=>%d\n", power_pressed, !power_pressed);
@@ -654,6 +650,14 @@ void app_main_gb(uint8_t load_state)
                 __NOP();
             }
             last_dma_state = dma_state;
+        }
+
+        // Render frames before faking a pause button press
+        if (pause_after_frames > 0) {
+            pause_after_frames--;
+            if (pause_after_frames == 0) {
+                pause_pressed = B_PAUSE;
+            }
         }
     }
 }

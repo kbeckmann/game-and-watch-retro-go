@@ -29,6 +29,8 @@
 #define blit blit_5to6
 #endif
 
+static uint8_t pause_after_frames;
+
 static uint32_t pause_pressed;
 static uint32_t power_pressed;
 
@@ -181,7 +183,7 @@ void nes_audio_submit(int16_t *buffer, int audioSamples)
     uint8_t volume = odroid_audio_volume_get();
     int32_t factor = volume_tbl[volume];
 
-    if (volume == ODROID_AUDIO_VOLUME_MIN) {
+    if (audio_mute || (volume == ODROID_AUDIO_VOLUME_MIN)) {
         // mute
         for (int i = 0; i < audioSamples; i++) {
             audiobuffer_dma[i + offset] = 0;
@@ -476,6 +478,14 @@ void osd_getinput(void)
 #endif
 
     input_update(INP_JOYPAD0, pad0);
+
+    // Render frames before faking a pause button press
+    if (pause_after_frames > 0) {
+        pause_after_frames--;
+        if (pause_after_frames == 0) {
+            pause_pressed = B_PAUSE;
+        }
+    }
 }
 
 size_t osd_getromdata(unsigned char **data)
@@ -535,7 +545,7 @@ void osd_loadstate()
 }
 
 
-int app_main_nes(uint8_t load_state)
+int app_main_nes(uint8_t load_state, uint8_t start_paused)
 {
     region_t nes_region;
 
@@ -544,9 +554,12 @@ int app_main_nes(uint8_t load_state)
     odroid_system_init(ODROID_APPID_NES, AUDIO_SAMPLE_RATE);
     odroid_system_emu_init(&LoadState, &SaveState, NULL);
 
-    uint32_t buttons = GW_GetBootButtons();
-    pause_pressed = (buttons & B_PAUSE);
-    power_pressed = (buttons & B_POWER);
+    if (start_paused) {
+        pause_after_frames = 3;
+        odroid_audio_mute(true);
+    } else {
+        pause_after_frames = 0;
+    }
 
     autoload = load_state;
 
