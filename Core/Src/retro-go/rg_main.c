@@ -248,7 +248,7 @@ void retro_loop()
                 int sel = odroid_overlay_dialog("Retro-Go", choices, -1);
                 if (sel == 1) {
                     // Reset settings
-                    if (odroid_overlay_confirm("Reset all settings? (TODO)", false) == 1) {
+                    if (odroid_overlay_confirm("Reset all settings?", false) == 1) {
                         odroid_settings_reset();
                         odroid_system_switch_app(0); // reset
                     }
