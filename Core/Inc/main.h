@@ -110,7 +110,8 @@ void flash_set_quad_enable(uint8_t enable);
 void store_erase(const uint8_t *flash_ptr, size_t size);
 void store_save(const uint8_t *flash_ptr, const uint8_t *data, size_t size);
 void boot_magic_set(uint32_t magic);
-uint32_t boot_magic_get(void);
+void uptime_inc(void);
+uint32_t uptime_get(void);
 
 /* USER CODE BEGIN EFP */
 

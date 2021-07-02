@@ -313,6 +313,8 @@ void TIM1_UP_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM1_UP_IRQn 0 */
 
+  uptime_inc();
+
   bq24072_poll();
 
   /* USER CODE END TIM1_UP_IRQn 0 */

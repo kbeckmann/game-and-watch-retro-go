@@ -81,6 +81,7 @@ __attribute__((used)) __attribute__((section (".persistent"))) volatile uint32_t
 
 uint32_t boot_buttons;
 
+uint32_t uptime_s;
 
 /* USER CODE END PV */
 
@@ -308,9 +309,14 @@ void boot_magic_set(uint32_t magic)
   boot_magic = magic;
 }
 
-uint32_t boot_magic_get(void)
+void uptime_inc(void)
 {
-  return boot_magic;
+  uptime_s++;
+}
+
+uint32_t uptime_get(void)
+{
+  return uptime_s;
 }
 
 void GW_EnterDeepSleep(void)
@@ -1081,7 +1087,7 @@ static void MX_TIM1_Init(void)
   htim1.Instance = TIM1;
   htim1.Init.Prescaler = 14000;
   htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim1.Init.Period = 50000;
+  htim1.Init.Period = 20000;
   htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim1.Init.RepetitionCounter = 0;
   htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
