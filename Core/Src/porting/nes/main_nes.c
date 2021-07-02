@@ -404,7 +404,7 @@ void osd_blitscreen(bitmap_t *bmp)
     HAL_LTDC_Reload(&hltdc, LTDC_RELOAD_VERTICAL_BLANKING);
 }
 
-static bool palette_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event)
+static bool palette_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat)
 {
    int pal = ppu_getopt(PPU_PALETTE_RGB);
    int max = PPU_PAL_COUNT - 1;

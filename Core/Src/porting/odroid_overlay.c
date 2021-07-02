@@ -244,7 +244,7 @@ void odroid_overlay_draw_dialog(const char *header, odroid_dialog_choice_t *opti
     for (int i = 0; i < options_count; i++)
     {
         if (options[i].update_cb != NULL) {
-            options[i].update_cb(&options[i], ODROID_DIALOG_INIT);
+            options[i].update_cb(&options[i], ODROID_DIALOG_INIT, 0);
         }
         if (options[i].value[0]) {
             len = sprintf(rows + i * 256, " %*s: %s ", -padding, options[i].label, options[i].value);
@@ -345,7 +345,7 @@ int odroid_overlay_dialog(const char *header, odroid_dialog_choice_t *options, i
                 if (joystick.values[ODROID_INPUT_LEFT]) {
                     last_key = ODROID_INPUT_LEFT;
                     if (options[sel].update_cb != NULL) {
-                        select = options[sel].update_cb(&options[sel], ODROID_DIALOG_PREV);
+                        select = options[sel].update_cb(&options[sel], ODROID_DIALOG_PREV, repeat);
                         sel_old = -1;
                     }
                     repeat++;
@@ -353,7 +353,7 @@ int odroid_overlay_dialog(const char *header, odroid_dialog_choice_t *options, i
                 else if (joystick.values[ODROID_INPUT_RIGHT]) {
                     last_key = ODROID_INPUT_RIGHT;
                     if (options[sel].update_cb != NULL) {
-                        select = options[sel].update_cb(&options[sel], ODROID_DIALOG_NEXT);
+                        select = options[sel].update_cb(&options[sel], ODROID_DIALOG_NEXT, repeat);
                         sel_old = -1;
                     }
                     repeat++;
@@ -361,7 +361,7 @@ int odroid_overlay_dialog(const char *header, odroid_dialog_choice_t *options, i
                 else if (joystick.values[ODROID_INPUT_A]) {
                     last_key = ODROID_INPUT_A;
                     if (options[sel].update_cb != NULL) {
-                        select = options[sel].update_cb(&options[sel], ODROID_DIALOG_ENTER);
+                        select = options[sel].update_cb(&options[sel], ODROID_DIALOG_ENTER, 0);
                         sel_old = -1;
                     } else {
                         select = true;
@@ -429,7 +429,7 @@ bool odroid_overlay_dialog_is_open(void)
     return dialog_open_depth > 0;
 }
 
-static bool volume_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event)
+static bool volume_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat)
 {
     int8_t level = odroid_audio_volume_get();
     int8_t min = ODROID_AUDIO_VOLUME_MIN;
@@ -448,7 +448,7 @@ static bool volume_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event
     return false;
 }
 
-static bool brightness_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event)
+static bool brightness_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat)
 {
     int8_t level = odroid_display_get_backlight();
     int8_t max = ODROID_BACKLIGHT_LEVEL_COUNT - 1;
@@ -465,7 +465,7 @@ static bool brightness_update_cb(odroid_dialog_choice_t *option, odroid_dialog_e
     return event == ODROID_DIALOG_ENTER;
 }
 
-static bool filter_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event)
+static bool filter_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat)
 {
     // int8_t max = ODROID_DISPLAY_FILTER_COUNT - 1;
     // int8_t mode = odroid_display_get_filter_mode();
@@ -488,7 +488,7 @@ static bool filter_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event
     return false;
 }
 
-static bool scaling_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event)
+static bool scaling_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat)
 {
     // int8_t max = ODROID_DISPLAY_SCALING_COUNT - 1;
     // int8_t mode = odroid_display_get_scaling_mode();
@@ -509,7 +509,7 @@ static bool scaling_update_cb(odroid_dialog_choice_t *option, odroid_dialog_even
     return false;
 }
 
-bool speedup_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event)
+bool speedup_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat)
 {
     rg_app_desc_t *app = odroid_system_get_app();
     if (event == ODROID_DIALOG_PREV && --app->speedupEnabled < 0) app->speedupEnabled = 2;

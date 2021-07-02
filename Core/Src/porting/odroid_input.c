@@ -31,8 +31,10 @@ typedef struct
 void update_gamepad_state(odroid_gamepad_state_t *state, uint32_t buttons, odroid_gamepad_key_t odroid_key, uint32_t gw_key) {
     if(buttons & gw_key) {
         state->values[odroid_key] = 1;
+        state->bitmask |= 1 << odroid_key;
     } else {
         state->values[odroid_key] = 0;
+        state->bitmask &= ~(1 << odroid_key);
     }
 }
  

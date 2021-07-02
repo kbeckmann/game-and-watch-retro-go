@@ -374,7 +374,7 @@ static bool LoadState(char *pathName)
 }
 
 
-static bool palette_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event)
+static bool palette_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat)
 {
     int pal = pal_get_dmg();
     int max = pal_count_dmg();
@@ -402,7 +402,7 @@ static bool palette_update_cb(odroid_dialog_choice_t *option, odroid_dialog_even
     return event == ODROID_DIALOG_ENTER;
 }
 
-/*static bool save_sram_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event)
+/*static bool save_sram_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat)
 {
     if (event == ODROID_DIALOG_PREV || event == ODROID_DIALOG_NEXT) {
         saveSRAM = !saveSRAM;
@@ -415,7 +415,7 @@ static bool palette_update_cb(odroid_dialog_choice_t *option, odroid_dialog_even
     return -
 }
 
-static bool rtc_t_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event)
+static bool rtc_t_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat)
 {
     if (option->id == 'd') {
         if (event == ODROID_DIALOG_PREV && --rtc.d < 0) rtc.d = 364;
@@ -440,7 +440,7 @@ static bool rtc_t_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_
     return event == ODROID_DIALOG_ENTER;
 }
 
-static bool rtc_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event)
+static bool rtc_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat)
 {
     if (event == ODROID_DIALOG_ENTER) {
         static odroid_dialog_choice_t choices[] = {
@@ -456,7 +456,7 @@ static bool rtc_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t 
     return false;
 }
 
-static bool advanced_settings_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event)
+static bool advanced_settings_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat)
 {
    if (event == ODROID_DIALOG_ENTER) {
       odroid_dialog_choice_t options[] = {

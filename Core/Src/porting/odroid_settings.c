@@ -35,6 +35,8 @@ typedef struct persistent_config {
     uint8_t startup_app;
     void *startup_file;
 
+    uint16_t main_menu_timeout_s;
+
     app_config_t app[ODROID_APPID_COUNT];
 
     uint32_t crc32;
@@ -49,6 +51,7 @@ static const persistent_config_t persistent_config_default = {
     .volume = ODROID_AUDIO_VOLUME_MAX / 2, // Too high volume can cause brown out if the battery isn't connected.
     .font_size = 8,
     .startup_app = 0,
+    .main_menu_timeout_s = 60 * 10, // Turn off after 10 minutes of idle time in the main menu
     .app = {
         {0}, // Launcher
         {
@@ -213,6 +216,16 @@ void* odroid_settings_StartupFile_get()
 void odroid_settings_StartupFile_set(void *value)
 {
     persistent_config_ram.startup_file = value;
+}
+
+
+uint16_t odroid_settings_MainMenuTimeoutS_get()
+{
+    return persistent_config_ram.main_menu_timeout_s;
+}
+void odroid_settings_MainMenuTimeoutS_set(uint16_t value)
+{
+    persistent_config_ram.main_menu_timeout_s = value;
 }
 
 
