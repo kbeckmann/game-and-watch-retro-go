@@ -143,7 +143,6 @@ int32_t odroid_settings_FontSize_get()
 void odroid_settings_FontSize_set(int32_t value)
 {
     persistent_config_ram.font_size = value;
-    odroid_settings_commit();
 }
 
 
@@ -164,7 +163,6 @@ int32_t odroid_settings_Volume_get()
 void odroid_settings_Volume_set(int32_t value)
 {
     persistent_config_ram.volume = value;
-    odroid_settings_commit();
 }
 
 
@@ -185,7 +183,6 @@ int32_t odroid_settings_Backlight_get()
 void odroid_settings_Backlight_set(int32_t value)
 {
     persistent_config_ram.backlight = value;
-    odroid_settings_commit();
 }
 
 
@@ -196,7 +193,6 @@ ODROID_START_ACTION odroid_settings_StartAction_get()
 void odroid_settings_StartAction_set(ODROID_START_ACTION value)
 {
     persistent_config_ram.start_action = value;
-    odroid_settings_commit();
 }
 
 
@@ -207,7 +203,6 @@ int32_t odroid_settings_StartupApp_get()
 void odroid_settings_StartupApp_set(int32_t value)
 {
     persistent_config_ram.startup_app = value;
-    odroid_settings_commit();
 }
 
 
@@ -218,7 +213,6 @@ void* odroid_settings_StartupFile_get()
 void odroid_settings_StartupFile_set(void *value)
 {
     persistent_config_ram.startup_file = value;
-    odroid_settings_commit();
 }
 
 
@@ -229,7 +223,6 @@ int32_t odroid_settings_Palette_get()
 void odroid_settings_Palette_set(int32_t value)
 {
     persistent_config_ram.app[odroid_system_get_app()->id].palette = value;
-    odroid_settings_commit();
 }
 
 
@@ -240,7 +233,6 @@ int32_t odroid_settings_SpriteLimit_get()
 void odroid_settings_SpriteLimit_set(int32_t value)
 {
     persistent_config_ram.app[odroid_system_get_app()->id].sprite_limit = value;
-    odroid_settings_commit();
 }
 
 
@@ -251,7 +243,6 @@ ODROID_REGION odroid_settings_Region_get()
 void odroid_settings_Region_set(ODROID_REGION value)
 {
     persistent_config_ram.app[odroid_system_get_app()->id].region = value;
-    odroid_settings_commit();
 }
 
 
@@ -262,7 +253,6 @@ int32_t odroid_settings_DisplayScaling_get()
 void odroid_settings_DisplayScaling_set(int32_t value)
 {
     persistent_config_ram.app[odroid_system_get_app()->id].disp_scaling = value;
-    odroid_settings_commit();
 }
 
 
@@ -273,7 +263,6 @@ int32_t odroid_settings_DisplayFilter_get()
 void odroid_settings_DisplayFilter_set(int32_t value)
 {
     persistent_config_ram.app[odroid_system_get_app()->id].disp_filter = value;
-    odroid_settings_commit();
 }
 
 
@@ -294,5 +283,4 @@ int32_t odroid_settings_DisplayOverscan_get()
 void odroid_settings_DisplayOverscan_set(int32_t value)
 {
     persistent_config_ram.app[odroid_system_get_app()->id].disp_overscan = value;
-    odroid_settings_commit();
 }

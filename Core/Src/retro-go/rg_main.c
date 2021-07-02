@@ -286,7 +286,7 @@ void retro_loop()
                 gui_event(KEY_PRESS_B, tab);
             }
             else if (last_key == ODROID_INPUT_POWER) {
-                GW_EnterDeepSleep();
+                odroid_system_sleep();
             }
         }
         if (repeat > 0)

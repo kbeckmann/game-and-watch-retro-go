@@ -117,5 +117,7 @@ void odroid_system_sleep(void)
 {
     odroid_settings_StartupFile_set(ACTIVE_FILE);
 
+    odroid_settings_commit();
+
     GW_EnterDeepSleep();
 }
