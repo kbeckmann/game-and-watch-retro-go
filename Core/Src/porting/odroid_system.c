@@ -88,6 +88,8 @@ void odroid_system_switch_app(int app)
 
     switch (app) {
     case 0:
+        odroid_settings_StartupFile_set(0);
+        odroid_settings_commit();
         NVIC_SystemReset();
         break;
     default:
