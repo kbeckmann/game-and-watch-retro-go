@@ -1,6 +1,4 @@
 TARGET = gw_retro_go
-LARGE_FLASH = 1
-CHECK_DIRTY_SUBMODULE = 1
 
 DEBUG = 0
 
