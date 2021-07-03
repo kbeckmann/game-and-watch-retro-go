@@ -121,7 +121,7 @@ def compress_lz4(data, level=None):
 
     try:
         import lz4.frame as lz4
-        return lz4.compress(data, compression_level=level)
+        return lz4.compress(data, compression_level=level, block_size=lz4.BLOCKSIZE_MAX1MB, block_linked=False)
     except ImportError:
         pass
 
