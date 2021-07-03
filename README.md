@@ -73,9 +73,7 @@ cd game-and-watch-retro-go
 # Place roms in the appropriate folders:
 # cp /path/to/rom.gb ./roms/gb/
 # cp /path/to/rom.nes ./roms/nes/
-# cp /path/to/rom.sms ./roms/sms/
-# cp /path/to/rom.nes ./roms/gg/
-# cp /path/to/pce.nes ./roms/pce/
+# etc. for each rom-emulator combination.
 
 # On a Mac running make < v4 you have to manually download the HAL package by running:
 # make download_sdk
