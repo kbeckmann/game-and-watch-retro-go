@@ -27,9 +27,7 @@ endif
 # Compress supported ROMs by default. Set to 0 to disable.
 COMPRESS ?= 1
 ifeq ($(COMPRESS),1)
-	COMPRESS_PARAM := --compress
-else
-	COMPRESS_PARAM := --no-compress
+	COMPRESS_PARAM := --compress=lz4
 endif
 
 PYTHON3 ?= /usr/bin/env python3
