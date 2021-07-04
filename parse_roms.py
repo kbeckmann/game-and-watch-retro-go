@@ -289,9 +289,12 @@ class ROMParser:
         return 0
 
     def _compress_rom(
-        self, variable_name, rom, compress_gb_speed=False, compress="lz4"
+        self, variable_name, rom, compress_gb_speed=False, compress=None
     ):
         """This will create a compressed rom file next to the original rom."""
+
+        if compress is None:
+            compress = "lz4"
 
         if compress not in COMPRESSIONS:
             raise ValueError(f'Unknown compression method: "{compress}"')
