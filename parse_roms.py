@@ -302,7 +302,7 @@ class ROMParser:
                         # It shoul fit exactly in the cache reducing the SWAP cache feequency to 0.
                         # any empty bank is compressed (=98bytes). considered never used by MBC.
 
-                        ## Ths is the cache size used as a compression credit
+                        # Ths is the cache size used as a compression credit
                         # TODO : can we the value from the linker ?
                         compression_credit = 26
 
@@ -340,7 +340,7 @@ class ROMParser:
                                 else:
                                     with open(bank_files[idx], "rb") as bank_file:
 
-                                        #### Write header ###
+                                        # Write header
                                         # write MAGIC WORD \x04\x22\x4D\x18
                                         # write FLG,BD,HC \x68\x40\x00
 
@@ -353,14 +353,14 @@ class ROMParser:
                                         )
                                         lz4_out_file.write(content_size_hc)
 
-                                        #### Write block data ###
+                                        # Write block data
                                         # 0x8000 flag uncompressed block
                                         # 0x4000 16384 bytes
                                         block_size = b"\x00\x40\x00\x80"
                                         lz4_out_file.write(block_size)
                                         lz4_out_file.write(bank_file.read())
 
-                                        #### Write footer ###
+                                        # Write footer
                                         # write END_MARK 0x0000
                                         lz4_footer = b"\x00\x00\x00\x00"
                                         lz4_out_file.write(lz4_footer)
