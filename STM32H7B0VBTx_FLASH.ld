@@ -77,7 +77,9 @@ __EXTFLASH_START__  = 0x90000000;
 __RAM_START__       = 0x24000000;
 __RAM_UC_START__    = __RAM_START__;
 __RAM_CORE_START__  = __RAM_START__ + __RAM_UC_LENGTH__;
-__RAM_EMU_START__    = __RAM_CORE_START__ + __RAM_CORE_LENGTH__;
+__RAM_EMU_START__   = __RAM_CORE_START__ + __RAM_CORE_LENGTH__;
+
+__RAM_EMU_END__     = __RAM_EMU_START__ + __RAM_EMU_LENGTH__;
 
 /* saveflash.ld sets __SAVEFLASH_LENGTH__ */
 INCLUDE build/saveflash.ld
@@ -214,6 +216,7 @@ SECTIONS
     _NES_ROM_UNPACK_BUFFER = .;
     _OVERLAY_NES_BSS_END = .;
     __ram_emu_nes_end__ = .;
+    ASSERT(ABSOLUTE(_OVERLAY_NES_BSS_END) < __RAM_EMU_END__, "Error: NES BSS overflow");
   }
   _OVERLAY_NES_BSS_SIZE = SIZEOF(.overlay_nes_bss);
   _NES_ROM_UNPACK_BUFFER_SIZE = __RAM_EMU_START__ + __RAM_EMU_LENGTH__ - _NES_ROM_UNPACK_BUFFER;
@@ -237,6 +240,7 @@ SECTIONS
     _GB_ROM_UNPACK_BUFFER = .;
     _OVERLAY_GB_BSS_END = .;
     __ram_emu_gb_end__ = .;
+    ASSERT(ABSOLUTE(_OVERLAY_GB_BSS_END) < __RAM_EMU_END__, "Error: GB BSS overflow");
   }
   _OVERLAY_GB_BSS_SIZE = SIZEOF(.overlay_gb_bss);
    _GB_ROM_UNPACK_BUFFER_SIZE = __RAM_EMU_START__ + __RAM_EMU_LENGTH__ - _GB_ROM_UNPACK_BUFFER;
@@ -259,6 +263,7 @@ SECTIONS
     build/smsplusgx/*.o (COMMON)
     __ram_emu_sms_end__ = .;
     _OVERLAY_SMS_BSS_END = .;
+    ASSERT(ABSOLUTE(_OVERLAY_SMS_BSS_END) < __RAM_EMU_END__, "Error: SMS BSS overflow");
   }
   _OVERLAY_SMS_BSS_SIZE = SIZEOF(.overlay_sms_bss);
   
@@ -280,6 +285,7 @@ SECTIONS
     build/pce/*.o (COMMON)
     __ram_emu_pce_end__ = .;
     _OVERLAY_PCE_BSS_END = .;
+    ASSERT(ABSOLUTE(_OVERLAY_PCE_BSS_END) < __RAM_EMU_END__, "Error: PCE BSS overflow");
   }
   _OVERLAY_PCE_BSS_SIZE = SIZEOF(.overlay_pce_bss);
 
