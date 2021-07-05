@@ -7,6 +7,7 @@
 
 const unsigned char *ROM_DATA = NULL;
 unsigned ROM_DATA_LENGTH;
+const char *ROM_EXT = NULL;
 retro_emulator_file_t *ACTIVE_FILE = NULL;
 
 #include "gb_roms.c"
@@ -45,5 +46,6 @@ void rom_manager_set_active_file(retro_emulator_file_t *file)
 {
     ACTIVE_FILE = file;
     ROM_DATA = file->address;
+    ROM_EXT = file->ext;
     ROM_DATA_LENGTH = file->size;
 }
