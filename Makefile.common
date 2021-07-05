@@ -25,9 +25,9 @@ else
 endif
 
 # Compress supported ROMs by default. Set to 0 to disable.
-COMPRESS ?= 1
-ifeq ($(COMPRESS),1)
-	COMPRESS_PARAM := --compress=lz4
+COMPRESS ?= lz4
+ifdef COMPRESS
+	COMPRESS_PARAM := --compress=$(COMPRESS)
 endif
 
 PYTHON3 ?= /usr/bin/env python3
@@ -42,6 +42,7 @@ BUILD_DIR ?= build
 
 # Common C sources
 C_SOURCES +=  \
+retro-go-stm32/components/lupng/miniz.c \
 retro-go-stm32/retro-go/main/gui.c \
 Core/Src/porting/gw_alloc.c \
 Core/Src/retro-go/rg_main.c \

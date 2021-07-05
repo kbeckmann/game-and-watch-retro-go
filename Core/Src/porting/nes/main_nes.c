@@ -17,6 +17,7 @@
 
 #include "lz4_depack.h" 
 #include <assert.h>
+#include  "miniz.h"
 
 #define ODROID_APPID_NES 2
 
@@ -492,15 +493,15 @@ size_t osd_getromdata(unsigned char **data)
 {
     /* src pointer to the ROM data in the external flash (raw or LZ4) */
     const unsigned char *src = ROM_DATA;
+    unsigned char *dest = (unsigned char *)&_NES_ROM_UNPACK_BUFFER;
+    uint32_t available_size = (uint32_t)&_NES_ROM_UNPACK_BUFFER_SIZE;
 
     if (memcmp(&src[0], LZ4_MAGIC, LZ4_MAGIC_SIZE) == 0)
     {
 
         /* dest pointer to the ROM data in the internal RAM (raw) */
-        unsigned char *dest = (unsigned char *)&_NES_ROM_UNPACK_BUFFER;
         uint32_t lz4_original_size;
         int32_t lz4_uncompressed_size;
-        uint32_t available_size = (uint32_t)&_NES_ROM_UNPACK_BUFFER_SIZE;
 
         printf("LZ4 compressed ROM detected.\n");
         printf("Uncompressing to %p. %ld bytes available.\n", dest, available_size);
@@ -522,6 +523,17 @@ size_t osd_getromdata(unsigned char **data)
         *data = dest;
 
         return lz4_uncompressed_size;
+    }
+    else if(strcmp(ROM_EXT, "zopfli") == 0){
+        /* DEFLATE decompression */
+        printf("Zopfli compressed ROM detected.\n");
+        size_t n_decomp_bytes;
+        int flags = 0;
+        flags |= TINFL_FLAG_USING_NON_WRAPPING_OUTPUT_BUF;
+        n_decomp_bytes = tinfl_decompress_mem_to_mem(dest, available_size, src, ROM_DATA_LENGTH, flags);
+        assert(n_decomp_bytes != TINFL_DECOMPRESS_MEM_TO_MEM_FAILED);
+        *data = dest;
+        return n_decomp_bytes;
     }
     else
     {
