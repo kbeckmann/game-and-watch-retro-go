@@ -6,6 +6,10 @@ import subprocess
 from pathlib import Path
 from typing import List
 from tempfile import TemporaryDirectory
+try:
+    from tqdm import tqdm
+except ImportError:
+    tqdm = None
 
 ROM_ENTRIES_TEMPLATE = """
 const retro_emulator_file_t {name}[] = {{
@@ -91,19 +95,35 @@ def compress_lz4(data, level=None):
         frame = []
 
         #### Write header ###
-        # write MAGIC WORD \x04\x22\x4D\x18
-        # write FLG,BD,HC \x68\x40\x00
-        header = b"\x04\x22\x4D\x18\x68\x40"
-        frame.append(header)
+        # write MAGIC WORD
+        magic = b"\x04\x22\x4D\x18"
+        frame.append(magic)
+
+        # write FLG, BD, HC
+        flg = b"\x68"  # independent blocks, no checksum, content-size enabled
+        # the uncompressed size of data included within the frame will be present
+        # as an 8 bytes unsigned little endian value, after the flags
+        frame.append(flg)
+
+        bd = b"\x40"
+        frame.append(bd)
 
         # write uncompressed frame size
-        content_size_hc = b"\x00\x40\x00\x00\x00\x00\x00\x00\x25"
-        frame.append(content_size_hc)
+        content_size = len(data).to_bytes(8, "little")
+        frame.append(content_size)
+
+        if len(data) == 16384:
+            # Hardcode in the checksum for this length to reduce dependencies
+            hc = b"\x25"
+        else:
+            from xxhash import xxh32
+            hc = xxh32(b"".join(frame[1:])).digest()[2].to_bytes(1, "little")
+        frame.append(hc)
 
         #### Write block data ###
-        # 0x8000 flag uncompressed block
-        # 0x4000 16384 bytes
-        block_size = b"\x00\x40\x00\x80"
+        # Block size in bytes with the highest bit set to 1 to mark the 
+        # data as uncompressed.
+        block_size = (len(data) + 2**31).to_bytes(4, "little")
         frame.append(block_size)
 
         frame.append(data)
@@ -140,6 +160,29 @@ def compress_lz4(data, level=None):
     return compressed_data
 
 
+@COMPRESSIONS
+def compress_zopfli(data, level=None):
+    if level == DONT_COMPRESS:
+        assert 0 <= len(data) <= 65535
+        frame = []
+
+        frame.append(b"\x01")  # Not compressed block
+
+        data_len = len(data).to_bytes(2, "big")
+        frame.append(data_len)
+
+        data_nlen = (len(data) ^ 0xFFFF).to_bytes(2, "big")
+        frame.append(data_nlen)
+
+        frame.append(data)
+
+        return b"".join(frame)
+    import zopfli
+    c = zopfli.ZopfliCompressor(zopfli.ZOPFLI_FORMAT_DEFLATE)
+    compressed_data = c.compress(data) + c.flush()
+    return compressed_data
+
+
 class ROM:
     def __init__(self, system_name: str, filepath: str, extension: str):
         filepath = Path(filepath)
@@ -152,7 +195,6 @@ class ROM:
         else:
             self.name = filepath.stem
         self.size = filepath.stat().st_size
-        self.ext = extension
         obj_name = "".join([i if i.isalnum() else "_" for i in self.path.name])
         self.obj_path = "build/roms/" + obj_name + ".o"
         symbol_path = str(self.path.parent) + "/" + obj_name
@@ -170,6 +212,10 @@ class ROM:
 
     def read(self):
         return self.path.read_bytes()
+
+    @property
+    def ext(self):
+        return self.path.suffix[1:]
 
 
 class ROMParser:
@@ -396,16 +442,18 @@ class ROMParser:
             return False
 
         roms_compressed = find_compressed_roms()
-        for r in roms_raw:
-            if contains_rom_by_name(r, roms_compressed):
-                # This rom has previously been compressed, skipping.
-                continue
-            self._compress_rom(
-                variable_name, r, compress_gb_speed=compress_gb_speed, compress=compress
-            )
 
-        # Re-generate the compressed rom list
-        roms_compressed = find_compressed_roms()
+        roms_raw = [r for r in roms_raw if not contains_rom_by_name(r, roms_compressed)]
+        if roms_raw:
+            pbar = tqdm(roms_raw) if tqdm else roms_raw
+            for r in pbar:
+                if tqdm:
+                    pbar.set_description(f"Compressing: {system_name} / {r.name}")
+                self._compress_rom(
+                    variable_name, r, compress_gb_speed=compress_gb_speed, compress=compress
+                )
+            # Re-generate the compressed rom list
+            roms_compressed = find_compressed_roms()
 
         # Create a list with all compressed roms and roms that
         # don't have a compressed counterpart.

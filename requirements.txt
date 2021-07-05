@@ -1,1 +1,4 @@
 lz4
+tqdm
+xxhash
+zopflipy
