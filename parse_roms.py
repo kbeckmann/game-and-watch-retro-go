@@ -183,10 +183,10 @@ def compress_zopfli(data, level=None):
 
         frame.append(b"\x01")  # Not compressed block
 
-        data_len = len(data).to_bytes(2, "big")
+        data_len = len(data).to_bytes(2, "little")
         frame.append(data_len)
 
-        data_nlen = (len(data) ^ 0xFFFF).to_bytes(2, "big")
+        data_nlen = (len(data) ^ 0xFFFF).to_bytes(2, "little")
         frame.append(data_nlen)
 
         frame.append(data)
