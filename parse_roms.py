@@ -4,8 +4,9 @@ import os
 import shutil
 import subprocess
 from pathlib import Path
-from typing import List
 from tempfile import TemporaryDirectory
+from typing import List
+
 try:
     from tqdm import tqdm
 except ImportError:
@@ -94,7 +95,7 @@ def compress_lz4(data, level=None):
     if level == DONT_COMPRESS:
         frame = []
 
-        #### Write header ###
+        # Write header
         # write MAGIC WORD
         magic = b"\x04\x22\x4D\x18"
         frame.append(magic)
@@ -117,18 +118,19 @@ def compress_lz4(data, level=None):
             hc = b"\x25"
         else:
             from xxhash import xxh32
+
             hc = xxh32(b"".join(frame[1:])).digest()[2].to_bytes(1, "little")
         frame.append(hc)
 
-        #### Write block data ###
-        # Block size in bytes with the highest bit set to 1 to mark the 
+        # Write block data
+        # Block size in bytes with the highest bit set to 1 to mark the
         # data as uncompressed.
-        block_size = (len(data) + 2**31).to_bytes(4, "little")
+        block_size = (len(data) + 2 ** 31).to_bytes(4, "little")
         frame.append(block_size)
 
         frame.append(data)
 
-        #### Write footer ###
+        # Write footer
         # write END_MARK 0x0000
         footer = b"\x00\x00\x00\x00"
         frame.append(footer)
@@ -141,7 +143,13 @@ def compress_lz4(data, level=None):
 
     try:
         import lz4.frame as lz4
-        return lz4.compress(data, compression_level=level, block_size=lz4.BLOCKSIZE_MAX1MB, block_linked=False)
+
+        return lz4.compress(
+            data,
+            compression_level=level,
+            block_size=lz4.BLOCKSIZE_MAX1MB,
+            block_linked=False,
+        )
     except ImportError:
         pass
 
@@ -154,7 +162,14 @@ def compress_lz4(data, level=None):
         file_in = d / "in"
         file_out = d / "out"
         file_in.write_bytes(data)
-        cmd = [lz4_path, "-" + str(level), "--content-size", "--no-frame-crc", file_in, file_out]
+        cmd = [
+            lz4_path,
+            "-" + str(level),
+            "--content-size",
+            "--no-frame-crc",
+            file_in,
+            file_out,
+        ]
         subprocess.check_output(cmd, stderr=subprocess.DEVNULL)
         compressed_data = file_out.read_bytes()
     return compressed_data
@@ -178,6 +193,7 @@ def compress_zopfli(data, level=None):
 
         return b"".join(frame)
     import zopfli
+
     c = zopfli.ZopfliCompressor(zopfli.ZOPFLI_FORMAT_DEFLATE)
     compressed_data = c.compress(data) + c.flush()
     return compressed_data
@@ -334,9 +350,7 @@ class ROMParser:
 
         return 0
 
-    def _compress_rom(
-        self, variable_name, rom, compress_gb_speed=False, compress=None
-    ):
+    def _compress_rom(self, variable_name, rom, compress_gb_speed=False, compress=None):
         """This will create a compressed rom file next to the original rom."""
 
         if compress is None:
@@ -377,7 +391,7 @@ class ROMParser:
                 # It shoul fit exactly in the cache reducing the SWAP cache feequency to 0.
                 # any empty bank is compressed (=98bytes). considered never used by MBC.
 
-                ## Ths is the cache size used as a compression credit
+                # Ths is the cache size used as a compression credit
                 # TODO : can we the value from the linker ?
                 compression_credit = 26
                 compress_size = [len(bank) for bank in compressed_banks[1:]]
@@ -450,7 +464,10 @@ class ROMParser:
                 if tqdm:
                     pbar.set_description(f"Compressing: {system_name} / {r.name}")
                 self._compress_rom(
-                    variable_name, r, compress_gb_speed=compress_gb_speed, compress=compress
+                    variable_name,
+                    r,
+                    compress_gb_speed=compress_gb_speed,
+                    compress=compress,
                 )
             # Re-generate the compressed rom list
             roms_compressed = find_compressed_roms()
@@ -657,4 +674,3 @@ if __name__ == "__main__":
         print("Missing dependencies. Run:")
         print("    python -m pip install -r requirements.txt")
         exit(-1)
-
