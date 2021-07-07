@@ -127,7 +127,7 @@ retro-go-stm32/huexpress-go/components/huexpress/engine/gfx.c \
 retro-go-stm32/huexpress-go/components/huexpress/engine/h6280.c \
 retro-go-stm32/huexpress-go/components/huexpress/engine/hard_pce.c \
 Core/Src/porting/pce/sound_pce.c \
-Core/Src/porting/pce/main_pce.c 
+Core/Src/porting/pce/main_pce.c
 
 C_INCLUDES +=  \
 -ICore/Inc \
@@ -141,12 +141,13 @@ C_INCLUDES +=  \
 -Iretro-go-stm32/smsplusgx-go/components/smsplus \
 -Iretro-go-stm32/smsplusgx-go/components/smsplus/cpu \
 -Iretro-go-stm32/smsplusgx-go/components/smsplus/sound \
--Iretro-go-stm32/huexpress-go/components/huexpress/engine 
+-Iretro-go-stm32/huexpress-go/components/huexpress/engine
 
 C_DEFS += \
 -DIS_LITTLE_ENDIAN \
 -DDISABLE_AHBRAM_DCACHE \
--D MINIZ_NO_MALLOC
+-DMINIZ_NO_MALLOC \
+-DMINIZ_NO_ZLIB_APIS
 
 
 include Makefile.common
@@ -159,4 +160,3 @@ $(BUILD_DIR)/$(TARGET)_extflash.bin: $(BUILD_DIR)/$(TARGET).elf | $(BUILD_DIR)
 $(BUILD_DIR)/$(TARGET)_intflash.bin: $(BUILD_DIR)/$(TARGET).elf | $(BUILD_DIR)
 	$(V)$(ECHO) [ BIN ] $(notdir $@)
 	$(V)$(BIN) -j .isr_vector -j .text -j .rodata -j .ARM.extab -j .preinit_array -j .init_array -j .fini_array -j .data $< $(BUILD_DIR)/$(TARGET)_intflash.bin
-
