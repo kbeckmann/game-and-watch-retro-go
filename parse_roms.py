@@ -644,16 +644,27 @@ class ROMParser:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Import ROMs to the build environment")
     parser = argparse.ArgumentParser()
-    parser.add_argument("--flash-size", "-s", type=int, default=1024 * 1024)
+    parser.add_argument(
+        "--flash-size",
+        "-s",
+        type=int,
+        default=1024 * 1024,
+        help="Size of external SPI flash in bytes.",
+    )
+    compression_choices = [t for t in COMPRESSIONS if not t[0] == "."]
     parser.add_argument(
         "--compress",
+        choices=compression_choices,
         type=str,
         default="",
-        help='Compression method. One of {"lz4",}. Defaults to no compression.',
+        help="Compression method. Defaults to no compression.",
     )
-    parser.add_argument("--no-compress", dest="compress", action="store_false")
     parser.add_argument(
-        "--compress_gb_speed", dest="compress_gb_speed", action="store_true"
+        "--compress_gb_speed",
+        dest="compress_gb_speed",
+        action="store_true",
+        help="Apply only selective compression to gameboy banks. Only apply "
+        "if bank decompression during switching is too slow.",
     )
     parser.add_argument(
         "--no-compress_gb_speed", dest="compress_gb_speed", action="store_false"
