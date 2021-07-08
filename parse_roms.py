@@ -231,17 +231,23 @@ class ROM:
 
     @property
     def ext(self):
-        return self.path.suffix[1:]
+        return self.path.suffix[1:].lower()
 
 
 class ROMParser:
     def find_roms(self, system_name: str, folder: str, extension: str) -> [ROM]:
+        extension = extension.lower()
         ext = extension
         if not extension.startswith("."):
             extension = "." + extension
+
         script_path = Path(__file__).parent
         roms_folder = script_path / "roms" / folder
-        rom_files = sorted(list(roms_folder.glob("*" + extension)))
+
+        # find all files that end with extension (case-insensitive)
+        rom_files = list(roms_folder.iterdir())
+        rom_files = [r for r in rom_files if r.name.lower().endswith(extension)]
+        rom_files.sort()
 
         found_roms = [ROM(system_name, rom_file, ext) for rom_file in rom_files]
 
