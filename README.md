@@ -70,6 +70,9 @@ git clone --recurse-submodules https://github.com/kbeckmann/game-and-watch-retro
 
 cd game-and-watch-retro-go
 
+# Install python dependencies, this is optional for basic uses (but recommended!)
+python3 -m pip install -r requirements.txt
+
 # Place roms in the appropriate folders:
 # cp /path/to/rom.gb ./roms/gb/
 # cp /path/to/rom.nes ./roms/nes/
@@ -79,9 +82,12 @@ cd game-and-watch-retro-go
 # make download_sdk
 
 # Build and program external and internal flash.
-# Note: If you are using the 16MB external flash, build using:
+# Notes:
+#     * If you are using the 16MB external flash, build using:
 #           make -j8 LARGE_FLASH=1 flash
-#       A custom flash size may be specified with the EXTFLASH_SIZE variable.
+#       A custom flash size in bytes may be specified with the EXTFLASH_SIZE variable.
+#     * If you'd like to apply more advanced experimental ROM compression, add the
+#       field COMPRESS=zopfli to the make command.
 
 make -j8 flash
 ```
@@ -113,7 +119,32 @@ docker run --rm -it --privileged -v /dev/bus/usb:/dev/bus/usb kbeckmann/retro-go
 
 # In case you get access errors when flashing, you may run sudo inside the docker container. The proper way is to fix the udev rules, but at least this is a way forward in case you are stuck.
 # docker run --rm -it --privileged -v /dev/bus/usb:/dev/bus/usb kbeckmann/retro-go-builder sudo -E make ADAPTER=stlink LARGE_FLASH=0 -j$(nproc) flash
+```
 
+## Experimental
+
+Features mentioned in this section are disabled by default and should be considered
+as upcoming features that need more testing. Give them a try!
+
+### Advanced ROM Compression
+
+The current default compression method is `lz4`, which is incredibly fast to both
+compress and decompress. However, it's compression ratio pales in comparison
+compared to some other compression method. We recently added [zopfli](https://github.com/google/zopfli)
+as a compressor to generate data to be decompressed by miniz on-device. This
+yields a higher compression ratio (see graph below), but at the cost of
+compression speed and (more importantly) decompression speed. Note that this
+benchmark was done on a desktop, not on-device. Decompression has to be fast
+enough to not be noticeable to the user, especially for gameboy games where memory
+banks are dynamically decompressed on-demand.
+
+<img src="assets/decompression-benchmark-annotated.jpg" width="800"/>
+
+To use zopfli compression, make sure the python dependencies are installed
+and add `COMPRESS=zopfli` to the `make` command. For example:
+
+```
+make -j8 LARGE_FLASH=1 COMPRESS=zopfli flash
 ```
 
 ## Backing up and restoring save state files
