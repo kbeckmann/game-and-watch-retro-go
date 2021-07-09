@@ -32,8 +32,11 @@ int odroid_overlay_game_menu()
 #include "gw_buttons.h"
 #include "gw_lcd.h"
 #include "bitmaps/font_basic.h"
+#include "bitmaps/font6x8_basic.h"
+#include "bitmaps/font8x12_basic.h"
 #include "odroid_system.h"
 #include "odroid_overlay.h"
+#include "odroid_overlay_ex.h"
 #include "main.h"
 
 // static uint16_t *overlay_buffer = NULL;
@@ -68,7 +71,7 @@ int odroid_overlay_draw_text_line(uint16_t x_pos, uint16_t y_pos, uint16_t width
     int font_height = 8; //odroid_overlay_get_font_size();
     int font_width = 8; //odroid_overlay_get_font_width();
     int x_offset = 0;
-    float scale = 1; //(float)font_height / 8;
+    //float scale = 1; //(float)font_height / 8;
     int text_len = strlen(text);
 
     for (int i = 0; i < (width / font_width); i++)
@@ -79,7 +82,7 @@ int odroid_overlay_draw_text_line(uint16_t x_pos, uint16_t y_pos, uint16_t width
             int offset = x_offset + (width * y);
             for (int x = 0; x < 8; x++)
             {
-                overlay_buffer[offset + x] = (glyph[(int)(y/scale)] & (1 << x)) ? color : color_bg;
+                overlay_buffer[offset + x] = (glyph[y] & (1 << x)) ? color : color_bg;
             }
         }
         x_offset += font_width;
@@ -257,7 +260,7 @@ void odroid_overlay_draw_dialog(const char *header, odroid_dialog_choice_t *opti
     if (width > 32) width = 32;
 
     box_width = (odroid_overlay_get_font_width() * width) + box_padding * 2;
-    box_height = (row_height * options_count) + (header ? row_height + 4 : 0) + box_padding * 2;
+    box_height = (row_height * options_count) + (header ? row_height + 8 : 0) + box_padding * 2;
 
     int box_x = (ODROID_SCREEN_WIDTH - box_width) / 2;
     int box_y = (ODROID_SCREEN_HEIGHT - box_height) / 2;
@@ -268,9 +271,9 @@ void odroid_overlay_draw_dialog(const char *header, odroid_dialog_choice_t *opti
     if (header)
     {
         int pad = (0.5f * (width - strlen(header)) * odroid_overlay_get_font_width());
-        odroid_overlay_draw_rect(x, y, box_width - 8, row_height + 4, (row_height + 4 / 2), box_color);
-        odroid_overlay_draw_text(x + pad, y, 0, header, box_text_color, box_color);
-        y += row_height + 4;
+        odroid_overlay_draw_rect(x, y, box_width - 8, row_height + 8, (row_height + 4 + 4 / 2), box_color);
+        odroid_overlay_draw_big_text(x + pad, y, 0, header, box_text_color, box_color);
+        y += row_height + 8;
     }
 
     uint16_t fg, bg, color, inner_width = box_width - (box_padding * 2);
@@ -657,4 +660,153 @@ int odroid_overlay_game_menu(odroid_dialog_choice_t *extra_options)
 
     return r;
 }
+
+
+int odroid_overlay_get_small_font_size()
+{
+    return 8;
+}
+
+int odroid_overlay_get_small_font_width()
+{
+    return 6;
+}
+
+int odroid_overlay_get_big_font_size()
+{
+    return 12;
+}
+
+int odroid_overlay_get_big_font_width()
+{
+    return 8;
+}
+
+
+int odroid_overlay_draw_small_text_line(uint16_t x_pos, uint16_t y_pos, uint16_t width, const char* text, uint16_t color, uint16_t color_bg)
+{
+    int font_height = 8; //odroid_overlay_get_font_size();
+    int font_width = 6; //odroid_overlay_get_font_width();
+    int x_offset = 0;
+    //float scale = 1; //(float)font_height / 8;
+    int text_len = strlen(text);
+
+    for (int i = 0; i < (width / font_width); i++)
+    {
+        const char* glyph = font6x8_basic[(i < text_len) ? text[i] : ' '];
+        for (int x = 0; x < font_width; x++)
+        {
+            //int offset = x_offset + (width * y);
+            for (int y = 0; y < font_height; y++)
+            {
+                int offset = x_offset + (width * y);
+                overlay_buffer[offset + x] = (glyph[x] & (1 << y)) ? color : color_bg;
+            }
+        }
+
+        x_offset += font_width;
+    }
+
+    odroid_display_write(x_pos, y_pos, width, font_height, overlay_buffer);
+
+    return font_height;
+}
+
+int odroid_overlay_draw_big_text_line(uint16_t x_pos, uint16_t y_pos, uint16_t width, const char* text, uint16_t color, uint16_t color_bg)
+{
+    int font_height = 12; //odroid_overlay_get_font_size();
+    int font_width = 8; //odroid_overlay_get_font_width();
+    int x_offset = 0;
+    //float scale = 1; //(float)font_height / 8;
+    int text_len = strlen(text);
+
+    for (int i = 0; i < (width / font_width); i++)
+    {
+        const char* glyph = font8x12_basic[(i < text_len) ? text[i] : ' '];
+        for (int x = 0; x < font_width; x++)
+        {
+            //int offset = x_offset + (width * y);
+            for (int y = 0; y < font_height; y++)
+            {
+                int offset = x_offset + (width * y);
+                overlay_buffer[offset + x] = (glyph[x] & (1 << y)) ? color : color_bg;
+            }
+        }
+
+        x_offset += font_width;
+    }
+
+    odroid_display_write(x_pos, y_pos, width, font_height, overlay_buffer);
+
+    return font_height;
+}
+
+int odroid_overlay_draw_small_text(uint16_t x_pos, uint16_t y_pos, uint16_t width, const char* text, uint16_t color, uint16_t color_bg)
+{
+    int text_len = 1;
+    int height = 0;
+
+    if (text == NULL || text[0] == 0) {
+        text = " ";
+    }
+
+    text_len = strlen(text);
+
+    if (width < 1) {
+        width = text_len * odroid_overlay_get_small_font_width();
+    }
+
+    if (width > (ODROID_SCREEN_WIDTH - x_pos)) {
+        width = (ODROID_SCREEN_WIDTH - x_pos);
+    }
+
+    int line_len = width / odroid_overlay_get_small_font_width();
+    char buffer[line_len + 1];
+
+    for (int pos = 0; pos < text_len;)
+    {
+        sprintf(buffer, "%.*s", line_len, text + pos);
+        if (strchr(buffer, '\n')) *(strchr(buffer, '\n')) = 0;
+        height += odroid_overlay_draw_small_text_line(x_pos, y_pos + height, width, buffer, color, color_bg);
+        pos += strlen(buffer);
+        if (*(text + pos) == 0 || *(text + pos) == '\n') pos++;
+    }
+
+    return height;
+}
+
+int odroid_overlay_draw_big_text(uint16_t x_pos, uint16_t y_pos, uint16_t width, const char* text, uint16_t color, uint16_t color_bg)
+{
+    int text_len = 1;
+    int height = 0;
+
+    if (text == NULL || text[0] == 0) {
+        text = " ";
+    }
+
+    text_len = strlen(text);
+
+    if (width < 1) {
+        width = text_len * odroid_overlay_get_big_font_width();
+    }
+
+    if (width > (ODROID_SCREEN_WIDTH - x_pos)) {
+        width = (ODROID_SCREEN_WIDTH - x_pos);
+    }
+
+    int line_len = width / odroid_overlay_get_big_font_width();
+    char buffer[line_len + 1];
+
+    for (int pos = 0; pos < text_len;)
+    {
+        sprintf(buffer, "%.*s", line_len, text + pos);
+        if (strchr(buffer, '\n')) *(strchr(buffer, '\n')) = 0;
+        height += odroid_overlay_draw_big_text_line(x_pos, y_pos + height, width, buffer, color, color_bg);
+        pos += strlen(buffer);
+        if (*(text + pos) == 0 || *(text + pos) == '\n') pos++;
+    }
+
+    return height;
+}
+
 #endif
