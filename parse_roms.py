@@ -24,6 +24,8 @@ ROM_ENTRY_TEMPLATE = """\t{{
 \t\t.ext = "{extension}",
 \t\t.address = {rom_entry},
 \t\t.size = {size},
+\t\t.img_address = {img_entry},
+\t\t.img_size = {img_size},
 \t\t.save_address = {save_entry},
 \t\t.save_size = sizeof({save_entry}),
 \t\t.system = &{system},
@@ -201,13 +203,13 @@ def compress_zopfli(data, level=None):
 
 class ROM:
     def __init__(self, system_name: str, filepath: str, extension: str):
+        img_file = filepath
         filepath = Path(filepath)
-
         self.path = filepath
-
         # Remove compression extension from the name in case it ends with that
         if filepath.suffix in COMPRESSIONS:
             self.name = filepath.with_suffix("").stem
+            img_file = os.path.splitext(img_file)[0]
         else:
             self.name = filepath.stem
         self.size = filepath.stat().st_size
@@ -219,7 +221,18 @@ class ROM:
             + "".join([i if i.isalnum() else "_" for i in symbol_path])
             + "_start"
         )
-
+        img_file = os.path.splitext(img_file)[0] + '.img'
+        obj_name = "".join([i if i.isalnum() else "_" for i in os.path.basename(img_file)])
+        symbol_path = str(self.path.parent) + "/" + obj_name
+        self.img_path = img_file
+        self.img_size = os.path.getsize(img_file)
+        self.obj_img = "build/roms/" + obj_name + ".o"
+        self.img_symbol = (
+            "_binary_" 
+            + "".join([i if i.isalnum() else "_" for i in symbol_path]) 
+            + "_start"
+        )
+        
     def __str__(self) -> str:
         return f"name: {self.name} size: {self.size} ext: {self.ext}"
 
@@ -232,7 +245,6 @@ class ROM:
     @property
     def ext(self):
         return self.path.suffix[1:].lower()
-
 
 class ROMParser:
     def find_roms(self, system_name: str, folder: str, extension: str) -> [ROM]:
@@ -277,6 +289,8 @@ class ROMParser:
                 name=rom.name,
                 size=rom.size,
                 rom_entry=rom.symbol,
+                img_size=rom.img_size,
+                img_entry=rom.img_symbol,
                 save_entry=save_prefix + str(i),
                 region=region,
                 extension=rom.ext,
@@ -318,6 +332,40 @@ class ROMParser:
         )
         template = "extern const uint8_t {name}[];\n"
         return template.format(name=rom.symbol)
+
+    def generate_img_object_file(self, rom: ROM) -> str:
+        # convert rom_img to an .o file and place the data in the .extflash_game_rom section
+        prefix = ""
+        if "GCC_PATH" in os.environ:
+            prefix = os.environ["GCC_PATH"]
+
+        prefix = Path(prefix)
+
+        subprocess.check_output(
+            [
+                prefix / "arm-none-eabi-objcopy",
+                "--rename-section",
+                ".data=.extflash_game_rom,alloc,load,readonly,data,contents",
+                "-I",
+                "binary",
+                "-O",
+                "elf32-littlearm",
+                "-B",
+                "armv7e-m",
+                rom.img_path,
+                rom.obj_img,
+            ]
+        )
+        subprocess.check_output(
+            [
+                prefix / "arm-none-eabi-ar",
+                "-cru",
+                "build/roms.a",
+                rom.obj_img,
+            ]
+        )
+        template = "extern const uint8_t {name}[];\n"
+        return template.format(name=rom.img_symbol)
 
     def generate_save_entry(self, name: str, save_size: int) -> str:
         return f'uint8_t {name}[{save_size}]  __attribute__((section (".saveflash"))) __attribute__((aligned(4096)));\n'
@@ -487,6 +535,7 @@ class ROMParser:
 
         total_save_size = 0
         total_rom_size = 0
+        total_img_size = 0
 
         save_size = SAVE_SIZES.get(folder, 0)
 
@@ -503,8 +552,10 @@ class ROMParser:
                     (save_size + aligned_size - 1) // (aligned_size)
                 ) * aligned_size
                 total_rom_size += rom.size
+                total_img_size += rom.img_size
 
                 f.write(self.generate_object_file(rom))
+                f.write(self.generate_img_object_file(rom))
                 f.write(self.generate_save_entry(save_prefix + str(i), save_size))
 
             rom_entries = self.generate_rom_entries(
@@ -522,7 +573,7 @@ class ROMParser:
                 )
             )
 
-        return total_save_size, total_rom_size
+        return total_save_size, total_rom_size, total_img_size
 
     def write_if_changed(self, path: str, data: str):
         path = Path(path)
@@ -535,9 +586,10 @@ class ROMParser:
     def parse(self, args):
         total_save_size = 0
         total_rom_size = 0
+        total_img_size = 0
         build_config = ""
 
-        save_size, rom_size = self.generate_system(
+        save_size, rom_size, img_size = self.generate_system(
             "Core/Src/retro-go/gb_roms.c",
             "Nintendo Gameboy",
             "gb_system",
@@ -549,9 +601,10 @@ class ROMParser:
         )
         total_save_size += save_size
         total_rom_size += rom_size
+        total_img_size += img_size
         build_config += "#define ENABLE_EMULATOR_GB\n" if rom_size > 0 else ""
 
-        save_size, rom_size = self.generate_system(
+        save_size, rom_size, img_size = self.generate_system(
             "Core/Src/retro-go/nes_roms.c",
             "Nintendo Entertainment System",
             "nes_system",
@@ -562,9 +615,10 @@ class ROMParser:
         )
         total_save_size += save_size
         total_rom_size += rom_size
+        total_img_size += img_size
         build_config += "#define ENABLE_EMULATOR_NES\n" if rom_size > 0 else ""
 
-        save_size, rom_size = self.generate_system(
+        save_size, rom_size, img_size = self.generate_system(
             "Core/Src/retro-go/sms_roms.c",
             "Sega Master System",
             "sms_system",
@@ -574,9 +628,10 @@ class ROMParser:
         )
         total_save_size += save_size
         total_rom_size += rom_size
+        total_img_size += img_size
         build_config += "#define ENABLE_EMULATOR_SMS\n" if rom_size > 0 else ""
 
-        save_size, rom_size = self.generate_system(
+        save_size, rom_size, img_size = self.generate_system(
             "Core/Src/retro-go/gg_roms.c",
             "Sega Game Gear",
             "gg_system",
@@ -586,9 +641,10 @@ class ROMParser:
         )
         total_save_size += save_size
         total_rom_size += rom_size
+        total_img_size += img_size
         build_config += "#define ENABLE_EMULATOR_GG\n" if rom_size > 0 else ""
 
-        save_size, rom_size = self.generate_system(
+        save_size, rom_size, img_size = self.generate_system(
             "Core/Src/retro-go/col_roms.c",
             "Colecovision",
             "col_system",
@@ -598,9 +654,10 @@ class ROMParser:
         )
         total_save_size += save_size
         total_rom_size += rom_size
+        total_img_size += img_size
         build_config += "#define ENABLE_EMULATOR_COL\n" if rom_size > 0 else ""
 
-        save_size, rom_size = self.generate_system(
+        save_size, rom_size, img_size = self.generate_system(
             "Core/Src/retro-go/sg1000_roms.c",
             "Sega SG-1000",
             "sg1000_system",
@@ -610,9 +667,10 @@ class ROMParser:
         )
         total_save_size += save_size
         total_rom_size += rom_size
+        total_img_size += img_size
         build_config += "#define ENABLE_EMULATOR_SG1000\n" if rom_size > 0 else ""
 
-        save_size, rom_size = self.generate_system(
+        save_size, rom_size, img_size = self.generate_system(
             "Core/Src/retro-go/pce_roms.c",
             "PC Engine",
             "pce_system",
@@ -623,9 +681,10 @@ class ROMParser:
 
         total_save_size += save_size
         total_rom_size += rom_size
+        total_img_size += img_size
         build_config += "#define ENABLE_EMULATOR_PCE\n" if rom_size > 0 else ""
 
-        total_size = total_save_size + total_rom_size
+        total_size = total_save_size + total_rom_size + total_img_size
 
         if total_size == 0:
             print(
@@ -634,7 +693,7 @@ class ROMParser:
             exit(-1)
 
         print(
-            f"Save data:\t{total_save_size} bytes\nROM data:\t{total_rom_size} bytes\n"
+            f"Save data:\t{total_save_size} bytes\nROM data:\t{total_rom_size} bytes\nIMG data:\t{total_img_size} bytes\n"
             f"Total:\t\t{total_size} / {args.flash_size} bytes (plus some metadata)."
         )
         if total_size > args.flash_size:
@@ -691,3 +750,4 @@ if __name__ == "__main__":
         print("Missing dependencies. Run:")
         print("    python -m pip install -r requirements.txt")
         exit(-1)
+
