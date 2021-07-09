@@ -1,4 +1,4 @@
-name: Builder
+name: ci
 
 on:
   push:
@@ -6,9 +6,8 @@ on:
       - main
       - ci
 
-
 jobs:
-  docker-ci-ubuntu:
+  build-ubuntu:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -21,14 +20,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  docker-ci-macos:
+  build-macos:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
       - name: Build
         run: ./.ci_build_macos.sh
 
-  docker-builder:
+  build-docker:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
