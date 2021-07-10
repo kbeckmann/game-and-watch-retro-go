@@ -1,11 +1,6 @@
 #!/bin/bash
 set -xe
 
-apt install lz4
-
-# Would be nice to clone the repo with submodules. If you know how to do this, please make a PR!
-git submodule update --init --recursive
-
 # col (placeholder)
 dd if=/dev/zero of=roms/col/placeholder.col bs=1024 count=16
 
@@ -28,7 +23,3 @@ mv UP-19PCE.pce ./roms/pce/
 
 # sg (placeholder)
 dd if=/dev/zero of=roms/col/placeholder.col bs=1024 count=16
-
-
-
-make -j $(nproc)
