@@ -384,7 +384,9 @@ void gui_draw_current_cover(retro_emulator_file_t *file)
         return;
     uint16_t *cover_buffer = (uint16_t*)(file->img_address) + 0x46 / 2;
     odroid_display_write_rect(102, 49, 116, 116, 116, cover_buffer);
-    odroid_overlay_draw_rect(98, 45, 124, 124, 2, C_GW_YELLOW);
+    odroid_overlay_draw_rect(96, 43, 128, 128, 2, C_GW_YELLOW);
+    odroid_overlay_draw_rect(98, 45, 124, 124, 2, C_GW_OPAQUE_YELLOW);
+    //odroid_overlay_draw_rect(100, 47, 120, 120, 2, C_GW_OPAQUE_YELLOW);
     sprintf(str_buffer, "%s", file->name);
     size_t len = strlen(str_buffer);
     if (len > 38) {
@@ -393,7 +395,7 @@ void gui_draw_current_cover(retro_emulator_file_t *file)
         len = 38;
         str_buffer[38] = 0;
     }
-    odroid_overlay_draw_big_text_line(8 + (38 - len) * 4, 172, len * 8, str_buffer, C_YELLOW, C_BLACK);
+    odroid_overlay_draw_big_text_line(8 + (38 - len) * 4, 174, len * 8, str_buffer, C_YELLOW, C_BLACK);
 }
 
 void gui_draw_list(tab_t *tab)
