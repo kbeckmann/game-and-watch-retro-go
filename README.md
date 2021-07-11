@@ -12,6 +12,12 @@ Supported emulators:
 - Sega Master System (sms)
 - Sega SG-1000 (sg)
 
+## ImgUI Branch
+
+<img src="assets/gwui.jpg" width="800"/>
+Need same as romname bitmap file, bmp file must 116x116 pixels and 16bit(RGB565) and flip vertical
+
+
 ## How to report issues
 
 :exclamation: Please read this before reporting issues.
