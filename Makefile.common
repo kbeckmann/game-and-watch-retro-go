@@ -429,6 +429,7 @@ flash_extflash: $(BUILD_DIR)/$(TARGET)_extflash.bin
 flash:
 	$(V)$(MAKE) flash_extflash
 	$(V)$(MAKE) flash_intflash
+	$(V)$(MAKE) disable_debug_block
 .PHONY: flash
 
 # Alias for flash
@@ -448,6 +449,11 @@ flash_saves_restore: $(BUILD_DIR)/$(TARGET).elf
 flash_saves_erase: $(BUILD_DIR)/$(TARGET).elf
 	$(V)./scripts/saves_erase.sh $<
 .PHONY: flash_saves_erase
+
+disable_debug_block:
+	# Reset the DBGMCU configuration register (DBGMCU_CR)
+	$(V)$(OPENOCD) -f $(FLSHLD_DIR)/interface_$(ADAPTER).cfg -c "init; halt; mww 0x5C001004 0x00000000; resume; exit;"
+.PHONY: disable_debug_block
 
 gdb: $(BUILD_DIR)/$(TARGET).elf
 	$(GDB) $< -ex "target extended-remote :3333"
