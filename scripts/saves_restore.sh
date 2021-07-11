@@ -52,5 +52,5 @@ for emu in gb gg nes pce sms; do
     done
 done
 
-# Reset the device
-${OPENOCD} -f ${FLSHLD_DIR}/interface_${ADAPTER}.cfg -c "init; halt; reset run; exit;"
+# Reset the device and disable clocks from running when device is suspended
+reset_and_disable_debug

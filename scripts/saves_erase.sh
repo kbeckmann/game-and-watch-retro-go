@@ -10,13 +10,6 @@ fi
 
 ELF="$1"
 
-function get_symbol {
-    name=$1
-    objdump_cmd="$OBJDUMP -t $ELF"
-    size=$($objdump_cmd | grep " $name" | cut -d " " -f1 | tr 'a-f' 'A-F')
-    printf "$((16#${size}))\n"
-}
-
 saveflash_start=$(get_symbol __SAVEFLASH_START__)
 saveflash_size=$(get_symbol __SAVEFLASH_LENGTH__)
 

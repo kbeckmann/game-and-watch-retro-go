@@ -41,3 +41,6 @@ for emu in gb gg nes pce sms; do
         ${OPENOCD} -f ${FLSHLD_DIR}/interface_${ADAPTER}.cfg -c "init; halt; dump_image \"${image_quoted}\" ${address} ${size}; resume; exit;"
     done
 done
+
+# Reset the device and disable clocks from running when device is suspended
+reset_and_disable_debug
