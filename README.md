@@ -159,6 +159,8 @@ Save states can then be programmed to the device using a newer elf file with new
 
 `program_saves.sh` will upload all save state files that you have backed up that are also included in the elf file. E.g Let's say you back up saves for rom A, B and C. Later on, you add a new rom D but remove A, then build and flash. When running the script, the save states for B and C will be programmed and nothing else.
 
+You can also erase all of the save slots easily by running `make flash_erase_saves`.
+
 ## Upgrading the flash
 
 The Nintendo® Game & Watch™ comes with a 1MB external flash. This can be upgraded.

@@ -434,6 +434,11 @@ flash:
 # Alias for flash
 flash_all: flash
 
+# Erases the saveflash area
+flash_erase_saves: $(BUILD_DIR)/$(TARGET).elf
+	$(V)./erase_saves.sh $<
+.PHONY: flash_erase_saves
+
 gdb: $(BUILD_DIR)/$(TARGET).elf
 	$(GDB) $< -ex "target extended-remote :3333"
 .PHONY: gdb
