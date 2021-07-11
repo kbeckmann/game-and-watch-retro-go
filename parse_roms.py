@@ -221,7 +221,7 @@ class ROM:
             + "".join([i if i.isalnum() else "_" for i in symbol_path])
             + "_start"
         )
-        img_file = os.path.splitext(img_file)[0] + '.img'
+        img_file = os.path.splitext(img_file)[0] + '.bmp'
         obj_name = "".join([i if i.isalnum() else "_" for i in os.path.basename(img_file)])
         symbol_path = str(self.path.parent) + "/" + obj_name
         self.img_path = img_file
