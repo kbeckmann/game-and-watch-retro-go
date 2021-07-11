@@ -311,22 +311,22 @@ void retro_loop()
                 odroid_overlay_settings_menu(choices);
                 gui_redraw();
             }
-            else if (last_key == ODROID_INPUT_UP) {
+            else if (last_key == ODROID_INPUT_LEFT) {
                 gui_scroll_list(tab, LINE_UP);
                 repeat++;
             }
-            else if (last_key == ODROID_INPUT_DOWN) {
+            else if (last_key == ODROID_INPUT_RIGHT) {
                 gui_scroll_list(tab, LINE_DOWN);
                 repeat++;
             }
-            else if (last_key == ODROID_INPUT_LEFT) {
+            else if (last_key == ODROID_INPUT_UP) {
                 gui.selected--;
                 if(gui.selected < 0) {
                     gui.selected = gui.tabcount - 1;
                 }
                 repeat++;
             }
-            else if (last_key == ODROID_INPUT_RIGHT) {
+            else if (last_key == ODROID_INPUT_DOWN) {
                 gui.selected++;
                 if(gui.selected >= gui.tabcount) {
                     gui.selected = 0;
