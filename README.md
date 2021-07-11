@@ -22,13 +22,11 @@ Need same as romname bitmap file, bmp file must 116x116 pixels and 16bit(RGB565)
 
 :exclamation: Please read this before reporting issues.
 
-You may run the script `./report_issue.sh` and follow the steps lined out, or continue reading:
-
 Please include the following:
 
 - Name of the emulator (nes, gb, etc.)
 - The full name of the ROM you are running, e.g. "Super_Tilt_Bro_(E).nes"
-- The git hash of this repo and the submodule. Run the following: `git describe --all --long --dirty=-dirty; cd retro-go-stm32; git describe --all --long --dirty=-dirty`
+- The git hash of this repo and the submodule. Please run the following and include the output in the report: `git describe --all --long --dirty=-dirty; cd retro-go-stm32; git describe --all --long --dirty=-dirty`
 
 With this information, please head over to the [Discord](https://discord.gg/vVcwrrHTNJ) and post in the #support channel. If you don't want to use discord for some reason, please create an issue.
 
@@ -155,15 +153,17 @@ make -j8 LARGE_FLASH=1 COMPRESS=zopfli flash
 
 ## Backing up and restoring save state files
 
-Save states can be backed up using `./dump_saves.sh build/gw_retro_go.elf`. Make sure to use the elf file that matches what is running on your device! It is a good idea to keep this elf file in case you want to back up at a later time.
+Save states can be backed up using `./scripts/saves_backup.sh build/gw_retro_go.elf`. Make sure to use the elf file that matches what is running on your device! It is a good idea to keep this elf file in case you want to back up at a later time.
 
 This downloads all save states to the local directory `./save_states`. Each save state will be located in `./save_states/<emu>/<rom name>.save`.
 
 After this, it's safe to change roms, pull new code and build & flash the device.
 
-Save states can then be programmed to the device using a newer elf file with new code and roms. To do this, run `./program_saves.sh build/gw_retro_go.elf` - this time with the _new_ elf file that matches what's running on the device. Save this elf file for backup later on.
+Save states can then be programmed to the device using a newer elf file with new code and roms. To do this, run `./scripts/saves_restore.sh build/gw_retro_go.elf` - this time with the _new_ elf file that matches what's running on the device. Save this elf file for backup later on. This can also be achieved with `make flash_saves_restore`.
 
-`program_saves.sh` will upload all save state files that you have backed up that are also included in the elf file. E.g Let's say you back up saves for rom A, B and C. Later on, you add a new rom D but remove A, then build and flash. When running the script, the save states for B and C will be programmed and nothing else.
+`saves_restore.sh` will upload all save state files that you have backed up that are also included in the elf file. E.g Let's say you back up saves for rom A, B and C. Later on, you add a new rom D but remove A, then build and flash. When running the script, the save states for B and C will be programmed and nothing else.
+
+You can also erase all of the save slots by running `make flash_saves_erase`.
 
 ## Upgrading the flash
 

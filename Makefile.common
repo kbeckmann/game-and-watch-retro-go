@@ -300,12 +300,12 @@ $(eval $(foreach obj,$(SDK_C_SOURCES) $(SDK_ASM_SOURCES),$(call sdk_obj_prereq_g
 FORCE:
 
 Core/Inc/githash.h: FORCE | $(BUILD_DIR)
-	$(V)./update_githash.sh $@
+	$(V)./scripts/update_githash.sh $@
 
 # Run parse_roms.py to generate information about the roms
 $(BUILD_DIR)/rom_files.txt: FORCE | $(BUILD_DIR)
 	$(V)$(ECHO) [ BASH ] Checking for updated roms
-	$(V)./update_rom_files.sh build/rom_files.txt roms/gb roms/nes roms/sms roms/gg roms/col roms/pce roms/sg
+	$(V)./scripts/update_rom_files.sh build/rom_files.txt roms/gb roms/nes roms/sms roms/gg roms/col roms/pce roms/sg
 
 $(BUILD_DIR)/roms.a: $(BUILD_DIR)/rom_files.txt parse_roms.py
 	$(V)$(ECHO) [ PYTHON3 ] $(notdir $<)
@@ -367,7 +367,7 @@ $(BUILD_DIR)/$(TARGET).elf: CheckTools $(OBJECTS) $(NES_OBJECTS) $(GNUBOY_OBJECT
 	$(V)$(ECHO) [ LD ] $(notdir $@)
 	$(V)$(CC) $(OBJECTS) $(NES_OBJECTS) $(GNUBOY_OBJECTS) $(SMSPLUSGX_OBJECTS) $(PCE_OBJECTS) $(LDFLAGS) -o $@
 	$(V)$(SZ) $@
-	$(V)./size.sh $@
+	$(V)./scripts/size.sh $@
 
 $(BUILD_DIR)/core/%.o: %.c Makefile Makefile.common $(SDK_HEADERS) $(BUILD_DIR)/config.h | $(BUILD_DIR) CheckDirtySubmodules
 	$(V)$(ECHO) [ CC core ] $(notdir $<)
@@ -429,10 +429,31 @@ flash_extflash: $(BUILD_DIR)/$(TARGET)_extflash.bin
 flash:
 	$(V)$(MAKE) flash_extflash
 	$(V)$(MAKE) flash_intflash
+	$(V)$(MAKE) disable_debug_block
 .PHONY: flash
 
 # Alias for flash
 flash_all: flash
+
+# Transfers save files from the device to the host machine
+flash_saves_backup: $(BUILD_DIR)/$(TARGET).elf
+	$(V)./scripts/saves_backup.sh $<
+.PHONY: flash_saves_backup
+
+# Transfers save files from the host machine to the device
+flash_saves_restore: $(BUILD_DIR)/$(TARGET).elf
+	$(V)./scripts/saves_restore.sh $<
+.PHONY: flash_saves_restore
+
+# Erases the saveflash area on the device
+flash_saves_erase: $(BUILD_DIR)/$(TARGET).elf
+	$(V)./scripts/saves_erase.sh $<
+.PHONY: flash_saves_erase
+
+disable_debug_block:
+	# Reset the DBGMCU configuration register (DBGMCU_CR)
+	$(V)$(OPENOCD) -f $(FLSHLD_DIR)/interface_$(ADAPTER).cfg -c "init; halt; mww 0x5C001004 0x00000000; resume; exit;"
+.PHONY: disable_debug_block
 
 gdb: $(BUILD_DIR)/$(TARGET).elf
 	$(GDB) $< -ex "target extended-remote :3333"
