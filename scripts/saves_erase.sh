@@ -1,37 +1,14 @@
 #!/bin/bash
 
-if [[ "$VERBOSE" == "1" ]]; then
-    set -ex
-else
-    set -e
-fi
-
-if [[ "${GCC_PATH}" != "" ]]; then
-    DEFAULT_OBJDUMP=${GCC_PATH}/arm-none-eabi-objdump
-else
-    DEFAULT_OBJDUMP=arm-none-eabi-objdump
-fi
-
-ELF=$1
-
-FLSHLD_DIR=${OBJDUMP:-../game-and-watch-flashloader}
-FLASHLOADER=${FLSHLD_DIR}/flash_multi.sh
-
-OBJDUMP=${OBJDUMP:-$DEFAULT_OBJDUMP}
-
-ADAPTER=${ADAPTER:-stlink}
-OPENOCD=${OPENOCD:-$(which openocd || true)}
-
-if [[ -z ${OPENOCD} ]]; then
-  echo "Cannot find 'openocd' in the PATH. You can set the environment variable 'OPENOCD' to manually specify the location"
-  exit 2
-fi
+. ./scripts/common.sh
 
 if [[ $# -lt 1 ]]; then
     echo "Usage: $(basename $0) <currently_running_binary.elf>"
     echo "This will erase all save states from the device"
     exit 1
 fi
+
+ELF="$1"
 
 function get_symbol {
     name=$1
@@ -55,8 +32,8 @@ fi
 # Flash it to the saveflash_start
 ${FLASHLOADER} "${DUMMY_FILE}" $(( saveflash_start - 0x90000000 ))
 
-# Reset the device
-${OPENOCD} -f ${FLSHLD_DIR}/interface_${ADAPTER}.cfg -c "init; halt; reset run; exit;"
+# Reset the device and disable clocks from running when device is suspended
+reset_and_disable_debug
 
 # Clean up
 rm -f "${DUMMY_FILE}"

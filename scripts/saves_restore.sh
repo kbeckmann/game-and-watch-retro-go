@@ -1,32 +1,6 @@
 #!/bin/bash
 
-if [[ "$VERBOSE" == "1" ]]; then
-    set -ex
-else
-    set -e
-fi
-
-if [[ "${GCC_PATH}" != "" ]]; then
-    DEFAULT_OBJDUMP=${GCC_PATH}/arm-none-eabi-objdump
-    DEFAULT_GDB=${GCC_PATH}/arm-none-eabi-gdb
-else
-    DEFAULT_OBJDUMP=arm-none-eabi-objdump
-    DEFAULT_GDB=arm-none-eabi-gdb
-fi
-
-FLSHLD_DIR=${OBJDUMP:-../game-and-watch-flashloader}
-FLASHLOADER=${FLASHLOADER:-${FLSHLD_DIR}/flash_multi.sh}
-
-OBJDUMP=${OBJDUMP:-$DEFAULT_OBJDUMP}
-GDB=${GDB:-$DEFAULT_GDB}
-
-ADAPTER=${ADAPTER:-stlink}
-OPENOCD=${OPENOCD:-$(which openocd || true)}
-
-if [[ -z ${OPENOCD} ]]; then
-  echo "Cannot find 'openocd' in the PATH. You can set the environment variable 'OPENOCD' to manually specify the location"
-  exit 2
-fi
+. ./scripts/common.sh
 
 if [[ $# -lt 1 ]]; then
     echo "Usage: $(basename $0) <currently_running_binary.elf> [backup directory]"
@@ -40,14 +14,6 @@ INDIR=save_states
 if [[ $# -gt 1 ]]; then
     INDIR="$2"
 fi
-
-
-function get_number_of_saves {
-    prefix=$1
-    objdump_cmd="${OBJDUMP} -t ${ELF}"
-    echo $(${objdump_cmd} | grep " $prefix" | wc -l)
-}
-
 
 # Start processing
 
