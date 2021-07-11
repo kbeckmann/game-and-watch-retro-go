@@ -688,7 +688,6 @@ int odroid_overlay_draw_small_text_line(uint16_t x_pos, uint16_t y_pos, uint16_t
     int font_height = 8; //odroid_overlay_get_font_size();
     int font_width = 6; //odroid_overlay_get_font_width();
     int x_offset = 0;
-    //float scale = 1; //(float)font_height / 8;
     int text_len = strlen(text);
 
     for (int i = 0; i < (width / font_width); i++)
@@ -723,13 +722,12 @@ int odroid_overlay_draw_big_text_line(uint16_t x_pos, uint16_t y_pos, uint16_t w
     for (int i = 0; i < (width / font_width); i++)
     {
         const char* glyph = font8x12_basic[(i < text_len) ? text[i] : ' '];
-        for (int x = 0; x < font_width; x++)
+        for (int y = 0; y < font_height; y++)
         {
-            //int offset = x_offset + (width * y);
-            for (int y = 0; y < font_height; y++)
+            int offset = x_offset + (width * y);
+            for (int x = 0; x < font_width; x++)
             {
-                int offset = x_offset + (width * y);
-                overlay_buffer[offset + x] = (glyph[x] & (1 << y)) ? color : color_bg;
+                overlay_buffer[offset + 7 - x] = (glyph[y] & (1 << x)) ? color : color_bg;
             }
         }
 
