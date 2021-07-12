@@ -329,18 +329,14 @@ uint16_t gui_get_darken_pixel(uint16_t color, uint16_t darken)
 
 void gui_draw_prior_cover(retro_emulator_file_t *file)
 {
-    if (file == NULL)
+    if ((file == NULL) || (file->img_size == 0))
         return;
-    if (gp_buffer == NULL)
-        gp_buffer = rg_alloc(gp_buffer_size, MEM_ANY);
-    uint16_t *dst_img = (uint16_t *)gp_buffer;
+    uint16_t *dst_img = lcd_get_active_buffer();
     uint16_t *src_img = (uint16_t*)(file->img_address) + 0x46 / 2;
     for (int y = 0; y < 116; y++) {
-        for (int x = 0; x < 90; x++) {
-            dst_img[y * 90 + x] = gui_get_darken_pixel(src_img[y * 116 + x + 26], x);
-        }
+        for (int x = 0; x < 90; x++) 
+            dst_img[(y + 49) * 320 + 0 + x] = gui_get_darken_pixel(src_img[y * 116 + x + 26], x);
     }
-    odroid_display_write_rect(0, 49, 90, 116, 90, dst_img);
     sprintf(str_buffer, "%s", file->name);
     size_t len = strlen(str_buffer);
     if (len > 15) {
@@ -349,23 +345,27 @@ void gui_draw_prior_cover(retro_emulator_file_t *file)
         str_buffer[15] = 0;
         len = 15;
     }
-    odroid_overlay_draw_small_text_line((15 - len) * 3, 39, len * 6, str_buffer, C_GW_YELLOW, C_BLACK);
+    for (int x = 0; x < len; x++)
+        odroid_overlay_draw_small_text_line(
+            (15 - len) * 3 + x * 6, 
+            39, 
+            6, 
+            &str_buffer[x],
+            gui_get_darken_pixel(C_GW_YELLOW, (15 - len) * 3 + x * 6), 
+            C_BLACK);
 }
 
 
 void gui_draw_next_cover(retro_emulator_file_t *file)
 {
-    if (file == NULL)
+    if ((file == NULL) || (file->img_size == 0))
         return;
-    if (gp_buffer == NULL)
-        gp_buffer = rg_alloc(gp_buffer_size, MEM_ANY);
-    uint16_t *dst_img = (uint16_t *)gp_buffer;
+    uint16_t *dst_img = lcd_get_active_buffer();
     uint16_t *src_img = (uint16_t *)(file->img_address) + 0x46 / 2;
     for (int y = 0; y < 116; y++) {
         for (int x = 0; x < 90; x++) 
-            dst_img[y * 90 + x] = gui_get_darken_pixel(src_img[y * 116 + x], 90 - x);
+            dst_img[(y + 49) * 320 + 230 + x] = gui_get_darken_pixel(src_img[y * 116 + x], 90 - x);
     }
-    odroid_display_write_rect(230, 49, 90, 116, 90, dst_img);
     sprintf(str_buffer, "%s", file->name);
     size_t len = strlen(str_buffer);
     if (len > 15) {
@@ -374,19 +374,28 @@ void gui_draw_next_cover(retro_emulator_file_t *file)
         len = 15;
         str_buffer[15] = 0;
     }
-    odroid_overlay_draw_small_text_line(230 + (15 - len) * 3, 39, len * 6, str_buffer, C_GW_YELLOW, C_BLACK);
+    for (int x=0; x < len; x++)
+        odroid_overlay_draw_small_text_line(
+            230 + (15 - len) * 3 + x * 6, 
+            39, 
+            6, 
+            &str_buffer[x], 
+            gui_get_darken_pixel(C_GW_YELLOW, 90 - (15 - len) * 3 - x * 6), 
+            C_BLACK);
+
+
 }
 
 
 void gui_draw_current_cover(retro_emulator_file_t *file)
 {
-    if (file == NULL)
+    if ((file == NULL) || (file->img_size == 0))
         return;
     uint16_t *cover_buffer = (uint16_t*)(file->img_address) + 0x46 / 2;
     odroid_display_write_rect(102, 49, 116, 116, 116, cover_buffer);
+    odroid_overlay_draw_rect(94, 41, 130, 130, 1, C_GW_OPAQUE_YELLOW);
     odroid_overlay_draw_rect(96, 43, 128, 128, 2, C_GW_YELLOW);
-    odroid_overlay_draw_rect(98, 45, 124, 124, 2, C_GW_OPAQUE_YELLOW);
-    //odroid_overlay_draw_rect(100, 47, 120, 120, 2, C_GW_OPAQUE_YELLOW);
+    odroid_overlay_draw_rect(99, 46, 122, 122, 1, C_GW_OPAQUE_YELLOW);
     sprintf(str_buffer, "%s", file->name);
     size_t len = strlen(str_buffer);
     if (len > 38) {
