@@ -30,6 +30,13 @@ ifdef COMPRESS
 	COMPRESS_PARAM := --compress=$(COMPRESS)
 endif
 
+# Reset the DBGMCU configuration register (DBGMCU_CR) after flashing
+# Set to 0 to keep the clocks running when suspended (makes debugging easier)
+RESET_DBGMCU ?= 1
+ifeq ($(RESET_DBGMCU),1)
+	RESET_DBGMCU_CMD = $(MAKE) reset_dbgmcu
+endif
+
 PYTHON3 ?= /usr/bin/env python3
 
 #######################################
@@ -429,7 +436,7 @@ flash_extflash: $(BUILD_DIR)/$(TARGET)_extflash.bin
 flash:
 	$(V)$(MAKE) flash_extflash
 	$(V)$(MAKE) flash_intflash
-	$(V)$(MAKE) disable_debug_block
+	$(V)$(RESET_DBGMCU_CMD)
 .PHONY: flash
 
 # Alias for flash
