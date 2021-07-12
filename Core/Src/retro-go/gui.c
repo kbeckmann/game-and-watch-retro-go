@@ -393,7 +393,7 @@ void gui_draw_current_cover(retro_emulator_file_t *file)
         return;
     uint16_t *cover_buffer = (uint16_t*)(file->img_address) + 0x46 / 2;
     odroid_display_write_rect(102, 49, 116, 116, 116, cover_buffer);
-    odroid_overlay_draw_rect(94, 41, 130, 130, 1, C_GW_OPAQUE_YELLOW);
+    odroid_overlay_draw_rect(94, 41, 132, 132, 1, C_GW_OPAQUE_YELLOW);
     odroid_overlay_draw_rect(96, 43, 128, 128, 2, C_GW_YELLOW);
     odroid_overlay_draw_rect(99, 46, 122, 122, 1, C_GW_OPAQUE_YELLOW);
     sprintf(str_buffer, "%s", file->name);
