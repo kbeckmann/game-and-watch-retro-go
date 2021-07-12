@@ -296,15 +296,15 @@ void emulator_show_file_info(retro_emulator_file_t *file)
     char filename_value[128];
     char type_value[32];
     char size_value[32];
+    char img_size[32];
     char crc_value[32];
     crc_value[0] = '\x00';
 
     odroid_dialog_choice_t choices[] = {
         {0, "File", filename_value, 1, NULL},
         {0, "Type", type_value, 1, NULL},
-        {0, "Folder", "...", 1, NULL},
         {0, "Size", size_value, 1, NULL},
-        {0, "CRC32", crc_value, 1, NULL},
+        {0, "ImgSize", img_size, 1, NULL},
         {0, "---", "", -1, NULL},
         {1, "Close", "", 1, NULL},
         ODROID_DIALOG_CHOICE_LAST
@@ -312,17 +312,8 @@ void emulator_show_file_info(retro_emulator_file_t *file)
 
     sprintf(choices[0].value, "%.127s", file->name);
     sprintf(choices[1].value, "%s", file->ext);
-    // sprintf(choices[2].value, "%s", file->folder);
-    // sprintf(choices[3].value, "%d KB", odroid_sdcard_get_filesize(emu_get_file_path(file)) / 1024);
-    sprintf(choices[3].value, "%d KB", file->size / 1024);
-
-    if (file->checksum > 1)
-    {
-        if (file->crc_offset)
-            sprintf(choices[4].value, "%08lX (%d)", file->checksum, file->crc_offset);
-        else
-            sprintf(choices[4].value, "%08lX", file->checksum);
-    }
+    sprintf(choices[2].value, "%d KB", file->size / 1024);
+    sprintf(choices[3].value, "%d KB", file->img_size / 1024);
 
     odroid_overlay_dialog("Properties", choices, -1);
 }
@@ -342,12 +333,12 @@ void emulator_show_file_menu(retro_emulator_file_t *file)
     odroid_dialog_choice_t choices[] = {
         {0, "Resume game ", "", has_save, NULL},
         {1, "New game    ", "", 1, NULL},
-        {0, "------------", "", -1, NULL},
+        {0, "---", "", -1, NULL},
         {3, is_fav ? "Del favorite" : "Add favorite", "", 1, NULL},
         {2, "Delete save ", "", has_save || has_sram, NULL},
         ODROID_DIALOG_CHOICE_LAST
     };
-    int sel = odroid_overlay_dialog(NULL, choices, has_save ? 0 : 1);
+    int sel = odroid_overlay_dialog(file->name, choices, has_save ? 0 : 1);
 
     if (sel == 0 || sel == 1) {
         gui_save_current_tab();

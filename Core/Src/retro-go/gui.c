@@ -351,7 +351,7 @@ void gui_draw_prior_cover(retro_emulator_file_t *file)
             39, 
             6, 
             &str_buffer[x],
-            gui_get_darken_pixel(C_GW_YELLOW, (15 - len) * 3 + x * 6), 
+            gui_get_darken_pixel(C_GW_YELLOW, (15 - len) * 3 + x * 6),
             C_BLACK);
 }
 
@@ -380,7 +380,7 @@ void gui_draw_next_cover(retro_emulator_file_t *file)
             39, 
             6, 
             &str_buffer[x], 
-            gui_get_darken_pixel(C_GW_YELLOW, 90 - (15 - len) * 3 - x * 6), 
+            gui_get_darken_pixel(C_GW_YELLOW, 90 - (15 - len) * 3 - x * 6),
             C_BLACK);
 
 
@@ -404,7 +404,7 @@ void gui_draw_current_cover(retro_emulator_file_t *file)
         len = 38;
         str_buffer[38] = 0;
     }
-    odroid_overlay_draw_big_text_line(8 + (38 - len) * 4, 174, len * 8, str_buffer, C_YELLOW, C_BLACK);
+    odroid_overlay_draw_big_text_line(8 + (38 - len) * 4, 174, len * 8, str_buffer, C_GW_YELLOW, C_BLACK);
 }
 
 void gui_draw_list(tab_t *tab)

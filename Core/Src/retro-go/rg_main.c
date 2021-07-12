@@ -238,7 +238,7 @@ void retro_loop()
                     {0, "By", "ducalex", 1, NULL},
                     {0, "", "kbeckmann", 1, NULL},
                     {0, "", "stacksmashing", 1, NULL},
-                    {0, "", "", -1, NULL},
+                    {0, "---", "", -1, NULL},
                     {2, "Debug menu", "", 1, NULL},
                     {1, "Reset settings", "", 1, NULL},
                     {0, "Close", "", 1, NULL},
@@ -271,10 +271,10 @@ void retro_loop()
                         {0, "Flash JEDEC ID", jedec_id_str, 1, NULL},
                         {0, "Flash manufacturer", flash_manufacturer_str(jedec_id[0]), 1, NULL},
                         {0, "Flash status", status_str, 1, NULL},
-                        {0, "------------------", "", 1, NULL},
+                        {0, "---", "", -1, NULL},
                         {1, "Set Quad Enable", "", 1, NULL},
                         {2, "Clear Quad Enable", "", 1, NULL},
-                        {0, "------------------", "", 1, NULL},
+                        {0, "---", "", -1, NULL},
                         {0, "Close", "", 1, NULL},
                         ODROID_DIALOG_CHOICE_LAST
                     };

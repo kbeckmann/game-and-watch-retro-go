@@ -228,7 +228,7 @@ void odroid_overlay_draw_dialog(const char *header, odroid_dialog_choice_t *opti
     int box_width = 64;
     int box_height = 64;
     int box_padding = 6;
-    int box_color = C_GW_RED;
+    int box_color = C_BLACK;
     int box_border_color = C_GW_YELLOW;
     int box_text_color = C_GW_YELLOW;
 
@@ -271,25 +271,33 @@ void odroid_overlay_draw_dialog(const char *header, odroid_dialog_choice_t *opti
     if (header)
     {
         int pad = (0.5f * (width - strlen(header)) * odroid_overlay_get_font_width());
-        odroid_overlay_draw_rect(x, y, box_width - 8, row_height + 8, (row_height + 4 + 4 / 2), box_color);
-        odroid_overlay_draw_big_text(x + pad, y, 0, header, box_text_color, box_color);
+        odroid_overlay_draw_rect(box_x - 1, box_y - 1, box_width + 2, row_height + 8, 1, box_border_color);
+        odroid_overlay_draw_rect(box_x, box_y, box_width, row_height + 7, 1, C_GW_OPAQUE_YELLOW);
+        odroid_overlay_draw_fill_rect(box_x + 1, box_y + 1, box_width - 2, row_height + 5, C_GW_RED);
+        odroid_overlay_draw_big_text_line(x + pad, box_y + 2, box_width - 2 * pad - 8, header, C_GW_YELLOW, C_GW_RED);
         y += row_height + 8;
     }
 
     uint16_t fg, bg, color, inner_width = box_width - (box_padding * 2);
     for (int i = 0; i < options_count; i++)
     {
-        color = options[i].enabled == 1 ? box_text_color : C_BLACK;
+        color = options[i].enabled == 1 ? box_text_color : C_GRAY;
         fg = (i == sel) ? box_color : color;
         bg = (i == sel) ? color : box_color;
-        row_height = odroid_overlay_draw_text(x, y + row_margin, inner_width, rows + i * 256, fg, bg);
-        row_height += row_margin * 2;
-        odroid_overlay_draw_rect(x, y, inner_width, row_height, row_margin, bg);
+        if (strncmp((char *)(rows + i * 256), " --- ", 5) == 0) {
+            odroid_overlay_draw_fill_rect(x, y, inner_width, row_height + 2 * row_margin, bg);
+            odroid_overlay_draw_fill_rect(x, y + row_height / 2 - row_margin, inner_width, 1, C_GW_OPAQUE_YELLOW);
+        }
+        else {
+            row_height = odroid_overlay_draw_text(x, y + row_margin, inner_width, rows + i * 256, fg, bg);
+            row_height += row_margin * 2;
+            odroid_overlay_draw_rect(x, y, inner_width, row_height, row_margin, bg);
+        }
         y += row_height;
     }
 
+    box_y = header ? box_y + row_height + 8 : box_y;
     box_height = y - box_y + box_padding;
-
     odroid_overlay_draw_rect(box_x, box_y, box_width, box_height, box_padding, box_color);
     odroid_overlay_draw_rect(box_x - 1, box_y - 1, box_width + 2, box_height + 2, 1, box_border_color);
 
