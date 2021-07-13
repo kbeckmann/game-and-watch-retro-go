@@ -22,6 +22,21 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  build-linuxemu-ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+      - name: Build
+        run: |
+          echo ${GITHUB_TOKEN} | docker login -u ${GITHUB_ACTOR} --password-stdin docker.pkg.github.com
+          docker pull 'docker.pkg.github.com/kbeckmann/ubuntubuilder/ubuntubuilder'
+          docker tag docker.pkg.github.com/kbeckmann/ubuntubuilder/ubuntubuilder:latest ubuntubuilder
+          docker run --rm -v $(pwd):/build -w /build ubuntubuilder sudo -E ./scripts/.ci_build_linuxemu_ubuntu.sh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   build-macos:
     runs-on: macos-latest
     steps:
