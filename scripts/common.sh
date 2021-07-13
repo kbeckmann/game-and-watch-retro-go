@@ -23,6 +23,8 @@ GDB=${GDB:-$DEFAULT_GDB}
 ADAPTER=${ADAPTER:-stlink}
 OPENOCD=${OPENOCD:-$(which openocd || true)}
 
+RESET_DBGMCU=${RESET_DBGMCU:-1}
+
 if [[ -z ${OPENOCD} ]]; then
   echo "Cannot find 'openocd' in the PATH. You can set the environment variable 'OPENOCD' to manually specify the location"
   exit 2
@@ -42,5 +44,9 @@ function get_number_of_saves {
 }
 
 function reset_and_disable_debug {
-    ${OPENOCD} -f ${FLSHLD_DIR}/interface_${ADAPTER}.cfg -c "init; reset halt; mww 0x5C001004 0x00000000; resume; exit;"
+    if [[ "$RESET_DBGMCU" -eq 1 ]]; then
+        ${OPENOCD} -f ${FLSHLD_DIR}/interface_${ADAPTER}.cfg -c "init; reset halt; mww 0x5C001004 0x00000000; resume; exit;"
+    else
+        ${OPENOCD} -f ${FLSHLD_DIR}/interface_${ADAPTER}.cfg -c "init; reset run; exit;"
+    fi
 }
