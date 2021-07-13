@@ -225,13 +225,18 @@ class ROM:
         obj_name = "".join([i if i.isalnum() else "_" for i in os.path.basename(img_file)])
         symbol_path = str(self.path.parent) + "/" + obj_name
         self.img_path = img_file
-        self.img_size = os.path.getsize(img_file)
-        self.obj_img = "build/roms/" + obj_name + ".o"
-        self.img_symbol = (
-            "_binary_" 
-            + "".join([i if i.isalnum() else "_" for i in symbol_path]) 
-            + "_start"
-        )
+        if os.path.exists(img_file):
+            self.img_size = os.path.getsize(img_file)
+            self.obj_img = "build/roms/" + obj_name + ".o"
+            self.img_symbol = (
+                "_binary_" 
+                + "".join([i if i.isalnum() else "_" for i in symbol_path]) 
+                + "_start"
+            )
+        else:
+            self.img_size = 0
+            self.obj_img = ""
+            self.img_symbol = "NULL"
         
     def __str__(self) -> str:
         return f"name: {self.name} size: {self.size} ext: {self.ext}"
@@ -555,7 +560,8 @@ class ROMParser:
                 total_img_size += rom.img_size
 
                 f.write(self.generate_object_file(rom))
-                f.write(self.generate_img_object_file(rom))
+                if rom.img_size > 0 :
+                    f.write(self.generate_img_object_file(rom))
                 f.write(self.generate_save_entry(save_prefix + str(i), save_size))
 
             rom_entries = self.generate_rom_entries(
