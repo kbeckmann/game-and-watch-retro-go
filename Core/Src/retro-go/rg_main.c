@@ -174,7 +174,7 @@ void retro_loop()
         if (gui.joystick.values[i]) last_key = i;
     }
 
-    // gui.selected   = odroid_settings_int32_get(KEY_SELECTED_TAB, 0);
+    gui.selected      = odroid_settings_MainMenuSelectedTab_get();
     // gui.theme      = odroid_settings_int32_get(KEY_GUI_THEME, 0);
     // gui.show_empty = odroid_settings_int32_get(KEY_SHOW_EMPTY, 1);
     // gui.show_cover = odroid_settings_int32_get(KEY_SHOW_COVER, 1);

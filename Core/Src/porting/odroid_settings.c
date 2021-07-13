@@ -36,6 +36,8 @@ typedef struct persistent_config {
     void *startup_file;
 
     uint16_t main_menu_timeout_s;
+    uint16_t main_menu_selected_tab;
+    uint16_t main_menu_cursor;
 
     app_config_t app[ODROID_APPID_COUNT];
 
@@ -52,6 +54,8 @@ static const persistent_config_t persistent_config_default = {
     .font_size = 8,
     .startup_app = 0,
     .main_menu_timeout_s = 60 * 10, // Turn off after 10 minutes of idle time in the main menu
+    .main_menu_selected_tab = 0,
+    .main_menu_cursor = 0,
     .app = {
         {0}, // Launcher
         {
@@ -226,6 +230,24 @@ uint16_t odroid_settings_MainMenuTimeoutS_get()
 void odroid_settings_MainMenuTimeoutS_set(uint16_t value)
 {
     persistent_config_ram.main_menu_timeout_s = value;
+}
+
+uint16_t odroid_settings_MainMenuSelectedTab_get()
+{
+    return persistent_config_ram.main_menu_selected_tab;
+}
+void odroid_settings_MainMenuSelectedTab_set(uint16_t value)
+{
+    persistent_config_ram.main_menu_selected_tab = value;
+}
+
+uint16_t odroid_settings_MainMenuCursor_get()
+{
+    return persistent_config_ram.main_menu_cursor;
+}
+void odroid_settings_MainMenuCursor_set(uint16_t value)
+{
+    persistent_config_ram.main_menu_cursor = value;
 }
 
 
