@@ -8,6 +8,7 @@
 #include "gui.h"
 #include "gw_lcd.h"
 #include "odroid_overlay_ex.h"
+#include "bitmaps.h"
 
 #define IMAGE_LOGO_WIDTH    (47)
 #define IMAGE_LOGO_HEIGHT   (51)
@@ -329,12 +330,16 @@ uint16_t gui_get_darken_pixel(uint16_t color, uint16_t darken)
 
 void gui_draw_prior_cover(retro_emulator_file_t *file)
 {
-    if ((file == NULL) || (file->img_size == 0))
+    if (file == NULL) 
         return;
+    uint16_t *src_img = NULL;
     uint16_t *dst_img = lcd_get_active_buffer();
-    uint16_t *src_img = (uint16_t*)(file->img_address) + 0x46 / 2;
+    if (file->img_size == 0) 
+        src_img = &cover_missed;
+    else 
+        src_img = (uint16_t *)(file->img_address) + 0x46 / 2;
     for (int y = 0; y < 116; y++) {
-        for (int x = 0; x < 90; x++) 
+        for (int x = 0; x < 90; x++)
             dst_img[(y + 49) * 320 + 0 + x] = gui_get_darken_pixel(src_img[y * 116 + x + 26], x);
     }
     sprintf(str_buffer, "%s", file->name);
@@ -358,12 +363,15 @@ void gui_draw_prior_cover(retro_emulator_file_t *file)
 
 void gui_draw_next_cover(retro_emulator_file_t *file)
 {
-    if ((file == NULL) || (file->img_size == 0))
-        return;
+    if (file == NULL) return;
+    uint16_t *src_img = NULL;
     uint16_t *dst_img = lcd_get_active_buffer();
-    uint16_t *src_img = (uint16_t *)(file->img_address) + 0x46 / 2;
+    if (file->img_size == 0) 
+        src_img = &cover_missed;
+    else 
+        src_img = (uint16_t *)(file->img_address) + 0x46 / 2;
     for (int y = 0; y < 116; y++) {
-        for (int x = 0; x < 90; x++) 
+        for (int x = 0; x < 90; x++)
             dst_img[(y + 49) * 320 + 230 + x] = gui_get_darken_pixel(src_img[y * 116 + x], 90 - x);
     }
     sprintf(str_buffer, "%s", file->name);
@@ -382,16 +390,18 @@ void gui_draw_next_cover(retro_emulator_file_t *file)
             &str_buffer[x], 
             gui_get_darken_pixel(C_GW_YELLOW, 90 - (15 - len) * 3 - x * 6),
             C_BLACK);
-
-
 }
 
 
 void gui_draw_current_cover(retro_emulator_file_t *file)
 {
-    if ((file == NULL) || (file->img_size == 0))
+    if (file == NULL) 
         return;
-    uint16_t *cover_buffer = (uint16_t*)(file->img_address) + 0x46 / 2;
+    uint16_t *cover_buffer = NULL;
+    if (file->img_size == 0) 
+        cover_buffer = &cover_missed;
+    else 
+        cover_buffer = (uint16_t*)(file->img_address) + 0x46 / 2;
     odroid_display_write_rect(102, 49, 116, 116, 116, cover_buffer);
     odroid_overlay_draw_rect(94, 41, 132, 132, 1, C_GW_OPAQUE_YELLOW);
     odroid_overlay_draw_rect(96, 43, 128, 128, 2, C_GW_YELLOW);
@@ -411,11 +421,14 @@ void gui_draw_list(tab_t *tab)
 {
     odroid_overlay_draw_fill_rect(0, LIST_Y_OFFSET, LIST_WIDTH, LIST_HEIGHT, C_BLACK);
     listbox_item_t *item = gui_get_selected_item(tab);
-    gui_draw_current_cover((retro_emulator_file_t *)(item ? item->arg : NULL));
+    if (item)
+        gui_draw_current_cover((retro_emulator_file_t *)item->arg);
     listbox_item_t *next_item = gui_get_selected_next_item(tab);
-    gui_draw_next_cover((retro_emulator_file_t *)(next_item ? next_item->arg : NULL));
+    if (next_item)
+        gui_draw_next_cover((retro_emulator_file_t *)next_item->arg);
     listbox_item_t *prior_item = gui_get_selected_prior_item(tab);
-    gui_draw_prior_cover((retro_emulator_file_t *)(prior_item ? prior_item->arg : NULL));
+    if (prior_item)
+        gui_draw_prior_cover((retro_emulator_file_t *)prior_item->arg);
 }
 
 
