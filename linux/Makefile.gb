@@ -30,6 +30,7 @@ porting.c \
 ../retro-go-stm32/gnuboy-go/components/gnuboy/mem.c \
 ../retro-go-stm32/gnuboy-go/components/gnuboy/rtc.c \
 ../retro-go-stm32/gnuboy-go/components/gnuboy/sound.c \
+../retro-go-stm32/components/lupng/miniz.c \
 
 
 PREFIX = 
@@ -50,7 +51,8 @@ C_INCLUDES =  \
 -I./gb \
 -I../Core/Src/porting/lib \
 -I../retro-go-stm32/gnuboy-go/components \
--I../retro-go-stm32/components/odroid
+-I../retro-go-stm32/components/odroid \
+-I../retro-go-stm32/components/lupng
 
 
 ASFLAGS = $(AS_DEFS) $(AS_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections
