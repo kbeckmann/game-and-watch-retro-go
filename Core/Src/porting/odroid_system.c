@@ -119,7 +119,8 @@ void odroid_system_sleep(void)
 {
     odroid_settings_StartupFile_set(ACTIVE_FILE);
 
-    odroid_settings_commit();
+    // odroid_settings_commit();
+    gui_save_current_tab();
 
     GW_EnterDeepSleep();
 }

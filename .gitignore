@@ -26,4 +26,6 @@ linux/loaded_nes_rom.c
 
 save_states
 
+venv
+
 **/.DS_Store

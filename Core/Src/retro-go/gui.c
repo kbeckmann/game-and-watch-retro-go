@@ -90,7 +90,12 @@ void gui_init_tab(tab_t *tab)
     // tab->status[0] = 0;
 
     sprintf(str_buffer, "Sel.%.11s", tab->name);
-    tab->listbox.cursor = odroid_settings_int32_get(str_buffer, 0);
+    // tab->listbox.cursor = odroid_settings_int32_get(str_buffer, 0);
+    tab_t *selected_tab = gui_get_tab(odroid_settings_MainMenuSelectedTab_get());
+    if (tab->name == selected_tab->name)
+    {
+        tab->listbox.cursor = odroid_settings_MainMenuCursor_get();
+    }
 
     gui_event(TAB_INIT, tab);
 
@@ -106,9 +111,6 @@ tab_t *gui_get_tab(int index)
 tab_t *gui_get_current_tab()
 {
     return gui_get_tab(gui.selected);
-
-
-
 }
 
 tab_t *gui_set_current_tab(int index)
@@ -128,8 +130,10 @@ void gui_save_current_tab()
     tab_t *tab = gui_get_current_tab();
 
     sprintf(str_buffer, "Sel.%.11s", tab->name);
-    odroid_settings_int32_set(str_buffer, tab->listbox.cursor);
-    odroid_settings_int32_set("SelectedTab", gui.selected);
+    // odroid_settings_int32_set(str_buffer, tab->listbox.cursor);
+    odroid_settings_MainMenuCursor_set(tab->listbox.cursor);
+    // odroid_settings_int32_set("SelectedTab", gui.selected);
+    odroid_settings_MainMenuSelectedTab_set(gui.selected);
     odroid_settings_commit();
 }
 
