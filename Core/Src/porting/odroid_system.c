@@ -118,10 +118,9 @@ runtime_stats_t odroid_system_get_stats()
 void odroid_system_sleep(void)
 {
     odroid_settings_StartupFile_set(ACTIVE_FILE);
-    odroid_settings_MainMenuSelectedTab_set(0);
-    odroid_settings_MainMenuCursor_set(0);
 
-    odroid_settings_commit();
+    // odroid_settings_commit();
+    gui_save_current_tab();
 
     GW_EnterDeepSleep();
 }
