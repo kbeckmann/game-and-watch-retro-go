@@ -22,7 +22,7 @@ mkdir -p "$OUTDIR"
 for emu in gb gg nes pce sms; do
     mkdir -p "${OUTDIR}/${emu}"
     COUNT=$(get_number_of_saves SAVE_$(echo ${emu} | awk '{print toupper($0)}')_)
-    for i in $(seq 0 $(( COUNT - 1 ))); do
+    for (( i = 0; i < COUNT; i++ )); do
         name=$(${GDB} "${ELF}" --batch -q -ex "printf \"%s\n\", ${emu}_roms[${i}].name")
         address=$(${GDB} "${ELF}" --batch -q -ex "printf \"0x%08x\n\", ${emu}_roms[${i}].save_address")
         size=$(${GDB} "${ELF}" --batch -q -ex "printf \"0x%08x\n\", ${emu}_roms[${i}].save_size")
