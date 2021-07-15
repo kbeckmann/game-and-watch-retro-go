@@ -191,7 +191,7 @@ int main(int argc, char *argv[])
     init_window(WIDTH, HEIGHT);
 
     init();
-    odroid_gamepad_state_t joystick;
+    odroid_gamepad_state_t joystick = {0};
 
     while (true)
     {
