@@ -15,7 +15,7 @@ Supported emulators:
 ## ImgUI Branch
 
 <img src="assets/gwui.jpg" width="800"/>
-Need same as romname bitmap file, bmp file must 116x116 pixels and 16bit(RGB565) and flip vertical
+Need same as romname bitmap file, bmp file must 128x96 pixels and 16bit(RGB565) and flip vertical
 Bmp image file mast RGB565
 (Photoshop -> save as -> BMP file (sel:win+16bit, checked 'flip row order' option) -> Advance mode -> R5 G6 B5)
 
