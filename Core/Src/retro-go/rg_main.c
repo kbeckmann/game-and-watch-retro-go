@@ -238,6 +238,7 @@ void retro_loop()
                     {0, "By", "ducalex", 1, NULL},
                     {0, "", "kbeckmann", 1, NULL},
                     {0, "", "stacksmashing", 1, NULL},
+                    {0, "UI Mod", "orzeus", -1, NULL},
                     {0, "---", "", -1, NULL},
                     {2, "Debug menu", "", 1, NULL},
                     {1, "Reset settings", "", 1, NULL},

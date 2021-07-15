@@ -85,15 +85,10 @@ static void event_handler(gui_event_t event, tab_t *tab)
         if (file->checksum == 0) {
             emulator_crc32_file(file);
         }
-
-        // if (gui.show_cover && gui.idle_counter == (gui.show_cover == 1 ? 8 : 1)) {
-        //     gui_draw_cover(file);
-        // }
     }
     else if (event == TAB_REDRAW)
     {
-        if (gui.show_cover)
-            gui_draw_cover(file);
+        gui_redraw();
     }
 }
 
