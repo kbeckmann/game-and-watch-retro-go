@@ -195,9 +195,18 @@ def compress_zopfli(data, level=None):
         frame.append(data)
 
         return b"".join(frame)
-    import zopfli
 
-    c = zopfli.ZopfliCompressor(zopfli.ZOPFLI_FORMAT_DEFLATE)
+    # Actual zopfli compression is temporarily disabled until a GB/GBC bank
+    # swapping bug is resolved.
+    # Slightly less efficient vanilla deflate compression is applied
+
+    # import zopfli
+    # c = zopfli.ZopfliCompressor(zopfli.ZOPFLI_FORMAT_DEFLATE)
+
+    import zlib
+
+    c = zlib.compressobj(level=9, method=zlib.DEFLATED, wbits=-15, memLevel=9)
+
     compressed_data = c.compress(data) + c.flush()
     return compressed_data
 
