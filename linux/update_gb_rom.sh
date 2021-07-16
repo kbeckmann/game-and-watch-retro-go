@@ -26,6 +26,6 @@ echo "unsigned int ROM_DATA_LENGTH = $SIZE;" >> $OUTFILE
 echo "unsigned int cart_rom_len = $SIZE;" >> $OUTFILE
 
 extension="${INFILE##*.}"
-echo "const char *ROM_EXT = \".$extension\";" >> $OUTFILE
+echo "const char *ROM_EXT = \"$extension\";" >> $OUTFILE
 
 echo "Done!"
