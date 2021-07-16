@@ -214,7 +214,14 @@ def compress_zopfli(data, level=None):
 def write_rgb565(img, fn):
     pixels = list(img.getdata())
     with open(fn, "wb") as f:
-        # TODO: write bitmap header
+        # TODO: this header could probably be a bit shorter, didn't really investigate
+        f.write(
+            b"BMH`\x00\x00\x00\x00\x00\x00F\x00\x00\x008\x00\x00\x00"
+            b"\x80\x00\x00\x00\xa0\xff\xff\xff\x01\x00\x10\x00\x03\x00\x00"
+            b"\x00\x02`\x00\x00\x12\x0b\x00\x00\x12\x0b\x00\x00\x00\x00\x00"
+            b"\x00\x00\x00\x00\x00\x00\xf8\x00\x00\xe0\x07\x00\x00\x1f\x00\x00"
+            b"\x00\x00\x00\x00\x00\x00\x00"
+        )
         for pix in pixels:
             r = (pix[0] >> 3) & 0x1F
             g = (pix[1] >> 2) & 0x3F
