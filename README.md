@@ -12,12 +12,12 @@ Supported emulators:
 - Sega Master System (sms)
 - Sega SG-1000 (sg)
 
-## ImgUI Branch
+## NewUI Branch
 
 <img src="assets/gwui.jpg" width="800"/>
-Need same as romname bitmap file, bmp file must 128x96 pixels and 16bit(RGB565) and flip vertical
-Bmp image file mast RGB565
-(Photoshop -> save as -> BMP file (sel:win+16bit, checked 'flip row order' option) -> Advance mode -> R5 G6 B5)
+### Prerequisites
+ - Need same name as rom's bitmap file, bmp file must 128x96 pixels and 16bit(RGB565) and save file format flip row order 
+ - Bmp image file must RGB565 (Photoshop -> save as -> BMP file (sel:win+16bit, checked 'flip row order' option) -> Advance mode -> R5 G6 B5)
 
 
 ## How to report issues
