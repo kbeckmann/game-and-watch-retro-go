@@ -2,6 +2,7 @@
 import argparse
 import os
 import shutil
+import struct
 import subprocess
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -210,18 +211,37 @@ def compress_zopfli(data, level=None):
     return compressed_data
 
 
+def write_rgb565(img, fn):
+    pixels = list(img.getdata())
+    with open(fn, "wb") as f:
+        # TODO: this header could probably be a bit shorter, didn't really investigate
+        f.write(
+            b"BMH`\x00\x00\x00\x00\x00\x00F\x00\x00\x008\x00\x00\x00"
+            b"\x80\x00\x00\x00\xa0\xff\xff\xff\x01\x00\x10\x00\x03\x00\x00"
+            b"\x00\x02`\x00\x00\x12\x0b\x00\x00\x12\x0b\x00\x00\x00\x00\x00"
+            b"\x00\x00\x00\x00\x00\x00\xf8\x00\x00\xe0\x07\x00\x00\x1f\x00\x00"
+            b"\x00\x00\x00\x00\x00\x00\x00"
+        )
+        for pix in pixels:
+            r = (pix[0] >> 3) & 0x1F
+            g = (pix[1] >> 2) & 0x3F
+            b = (pix[2] >> 3) & 0x1F
+            f.write(struct.pack("H", (r << 11) + (g << 5) + b))
+
+
+class NoArtworkError(Exception):
+    """No artwork found for this ROM"""
+
+
 class ROM:
     def __init__(self, system_name: str, filepath: str, extension: str):
-        img_file = filepath
         filepath = Path(filepath)
         self.path = filepath
         # Remove compression extension from the name in case it ends with that
         if filepath.suffix in COMPRESSIONS:
             self.name = filepath.with_suffix("").stem
-            img_file = os.path.splitext(img_file)[0]
         else:
             self.name = filepath.stem
-        self.size = filepath.stat().st_size
         obj_name = "".join([i if i.isalnum() else "_" for i in self.path.name])
         self.obj_path = "build/roms/" + obj_name + ".o"
         symbol_path = str(self.path.parent) + "/" + obj_name
@@ -230,23 +250,17 @@ class ROM:
             + "".join([i if i.isalnum() else "_" for i in symbol_path])
             + "_start"
         )
-        img_file = os.path.splitext(img_file)[0] + '.bmp'
-        obj_name = "".join([i if i.isalnum() else "_" for i in os.path.basename(img_file)])
+
+        self.img_path = self.path.parent / (self.name + ".bmp")
+        obj_name = "".join([i if i.isalnum() else "_" for i in self.img_path.name])
         symbol_path = str(self.path.parent) + "/" + obj_name
-        self.img_path = img_file
-        if os.path.exists(img_file):
-            self.img_size = os.path.getsize(img_file)
-            self.obj_img = "build/roms/" + obj_name + ".o"
-            self.img_symbol = (
-                "_binary_" 
-                + "".join([i if i.isalnum() else "_" for i in symbol_path]) 
-                + "_start"
-            )
-        else:
-            self.img_size = 0
-            self.obj_img = ""
-            self.img_symbol = "NULL"
-        
+        self.obj_img = "build/roms/" + obj_name + ".o"
+        self.img_symbol = (
+            "_binary_"
+            + "".join([i if i.isalnum() else "_" for i in symbol_path])
+            + "_start"
+        )
+
     def __str__(self) -> str:
         return f"name: {self.name} size: {self.size} ext: {self.ext}"
 
@@ -259,6 +273,18 @@ class ROM:
     @property
     def ext(self):
         return self.path.suffix[1:].lower()
+
+    @property
+    def size(self):
+        return self.path.stat().st_size
+
+    @property
+    def img_size(self):
+        try:
+            return self.img_path.stat().st_size
+        except FileNotFoundError:
+            return 0
+
 
 class ROMParser:
     def find_roms(self, system_name: str, folder: str, extension: str) -> [ROM]:
@@ -304,7 +330,7 @@ class ROMParser:
                 size=rom.size,
                 rom_entry=rom.symbol,
                 img_size=rom.img_size,
-                img_entry=rom.img_symbol,
+                img_entry=rom.img_symbol if rom.img_size else "NULL",
                 save_entry=save_prefix + str(i),
                 region=region,
                 extension=rom.ext,
@@ -354,6 +380,20 @@ class ROMParser:
             prefix = os.environ["GCC_PATH"]
 
         prefix = Path(prefix)
+
+        if not rom.img_path.exists():
+            # Attempt to generate a bmp from another filetype
+            # Check if a png exists
+            png_path = rom.img_path.with_suffix(".png")
+            # TODO: add jpg and other paths
+            if png_path.exists():
+                from PIL import Image, ImageOps
+
+                img = Image.open(png_path)
+                img = ImageOps.fit(img, (128, 96))
+                write_rgb565(img, rom.img_path)
+            else:
+                raise NoArtworkError
 
         subprocess.check_output(
             [
@@ -569,8 +609,10 @@ class ROMParser:
                 total_img_size += rom.img_size
 
                 f.write(self.generate_object_file(rom))
-                if rom.img_size > 0 :
+                try:
                     f.write(self.generate_img_object_file(rom))
+                except NoArtworkError:
+                    pass
                 f.write(self.generate_save_entry(save_prefix + str(i), save_size))
 
             rom_entries = self.generate_rom_entries(
@@ -708,7 +750,8 @@ class ROMParser:
             exit(-1)
 
         print(
-            f"Save data:\t{total_save_size} bytes\nROM data:\t{total_rom_size} bytes\nIMG data:\t{total_img_size} bytes\n"
+            f"Save data:\t{total_save_size} bytes\nROM data:\t{total_rom_size} bytes\n"
+            f"IMG data:\t{total_img_size} bytes\n"
             f"Total:\t\t{total_size} / {args.flash_size} bytes (plus some metadata)."
         )
         if total_size > args.flash_size:
@@ -765,4 +808,3 @@ if __name__ == "__main__":
         print("Missing dependencies. Run:")
         print("    python -m pip install -r requirements.txt")
         exit(-1)
-

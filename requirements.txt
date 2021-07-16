@@ -1,4 +1,5 @@
 lz4
+pillow
 tqdm
 xxhash
 zopflipy
