@@ -389,8 +389,8 @@ class ROMParser:
             if png_path.exists():
                 from PIL import Image, ImageOps
 
-                img = Image.open(png_path)
-                img = ImageOps.fit(img, (128, 96))
+                img = Image.open(png_path).convert(mode="RGB").resize((130, 98), Image.ANTIALIAS).crop((1,1,129,97))
+                #img = ImageOps.resize(img, (128, 96))
                 write_rgb565(img, rom.img_path)
             else:
                 raise NoArtworkError
