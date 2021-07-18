@@ -320,7 +320,7 @@ void gui_draw_status(tab_t *tab)
     odroid_overlay_draw_battery(ODROID_SCREEN_WIDTH - 32, 17);
 }
 
-
+/*
 uint16_t gui_get_darken_pixel(uint16_t color, uint16_t darken)
 {
     int16_t r = (int16_t)((color & 0b1111100000000000) * darken / 100) & 0b1111100000000000;
@@ -328,6 +328,7 @@ uint16_t gui_get_darken_pixel(uint16_t color, uint16_t darken)
     int16_t b = (int16_t)((color & 0b0000000000011111) * darken / 100) & 0b0000000000011111;
     return r | g | b;
 }
+*/
 
 
 void gui_draw_prior_cover(retro_emulator_file_t *file)
@@ -342,7 +343,7 @@ void gui_draw_prior_cover(retro_emulator_file_t *file)
         src_img = (uint16_t *)(file->img_address) + 0x46 / 2;
     for (int y = 0; y < 96; y++) {
         for (int x = 0; x < 80; x++)
-            dst_img[(y + 59) * 320 + 0 + x] = gui_get_darken_pixel(src_img[y * 128 + x + 48], x);
+            dst_img[(y + 59) * 320 + 0 + x] = get_darken_pixel(src_img[y * 128 + x + 48], x);
     }
     sprintf(str_buffer, "%s", file->name);
     size_t len = strlen(str_buffer);
@@ -359,7 +360,7 @@ void gui_draw_prior_cover(retro_emulator_file_t *file)
             49, //top
             6, 
             &str_buffer[x + startx],
-            gui_get_darken_pixel(C_GW_YELLOW, 28 + (13 - len) * 3 + x * 6),
+            get_darken_pixel(C_GW_YELLOW, 28 + (13 - len) * 3 + x * 6),
             C_BLACK);
 }
 
@@ -375,7 +376,7 @@ void gui_draw_next_cover(retro_emulator_file_t *file)
         src_img = (uint16_t *)(file->img_address) + 0x46 / 2;
     for (int y = 0; y < 96; y++) {
         for (int x = 0; x < 80; x++)
-            dst_img[(y + 59) * 320 + 240 + x] = gui_get_darken_pixel(src_img[y * 128 + x], 80 - x);
+            dst_img[(y + 59) * 320 + 240 + x] = get_darken_pixel(src_img[y * 128 + x], 80 - x);
     }
     sprintf(str_buffer, "%s", file->name);
     size_t len = strlen(str_buffer);
@@ -390,7 +391,7 @@ void gui_draw_next_cover(retro_emulator_file_t *file)
             49, //top
             6, 
             &str_buffer[x], 
-            gui_get_darken_pixel(C_GW_YELLOW, 100 - (13 - len) * 3 - x * 6),
+            get_darken_pixel(C_GW_YELLOW, 100 - (13 - len) * 3 - x * 6),
             C_BLACK);
 }
 
@@ -423,8 +424,8 @@ void gui_draw_list(tab_t *tab)
 {
     odroid_overlay_draw_fill_rect(0, LIST_Y_OFFSET + 6, LIST_WIDTH, LIST_HEIGHT - 12, C_BLACK);
     for (int y = 0; y < 8; y++) {
-        odroid_overlay_draw_fill_rect(0, LIST_Y_OFFSET + y, LIST_WIDTH, 1, gui_get_darken_pixel(C_GW_RED, 100 - (y + 1) * 10));
-        odroid_overlay_draw_fill_rect(0, LIST_Y_OFFSET + LIST_HEIGHT - 1 - y, LIST_WIDTH, 1, gui_get_darken_pixel(C_GW_RED, 100 - (y + 1) * 10));
+        odroid_overlay_draw_fill_rect(0, LIST_Y_OFFSET + y, LIST_WIDTH, 1, get_darken_pixel(C_GW_RED, 100 - (y + 1) * 10));
+        odroid_overlay_draw_fill_rect(0, LIST_Y_OFFSET + LIST_HEIGHT - 1 - y, LIST_WIDTH, 1, get_darken_pixel(C_GW_RED, 100 - (y + 1) * 10));
     }
 
     listbox_item_t *item = gui_get_selected_item(tab);

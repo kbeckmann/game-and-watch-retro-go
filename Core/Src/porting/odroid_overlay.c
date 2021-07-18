@@ -216,6 +216,15 @@ static int get_dialog_items_count(odroid_dialog_choice_t *options)
     return 0;
 }
 
+uint16_t get_darken_pixel(uint16_t color, uint16_t darken)
+{
+    int16_t r = (int16_t)((color & 0b1111100000000000) * darken / 100) & 0b1111100000000000;
+    int16_t g = (int16_t)((color & 0b0000011111100000) * darken / 100) & 0b0000011111100000;
+    int16_t b = (int16_t)((color & 0b0000000000011111) * darken / 100) & 0b0000000000011111;
+    return r | g | b;
+}
+
+
 void odroid_overlay_draw_dialog(const char *header, odroid_dialog_choice_t *options, int sel)
 {
     int width = header ? strlen(header) : 8;
@@ -231,6 +240,15 @@ void odroid_overlay_draw_dialog(const char *header, odroid_dialog_choice_t *opti
     int box_color = C_BLACK;
     int box_border_color = C_GW_YELLOW;
     int box_text_color = C_GW_YELLOW;
+
+    if (dialog_open_depth <= 0) {
+        uint16_t *dst_img = lcd_get_active_buffer();
+        for (int y = 0; y < ODROID_SCREEN_HEIGHT; y++) {
+            for (int x = 0; x < ODROID_SCREEN_WIDTH; x++)
+                dst_img[y * ODROID_SCREEN_WIDTH + x] = get_darken_pixel(dst_img[y * ODROID_SCREEN_WIDTH + x], 25);
+        }
+
+    }
 
     int options_count = get_dialog_items_count(options);
 
@@ -314,9 +332,10 @@ int odroid_overlay_dialog(const char *header, odroid_dialog_choice_t *options, i
     bool select = false;
     odroid_gamepad_state_t joystick;
 
-    dialog_open_depth++;
-
     odroid_overlay_draw_dialog(header, options, sel);
+    lcd_sync();
+
+    dialog_open_depth++;
 
     while (odroid_input_key_is_pressed(ODROID_INPUT_ANY))
         wdog_refresh();
