@@ -343,7 +343,7 @@ void gui_draw_prior_cover(retro_emulator_file_t *file)
         src_img = (uint16_t *)(file->img_address) + 0x46 / 2;
     for (int y = 0; y < 96; y++) {
         for (int x = 0; x < 80; x++)
-            dst_img[(y + 59) * 320 + 0 + x] = get_darken_pixel(src_img[y * 128 + x + 48], x);
+            dst_img[(y + 59) * 320 + 0 + x] = get_darken_pixel(src_img[y * 128 + x + 48], x + 20);
     }
     sprintf(str_buffer, "%s", file->name);
     size_t len = strlen(str_buffer);
@@ -376,7 +376,7 @@ void gui_draw_next_cover(retro_emulator_file_t *file)
         src_img = (uint16_t *)(file->img_address) + 0x46 / 2;
     for (int y = 0; y < 96; y++) {
         for (int x = 0; x < 80; x++)
-            dst_img[(y + 59) * 320 + 240 + x] = get_darken_pixel(src_img[y * 128 + x], 80 - x);
+            dst_img[(y + 59) * 320 + 240 + x] = get_darken_pixel(src_img[y * 128 + x], 99 - x);
     }
     sprintf(str_buffer, "%s", file->name);
     size_t len = strlen(str_buffer);

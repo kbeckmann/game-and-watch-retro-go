@@ -245,7 +245,7 @@ void odroid_overlay_draw_dialog(const char *header, odroid_dialog_choice_t *opti
         uint16_t *dst_img = lcd_get_active_buffer();
         for (int y = 0; y < ODROID_SCREEN_HEIGHT; y++) {
             for (int x = 0; x < ODROID_SCREEN_WIDTH; x++)
-                dst_img[y * ODROID_SCREEN_WIDTH + x] = get_darken_pixel(dst_img[y * ODROID_SCREEN_WIDTH + x], 25);
+                dst_img[y * ODROID_SCREEN_WIDTH + x] = get_darken_pixel(dst_img[y * ODROID_SCREEN_WIDTH + x], 40);
         }
 
     }
@@ -646,10 +646,13 @@ int odroid_overlay_game_menu(odroid_dialog_choice_t *extra_options)
         // {0, "Continue", "",  1, NULL},
         {10, "Save & Continue", "",  1, NULL},
         {20, "Save & Quit", "", 1, NULL},
+        {0, "---", "",  -1, NULL},
         {30, "Reload", "", 1, NULL},
         {40, "Options", "", 1, NULL},
         // {50, "Tools", "", 1, NULL},
+        {0, "---", "",  -1, NULL},
         {90, "Power off", "", 1, NULL},
+        {0, "---", "",  -1, NULL},
         {100, "Quit to menu", "", 1, NULL},
         ODROID_DIALOG_CHOICE_LAST
     };
