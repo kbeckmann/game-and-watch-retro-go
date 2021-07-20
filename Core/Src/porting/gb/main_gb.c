@@ -551,6 +551,7 @@ void app_main_gb(uint8_t load_state, uint8_t start_paused)
     odroid_gamepad_state_t joystick;
     uint8_t pause_after_frames;
     uint8_t frames_since_last_skip = 0;
+    uint8_t pauseFrames = 0;
 
     const int frameTime = get_frame_time(60);
 
@@ -633,6 +634,12 @@ void app_main_gb(uint8_t load_state, uint8_t start_paused)
         {
             if (get_elapsed_time_since(startTime) > frameTime) skipFrames = 1;
             switch(app->speedupEnabled){
+                case SPEEDUP_0_5x:
+                    pauseFrames++;
+                    break;
+                case SPEEDUP_0_75x:
+                    if(frames_since_last_skip % 4 == 0) pauseFrames++;
+                    break;
                 case SPEEDUP_1_25x:
                     if(frames_since_last_skip % 4 == 0) skipFrames++;
                     break;
@@ -661,10 +668,13 @@ void app_main_gb(uint8_t load_state, uint8_t start_paused)
             // odroid_audio_submit(pcm.buf, pcm.pos >> 1);
             // handled in pcm_submit instead.
             static dma_transfer_state_t last_dma_state = DMA_TRANSFER_STATE_HF;
-            while (dma_state == last_dma_state) {
-                __NOP();
+            for(uint8_t p = 0; p < pauseFrames + 1; p++) {
+                while (dma_state == last_dma_state) {
+                    __NOP();
+                }
+                last_dma_state = dma_state;
             }
-            last_dma_state = dma_state;
+            pauseFrames = 0;
         }
 
         // Render frames before faking a pause button press

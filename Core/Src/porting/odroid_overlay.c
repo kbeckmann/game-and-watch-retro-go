@@ -512,10 +512,16 @@ static bool scaling_update_cb(odroid_dialog_choice_t *option, odroid_dialog_even
 bool speedup_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat)
 {
     rg_app_desc_t *app = odroid_system_get_app();
-    if (event == ODROID_DIALOG_PREV && --app->speedupEnabled < SPEEDUP_1x) app->speedupEnabled = SPEEDUP_MAX - 1;
-    if (event == ODROID_DIALOG_NEXT && ++app->speedupEnabled >= SPEEDUP_MAX) app->speedupEnabled = SPEEDUP_1x;
+    if (event == ODROID_DIALOG_PREV && --app->speedupEnabled <= SPEEDUP_MIN) app->speedupEnabled = SPEEDUP_MAX - 1;
+    if (event == ODROID_DIALOG_NEXT && ++app->speedupEnabled >= SPEEDUP_MAX) app->speedupEnabled = SPEEDUP_MIN + 1;
 
     switch(app->speedupEnabled){
+        case SPEEDUP_0_5x:
+            strcpy(option->value, "0.5x");
+            break;
+        case SPEEDUP_0_75x:
+            strcpy(option->value, "0.75x");
+            break;
         case SPEEDUP_1x:
             strcpy(option->value, "1x");
             break;
