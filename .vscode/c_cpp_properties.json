@@ -1,0 +1,51 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/Core/Inc",
+                "${workspaceFolder}/Core/Inc",
+                "${workspaceFolder}/Core/Inc/porting",
+                "${workspaceFolder}/Core/Inc/porting/gb",
+                "${workspaceFolder}/Core/Inc/porting/nes",
+                "${workspaceFolder}/Core/Inc/porting/pce",
+                "${workspaceFolder}/Core/Inc/porting/smsplusgx",
+                "${workspaceFolder}/Core/Inc/retro-go",
+                "${workspaceFolder}/Core/Src/porting/lib",
+                "${workspaceFolder}/Drivers/CMSIS/Device/ST/STM32H7xx/Include",
+                "${workspaceFolder}/Drivers/CMSIS/Include",
+                "${workspaceFolder}/Drivers/STM32H7xx_HAL_Driver/Inc",
+                "${workspaceFolder}/Drivers/STM32H7xx_HAL_Driver/Inc/Legacy",
+                "${workspaceFolder}/retro-go-stm32/components/lupng",
+                "${workspaceFolder}/retro-go-stm32/components/odroid",
+                "${workspaceFolder}/retro-go-stm32/gnuboy-go/components",
+                "${workspaceFolder}/retro-go-stm32/huexpress-go/components/huexpress/engine",
+                "${workspaceFolder}/retro-go-stm32/nofrendo-go/components/nofrendo",
+                "${workspaceFolder}/retro-go-stm32/nofrendo-go/components/nofrendo/cpu",
+                "${workspaceFolder}/retro-go-stm32/nofrendo-go/components/nofrendo/mappers",
+                "${workspaceFolder}/retro-go-stm32/nofrendo-go/components/nofrendo/nes",
+                "${workspaceFolder}/retro-go-stm32/smsplusgx-go/components/smsplus",
+                "${workspaceFolder}/retro-go-stm32/smsplusgx-go/components/smsplus/cpu",
+                "${workspaceFolder}/retro-go-stm32/smsplusgx-go/components/smsplus/sound"
+            ],
+            "defines": [
+                "IS_LITTLE_ENDIAN",
+                "DISABLE_AHBRAM_DCACHE",
+                "MINIZ_NO_MALLOC",
+                "MINIZ_NO_ZLIB_AP",
+                "USE_HAL_DRIVER",
+                "STM32H7B0xx",
+                "VECT_TAB_ITCM",
+                "IS_LITTLE_ENDIAN",
+                "DEBUG_RG_ALLOC",
+                "MINIZ_NO_TI"
+            ],
+            "compilerPath": "/usr/bin/clang",
+            "cStandard": "c17",
+            "cppStandard": "c++14",
+            "intelliSenseMode": "linux-clang-x64"
+        }
+    ],
+    "version": 4
+}
