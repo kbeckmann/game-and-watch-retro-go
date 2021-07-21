@@ -32,8 +32,6 @@ static uint16_t palette[32];
 static uint32_t palette_spaced[32];
 
 
-static uint skipFrames = 0;
-
 static bool consoleIsGG  = false;
 static bool consoleIsSMS = false;
 static bool consoleIsCOL = false;
@@ -47,7 +45,7 @@ unsigned int crc32_le(unsigned int crc, unsigned char const * buf,unsigned int l
 
 // --- MAIN
 
-static int 
+static int
 load_rom_from_flash(uint8_t emu_engine)
 {
     static uint8 sram[0x8000];
@@ -102,7 +100,7 @@ uint8_t *fb_buffer = emulator_framebuffer;
 
 #define CONV(_b0) ((0b11111000000000000000000000&_b0)>>10) | ((0b000001111110000000000&_b0)>>5) | ((0b0000000000011111&_b0));
 
-static void 
+static void
 blit_gg(bitmap_t *bmp, uint16_t *framebuffer) {	/* 160 x 144 -> 320 x 240 */
     int y_src = 0;
     int y_dst = 0;
@@ -130,7 +128,7 @@ blit_gg(bitmap_t *bmp, uint16_t *framebuffer) {	/* 160 x 144 -> 320 x 240 */
     }
 }
 
-static void 
+static void
 blit_sms(bitmap_t *bmp, uint16_t *framebuffer) {	/* 256 x 192 -> 320 x 230 */
     const int hpad = (WIDTH - 307) / 2;
     const int vpad = (HEIGHT - 230) / 2;
@@ -234,7 +232,7 @@ void sms_pcm_submit() {
     }
 }
 
-static void sms_draw_frame() 
+static void sms_draw_frame()
 {
   static uint32_t lastFPSTime = 0;
   static uint32_t frames = 0;
@@ -333,11 +331,14 @@ static void sms_update_keys( odroid_gamepad_state_t* joystick )
 }
 
 
-int 
+int
 app_main_smsplusgx(uint8_t load_state, uint8_t start_paused, uint8_t is_coleco)
 {
     uint32_t pause_pressed = 0;
+    uint32_t skipFrames = 0;
     uint8_t pause_after_frames;
+    uint8_t frames_since_last_skip = 0;
+    uint8_t pauseFrames = 0;
 
     if (start_paused) {
         pause_after_frames = 2;
@@ -422,6 +423,9 @@ app_main_smsplusgx(uint8_t load_state, uint8_t start_paused, uint8_t is_coleco)
         uint startTime = get_elapsed_time();
         bool drawFrame = !skipFrames;
 
+        if(drawFrame) frames_since_last_skip += 1;
+        else frames_since_last_skip = 0;
+
         sms_update_keys( &joystick );
 
         system_frame(!drawFrame);
@@ -432,7 +436,26 @@ app_main_smsplusgx(uint8_t load_state, uint8_t start_paused, uint8_t is_coleco)
         if (skipFrames == 0)
         {
             if (get_elapsed_time_since(startTime) > frameTime) skipFrames = 1;
-            if (app->speedupEnabled) skipFrames += app->speedupEnabled * 2.5;
+            switch(app->speedupEnabled){
+                case SPEEDUP_0_5x:
+                    pauseFrames++;
+                    break;
+                case SPEEDUP_0_75x:
+                    if(frames_since_last_skip % 4 == 0) pauseFrames++;
+                    break;
+                case SPEEDUP_1_25x:
+                    if(frames_since_last_skip % 4 == 0) skipFrames++;
+                    break;
+                case SPEEDUP_1_5x:
+                    if(frames_since_last_skip % 2 == 0) skipFrames++;
+                    break;
+                case SPEEDUP_2x:
+                    skipFrames++;
+                    break;
+                case SPEEDUP_3x:
+                    skipFrames+=2;
+                    break;
+            }
         }
         else if (skipFrames > 0)
         {
@@ -442,14 +465,17 @@ app_main_smsplusgx(uint8_t load_state, uint8_t start_paused, uint8_t is_coleco)
         // Tick before submitting audio/syncing
         odroid_system_tick(!drawFrame, fullFrame, get_elapsed_time_since(startTime));
 
-        if (!app->speedupEnabled)
+        if (drawFrame)
         {
             sms_pcm_submit();
-            static dma_transfer_state_t last_dma_state = DMA_TRANSFER_STATE_HF;
-            while (dma_state == last_dma_state) {
-                __NOP();
+            for(uint8_t p = 0; p < pauseFrames + 1; p++) {
+                static dma_transfer_state_t last_dma_state = DMA_TRANSFER_STATE_HF;
+                while (dma_state == last_dma_state) {
+                    __NOP();
+                }
+                last_dma_state = dma_state;
             }
-            last_dma_state = dma_state;
+            pauseFrames = 0;
         }
 
         // Render frames before faking a pause button press

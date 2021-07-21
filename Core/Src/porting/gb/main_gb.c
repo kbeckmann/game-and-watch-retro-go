@@ -550,6 +550,8 @@ void app_main_gb(uint8_t load_state, uint8_t start_paused)
     rg_app_desc_t *app = init(load_state);
     odroid_gamepad_state_t joystick;
     uint8_t pause_after_frames;
+    uint8_t frames_since_last_skip = 0;
+    uint8_t pauseFrames = 0;
 
     const int frameTime = get_frame_time(60);
 
@@ -568,6 +570,9 @@ void app_main_gb(uint8_t load_state, uint8_t start_paused)
 
         uint startTime = get_elapsed_time();
         bool drawFrame = !skipFrames;
+
+        if(drawFrame) frames_since_last_skip += 1;
+        else frames_since_last_skip = 0;
 
         pad_set(PAD_UP, joystick.values[ODROID_INPUT_UP]);
         pad_set(PAD_RIGHT, joystick.values[ODROID_INPUT_RIGHT]);
@@ -628,10 +633,27 @@ void app_main_gb(uint8_t load_state, uint8_t start_paused)
         if (skipFrames == 0)
         {
             if (get_elapsed_time_since(startTime) > frameTime) skipFrames = 1;
-            if (app->speedupEnabled) {
-                skipFrames += app->speedupEnabled * 2;
-                skippedFrames += app->speedupEnabled * 2;
+            switch(app->speedupEnabled){
+                case SPEEDUP_0_5x:
+                    pauseFrames++;
+                    break;
+                case SPEEDUP_0_75x:
+                    if(frames_since_last_skip % 4 == 0) pauseFrames++;
+                    break;
+                case SPEEDUP_1_25x:
+                    if(frames_since_last_skip % 4 == 0) skipFrames++;
+                    break;
+                case SPEEDUP_1_5x:
+                    if(frames_since_last_skip % 2 == 0) skipFrames++;
+                    break;
+                case SPEEDUP_2x:
+                    skipFrames++;
+                    break;
+                case SPEEDUP_3x:
+                    skipFrames+=2;
+                    break;
             }
+            skippedFrames += skipFrames;
         }
         else if (skipFrames > 0)
         {
@@ -641,15 +663,18 @@ void app_main_gb(uint8_t load_state, uint8_t start_paused)
         // Tick before submitting audio/syncing
         odroid_system_tick(!drawFrame, fullFrame, get_elapsed_time_since(startTime));
 
-        if (!app->speedupEnabled)
+        if(drawFrame)
         {
             // odroid_audio_submit(pcm.buf, pcm.pos >> 1);
             // handled in pcm_submit instead.
             static dma_transfer_state_t last_dma_state = DMA_TRANSFER_STATE_HF;
-            while (dma_state == last_dma_state) {
-                __NOP();
+            for(uint8_t p = 0; p < pauseFrames + 1; p++) {
+                while (dma_state == last_dma_state) {
+                    __NOP();
+                }
+                last_dma_state = dma_state;
             }
-            last_dma_state = dma_state;
+            pauseFrames = 0;
         }
 
         // Render frames before faking a pause button press

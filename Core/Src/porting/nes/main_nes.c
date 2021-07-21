@@ -15,7 +15,7 @@
 #include "common.h"
 #include "rom_manager.h"
 
-#include "lz4_depack.h" 
+#include "lz4_depack.h"
 #include <assert.h>
 #include  "miniz.h"
 
@@ -134,24 +134,47 @@ static uint32_t skippedFrames = 0;
 
 void osd_vsync()
 {
-    static uint32_t skipFrames = 0;
     static uint32_t lastSyncTime = 0;
-    uint32_t t0;
+    static uint8_t skipFrames = 0;
+    static uint8_t frames_since_last_skip = 0;
 
+    uint32_t t0;
     uint32_t elapsed = get_elapsed_time_since(lastSyncTime);
+    uint8_t pauseFrames = 0;
+    bool drawFrame = !skipFrames;
+
+    if(drawFrame) frames_since_last_skip += 1;
+    else frames_since_last_skip = 0;
 
     rg_app_desc_t *app = odroid_system_get_app();
     if (skipFrames == 0) {
         if (elapsed > frameTime) skipFrames = 1;
-        if (app->speedupEnabled) skipFrames += app->speedupEnabled * 2;
+        switch(app->speedupEnabled){
+             case SPEEDUP_0_5x:
+                 pauseFrames++;
+                 break;
+             case SPEEDUP_0_75x:
+                 if(frames_since_last_skip % 4 == 0) pauseFrames++;
+                 break;
+             case SPEEDUP_1_25x:
+                 if(frames_since_last_skip % 4 == 0) skipFrames++;
+                 break;
+             case SPEEDUP_1_5x:
+                 if(frames_since_last_skip % 2 == 0) skipFrames++;
+                 break;
+             case SPEEDUP_2x:
+                 skipFrames++;
+                 break;
+             case SPEEDUP_3x:
+                 skipFrames+=2;
+                 break;
+        }
+        skippedFrames += skipFrames;
     } else if (skipFrames > 0) {
         skipFrames--;
-        skippedFrames++;
     }
 
-    if (!app->speedupEnabled) {
-        nes_audio_submit(nes_getptr()->apu->buffer, nes_getptr()->apu->samples_per_frame);
-    }
+    nes_audio_submit(nes_getptr()->apu->buffer, nes_getptr()->apu->samples_per_frame);
 
     // Tick before submitting audio/syncing
     odroid_system_tick(!nes_getptr()->drawframe, fullFrame, elapsed);
@@ -161,21 +184,21 @@ void osd_vsync()
     // Wait until the audio buffer has been transmitted
     static uint32_t last_dma_counter = 0;
     t0 = get_elapsed_time();
-    while (dma_counter == last_dma_counter) {
-        __WFI();
+    if(drawFrame){
+        for(uint8_t p = 0; p < pauseFrames + 1; p++) {
+            while (dma_counter == last_dma_counter) {
+                __WFI();
+            }
+            last_dma_counter = dma_counter;
+        }
     }
+
     vsync_wait_ms += get_elapsed_time_since(t0);
-
-    last_dma_counter = dma_counter;
-
     lastSyncTime = get_elapsed_time();
 }
 
 void nes_audio_submit(int16_t *buffer, int audioSamples)
 {
-    if (odroid_system_get_app()->speedupEnabled)
-        return;
-
     // apu_process(audiobuffer_emulator, audioSamples, false); //get audio data
 
     size_t offset = (dma_state == DMA_TRANSFER_STATE_HF) ? 0 : audioSamples;
