@@ -482,7 +482,8 @@ class ROMParser:
 
     def _compress_rom(self, variable_name, rom, compress_gb_speed=False, compress=None):
         """This will create a compressed rom file next to the original rom."""
-
+        if not (rom.publish):
+            return
         if compress is None:
             compress = "lz4"
 
@@ -652,8 +653,6 @@ class ROMParser:
                 folder + "_roms", roms, save_prefix, variable_name
             )
             f.write(rom_entries)
-
-            print(rom_entries)
 
             f.write(
                 SYSTEM_TEMPLATE.format(
