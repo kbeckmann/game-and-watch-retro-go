@@ -433,6 +433,8 @@ int app_main_pce(uint8_t load_state, uint8_t start_paused) {
 
     uint32_t pause_pressed = 0;
     uint8_t pause_after_frames;
+    uint8_t pauseFrames = 0;
+    uint8_t frames_since_last_skip = 0;
 
     if (start_paused) {
         pause_after_frames = 2;
@@ -478,6 +480,9 @@ int app_main_pce(uint8_t load_state, uint8_t start_paused) {
 
     while (true) {
         wdog_refresh();
+        bool drawFrame = !skipFrames;
+        if(drawFrame) frames_since_last_skip += 1;
+        else frames_since_last_skip = 0;
 
         odroid_gamepad_state_t joystick;
 
@@ -524,13 +529,31 @@ int app_main_pce(uint8_t load_state, uint8_t start_paused) {
             gfx_run();
         }
 
-        bool drawFrame = !skipFrames;
         pce_osd_gfx_blit(drawFrame);
 
         // See if we need to skip a frame to keep up
         if (skipFrames == 0) {
             if (get_elapsed_time_since(startTime) > frameTime) skipFrames = 1;
-            if (app->speedupEnabled) skipFrames += app->speedupEnabled * 2.5;
+            switch(app->speedupEnabled){
+                case SPEEDUP_0_5x:
+                    pauseFrames++;
+                    break;
+                case SPEEDUP_0_75x:
+                    if(frames_since_last_skip % 4 == 0) pauseFrames++;
+                    break;
+                case SPEEDUP_1_25x:
+                    if(frames_since_last_skip % 4 == 0) skipFrames++;
+                    break;
+                case SPEEDUP_1_5x:
+                    if(frames_since_last_skip % 2 == 0) skipFrames++;
+                    break;
+                case SPEEDUP_2x:
+                    skipFrames++;
+                    break;
+                case SPEEDUP_3x:
+                    skipFrames+=2;
+                    break;
+            }
         } else if (skipFrames > 0) {
             skipFrames--;
         }
@@ -538,8 +561,11 @@ int app_main_pce(uint8_t load_state, uint8_t start_paused) {
         // Tick before submitting audio/syncing
         odroid_system_tick(!drawFrame, fullFrame, get_elapsed_time_since(startTime));
 
-        if (!app->speedupEnabled) {
-            pce_pcm_submit();
+        if (drawFrame) {
+            for(uint8_t p = 0; p < pauseFrames + 1; p++) {
+                pce_pcm_submit();
+            }
+            pauseFrames = 0;
         }
 
         // Prevent overflow
@@ -557,4 +583,3 @@ int app_main_pce(uint8_t load_state, uint8_t start_paused) {
     }
 
 }
-
