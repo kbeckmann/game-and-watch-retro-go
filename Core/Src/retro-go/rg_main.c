@@ -235,10 +235,10 @@ void retro_loop()
             if (last_key == ODROID_INPUT_START) {
                 odroid_dialog_choice_t choices[] = {
                     {0, "版本", GIT_HASH, 1, NULL},
-                    {0, "开发者", "ducalex", 1, NULL},
-                    {0, "&", "kbeckmann", 1, NULL},
-                    {0, "&", "stacksmashing", 1, NULL},
-                    {0, "中文化", "orzeus", -1, NULL},
+                    {9, "开发者", "ducalex", 1, NULL},
+                    {9, "&", "kbeckmann", 1, NULL},
+                    {9, "&", "stacksmashing", 1, NULL},
+                    {9, "中文化", "orzeus", 1, NULL},
                     {0, "---", "", -1, NULL},
                     {2, "调试信息", "≈", 1, NULL},
                     {1, "重置设定", "≡", 1, NULL},
@@ -274,8 +274,8 @@ void retro_loop()
                         {0, "制造商", flash_manufacturer_str(jedec_id[0]), 1, NULL},
                         {0, "芯片状态", status_str, 1, NULL},
                         {0, "---", "", -1, NULL},
-                        {1, "开启芯片高速存取模式", "≡", 1, NULL},
-                        {2, "清除芯片高速存取模式", "…", 1, NULL},
+                        {1, "开启芯片高速存取模式", "", 1, NULL},
+                        {2, "清除芯片高速存取模式", "", 1, NULL},
                         {0, "---", "", -1, NULL},
                         {0, "关闭", "×", 1, NULL},
                         ODROID_DIALOG_CHOICE_LAST
@@ -284,15 +284,19 @@ void retro_loop()
                     int sel = odroid_overlay_dialog("调试信息", debuginfo, -1);
                     if (sel == 1) {
                         // Set Quad Enable
-                        if (odroid_overlay_confirm("开启存储芯片的高速存储模式？", false) == 1) {
+                        if (odroid_overlay_confirm("您确定开启存储芯片的高速存储模式？", false) == 1) {
                             flash_set_quad_enable(1);
                         }
                     } else  if (sel == 2) {
                         // Clear Quad Enable
-                        if (odroid_overlay_confirm("关闭存储芯片的高速存储模式？", false) == 1) {
+                        if (odroid_overlay_confirm("您确定关闭存储芯片的高速存储模式？", false) == 1) {
                             flash_set_quad_enable(0);
                         }
                     }
+                }
+                else if (sel == 9) {
+                    odroid_overlay_alert("您真的真的真的好帅好帅好帅！！！");
+
                 }
 
                 gui_redraw();

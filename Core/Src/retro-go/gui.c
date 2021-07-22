@@ -338,7 +338,6 @@ void gui_draw_prior_cover(retro_emulator_file_t *file)
     size_t real_len = strlen(str_buffer);
     //revert to draw it
     size_t len = (real_len > 13) ? 13 : real_len;
-    //size_t startx = 0;
     for (int x = len; x > 0; x--) {
         //get single or double;
         uint8_t c1 = str_buffer[real_len - len + x - 1];
@@ -359,7 +358,7 @@ void gui_draw_prior_cover(retro_emulator_file_t *file)
                 (13 - len) * 3 + x * 6 - 4,
                 47, //top
                 12,
-                &str_buffer[real_len - len + x - 2],
+                &str_buffer[real_len - len + x - 1],
                 get_darken_pixel(C_GW_YELLOW, 28 + (13 - len) * 3 + x * 6),
                 C_BLACK);
 
@@ -384,7 +383,6 @@ void gui_draw_next_cover(retro_emulator_file_t *file)
     sprintf(str_buffer, "%s", file->name);
     size_t len = strlen(str_buffer);
     len = (len > 13) ? 13 : len;
-
     for (int x = 0; x < len; x++) {
         uint8_t c1 = str_buffer[x];
         if (c1 < 0x80) {
@@ -443,13 +441,6 @@ void gui_draw_current_cover(retro_emulator_file_t *file)
     sprintf(str_buffer, "%s", file->name);
     size_t len = strlen(str_buffer);
     len = (len > 48) ? 48 : len;
-    //max show txt len: 48*6?
-    /*if (len > 38) {
-        for (int i = 35; i < 38; i++)
-            str_buffer[i] = '.';
-        len = 38;
-        str_buffer[38] = 0;
-    }*/
     odroid_overlay_draw_chn_text_line(16 + (48 - len) * 3, 167, len * 6, str_buffer, C_GW_YELLOW, C_BLACK);
     //draw a left & right arrow
 }

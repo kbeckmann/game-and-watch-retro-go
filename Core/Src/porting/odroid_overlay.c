@@ -276,7 +276,7 @@ void odroid_overlay_draw_dialog(const char *header, odroid_dialog_choice_t *opti
         width = len > width ? len : width;
     }
 
-    if (width > 32) width = 32;
+    if (width > 44) width = 44;
 
     box_width = (odroid_overlay_get_chn_font_width() * width) + box_padding * 2;
     box_height = (row_height * options_count) + (header ? row_height + 8 : 0) + box_padding * 2;
@@ -287,25 +287,26 @@ void odroid_overlay_draw_dialog(const char *header, odroid_dialog_choice_t *opti
     int x = box_x + box_padding;
     int y = box_y + box_padding;
 
+    uint16_t fg, bg, color, inner_width = box_width - (box_padding * 2);
     if (header)
     {
-        int pad = (0.5f * (width - strlen(header)) * odroid_overlay_get_chn_font_width());
+        //int pad = (0.5f * (width - strlen(header)) * odroid_overlay_get_chn_font_width());
         odroid_overlay_draw_rect(box_x - 1, box_y - 1, box_width + 2, row_height + 8, 1, box_border_color);
         //odroid_overlay_draw_rect(box_x, box_y, box_width, row_height + 7, 1, C_GW_OPAQUE_YELLOW);
         odroid_overlay_draw_fill_rect(box_x, box_y, box_width, row_height + 7, C_GW_RED);
-        odroid_overlay_draw_chn_text_line(x + pad, box_y + 3, box_width - 2 * pad - 8, header, C_GW_YELLOW, C_GW_RED);
+        odroid_overlay_draw_chn_text_line(x - box_padding, box_y + 3, inner_width, header, C_GW_YELLOW, C_GW_RED);
+        odroid_overlay_draw_fill_rect(box_x + inner_width - 8, box_y + 2, 4, 14, box_border_color);
         y += row_height + 8;
     }
 
-    uint16_t fg, bg, color, inner_width = box_width - (box_padding * 2);
     for (int i = 0; i < options_count; i++)
     {
-        color = options[i].enabled == 1 ? box_text_color : C_GRAY;
+        color = options[i].enabled == 1 ? box_text_color : C_GW_OPAQUE_YELLOW;
         fg = (i == sel) ? box_color : color;
         bg = (i == sel) ? color : box_color;
         if (strncmp((char *)(rows + i * 256), " --- ", 5) == 0) {
             odroid_overlay_draw_fill_rect(x, y, inner_width, row_height + 3 * row_margin, bg);
-            odroid_overlay_draw_fill_rect(x + 6, y + row_height / 2 - row_margin, inner_width - 12, 1, C_GW_OPAQUE_YELLOW);
+            odroid_overlay_draw_fill_rect(x + 6, y + row_height / 2 - row_margin, inner_width - 12, 1, box_border_color);
         }
         else {
             row_height = odroid_overlay_draw_chn_text(x, y + row_margin, inner_width, rows + i * 256, fg, bg);
@@ -439,20 +440,22 @@ int odroid_overlay_dialog(const char *header, odroid_dialog_choice_t *options, i
 int odroid_overlay_confirm(const char *text, bool yes_selected)
 {
     odroid_dialog_choice_t choices[] = {
+        {0, text, "", 0, NULL},
         {1, "是", "○", 1, NULL},
         {0, "否", "×", 1, NULL},
         ODROID_DIALOG_CHOICE_LAST
     };
-    return odroid_overlay_dialog(text, choices, yes_selected ? 0 : 1);
+    return odroid_overlay_dialog("请选择", choices, yes_selected ? 0 : 1);
 }
 
 void odroid_overlay_alert(const char *text)
 {
     odroid_dialog_choice_t choices[] = {
+        {0, text, "", 0, NULL},
         {1, "确定", "○", 1, NULL},
         ODROID_DIALOG_CHOICE_LAST
     };
-    odroid_overlay_dialog(text, choices, 0);
+    odroid_overlay_dialog("信息确认", choices, 0);
 }
 
 bool odroid_overlay_dialog_is_open(void)
