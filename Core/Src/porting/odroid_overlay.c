@@ -294,16 +294,24 @@ void odroid_overlay_draw_dialog(const char *header, odroid_dialog_choice_t *opti
         odroid_overlay_draw_rect(box_x - 1, box_y - 1, box_width + 2, row_height + 8, 1, box_border_color);
         //odroid_overlay_draw_rect(box_x, box_y, box_width, row_height + 7, 1, C_GW_OPAQUE_YELLOW);
         odroid_overlay_draw_fill_rect(box_x, box_y, box_width, row_height + 7, C_GW_RED);
-        odroid_overlay_draw_chn_text_line(x - box_padding, box_y + 3, inner_width, header, C_GW_YELLOW, C_GW_RED);
-        odroid_overlay_draw_fill_rect(box_x + inner_width - 8, box_y + 2, 4, 14, box_border_color);
+        odroid_overlay_draw_chn_text_line(x , box_y + 3, inner_width, header, C_GW_YELLOW, C_GW_RED);
+        odroid_overlay_draw_fill_rect(x + inner_width, box_y + 4, 2, 4, C_GW_YELLOW);
+        odroid_overlay_draw_fill_rect(x + inner_width, box_y + 10, 2, 4, C_GW_OPAQUE_YELLOW);
         y += row_height + 8;
     }
 
     for (int i = 0; i < options_count; i++)
     {
         color = options[i].enabled == 1 ? box_text_color : C_GW_OPAQUE_YELLOW;
-        fg = (i == sel) ? box_color : color;
-        bg = (i == sel) ? color : box_color;
+        if (options[i].enabled == 1) {
+            fg = (i == sel) ? box_color : color;
+            bg = (i == sel) ? color : box_color;
+        }
+        else {
+            fg = color;
+            bg = C_BLACK;
+        }
+
         if (strncmp((char *)(rows + i * 256), " --- ", 5) == 0) {
             odroid_overlay_draw_fill_rect(x, y, inner_width, row_height + 3 * row_margin, bg);
             odroid_overlay_draw_fill_rect(x + 6, y + row_height / 2 - row_margin, inner_width - 12, 1, box_border_color);
@@ -440,7 +448,8 @@ int odroid_overlay_dialog(const char *header, odroid_dialog_choice_t *options, i
 int odroid_overlay_confirm(const char *text, bool yes_selected)
 {
     odroid_dialog_choice_t choices[] = {
-        {0, text, "", 0, NULL},
+        {0, text, "", -1, NULL},
+        {0, "---", "", -1, NULL},
         {1, "ÊÇ", "¡ð", 1, NULL},
         {0, "·ñ", "¡Á", 1, NULL},
         ODROID_DIALOG_CHOICE_LAST
@@ -451,7 +460,8 @@ int odroid_overlay_confirm(const char *text, bool yes_selected)
 void odroid_overlay_alert(const char *text)
 {
     odroid_dialog_choice_t choices[] = {
-        {0, text, "", 0, NULL},
+        {0, text, "", -1, NULL},
+        {0, "---", "", -1, NULL},
         {1, "È·¶¨", "¡ð", 1, NULL},
         ODROID_DIALOG_CHOICE_LAST
     };

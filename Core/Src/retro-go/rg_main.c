@@ -270,9 +270,9 @@ void retro_loop()
                     snprintf(status_str, sizeof(status_str), "0x%02X", status);
 
                     odroid_dialog_choice_t debuginfo[] = {
-                        {0, "芯片 JEDEC ID", jedec_id_str, 1, NULL},
-                        {0, "制造商", flash_manufacturer_str(jedec_id[0]), 1, NULL},
-                        {0, "芯片状态", status_str, 1, NULL},
+                        {0, "存储 JEDEC ID", jedec_id_str, 1, NULL},
+                        {0, "存储芯片制造商", flash_manufacturer_str(jedec_id[0]), 1, NULL},
+                        {0, "存储芯片状态", status_str, 1, NULL},
                         {0, "---", "", -1, NULL},
                         {1, "开启芯片高速存取模式", "", 1, NULL},
                         {2, "清除芯片高速存取模式", "", 1, NULL},
@@ -296,9 +296,7 @@ void retro_loop()
                 }
                 else if (sel == 9) {
                     odroid_overlay_alert("您真的真的真的好帅好帅好帅！！！");
-
                 }
-
                 gui_redraw();
             }
             else if (last_key == ODROID_INPUT_VOLUME) {
