@@ -347,7 +347,7 @@ void gui_draw_prior_cover(retro_emulator_file_t *file)
                 47, //top
                 6,
                 &str_buffer[real_len - len + x - 1],
-                get_darken_pixel(C_GW_YELLOW, 28 + (13 - len) * 3 + x * 6),
+                get_darken_pixel(C_GW_OPAQUE_YELLOW, 28 + (13 - len) * 3 + x * 6),
                 C_BLACK);
         }
         else { //double;
@@ -359,7 +359,7 @@ void gui_draw_prior_cover(retro_emulator_file_t *file)
                 47, //top
                 12,
                 &str_buffer[real_len - len + x - 1],
-                get_darken_pixel(C_GW_YELLOW, 28 + (13 - len) * 3 + x * 6),
+                get_darken_pixel(C_GW_OPAQUE_YELLOW, 28 + (13 - len) * 3 + x * 6),
                 C_BLACK);
 
         }
@@ -391,7 +391,7 @@ void gui_draw_next_cover(retro_emulator_file_t *file)
                 47, //top
                 6,
                 &str_buffer[x],
-                get_darken_pixel(C_GW_YELLOW, 100 - (13 - len) * 3 - x * 6),
+                get_darken_pixel(C_GW_OPAQUE_YELLOW, 100 - (13 - len) * 3 - x * 6),
                 C_BLACK);
         } 
         else {  //double;
@@ -402,7 +402,7 @@ void gui_draw_next_cover(retro_emulator_file_t *file)
                 47, //top
                 12,
                 &str_buffer[x],
-                get_darken_pixel(C_GW_YELLOW, 100 - (13 - len) * 3 - x * 6),
+                get_darken_pixel(C_GW_OPAQUE_YELLOW, 100 - (13 - len) * 3 - x * 6),
                 C_BLACK);
             x--;
         }
