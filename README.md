@@ -12,15 +12,29 @@ Supported emulators:
 - Sega Master System (sms)
 - Sega SG-1000 (sg)
 
-## NewUI Branch
+## ChineseUI Branch
+
+### How to make chinese romname?
+
+after ready your rom file & image file, run:
+
+```bash
+make romdef
+```
+then your will found a `roms.json` file in `roms` folder, continue modify the file and change the name define
+
+continue to normal make process
 
 <img src="assets/gwui.jpg" width="800"/>
 
 
 ### Prerequisites
 
- - Need same name as rom's bitmap file, bmp file must 128x96 pixels and 16bit(RGB565) and save file format flip row order 
- - Bmp image file must RGB565 (Photoshop -> save as -> BMP file (sel:win+16bit, checked 'flip row order' option) -> Advance mode -> R5 G6 B5)
+ - **NOW YOU ONLY NEED GIVE A PNG FILE AND NAME AS ROMNAME AT ROM''S SAME FOLDER.**
+
+ ~~ Need same name as rom's bitmap file, bmp file must 128x96 pixels and 16bit(RGB565) and save file format flip row order ~~
+ ~~ Bmp image file must RGB565 (Photoshop -> save as -> BMP file (sel:win+16bit, checked 'flip row order' option) -> Advance mode -> R5 G6 B5) ~~
+
 
 
 ## How to report issues
