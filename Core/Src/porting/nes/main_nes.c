@@ -32,9 +32,6 @@
 
 static uint8_t pause_after_frames;
 
-static uint32_t pause_pressed;
-static uint32_t power_pressed;
-
 static bool fullFrame = 0;
 static uint frameTime = 1000 / 60;
 static uint samplesPerFrame;
@@ -447,6 +444,8 @@ static bool palette_update_cb(odroid_dialog_choice_t *option, odroid_dialog_even
 
 void osd_getinput(void)
 {
+    static uint8_t pause_pressed;
+    static uint8_t power_pressed;
     uint16 pad0 = 0;
 
     wdog_refresh();
@@ -510,7 +509,7 @@ void osd_getinput(void)
     if (pause_after_frames > 0) {
         pause_after_frames--;
         if (pause_after_frames == 0) {
-            pause_pressed = B_PAUSE;
+            pause_pressed = 1;
         }
     }
 }
