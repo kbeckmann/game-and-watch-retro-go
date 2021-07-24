@@ -340,6 +340,12 @@ int odroid_overlay_dialog(const char *header, odroid_dialog_choice_t *options, i
                 sel = -1;
                 break;
             }
+            else if (joystick.values[ODROID_INPUT_POWER]) {
+                sel = -1;
+                odroid_system_emu_save_state(0);
+                odroid_system_sleep();
+                break;
+            }
             if (options[sel].enabled) {
                 select = false;
                 if (joystick.values[ODROID_INPUT_LEFT]) {
