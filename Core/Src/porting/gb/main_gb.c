@@ -36,10 +36,6 @@
 #endif
 
 
-static uint32_t pause_pressed;
-static uint32_t power_pressed;
-
-
 static odroid_video_frame_t update1 = {GB_WIDTH, GB_HEIGHT, GB_WIDTH * 2, 2, 0xFF, -1, NULL, NULL, 0, {}};
 static odroid_video_frame_t update2 = {GB_WIDTH, GB_HEIGHT, GB_WIDTH * 2, 2, 0xFF, -1, NULL, NULL, 0, {}};
 static odroid_video_frame_t *currentUpdate = &update1;
@@ -156,7 +152,6 @@ static void screen_blit_bilinear(void) {
 
     float x_scale = ((float) w2) / ((float) w1);
     float y_scale = ((float) h2) / ((float) h1);
-
 
 
 
@@ -552,6 +547,8 @@ void app_main_gb(uint8_t load_state, uint8_t start_paused)
     uint8_t pause_after_frames;
     uint8_t frames_since_last_skip = 0;
     uint8_t pauseFrames = 0;
+    uint8_t pause_pressed = 0;
+    uint8_t power_pressed = 0;
 
     const int frameTime = get_frame_time(60);
 
@@ -681,7 +678,7 @@ void app_main_gb(uint8_t load_state, uint8_t start_paused)
         if (pause_after_frames > 0) {
             pause_after_frames--;
             if (pause_after_frames == 0) {
-                pause_pressed = B_PAUSE;
+                pause_pressed = 1;
             }
         }
     }
