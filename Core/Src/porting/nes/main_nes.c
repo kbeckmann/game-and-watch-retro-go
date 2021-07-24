@@ -444,8 +444,11 @@ static bool palette_update_cb(odroid_dialog_choice_t *option, odroid_dialog_even
 
 void osd_getinput(void)
 {
+    rg_app_desc_t *app = odroid_system_get_app();
     static uint8_t pause_pressed;
     static uint8_t power_pressed;
+    static emu_speedup_t last_speedup = SPEEDUP_1_5x;
+    static int8_t pause_pressed_count = 0;
     uint16 pad0 = 0;
 
     wdog_refresh();
@@ -462,8 +465,27 @@ void osd_getinput(void)
     if (joystick.values[ODROID_INPUT_A]) pad0 |= INP_PAD_A;
     if (joystick.values[ODROID_INPUT_B]) pad0 |= INP_PAD_B;
 
+    if(pause_pressed && pause_pressed_count >= 0){
+        // Long-pressing PAUSE/SET to quickly toggle emulator speed.
+        if(pause_pressed_count < 127) {
+            pause_pressed_count++;
+        }
+        if(pause_pressed_count > 30) {  // 30 frames = half a second
+            if(app->speedupEnabled == SPEEDUP_1x) {
+                app->speedupEnabled = last_speedup;
+            }
+            else {
+                last_speedup = app->speedupEnabled;
+                app->speedupEnabled = SPEEDUP_1x;
+            }
+
+            pause_pressed_count = -1;
+        }
+    }
+
     if (pause_pressed != joystick.values[ODROID_INPUT_VOLUME]) {
-        if (pause_pressed) {
+        if (pause_pressed && pause_pressed_count >= 0) {
+            // PAUSE/SET has been released
             printf("Pause pressed %ld=>%d\n", audio_mute, !audio_mute);
 
             odroid_dialog_choice_t options[] = {
@@ -477,6 +499,7 @@ void osd_getinput(void)
             memset(framebuffer2, 0x0, sizeof(framebuffer2));
         }
         pause_pressed = joystick.values[ODROID_INPUT_VOLUME];
+        pause_pressed_count = 0;
     }
 
     if (power_pressed != joystick.values[ODROID_INPUT_POWER]) {
