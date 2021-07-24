@@ -311,7 +311,7 @@ void gui_draw_status(tab_t *tab)
     odroid_overlay_draw_chn_text(
         0,
         16,
-        ODROID_SCREEN_WIDTH - 36,
+        ODROID_SCREEN_WIDTH - 20,
         tab->status,
         C_GW_YELLOW,
         C_GW_RED

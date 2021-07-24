@@ -242,14 +242,13 @@ void odroid_overlay_draw_dialog(const char *header, odroid_dialog_choice_t *opti
     int box_border_color = C_GW_OPAQUE_YELLOW;
     int box_text_color = C_GW_YELLOW;
 
-    if (dialog_open_depth <= 0) {   //darken bg
-        uint16_t *dst_img = lcd_get_active_buffer();
-        for (int y = 0; y < ODROID_SCREEN_HEIGHT; y++) {
-            for (int x = 0; x < ODROID_SCREEN_WIDTH; x++)
-                dst_img[y * ODROID_SCREEN_WIDTH + x] = get_darken_pixel(dst_img[y * ODROID_SCREEN_WIDTH + x], 40);
-        }
-
-    }
+    //if (dialog_open_depth <= 0) {   //darken bg
+    //    uint16_t *dst_img = lcd_get_active_buffer();
+    //    for (int y = 0; y < ODROID_SCREEN_HEIGHT; y++) {
+    //        for (int x = 0; x < ODROID_SCREEN_WIDTH; x++)
+    //            dst_img[y * ODROID_SCREEN_WIDTH + x] = get_darken_pixel(dst_img[y * ODROID_SCREEN_WIDTH + x], 40);
+    //    }
+    //}
 
     int options_count = get_dialog_items_count(options);
 
@@ -465,7 +464,7 @@ void odroid_overlay_alert(const char *text)
         {1, "确定", "○", 1, NULL},
         ODROID_DIALOG_CHOICE_LAST
     };
-    odroid_overlay_dialog("信息确认", choices, 0);
+    odroid_overlay_dialog("信息确认", choices, 1);
 }
 
 bool odroid_overlay_dialog_is_open(void)
@@ -476,10 +475,11 @@ bool odroid_overlay_dialog_is_open(void)
 static bool volume_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat)
 {
     int8_t level = odroid_audio_volume_get();
-    int8_t min = ODROID_AUDIO_VOLUME_MIN;
-    int8_t max = ODROID_AUDIO_VOLUME_MAX;
+    int8_t min = 1;
+    int8_t max = 9;
+    unsigned char sout[max * 2 + 2];
 
-    if (event == ODROID_DIALOG_PREV && level > min) {
+    if (event == ODROID_DIALOG_PREV && level > 0) {
         odroid_audio_volume_set(--level);
     }
 
@@ -487,7 +487,13 @@ static bool volume_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event
         odroid_audio_volume_set(++level);
     }
 
-    sprintf(option->value, "%d/%d", level, max);
+    for (int i = 0; i <= max; i++) {
+        sout[i * 2] = 0xA1;
+        sout[i * 2 + 1] = (i <= level) ? 0xF6 : 0xF5;
+    }
+
+    sprintf(option->value, "%.*s", max * 2 + 2, sout);
+    //sprintf(option->value, "%d/%d", level, max);
     return event == ODROID_DIALOG_ENTER;
     return false;
 }
@@ -495,7 +501,8 @@ static bool volume_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event
 static bool brightness_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat)
 {
     int8_t level = odroid_display_get_backlight();
-    int8_t max = ODROID_BACKLIGHT_LEVEL_COUNT - 1;
+    int8_t max = 9;
+    unsigned char sout[max * 2 + 2];
 
     if (event == ODROID_DIALOG_PREV && level > 0) {
         odroid_display_set_backlight(--level);
@@ -504,8 +511,13 @@ static bool brightness_update_cb(odroid_dialog_choice_t *option, odroid_dialog_e
     if (event == ODROID_DIALOG_NEXT && level < max) {
         odroid_display_set_backlight(++level);
     }
+    for (int i = 0; i <= max; i++) {
+        sout[i * 2] = 0xA1;
+        sout[i * 2 + 1] = (i <= level) ? 0xF6 : 0xF5;
+    }
 
-    sprintf(option->value, "%d/%d", level + 1, max + 1);
+    sprintf(option->value, "%.*s", max * 2 + 2, sout);
+    //sprintf(option->value, "%d/%d", level + 1, max + 1);
     //sprintf(option->value, "%d/%d", level + 1, max + 1, (level < max + 1) ? '>' : ' ');
     return event == ODROID_DIALOG_ENTER;
 }
@@ -620,7 +632,7 @@ static void draw_game_status_bar(runtime_stats_t stats)
     const char *romPath = (ACTIVE_FILE) ? ACTIVE_FILE->name : 'N/A';
         //odroid_system_get_app()->romPath;
 
-    snprintf(header, 40, "帧率: %d.%d (%d.%d) / CPU占用: %d.%d%%",
+    snprintf(header, 40, "帧率: %d.%d (%d.%d) / 负载（CPU）: %d.%d%%",
         (int) stats.totalFPS,    (int) fmod(stats.totalFPS * 10, 10),
         (int) stats.skippedFPS,  (int) fmod(stats.skippedFPS * 10, 10),
         (int) stats.busyPercent, (int) fmod(stats.busyPercent * 10, 10));

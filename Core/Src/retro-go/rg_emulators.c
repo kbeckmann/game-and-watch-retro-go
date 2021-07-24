@@ -312,7 +312,7 @@ void emulator_show_file_info(retro_emulator_file_t *file)
     sprintf(choices[2].value, "%d KB", file->size / 1024);
     sprintf(choices[3].value, "%d KB", file->img_size / 1024);
 
-    odroid_overlay_dialog(" Ù–‘", choices, -1);
+    odroid_overlay_dialog("”Œœ∑ Rom  Ù–‘", choices, -1);
 }
 
 void emulator_show_file_menu(retro_emulator_file_t *file)

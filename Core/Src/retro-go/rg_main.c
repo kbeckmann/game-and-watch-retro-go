@@ -140,7 +140,7 @@ static bool main_menu_timeout_cb(odroid_dialog_choice_t *option, odroid_dialog_e
         odroid_settings_MainMenuTimeoutS_set(timeout + step);
         //gui_redraw();
     }
-    sprintf(option->value, "%d √Î", odroid_settings_MainMenuTimeoutS_get());
+    sprintf(option->value, "        %d √Î", odroid_settings_MainMenuTimeoutS_get());
     return event == ODROID_DIALOG_ENTER;
 }
 
