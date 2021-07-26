@@ -431,7 +431,8 @@ void pce_pcm_submit() {
 
 int app_main_pce(uint8_t load_state, uint8_t start_paused) {
 
-    uint32_t pause_pressed = 0;
+    uint8_t pause_pressed = 0;
+    uint8_t power_pressed = 0;
     uint8_t pause_after_frames;
     uint8_t pauseFrames = 0;
     uint8_t frames_since_last_skip = 0;
@@ -475,7 +476,6 @@ int app_main_pce(uint8_t load_state, uint8_t start_paused) {
     if (load_state) LoadState(NULL);
 
     // Main emulator loop
-    uint32_t power_pressed = 0;
     printf("Main emulator loop start\n");
 
     while (true) {
@@ -577,7 +577,7 @@ int app_main_pce(uint8_t load_state, uint8_t start_paused) {
         if (pause_after_frames > 0) {
             pause_after_frames--;
             if (pause_after_frames == 0) {
-                pause_pressed = B_PAUSE;
+                pause_pressed = 1;
             }
         }
     }

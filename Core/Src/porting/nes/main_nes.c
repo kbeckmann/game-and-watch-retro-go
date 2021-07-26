@@ -32,9 +32,6 @@
 
 static uint8_t pause_after_frames;
 
-static uint32_t pause_pressed;
-static uint32_t power_pressed;
-
 static bool fullFrame = 0;
 static uint frameTime = 1000 / 60;
 static uint samplesPerFrame;
@@ -447,21 +444,25 @@ static bool palette_update_cb(odroid_dialog_choice_t *option, odroid_dialog_even
 
 void osd_getinput(void)
 {
+    static uint8_t pause_pressed;
+    static uint8_t power_pressed;
     uint16 pad0 = 0;
 
     wdog_refresh();
 
-    uint32_t buttons = buttons_get();
-    if(buttons & B_GAME) pad0 |= INP_PAD_START;
-    if(buttons & B_TIME) pad0 |= INP_PAD_SELECT;
-    if(buttons & B_Up)   pad0 |= INP_PAD_UP;
-    if(buttons & B_Down)   pad0 |= INP_PAD_DOWN;
-    if(buttons & B_Left)   pad0 |= INP_PAD_LEFT;
-    if(buttons & B_Right)   pad0 |= INP_PAD_RIGHT;
-    if(buttons & B_A)   pad0 |= INP_PAD_A;
-    if(buttons & B_B)   pad0 |= INP_PAD_B;
+    odroid_gamepad_state_t joystick;
+    odroid_input_read_gamepad(&joystick);
 
-    if (pause_pressed != (buttons & B_PAUSE)) {
+    if (joystick.values[ODROID_INPUT_START])  pad0 |= INP_PAD_START;
+    if (joystick.values[ODROID_INPUT_SELECT]) pad0 |= INP_PAD_SELECT;
+    if (joystick.values[ODROID_INPUT_UP]) pad0 |= INP_PAD_UP;
+    if (joystick.values[ODROID_INPUT_DOWN]) pad0 |= INP_PAD_DOWN;
+    if (joystick.values[ODROID_INPUT_LEFT]) pad0 |= INP_PAD_LEFT;
+    if (joystick.values[ODROID_INPUT_RIGHT]) pad0 |= INP_PAD_RIGHT;
+    if (joystick.values[ODROID_INPUT_A]) pad0 |= INP_PAD_A;
+    if (joystick.values[ODROID_INPUT_B]) pad0 |= INP_PAD_B;
+
+    if (pause_pressed != joystick.values[ODROID_INPUT_VOLUME]) {
         if (pause_pressed) {
             printf("Pause pressed %ld=>%d\n", audio_mute, !audio_mute);
 
@@ -475,22 +476,23 @@ void osd_getinput(void)
             memset(framebuffer1, 0x0, sizeof(framebuffer1));
             memset(framebuffer2, 0x0, sizeof(framebuffer2));
         }
-        pause_pressed = buttons & B_PAUSE;
+        pause_pressed = joystick.values[ODROID_INPUT_VOLUME];
     }
 
-    if (power_pressed != (buttons & B_POWER)) {
+    if (power_pressed != joystick.values[ODROID_INPUT_POWER]) {
         printf("Power toggle %ld=>%d\n", power_pressed, !power_pressed);
-        power_pressed = buttons & B_POWER;
-        if (buttons & B_POWER) {
+        power_pressed = joystick.values[ODROID_INPUT_POWER];
+        if (power_pressed) {
             printf("Power PRESSED %ld\n", power_pressed);
             HAL_SAI_DMAStop(&hsai_BlockA1);
-            if(!(buttons & B_PAUSE)) {
+            if(!joystick.values[ODROID_INPUT_VOLUME]) {
                 SaveState("");
             }
 
             odroid_system_sleep();
         }
     }
+
 
     // Enable to log button presses
 #if 0
@@ -507,7 +509,7 @@ void osd_getinput(void)
     if (pause_after_frames > 0) {
         pause_after_frames--;
         if (pause_after_frames == 0) {
-            pause_pressed = B_PAUSE;
+            pause_pressed = 1;
         }
     }
 }

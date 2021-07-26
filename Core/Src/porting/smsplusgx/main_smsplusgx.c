@@ -269,7 +269,7 @@ static void sms_draw_frame()
 
 static void sms_update_keys( odroid_gamepad_state_t* joystick )
 {
-  static uint32_t power_pressed = 0;
+  static uint8_t power_pressed = 0;
   uint8 k = 0;
 
   input.pad[0] = 0x00;
@@ -334,8 +334,8 @@ static void sms_update_keys( odroid_gamepad_state_t* joystick )
 int
 app_main_smsplusgx(uint8_t load_state, uint8_t start_paused, uint8_t is_coleco)
 {
-    uint32_t pause_pressed = 0;
-    uint32_t skipFrames = 0;
+    uint8_t pause_pressed = 0;
+    uint8_t skipFrames = 0;
     uint8_t pause_after_frames;
     uint8_t frames_since_last_skip = 0;
     uint8_t pauseFrames = 0;
@@ -482,7 +482,7 @@ app_main_smsplusgx(uint8_t load_state, uint8_t start_paused, uint8_t is_coleco)
         if (pause_after_frames > 0) {
             pause_after_frames--;
             if (pause_after_frames == 0) {
-                pause_pressed = B_PAUSE;
+                pause_pressed = 1;
             }
         }
     }
