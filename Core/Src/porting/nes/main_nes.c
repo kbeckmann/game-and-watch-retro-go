@@ -30,7 +30,6 @@
 #define blit blit_5to6
 #endif
 
-static uint frameTime = 1000 / 60;
 static uint samplesPerFrame;
 static uint32_t vsync_wait_ms = 0;
 
@@ -351,7 +350,7 @@ void osd_blitscreen(bitmap_t *bmp)
 
     if (delta >= 1000) {
         int fps = (10000 * frames) / delta;
-        printf("FPS: %d.%d, frames %ld, delta %ld ms, skipped %ld\n", fps / 10, fps % 10, frames, delta, common_emu_state.skipped_frames);
+        printf("FPS: %d.%d, frames %ld, delta %ld ms, skipped %d\n", fps / 10, fps % 10, frames, delta, common_emu_state.skipped_frames);
         frames = 0;
         common_emu_state.skipped_frames = 0;
         vsync_wait_ms = 0;
@@ -414,7 +413,7 @@ void osd_getinput(void)
     if (joystick.values[ODROID_INPUT_A]) pad0 |= INP_PAD_A;
     if (joystick.values[ODROID_INPUT_B]) pad0 |= INP_PAD_B;
 
-    const odroid_dialog_choice_t options[] = {
+    odroid_dialog_choice_t options[] = {
             {100, "Palette", "Default", 1, &palette_update_cb},
             // {101, "More...", "", 1, &advanced_settings_cb},
             ODROID_DIALOG_CHOICE_LAST
