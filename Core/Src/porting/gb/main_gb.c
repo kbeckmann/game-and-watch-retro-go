@@ -66,7 +66,7 @@ static inline void screen_blit(void) {
 
     if (delta >= 1000) {
         int fps = (10000 * frames) / delta;
-        printf("FPS: %d.%d, frames %ld, delta %ld ms, skipped %ld\n", fps / 10, fps % 10, delta, frames, common_emu_state.skipped_frames);
+        printf("FPS: %d.%d, frames %ld, delta %ld ms, skipped %d\n", fps / 10, fps % 10, delta, frames, common_emu_state.skipped_frames);
         frames = 0;
         common_emu_state.skipped_frames = 0;
         lastFPSTime = currentTime;
@@ -117,7 +117,7 @@ static void screen_blit_bilinear(void) {
 
     if (delta >= 1000) {
         int fps = (10000 * frames) / delta;
-        printf("FPS: %d.%d, frames %ld, delta %ld ms, skipped %ld\n", fps / 10, fps % 10, delta, frames, common_emu_state.skipped_frames);
+        printf("FPS: %d.%d, frames %ld, delta %ld ms, skipped %d\n", fps / 10, fps % 10, delta, frames, common_emu_state.skipped_frames);
         frames = 0;
         common_emu_state.skipped_frames = 0;
         lastFPSTime = currentTime;
@@ -178,7 +178,7 @@ static inline void screen_blit_v3to5(void) {
 
     if (delta >= 1000) {
         int fps = (10000 * frames) / delta;
-        printf("FPS: %d.%d, frames %ld, delta %ld ms, skipped %ld\n", fps / 10, fps % 10, delta, frames, common_emu_state.skipped_frames);
+        printf("FPS: %d.%d, frames %ld, delta %ld ms, skipped %d\n", fps / 10, fps % 10, delta, frames, common_emu_state.skipped_frames);
         frames = 0;
         common_emu_state.skipped_frames = 0;
         lastFPSTime = currentTime;
@@ -241,7 +241,7 @@ static inline void screen_blit_jth(void) {
 
     if (delta >= 1000) {
         int fps = (10000 * frames) / delta;
-        printf("FPS: %d.%d, frames %ld, delta %ld ms, skipped %ld\n", fps / 10, fps % 10, delta, frames, common_emu_state.skipped_frames);
+        printf("FPS: %d.%d, frames %ld, delta %ld ms, skipped %d\n", fps / 10, fps % 10, delta, frames, common_emu_state.skipped_frames);
         frames = 0;
         common_emu_state.skipped_frames = 0;
         lastFPSTime = currentTime;
@@ -538,7 +538,7 @@ rg_app_desc_t * init(uint8_t load_state)
 
 void app_main_gb(uint8_t load_state, uint8_t start_paused)
 {
-    rg_app_desc_t *app = init(load_state);
+    init(load_state);
     odroid_gamepad_state_t joystick;
 
     if (start_paused) {
@@ -553,8 +553,6 @@ void app_main_gb(uint8_t load_state, uint8_t start_paused)
         wdog_refresh();
 
         odroid_input_read_gamepad(&joystick);
-
-        uint startTime = get_elapsed_time();
 
         pad_set(PAD_UP, joystick.values[ODROID_INPUT_UP]);
         pad_set(PAD_RIGHT, joystick.values[ODROID_INPUT_RIGHT]);
