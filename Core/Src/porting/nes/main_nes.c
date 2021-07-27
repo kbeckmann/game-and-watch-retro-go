@@ -30,7 +30,6 @@
 #define blit blit_5to6
 #endif
 
-static bool fullFrame = 0;
 static uint frameTime = 1000 / 60;
 static uint samplesPerFrame;
 static uint32_t vsync_wait_ms = 0;
@@ -132,10 +131,7 @@ void osd_vsync()
 
     nes_audio_submit(nes_getptr()->apu->buffer, nes_getptr()->apu->samples_per_frame);
 
-    // Tick before submitting audio/syncing
-    odroid_system_tick(!nes_getptr()->drawframe, fullFrame, 0);
-
-    nes_getptr()->drawframe = (common_emu_state.skip_frames == 0);
+    nes_getptr()->drawframe = draw_frame;
 
     // Wait until the audio buffer has been transmitted
     static uint32_t last_dma_counter = 0;
@@ -143,7 +139,7 @@ void osd_vsync()
     if(draw_frame){
         for(uint8_t p = 0; p < common_emu_state.pause_frames + 1; p++) {
             while (dma_counter == last_dma_counter) {
-                __WFI();
+                cpumon_sleep();
             }
             last_dma_counter = dma_counter;
         }

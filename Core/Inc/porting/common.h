@@ -37,6 +37,19 @@ extern const uint8_t volume_tbl[ODROID_AUDIO_VOLUME_MAX + 1];
 bool common_emu_frame_loop();
 void common_emu_input_loop(odroid_gamepad_state_t *joystick, odroid_dialog_choice_t *game_options);
 
+typedef struct {
+    uint last_busy;
+    uint busy_ms;
+    uint sleep_ms;
+} cpumon_stats_t;
+extern cpumon_stats_t cpumon_stats;
+
+/**
+ * Just calls `__WFI()` and measures time spent sleeping.
+ */
+void cpumon_sleep();
+void cpumon_reset();
+
 /**
  * Holds common higher-level emu options that need to be used at not-neat
  * locations in each emulator.

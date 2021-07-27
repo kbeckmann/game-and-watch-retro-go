@@ -14,6 +14,8 @@
 #include "gw_lcd.h"
 #include "gw_linker.h"
 
+cpumon_stats_t cpumon_stats = {0};
+
 uint32_t audioBuffer[AUDIO_BUFFER_LENGTH];
 uint32_t audio_mute;
 
@@ -84,10 +86,13 @@ common_emu_state_t common_emu_state = {
  */
 bool common_emu_frame_loop(){
     rg_app_desc_t *app = odroid_system_get_app();
-    static int32_t leftovers = 0;
+    static int32_t frame_integrator = 0;
     int16_t frame_time_10us = common_emu_state.frame_time_10us;
     int16_t elapsed_10us = 100 * get_elapsed_time_since(common_emu_state.last_sync_time);
     bool draw_frame = !common_emu_state.skip_frames;
+
+    odroid_system_tick(!draw_frame, 0, cpumon_stats.busy_ms);
+    cpumon_reset();
 
     common_emu_state.pause_frames = 0;
     if(!draw_frame) common_emu_state.skip_frames = 0;
@@ -122,9 +127,9 @@ bool common_emu_frame_loop(){
             frame_time_10us /= 3;
             break;
     }
-    leftovers += (elapsed_10us - frame_time_10us);
-    if(leftovers > frame_time_10us) common_emu_state.skip_frames = 1;
-    else if(leftovers < -frame_time_10us) common_emu_state.pause_frames = 1;
+    frame_integrator += (elapsed_10us - frame_time_10us);
+    if(frame_integrator > frame_time_10us) common_emu_state.skip_frames = 1;
+    else if(frame_integrator < -frame_time_10us) common_emu_state.pause_frames = 1;
     common_emu_state.skipped_frames += common_emu_state.skip_frames;
 
     return draw_frame;
@@ -169,7 +174,7 @@ void common_emu_input_loop(odroid_gamepad_state_t *joystick, odroid_dialog_choic
             memset(framebuffer1, 0x0, sizeof(framebuffer1));
             memset(framebuffer2, 0x0, sizeof(framebuffer2));
             common_emu_state.startup_frames = 0;
-            //common_emu_state.last_sync_time = get_elapsed_time();  // reset timer
+            cpumon_stats.last_busy = 0;
         }
         pause_pressed = joystick->values[ODROID_INPUT_VOLUME];
         pause_pressed_count = 0;
@@ -194,4 +199,23 @@ void common_emu_input_loop(odroid_gamepad_state_t *joystick, odroid_dialog_choic
             pause_pressed = 1;
         }
     }
+}
+
+void cpumon_sleep(){
+    uint t0 = get_elapsed_time();
+    if(cpumon_stats.last_busy){
+        cpumon_stats.busy_ms += t0 - cpumon_stats.last_busy;
+    }
+    else{
+        cpumon_stats.busy_ms = 0;
+    }
+    __WFI();
+    uint t1 = get_elapsed_time();
+    cpumon_stats.last_busy = t1;
+    cpumon_stats.sleep_ms += t1 - t0;
+}
+
+void cpumon_reset(){
+    cpumon_stats.busy_ms = 0;
+    cpumon_stats.sleep_ms = 0;
 }
