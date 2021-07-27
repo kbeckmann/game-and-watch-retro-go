@@ -241,6 +241,7 @@ void odroid_overlay_draw_dialog(const char *header, odroid_dialog_choice_t *opti
     int box_color = C_BLACK;
     int box_border_color = C_GW_OPAQUE_YELLOW;
     int box_text_color = C_GW_YELLOW;
+    odroid_dialog_choice_t separator = ODROID_DIALOG_CHOICE_SEPARATOR;
 
     //if (dialog_open_depth <= 0) {   //darken bg
     //    uint16_t *dst_img = lcd_get_active_buffer();
@@ -311,7 +312,7 @@ void odroid_overlay_draw_dialog(const char *header, odroid_dialog_choice_t *opti
             bg = C_BLACK;
         }
 
-        if (strncmp((char *)(rows + i * 256), " --- ", 5) == 0) {
+        if (options[i].id == separator.id) {
             odroid_overlay_draw_fill_rect(x, y, inner_width, row_height + 3 * row_margin, bg);
             odroid_overlay_draw_fill_rect(x + 6, y + row_height / 2 - row_margin, inner_width - 12, 1, box_border_color);
         }
@@ -454,7 +455,7 @@ int odroid_overlay_confirm(const char *text, bool yes_selected)
 {
     odroid_dialog_choice_t choices[] = {
         {0, text, "", -1, NULL},
-        {0, "---", "", -1, NULL},
+        ODROID_DIALOG_CHOICE_SEPARATOR,
         {1, "是", "○", 1, NULL},
         {0, "否", "×", 1, NULL},
         ODROID_DIALOG_CHOICE_LAST
@@ -466,7 +467,7 @@ void odroid_overlay_alert(const char *text)
 {
     odroid_dialog_choice_t choices[] = {
         {0, text, "", -1, NULL},
-        {0, "---", "", -1, NULL},
+        ODROID_DIALOG_CHOICE_SEPARATOR,
         {1, "确定", "○", 1, NULL},
         ODROID_DIALOG_CHOICE_LAST
     };
@@ -499,7 +500,6 @@ static bool volume_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event
     }
 
     sprintf(option->value, "%.*s", max * 2 + 2, sout);
-    //sprintf(option->value, "%d/%d", level, max);
     return event == ODROID_DIALOG_ENTER;
     return false;
 }
@@ -523,8 +523,6 @@ static bool brightness_update_cb(odroid_dialog_choice_t *option, odroid_dialog_e
     }
 
     sprintf(option->value, "%.*s", max * 2 + 2, sout);
-    //sprintf(option->value, "%d/%d", level + 1, max + 1);
-    //sprintf(option->value, "%d/%d", level + 1, max + 1, (level < max + 1) ? '>' : ' ');
     return event == ODROID_DIALOG_ENTER;
 }
 
@@ -580,25 +578,25 @@ bool speedup_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t eve
 
     switch(app->speedupEnabled){
         case SPEEDUP_0_5x:
-            strcpy(option->value, "0.50 倍");
+            sprintf(option->value, "%20s", "0.50 倍");
             break;
         case SPEEDUP_0_75x:
-            strcpy(option->value, "0.75 倍");
+            sprintf(option->value, "%20s", "0.75 倍");
             break;
         case SPEEDUP_1x:
-            strcpy(option->value, "1.00 倍");
+            sprintf(option->value, "%20s", "1.00 倍");
             break;
         case SPEEDUP_1_25x:
-            strcpy(option->value, "1.25 倍");
+            sprintf(option->value, "%20s", "1.25 倍");
             break;
         case SPEEDUP_1_5x:
-            strcpy(option->value, "1.50 倍");
+            sprintf(option->value, "%20s", "1.50 倍");
             break;
         case SPEEDUP_2x:
-            strcpy(option->value, "2.00 倍");
+            sprintf(option->value, "%20s", "2.00 倍");
             break;
         case SPEEDUP_3x:
-            strcpy(option->value, "3.00 倍");
+            sprintf(option->value, "%20s", "3.00 倍");
             break;
     }
 
@@ -703,13 +701,13 @@ int odroid_overlay_game_menu(odroid_dialog_choice_t *extra_options)
         // {0, "Continue", "",  1, NULL},
         {10, "保存进度", "■",  1, NULL},
         {20, "保存后退出", "×", 1, NULL},
-        {0, "---", "",  -1, NULL},
+        ODROID_DIALOG_CHOICE_SEPARATOR,
         {30, "重载", "∞", 1, NULL},
         {40, "选项", "◎", 1, NULL},
         // {50, "Tools", "", 1, NULL},
-        {0, "---", "",  -1, NULL},
+        ODROID_DIALOG_CHOICE_SEPARATOR,
         {90, "休眠", "∽", 1, NULL},
-        {0, "---", "",  -1, NULL},
+        ODROID_DIALOG_CHOICE_SEPARATOR,
         {100, "退出游戏", "×", 1, NULL},
         ODROID_DIALOG_CHOICE_LAST
     };

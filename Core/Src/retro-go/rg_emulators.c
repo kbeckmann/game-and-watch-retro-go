@@ -15,6 +15,7 @@
 #include "main_nes.h"
 #include "main_smsplusgx.h"
 #include "main_pce.h"
+#include "odroid_overlay_ex.h"
 
 // Increase when adding new emulators
 #define MAX_EMULATORS 7
@@ -40,7 +41,7 @@ static void event_handler(gui_event_t event, tab_t *tab)
 
         if (emu->roms.count > 0)
         {
-            sprintf(tab->status, " %s 游戏共 %d 个", emu->system_name, emu->roms.count);
+            sprintf(tab->status, " %s 游戏共有 %d 个", emu->system_name, emu->roms.count);
             gui_resize_list(tab, emu->roms.count);
 
             for (int i = 0; i < emu->roms.count; i++)
@@ -302,7 +303,7 @@ void emulator_show_file_info(retro_emulator_file_t *file)
         {0, "类型", type_value, 1, NULL},
         {0, "尺寸", size_value, 1, NULL},
         {0, "封面", img_size, 1, NULL},
-        {0, "---", "", -1, NULL},
+        ODROID_DIALOG_CHOICE_SEPARATOR,
         {1, "关闭", "×", 1, NULL},
         ODROID_DIALOG_CHOICE_LAST
     };
@@ -330,7 +331,7 @@ void emulator_show_file_menu(retro_emulator_file_t *file)
     odroid_dialog_choice_t choices[] = {
         {0, "继续游戏", "◆", has_save, NULL},
         {1, "开始游戏", "◇", 1, NULL},
-        {0, "---", "", -1, NULL},
+        ODROID_DIALOG_CHOICE_SEPARATOR,
         {3, is_fav ? "移除收藏" : "添加收藏", is_fav ? "☆" : "★" , 1, NULL},
         {2, "删除进度", "□", has_save || has_sram, NULL},
         ODROID_DIALOG_CHOICE_LAST

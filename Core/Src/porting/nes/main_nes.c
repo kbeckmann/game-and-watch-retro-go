@@ -438,7 +438,7 @@ static bool palette_update_cb(odroid_dialog_choice_t *option, odroid_dialog_even
       ppu_setopt(PPU_PALETTE_RGB, pal);
    }
 
-   sprintf(option->value, "%.7s", ppu_getpalette(pal)->name);
+   sprintf(option->value, "%20s", ppu_getpalette(pal)->name);
    return event == ODROID_DIALOG_ENTER;
 }
 

@@ -12,6 +12,7 @@
 #include "githash.h"
 #include "main.h"
 #include "gw_buttons.h"
+#include "odroid_overlay_ex.h"
 
 static const uint8_t *flash_manufacturer_str(uint8_t manufacturer)
 {
@@ -140,7 +141,7 @@ static bool main_menu_timeout_cb(odroid_dialog_choice_t *option, odroid_dialog_e
         odroid_settings_MainMenuTimeoutS_set(timeout + step);
         //gui_redraw();
     }
-    sprintf(option->value, "        %d 秒", odroid_settings_MainMenuTimeoutS_get());
+    sprintf(option->value, "%14s%d 秒", " ", odroid_settings_MainMenuTimeoutS_get());
     return event == ODROID_DIALOG_ENTER;
 }
 
@@ -234,15 +235,15 @@ void retro_loop()
 
             if (last_key == ODROID_INPUT_START) {
                 odroid_dialog_choice_t choices[] = {
-                    {0, "版本", GIT_HASH, 1, NULL},
+                    {0, "版  本", GIT_HASH, 1, NULL},
                     {9, "开发者", "ducalex", 1, NULL},
                     {9, "&", "kbeckmann", 1, NULL},
                     {9, "&", "stacksmashing", 1, NULL},
                     {9, "中文化", "orzeus", 1, NULL},
-                    {0, "---", "", -1, NULL},
+                    ODROID_DIALOG_CHOICE_SEPARATOR,
                     {2, "调试信息", "≈", 1, NULL},
                     {1, "重置设定", "≡", 1, NULL},
-                    {0, "---", "", -1, NULL},
+                    ODROID_DIALOG_CHOICE_SEPARATOR,
                     {0, "关闭", "×", 1, NULL},
                     ODROID_DIALOG_CHOICE_LAST
                 };
@@ -273,10 +274,10 @@ void retro_loop()
                         {0, "存储 JEDEC ID", jedec_id_str, 1, NULL},
                         {0, "存储芯片制造商", flash_manufacturer_str(jedec_id[0]), 1, NULL},
                         {0, "存储芯片状态", status_str, 1, NULL},
-                        {0, "---", "", -1, NULL},
-                        {1, "开启芯片高速存取模式", "", 1, NULL},
-                        {2, "清除芯片高速存取模式", "", 1, NULL},
-                        {0, "---", "", -1, NULL},
+                        ODROID_DIALOG_CHOICE_SEPARATOR,
+                        {1, "开启芯片高速存取", "", 1, NULL},
+                        {2, "清除芯片高速存取", "", 1, NULL},
+                        ODROID_DIALOG_CHOICE_SEPARATOR,
                         {0, "关闭", "×", 1, NULL},
                         ODROID_DIALOG_CHOICE_LAST
                     };
@@ -302,7 +303,7 @@ void retro_loop()
             else if (last_key == ODROID_INPUT_VOLUME) {
                 char timeout_value[32];
                 odroid_dialog_choice_t choices[] = {
-                    {0, "---", "", -1, NULL},
+                    ODROID_DIALOG_CHOICE_SEPARATOR,
                     {0, "空闲待机", timeout_value, 1, &main_menu_timeout_cb},
                     // {0, "Color theme", "1/10", 1, &color_shift_cb},
                     // {0, "Font size", "Small", 1, &font_size_cb},
