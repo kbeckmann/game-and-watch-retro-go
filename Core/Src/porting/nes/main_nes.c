@@ -30,8 +30,6 @@
 #define blit blit_5to6
 #endif
 
-static uint8_t pause_after_frames;
-
 static bool fullFrame = 0;
 static uint frameTime = 1000 / 60;
 static uint samplesPerFrame;
@@ -127,62 +125,23 @@ void osd_setpalette(rgb_t *pal)
 #endif
 }
 
-static uint32_t skippedFrames = 0;
-
 void osd_vsync()
 {
-    static uint32_t lastSyncTime = 0;
-    static uint8_t skipFrames = 0;
-    static uint8_t frames_since_last_skip = 0;
-
     uint32_t t0;
-    uint32_t elapsed = get_elapsed_time_since(lastSyncTime);
-    uint8_t pauseFrames = 0;
-    bool drawFrame = !skipFrames;
-
-    if(drawFrame) frames_since_last_skip += 1;
-    else frames_since_last_skip = 0;
-
-    rg_app_desc_t *app = odroid_system_get_app();
-    if (skipFrames == 0) {
-        if (elapsed > frameTime) skipFrames = 1;
-        switch(app->speedupEnabled){
-             case SPEEDUP_0_5x:
-                 pauseFrames++;
-                 break;
-             case SPEEDUP_0_75x:
-                 if(frames_since_last_skip % 4 == 0) pauseFrames++;
-                 break;
-             case SPEEDUP_1_25x:
-                 if(frames_since_last_skip % 4 == 0) skipFrames++;
-                 break;
-             case SPEEDUP_1_5x:
-                 if(frames_since_last_skip % 2 == 0) skipFrames++;
-                 break;
-             case SPEEDUP_2x:
-                 skipFrames++;
-                 break;
-             case SPEEDUP_3x:
-                 skipFrames+=2;
-                 break;
-        }
-        skippedFrames += skipFrames;
-    } else if (skipFrames > 0) {
-        skipFrames--;
-    }
+    bool draw_frame = common_emu_frame_loop();
 
     nes_audio_submit(nes_getptr()->apu->buffer, nes_getptr()->apu->samples_per_frame);
 
     // Tick before submitting audio/syncing
-    odroid_system_tick(!nes_getptr()->drawframe, fullFrame, elapsed);
+    odroid_system_tick(!nes_getptr()->drawframe, fullFrame, 0);
 
-    nes_getptr()->drawframe = (skipFrames == 0);
+    nes_getptr()->drawframe = (common_emu_state.skip_frames == 0);
 
     // Wait until the audio buffer has been transmitted
     static uint32_t last_dma_counter = 0;
     t0 = get_elapsed_time();
-    if(drawFrame){
-        for(uint8_t p = 0; p < pauseFrames + 1; p++) {
+    if(draw_frame){
+        for(uint8_t p = 0; p < common_emu_state.pause_frames + 1; p++) {
             while (dma_counter == last_dma_counter) {
                 __WFI();
             }
@@ -191,7 +150,6 @@ void osd_vsync()
     }
 
     vsync_wait_ms += get_elapsed_time_since(t0);
-    lastSyncTime = get_elapsed_time();
 }
 
 void nes_audio_submit(int16_t *buffer, int audioSamples)
@@ -397,9 +355,9 @@ void osd_blitscreen(bitmap_t *bmp)
 
     if (delta >= 1000) {
         int fps = (10000 * frames) / delta;
-        printf("FPS: %d.%d, frames %ld, delta %ld ms, skipped %ld\n", fps / 10, fps % 10, frames, delta, skippedFrames);
+        printf("FPS: %d.%d, frames %ld, delta %ld ms, skipped %ld\n", fps / 10, fps % 10, frames, delta, common_emu_state.skipped_frames);
         frames = 0;
-        skippedFrames = 0;
+        common_emu_state.skipped_frames = 0;
         vsync_wait_ms = 0;
         lastFPSTime = currentTime;
     }
@@ -444,11 +402,6 @@ static bool palette_update_cb(odroid_dialog_choice_t *option, odroid_dialog_even
 
 void osd_getinput(void)
 {
-    rg_app_desc_t *app = odroid_system_get_app();
-    static uint8_t pause_pressed;
-    static uint8_t power_pressed;
-    static emu_speedup_t last_speedup = SPEEDUP_1_5x;
-    static int8_t pause_pressed_count = 0;
     uint16 pad0 = 0;
 
     wdog_refresh();
@@ -465,57 +418,12 @@ void osd_getinput(void)
     if (joystick.values[ODROID_INPUT_A]) pad0 |= INP_PAD_A;
     if (joystick.values[ODROID_INPUT_B]) pad0 |= INP_PAD_B;
 
-    if(pause_pressed && pause_pressed_count >= 0){
-        // Long-pressing PAUSE/SET to quickly toggle emulator speed.
-        if(pause_pressed_count < 127) {
-            pause_pressed_count++;
-        }
-        if(pause_pressed_count > 30) {  // 30 frames = half a second
-            if(app->speedupEnabled == SPEEDUP_1x) {
-                app->speedupEnabled = last_speedup;
-            }
-            else {
-                last_speedup = app->speedupEnabled;
-                app->speedupEnabled = SPEEDUP_1x;
-            }
-
-            pause_pressed_count = -1;
-        }
-    }
-
-    if (pause_pressed != joystick.values[ODROID_INPUT_VOLUME]) {
-        if (pause_pressed && pause_pressed_count >= 0) {
-            // PAUSE/SET has been released
-            printf("Pause pressed %ld=>%d\n", audio_mute, !audio_mute);
-
-            odroid_dialog_choice_t options[] = {
-                    {100, "Palette", "Default", 1, &palette_update_cb},
-                    // {101, "More...", "", 1, &advanced_settings_cb},
-                    ODROID_DIALOG_CHOICE_LAST
-            };
-
-            odroid_overlay_game_menu(options);
-            memset(framebuffer1, 0x0, sizeof(framebuffer1));
-            memset(framebuffer2, 0x0, sizeof(framebuffer2));
-        }
-        pause_pressed = joystick.values[ODROID_INPUT_VOLUME];
-        pause_pressed_count = 0;
-    }
-
-    if (power_pressed != joystick.values[ODROID_INPUT_POWER]) {
-        printf("Power toggle %ld=>%d\n", power_pressed, !power_pressed);
-        power_pressed = joystick.values[ODROID_INPUT_POWER];
-        if (power_pressed) {
-            printf("Power PRESSED %ld\n", power_pressed);
-            HAL_SAI_DMAStop(&hsai_BlockA1);
-            if(!joystick.values[ODROID_INPUT_VOLUME]) {
-                SaveState("");
-            }
-
-            odroid_system_sleep();
-        }
-    }
-
+    const odroid_dialog_choice_t options[] = {
+            {100, "Palette", "Default", 1, &palette_update_cb},
+            // {101, "More...", "", 1, &advanced_settings_cb},
+            ODROID_DIALOG_CHOICE_LAST
+    };
+    common_emu_input_loop(&joystick, options);
 
     // Enable to log button presses
 #if 0
@@ -527,14 +435,6 @@ void osd_getinput(void)
 #endif
 
     input_update(INP_JOYPAD0, pad0);
-
-    // Render frames before faking a pause button press
-    if (pause_after_frames > 0) {
-        pause_after_frames--;
-        if (pause_after_frames == 0) {
-            pause_pressed = 1;
-        }
-    }
 }
 
 size_t osd_getromdata(unsigned char **data)
@@ -615,10 +515,10 @@ int app_main_nes(uint8_t load_state, uint8_t start_paused)
     odroid_system_emu_init(&LoadState, &SaveState, NULL);
 
     if (start_paused) {
-        pause_after_frames = 3;
+        common_emu_state.pause_after_frames = 3;
         odroid_audio_mute(true);
     } else {
-        pause_after_frames = 0;
+        common_emu_state.pause_after_frames = 0;
     }
 
     autoload = load_state;
@@ -629,12 +529,13 @@ int app_main_nes(uint8_t load_state, uint8_t start_paused)
 
     if (ACTIVE_FILE->region == REGION_PAL) {
         nes_region = NES_PAL;
-        frameTime = 1000 / 50;
+        common_emu_state.frame_time_10us = 100000 / 50;
         samplesPerFrame = (AUDIO_SAMPLE_RATE) / 50;
         HAL_SAI_Transmit_DMA(&hsai_BlockA1, (uint8_t *) audiobuffer_dma,  (2 * AUDIO_SAMPLE_RATE) / 50);
     } else {
         nes_region = NES_NTSC;
-        frameTime = 1000 / 60;
+        common_emu_state.frame_time_10us = 100000 / 60;
+        //printf("frame_time_10us: %d\n", common_emu_state.frame_time_10us);
         samplesPerFrame = (AUDIO_SAMPLE_RATE) / 60;
         HAL_SAI_Transmit_DMA(&hsai_BlockA1, (uint8_t *) audiobuffer_dma, (2 * AUDIO_SAMPLE_RATE) / 60);
     }
