@@ -84,7 +84,7 @@ common_emu_state_t common_emu_state = {
  *    * increment `common_emu_state.skip_frames` if a frame came in too slow.
  * @returns bool Whether or not to draw the frame.
  */
-bool common_emu_frame_loop(){
+bool common_emu_frame_loop(void){
     rg_app_desc_t *app = odroid_system_get_app();
     static int32_t frame_integrator = 0;
     int16_t frame_time_10us = common_emu_state.frame_time_10us;
@@ -254,7 +254,7 @@ void common_emu_input_loop(odroid_gamepad_state_t *joystick, odroid_dialog_choic
     }
 }
 
-void cpumon_sleep(){
+void cpumon_sleep(void){
     uint t0 = get_elapsed_time();
     if(cpumon_stats.last_busy){
         cpumon_stats.busy_ms += t0 - cpumon_stats.last_busy;
@@ -268,7 +268,7 @@ void cpumon_sleep(){
     cpumon_stats.sleep_ms += t1 - t0;
 }
 
-void cpumon_reset(){
+void cpumon_reset(void){
     cpumon_stats.busy_ms = 0;
     cpumon_stats.sleep_ms = 0;
 }
