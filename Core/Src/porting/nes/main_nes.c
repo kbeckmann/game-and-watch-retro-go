@@ -404,6 +404,14 @@ void osd_getinput(void)
     odroid_gamepad_state_t joystick;
     odroid_input_read_gamepad(&joystick);
 
+    odroid_dialog_choice_t options[] = {
+            {100, "Palette", "Default", 1, &palette_update_cb},
+            // {101, "More...", "", 1, &advanced_settings_cb},
+            ODROID_DIALOG_CHOICE_LAST
+    };
+    common_emu_input_loop(&joystick, options);
+
+
     if (joystick.values[ODROID_INPUT_START])  pad0 |= INP_PAD_START;
     if (joystick.values[ODROID_INPUT_SELECT]) pad0 |= INP_PAD_SELECT;
     if (joystick.values[ODROID_INPUT_UP]) pad0 |= INP_PAD_UP;
@@ -412,13 +420,6 @@ void osd_getinput(void)
     if (joystick.values[ODROID_INPUT_RIGHT]) pad0 |= INP_PAD_RIGHT;
     if (joystick.values[ODROID_INPUT_A]) pad0 |= INP_PAD_A;
     if (joystick.values[ODROID_INPUT_B]) pad0 |= INP_PAD_B;
-
-    odroid_dialog_choice_t options[] = {
-            {100, "Palette", "Default", 1, &palette_update_cb},
-            // {101, "More...", "", 1, &advanced_settings_cb},
-            ODROID_DIALOG_CHOICE_LAST
-    };
-    common_emu_input_loop(&joystick, options);
 
     // Enable to log button presses
 #if 0

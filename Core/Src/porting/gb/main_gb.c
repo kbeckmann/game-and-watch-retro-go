@@ -554,6 +554,14 @@ void app_main_gb(uint8_t load_state, uint8_t start_paused)
 
         odroid_input_read_gamepad(&joystick);
 
+        bool drawFrame = common_emu_frame_loop();
+        odroid_dialog_choice_t options[] = {
+            {300, "Palette", "7/7", !hw.cgb, &palette_update_cb},
+            // {301, "More...", "", 1, &advanced_settings_cb},
+            ODROID_DIALOG_CHOICE_LAST
+        };
+        common_emu_input_loop(&joystick, options);
+
         pad_set(PAD_UP, joystick.values[ODROID_INPUT_UP]);
         pad_set(PAD_RIGHT, joystick.values[ODROID_INPUT_RIGHT]);
         pad_set(PAD_DOWN, joystick.values[ODROID_INPUT_DOWN]);
@@ -562,14 +570,6 @@ void app_main_gb(uint8_t load_state, uint8_t start_paused)
         pad_set(PAD_START, joystick.values[ODROID_INPUT_START]);
         pad_set(PAD_A, joystick.values[ODROID_INPUT_A]);
         pad_set(PAD_B, joystick.values[ODROID_INPUT_B]);
-
-        bool drawFrame = common_emu_frame_loop();
-        odroid_dialog_choice_t options[] = {
-            {300, "Palette", "7/7", !hw.cgb, &palette_update_cb},
-            // {301, "More...", "", 1, &advanced_settings_cb},
-            ODROID_DIALOG_CHOICE_LAST
-        };
-        common_emu_input_loop(&joystick, options);
 
         emu_run(drawFrame);
 

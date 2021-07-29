@@ -136,6 +136,7 @@ bool common_emu_frame_loop(){
 }
 
 
+
 /**
  * Common input/macro/menuing features inside all emu loops. This is to be called
  * after inputs are read into `joystick`, but before the actual emulation tick
@@ -145,58 +146,110 @@ bool common_emu_frame_loop(){
 void common_emu_input_loop(odroid_gamepad_state_t *joystick, odroid_dialog_choice_t *game_options) {
     rg_app_desc_t *app = odroid_system_get_app();
     static emu_speedup_t last_speedup = SPEEDUP_1_5x;
-    static uint8_t pause_pressed = 0;
-    static uint8_t power_pressed = 0;
-    static int8_t pause_pressed_count = 0;
+    static int8_t last_key = -1;
+    static bool pause_pressed = false;
+    static bool macro_activated = false;
 
-    if(pause_pressed && pause_pressed_count >= 0){
-        // Long-pressing PAUSE/SET to quickly toggle emulator speed.
-        if(pause_pressed_count < 127) {
-            pause_pressed_count++;
-        }
-        if(pause_pressed_count > 30) {  // 30 frames = half a second
-            if(app->speedupEnabled == SPEEDUP_1x) {
-                app->speedupEnabled = last_speedup;
+    if(joystick->values[ODROID_INPUT_VOLUME]){  // PAUSE/SET button
+        // PAUSE/SET has been pressed, checking additional inputs for macros
+        pause_pressed = true;
+        if(last_key < 0) {
+            if (joystick->values[ODROID_INPUT_POWER]){
+                // Do NOT save-state and then poweroff
+                last_key = ODROID_INPUT_POWER;
+                HAL_SAI_DMAStop(&hsai_BlockA1);
+                odroid_system_sleep();
             }
-            else {
-                last_speedup = app->speedupEnabled;
-                app->speedupEnabled = SPEEDUP_1x;
+            else if(joystick->values[ODROID_INPUT_START]){ // GAME button
+                // Reserved for future use
+                last_key = ODROID_INPUT_START;
+            }
+            else if(joystick->values[ODROID_INPUT_SELECT]){ // TIME button
+                // Toggle Speedup
+                last_key = ODROID_INPUT_SELECT;
+                if(app->speedupEnabled == SPEEDUP_1x) {
+                    app->speedupEnabled = last_speedup;
+                }
+                else {
+                    last_speedup = app->speedupEnabled;
+                    app->speedupEnabled = SPEEDUP_1x;
+                }
+            }
+            else if(joystick->values[ODROID_INPUT_LEFT]){
+                // Volume Up
+                last_key = ODROID_INPUT_LEFT;
+                int8_t level = odroid_audio_volume_get();
+                if (level > ODROID_AUDIO_VOLUME_MIN) odroid_audio_volume_set(--level);
+            }
+            else if(joystick->values[ODROID_INPUT_RIGHT]){
+                // Volume Down
+                last_key = ODROID_INPUT_RIGHT;
+                int8_t level = odroid_audio_volume_get();
+                if (level < ODROID_AUDIO_VOLUME_MAX) odroid_audio_volume_set(++level);
+            }
+            else if(joystick->values[ODROID_INPUT_UP]){
+                // Brightness Up
+                last_key = ODROID_INPUT_UP;
+                int8_t level = odroid_display_get_backlight();
+                if (level < ODROID_BACKLIGHT_LEVEL_COUNT - 1) odroid_display_set_backlight(++level);
+            }
+            else if(joystick->values[ODROID_INPUT_DOWN]){
+                // Brightness Down
+                last_key = ODROID_INPUT_DOWN;
+                int8_t level = odroid_display_get_backlight();
+                if (level > 0) odroid_display_set_backlight(--level);
+            }
+            else if(joystick->values[ODROID_INPUT_A]){
+                // Save State
+                last_key = ODROID_INPUT_A;
+                odroid_system_emu_save_state(0);
+            }
+            else if(joystick->values[ODROID_INPUT_B]){
+                // Load State
+                last_key = ODROID_INPUT_B;
+                odroid_system_emu_load_state(0);
+            }
+        }
+
+        if (last_key >= 0) {
+            macro_activated = true;
+            if (!joystick->values[last_key]) {
+                last_key = -1;
             }
 
-            pause_pressed_count = -1;
+            // Consume all inputs so it doesn't get passed along to the
+            // running emulator
+            memset(joystick, '\x00', sizeof(odroid_gamepad_state_t));
         }
+
+    }
+    else if (pause_pressed && !joystick->values[ODROID_INPUT_VOLUME] && !macro_activated){
+        // PAUSE/SET has been released without performing any macro. Launch menu
+        pause_pressed = false;
+
+        odroid_overlay_game_menu(game_options);
+        memset(framebuffer1, 0x0, sizeof(framebuffer1));
+        memset(framebuffer2, 0x0, sizeof(framebuffer2));
+        common_emu_state.startup_frames = 0;
+        cpumon_stats.last_busy = 0;
+    }
+    else if (!joystick->values[ODROID_INPUT_VOLUME]){
+        pause_pressed = false;
+        macro_activated = false;
+        last_key = -1;
     }
 
-    if (pause_pressed != joystick->values[ODROID_INPUT_VOLUME]) {
-        if (pause_pressed && pause_pressed_count >= 0) {
-            // PAUSE/SET has been released
-            odroid_overlay_game_menu(game_options);
-            memset(framebuffer1, 0x0, sizeof(framebuffer1));
-            memset(framebuffer2, 0x0, sizeof(framebuffer2));
-            common_emu_state.startup_frames = 0;
-            cpumon_stats.last_busy = 0;
-        }
-        pause_pressed = joystick->values[ODROID_INPUT_VOLUME];
-        pause_pressed_count = 0;
-    }
-
-    if (power_pressed != joystick->values[ODROID_INPUT_POWER]) {
-        printf("Power toggle %ld=>%d\n", power_pressed, !power_pressed);
-        power_pressed = joystick->values[ODROID_INPUT_POWER];
-        if (power_pressed) {
-            printf("Power PRESSED %ld\n", power_pressed);
-            HAL_SAI_DMAStop(&hsai_BlockA1);
-            if(!joystick->values[ODROID_INPUT_VOLUME]) {
-                app->saveState("");
-            }
-            odroid_system_sleep();
-        }
+    if (joystick->values[ODROID_INPUT_POWER]) {
+        // Save-state and poweroff
+        HAL_SAI_DMAStop(&hsai_BlockA1);
+        app->saveState("");
+        odroid_system_sleep();
     }
 
     if (common_emu_state.pause_after_frames > 0) {
         (common_emu_state.pause_after_frames)--;
         if (common_emu_state.pause_after_frames == 0) {
-            pause_pressed = 1;
+            pause_pressed = true;
         }
     }
 }
