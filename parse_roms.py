@@ -254,7 +254,7 @@ class ROM:
         self.img_path = self.path.parent / (self.name + ".bmp")
         obj_name = "".join([i if i.isalnum() else "_" for i in self.img_path.name])
         symbol_path = str(self.path.parent) + "/" + obj_name
-        self.obj_img = "build/roms/" + obj_name + ".o"
+        self.obj_img = "build/roms/" + obj_name + "_" + extension + ".o"
         self.img_symbol = (
             "_binary_"
             + "".join([i if i.isalnum() else "_" for i in symbol_path])
