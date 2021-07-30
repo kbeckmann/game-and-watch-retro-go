@@ -53,7 +53,6 @@ static short audioBuffer_pce[ AUDIO_BUFFER_LENGTH_PCE * 2];
 static uint8_t emulator_framebuffer_pce[XBUF_WIDTH * XBUF_HEIGHT];
 static uint8_t OBJ_CACHE_buf[0x10000];
 static uint8_t PCE_EXRAM_BUF[0x8000];
-static uint skipFrames = 0;
 static int framePerSecond=0;
 
 // TODO: Move to lcd.c/h
@@ -424,37 +423,28 @@ void pce_pcm_submit() {
     }
     static dma_transfer_state_t last_dma_state = DMA_TRANSFER_STATE_HF;
     while (dma_state == last_dma_state) {
-        __NOP();
+        cpumon_sleep();
     }
     last_dma_state = dma_state;
 }
 
 int app_main_pce(uint8_t load_state, uint8_t start_paused) {
 
-    uint8_t pause_pressed = 0;
-    uint8_t power_pressed = 0;
-    uint8_t pause_after_frames;
-    uint8_t pauseFrames = 0;
-    uint8_t frames_since_last_skip = 0;
-
     if (start_paused) {
-        pause_after_frames = 2;
+        common_emu_state.pause_after_frames = 2;
         odroid_audio_mute(true);
     } else {
-        pause_after_frames = 0;
+        common_emu_state.pause_after_frames = 0;
     }
 
     odroid_system_init(APP_ID, AUDIO_SAMPLE_RATE);
     odroid_system_emu_init(&LoadState, &SaveState, &netplay_callback);
-    rg_app_desc_t *app = odroid_system_get_app();
     pce_log[0]=0;
 
     // Init Graphics
     init_color_pals();
     const int refresh_rate = FPS_NTSC;
     sprintf(pce_log,"%d",refresh_rate);
-    const int frameTime = 1000 / refresh_rate;
-    bool fullFrame = false;
     memset(framebuffer1, 0, sizeof(framebuffer1));
     memset(framebuffer2, 0, sizeof(framebuffer2));
     gfx_init();
@@ -480,45 +470,15 @@ int app_main_pce(uint8_t load_state, uint8_t start_paused) {
 
     while (true) {
         wdog_refresh();
-        bool drawFrame = !skipFrames;
-        if(drawFrame) frames_since_last_skip += 1;
-        else frames_since_last_skip = 0;
+        bool drawFrame = common_emu_frame_loop();
 
         odroid_gamepad_state_t joystick;
-
         odroid_input_read_gamepad(&joystick);
 
-        if (pause_pressed != joystick.values[ODROID_INPUT_VOLUME]) {
-            if (pause_pressed) {
-                // TODO: Sync framebuffers in a nicer way
-                lcd_sync();
-
-                odroid_dialog_choice_t options[] = {
-                    ODROID_DIALOG_CHOICE_LAST
-                };
-                odroid_overlay_game_menu(options);
-                memset(framebuffer1, 0x0, sizeof(framebuffer1));
-                memset(framebuffer2, 0x0, sizeof(framebuffer2));
-            }
-            pause_pressed = joystick.values[ODROID_INPUT_VOLUME];
-        }
-
-        uint startTime = get_elapsed_time();
-
-        if (power_pressed != joystick.values[ODROID_INPUT_POWER]) {
-            printf("Power toggle %ld=>%d\n", power_pressed, !power_pressed);
-            power_pressed = joystick.values[ODROID_INPUT_POWER];
-            if (power_pressed) {
-                printf("Power PRESSED %ld\n", power_pressed);
-                HAL_SAI_DMAStop(&hsai_BlockA1);
-                if(!joystick.values[ODROID_INPUT_VOLUME]) {
-                    // Always save as long as PAUSE is not pressed
-                    SaveState(NULL);
-                }
-
-                odroid_system_sleep();
-            }
-        }
+        odroid_dialog_choice_t options[] = {
+            ODROID_DIALOG_CHOICE_LAST
+        };
+        common_emu_input_loop(&joystick, options);
 
         pce_input_read(&joystick);
 
@@ -531,55 +491,15 @@ int app_main_pce(uint8_t load_state, uint8_t start_paused) {
 
         pce_osd_gfx_blit(drawFrame);
 
-        // See if we need to skip a frame to keep up
-        if (skipFrames == 0) {
-            if (get_elapsed_time_since(startTime) > frameTime) skipFrames = 1;
-            switch(app->speedupEnabled){
-                case SPEEDUP_0_5x:
-                    pauseFrames++;
-                    break;
-                case SPEEDUP_0_75x:
-                    if(frames_since_last_skip % 4 == 0) pauseFrames++;
-                    break;
-                case SPEEDUP_1_25x:
-                    if(frames_since_last_skip % 4 == 0) skipFrames++;
-                    break;
-                case SPEEDUP_1_5x:
-                    if(frames_since_last_skip % 2 == 0) skipFrames++;
-                    break;
-                case SPEEDUP_2x:
-                    skipFrames++;
-                    break;
-                case SPEEDUP_3x:
-                    skipFrames+=2;
-                    break;
-            }
-        } else if (skipFrames > 0) {
-            skipFrames--;
-        }
-
-        // Tick before submitting audio/syncing
-        odroid_system_tick(!drawFrame, fullFrame, get_elapsed_time_since(startTime));
-
         if (drawFrame) {
-            for(uint8_t p = 0; p < pauseFrames + 1; p++) {
+            for(uint8_t p = 0; p < common_emu_state.pause_frames + 1; p++) {
                 pce_pcm_submit();
             }
-            pauseFrames = 0;
         }
 
         // Prevent overflow
         int trim = MIN(Cycles, PCE.MaxCycles);
         PCE.MaxCycles -= trim;
         Cycles -= trim;
-
-        // Render frames before faking a pause button press
-        if (pause_after_frames > 0) {
-            pause_after_frames--;
-            if (pause_after_frames == 0) {
-                pause_pressed = 1;
-            }
-        }
     }
-
 }
