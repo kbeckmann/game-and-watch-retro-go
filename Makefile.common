@@ -467,6 +467,13 @@ gdb: $(BUILD_DIR)/$(TARGET).elf
 	$(GDB) $< -ex "target extended-remote :3333"
 .PHONY: gdb
 
+romdef:
+	$(V)$(ECHO) [ PYTHON3 ] $(notdir $<)
+	$(V)$(PYTHON3) parse_romdef.py
+	$(V)$(ECHO) [ RM ] $(BUILD_DIR)/roms.a
+	$(V)rm -rf $(BUILD_DIR)/roms.a
+	$(V)$(ECHO) [ RM ] $(BUILD_DIR)/core/rom_manager.*
+	$(V)rm -rf $(BUILD_DIR)/core/rom_manager.*
 
 #######################################
 # download SDK files
@@ -477,6 +484,7 @@ $(SDK_DIR)/%:
 
 .PHONY: download_sdk
 download_sdk: $(SDK_HEADERS) $(SDK_C_SOURCES) $(SDK_ASM_SOURCES)
+
 
 #######################################
 # clean up

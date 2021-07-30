@@ -438,7 +438,7 @@ static bool palette_update_cb(odroid_dialog_choice_t *option, odroid_dialog_even
       ppu_setopt(PPU_PALETTE_RGB, pal);
    }
 
-   sprintf(option->value, "%.7s", ppu_getpalette(pal)->name);
+   sprintf(option->value, "%20s", ppu_getpalette(pal)->name);
    return event == ODROID_DIALOG_ENTER;
 }
 
@@ -467,7 +467,7 @@ void osd_getinput(void)
             printf("Pause pressed %ld=>%d\n", audio_mute, !audio_mute);
 
             odroid_dialog_choice_t options[] = {
-                    {100, "Palette", "Default", 1, &palette_update_cb},
+                    {100, "µ÷É«°å", "Ä¬ÈÏ", 1, &palette_update_cb},
                     // {101, "More...", "", 1, &advanced_settings_cb},
                     ODROID_DIALOG_CHOICE_LAST
             };

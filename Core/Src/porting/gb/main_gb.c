@@ -391,8 +391,8 @@ static bool palette_update_cb(odroid_dialog_choice_t *option, odroid_dialog_even
         lcd_sync();
     }
 
-    if (pal == 0) strcpy(option->value, "GBC");
-    else sprintf(option->value, "%d/%d", pal, max);
+    if (pal == 0) sprintf(option->value, "%20s", "GBC");
+    else sprintf(option->value, "%15s%2d/%2d"," ", pal, max);
 
     return event == ODROID_DIALOG_ENTER;
 }
@@ -586,7 +586,7 @@ void app_main_gb(uint8_t load_state, uint8_t start_paused)
                 lcd_sync();
 
                 odroid_dialog_choice_t options[] = {
-                    {300, "Palette", "7/7", !hw.cgb, &palette_update_cb},
+                    {300, "µ÷É«°å", "7/7", !hw.cgb, &palette_update_cb},
                     // {301, "More...", "", 1, &advanced_settings_cb},
                     ODROID_DIALOG_CHOICE_LAST
                 };
