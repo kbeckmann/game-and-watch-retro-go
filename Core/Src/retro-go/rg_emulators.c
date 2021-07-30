@@ -15,7 +15,6 @@
 #include "main_nes.h"
 #include "main_smsplusgx.h"
 #include "main_pce.h"
-#include "odroid_overlay_ex.h"
 
 // Increase when adding new emulators
 #define MAX_EMULATORS 7
@@ -41,7 +40,7 @@ static void event_handler(gui_event_t event, tab_t *tab)
 
         if (emu->roms.count > 0)
         {
-            sprintf(tab->status, " %s 游戏共有 %d 个", emu->system_name, emu->roms.count);
+            sprintf(tab->status, " Games: %d", emu->roms.count);
             gui_resize_list(tab, emu->roms.count);
 
             for (int i = 0; i < emu->roms.count; i++)
@@ -109,7 +108,6 @@ static void add_emulator(const char *system, const char *dirname, const char* ex
     p->crc_offset = crc_offset;
 
     gui_add_tab(dirname, logo, header, p, event_handler);
-    //show a face?
 
     emulator_init(p);
 }
@@ -299,12 +297,12 @@ void emulator_show_file_info(retro_emulator_file_t *file)
     crc_value[0] = '\x00';
 
     odroid_dialog_choice_t choices[] = {
-        {0, "文件", filename_value, 1, NULL},
-        {0, "类型", type_value, 1, NULL},
-        {0, "尺寸", size_value, 1, NULL},
-        {0, "封面", img_size, 1, NULL},
-        ODROID_DIALOG_CHOICE_SEPARATOR,
-        {1, "关闭", "×", 1, NULL},
+        {0, "File", filename_value, 1, NULL},
+        {0, "Type", type_value, 1, NULL},
+        {0, "Size", size_value, 1, NULL},
+        {0, "ImgSize", img_size, 1, NULL},
+        {0, "---", "", -1, NULL},
+        {1, "Close", "", 1, NULL},
         ODROID_DIALOG_CHOICE_LAST
     };
 
@@ -313,7 +311,7 @@ void emulator_show_file_info(retro_emulator_file_t *file)
     sprintf(choices[2].value, "%d KB", file->size / 1024);
     sprintf(choices[3].value, "%d KB", file->img_size / 1024);
 
-    odroid_overlay_dialog("游戏 Rom 属性", choices, -1);
+    odroid_overlay_dialog("Properties", choices, -1);
 }
 
 void emulator_show_file_menu(retro_emulator_file_t *file)
@@ -329,11 +327,11 @@ void emulator_show_file_menu(retro_emulator_file_t *file)
     bool is_fav = 0;
 
     odroid_dialog_choice_t choices[] = {
-        {0, "继续游戏", "◆", has_save, NULL},
-        {1, "开始游戏", "◇", 1, NULL},
-        ODROID_DIALOG_CHOICE_SEPARATOR,
-        {3, is_fav ? "移除收藏" : "添加收藏", is_fav ? "☆" : "★" , 1, NULL},
-        {2, "删除进度", "□", has_save || has_sram, NULL},
+        {0, "Resume game ", "", has_save, NULL},
+        {1, "New game    ", "", 1, NULL},
+        {0, "---", "", -1, NULL},
+        {3, is_fav ? "Del favorite" : "Add favorite", "", 1, NULL},
+        {2, "Delete save ", "", has_save || has_sram, NULL},
         ODROID_DIALOG_CHOICE_LAST
     };
     int sel = odroid_overlay_dialog(file->name, choices, has_save ? 0 : 1);
@@ -343,7 +341,7 @@ void emulator_show_file_menu(retro_emulator_file_t *file)
         emulator_start(file, sel == 0, false);
     }
     else if (sel == 2) {
-        if (odroid_overlay_confirm("删除已保存的游戏进度？", false) == 1) {
+        if (odroid_overlay_confirm("Delete save file?", false) == 1) {
             store_erase(file->save_address, file->save_size);
         }
     }
@@ -361,7 +359,6 @@ void emulator_show_file_menu(retro_emulator_file_t *file)
 void emulator_start(retro_emulator_file_t *file, bool load_state, bool start_paused)
 {
     printf("Retro-Go: Starting game: %s\n", file->name);
-    //set apppath
     rom_manager_set_active_file(file);
 
     // odroid_settings_StartAction_set(load_state ? ODROID_START_ACTION_RESUME : ODROID_START_ACTION_NEWGAME);
@@ -446,6 +443,8 @@ void emulators_init()
     add_emulator("PC Engine", "pce", "pce", "huexpress-go", 0, logo_nes, header_pce);
 #endif
 
+    // add_emulator("ColecoVision", "col", "col", "smsplusgx-go", 0, logo_col, header_col);
+    // add_emulator("PC Engine", "pce", "pce", "huexpress-go", 0, logo_pce, header_pce);
     // add_emulator("Atari Lynx", "lnx", "lnx", "handy-go", 64, logo_lnx, header_lnx);
     // add_emulator("Atari 2600", "a26", "a26", "stella-go", 0, logo_a26, header_a26);
 }

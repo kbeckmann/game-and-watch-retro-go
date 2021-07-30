@@ -12,14 +12,13 @@
 #include "githash.h"
 #include "main.h"
 #include "gw_buttons.h"
-#include "odroid_overlay_ex.h"
 
 static const uint8_t *flash_manufacturer_str(uint8_t manufacturer)
 {
     switch (manufacturer) {
-        case 0xC2: return "旺宏(Macronix)";
-        case 0x9D: return "矽成(ISSI)";
-        default:   return "未知(Unknown)";
+        case 0xC2: return "Macronix";
+        case 0x9D: return "ISSI";
+        default:   return "Unknown";
     }
 }
 
@@ -139,9 +138,9 @@ static bool main_menu_timeout_cb(odroid_dialog_choice_t *option, odroid_dialog_e
         }
 
         odroid_settings_MainMenuTimeoutS_set(timeout + step);
-        //gui_redraw();
+        gui_redraw();
     }
-    sprintf(option->value, "%14s%d 秒", " ", odroid_settings_MainMenuTimeoutS_get());
+    sprintf(option->value, "%d s", odroid_settings_MainMenuTimeoutS_get());
     return event == ODROID_DIALOG_ENTER;
 }
 
@@ -235,23 +234,22 @@ void retro_loop()
 
             if (last_key == ODROID_INPUT_START) {
                 odroid_dialog_choice_t choices[] = {
-                    {0, "版  本", GIT_HASH, 1, NULL},
-                    {9, "开发者", "ducalex", 1, NULL},
-                    {9, "&", "kbeckmann", 1, NULL},
-                    {9, "&", "stacksmashing", 1, NULL},
-                    {9, "中文化", "orzeus", 1, NULL},
-                    ODROID_DIALOG_CHOICE_SEPARATOR,
-                    {2, "调试信息", "≈", 1, NULL},
-                    {1, "重置设定", "≡", 1, NULL},
-                    ODROID_DIALOG_CHOICE_SEPARATOR,
-                    {0, "关闭", "×", 1, NULL},
+                    {0, "Ver.", GIT_HASH, 1, NULL},
+                    {0, "By", "ducalex", 1, NULL},
+                    {0, "", "kbeckmann", 1, NULL},
+                    {0, "", "stacksmashing", 1, NULL},
+                    {0, "UI Mod", "orzeus", -1, NULL},
+                    {0, "---", "", -1, NULL},
+                    {2, "Debug menu", "", 1, NULL},
+                    {1, "Reset settings", "", 1, NULL},
+                    {0, "Close", "", 1, NULL},
                     ODROID_DIALOG_CHOICE_LAST
                 };
 
-                int sel = odroid_overlay_dialog("关于 Retro-Go", choices, -1);
+                int sel = odroid_overlay_dialog("Retro-Go", choices, -1);
                 if (sel == 1) {
                     // Reset settings
-                    if (odroid_overlay_confirm("您确定要重置所有设定信息？", false) == 1) {
+                    if (odroid_overlay_confirm("Reset all settings?", false) == 1) {
                         odroid_settings_reset();
                         odroid_system_switch_app(0); // reset
                     }
@@ -271,40 +269,38 @@ void retro_loop()
                     snprintf(status_str, sizeof(status_str), "0x%02X", status);
 
                     odroid_dialog_choice_t debuginfo[] = {
-                        {0, "存储 JEDEC ID", jedec_id_str, 1, NULL},
-                        {0, "存储芯片制造商", flash_manufacturer_str(jedec_id[0]), 1, NULL},
-                        {0, "存储芯片状态", status_str, 1, NULL},
-                        ODROID_DIALOG_CHOICE_SEPARATOR,
-                        {1, "开启芯片高速存取", "", 1, NULL},
-                        {2, "清除芯片高速存取", "", 1, NULL},
-                        ODROID_DIALOG_CHOICE_SEPARATOR,
-                        {0, "关闭", "×", 1, NULL},
+                        {0, "Flash JEDEC ID", jedec_id_str, 1, NULL},
+                        {0, "Flash manufacturer", flash_manufacturer_str(jedec_id[0]), 1, NULL},
+                        {0, "Flash status", status_str, 1, NULL},
+                        {0, "---", "", -1, NULL},
+                        {1, "Set Quad Enable", "", 1, NULL},
+                        {2, "Clear Quad Enable", "", 1, NULL},
+                        {0, "---", "", -1, NULL},
+                        {0, "Close", "", 1, NULL},
                         ODROID_DIALOG_CHOICE_LAST
                     };
 
-                    int sel = odroid_overlay_dialog("调试信息", debuginfo, -1);
+                    int sel = odroid_overlay_dialog("Debug", debuginfo, -1);
                     if (sel == 1) {
                         // Set Quad Enable
-                        if (odroid_overlay_confirm("您确定开启存储芯片的高速存储模式？", false) == 1) {
+                        if (odroid_overlay_confirm("Set Quad Enable?", false) == 1) {
                             flash_set_quad_enable(1);
                         }
                     } else  if (sel == 2) {
                         // Clear Quad Enable
-                        if (odroid_overlay_confirm("您确定关闭存储芯片的高速存储模式？", false) == 1) {
+                        if (odroid_overlay_confirm("Clear Quad Enable?", false) == 1) {
                             flash_set_quad_enable(0);
                         }
                     }
                 }
-                else if (sel == 9) {
-                    odroid_overlay_alert("您真的真的真的好帅好帅好帅！！！");
-                }
+
                 gui_redraw();
             }
             else if (last_key == ODROID_INPUT_VOLUME) {
                 char timeout_value[32];
                 odroid_dialog_choice_t choices[] = {
-                    ODROID_DIALOG_CHOICE_SEPARATOR,
-                    {0, "空闲待机", timeout_value, 1, &main_menu_timeout_cb},
+                    {0, "---", "", -1, NULL},
+                    {0, "Idle power off", timeout_value, 1, &main_menu_timeout_cb},
                     // {0, "Color theme", "1/10", 1, &color_shift_cb},
                     // {0, "Font size", "Small", 1, &font_size_cb},
                     // {0, "Show cover", "Yes", 1, &show_cover_cb},

@@ -10,8 +10,8 @@ extern const unsigned char logo_fav[];
 extern const unsigned char header_gb[];
 extern const unsigned char logo_gb[];
 
-//extern const unsigned char header_gbc[];
-//extern const unsigned char logo_gbc[];
+extern const unsigned char header_gbc[];
+extern const unsigned char logo_gbc[];
 
 extern const unsigned char header_gg[];
 extern const unsigned char logo_gg[];

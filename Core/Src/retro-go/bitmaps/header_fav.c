@@ -1,2 +1,2 @@
-const unsigned char header_fav[]  __attribute__((section(".extflash_data"))) = {
+const unsigned char header_fav[] = {
 };
