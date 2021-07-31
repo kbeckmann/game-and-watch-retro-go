@@ -417,9 +417,9 @@ static void flashapp_run(flashapp_t *flashapp)
                 }
 
                 // Round size up to nearest erase size if needed ?
-                // if ((flashapp->erase_bytes_left & (smallest_erase - 1)) != 0) {
-                //     flashapp->erase_bytes_left += smallest_erase - (flashapp->erase_bytes_left & (smallest_erase - 1));
-                // }
+                if ((flashapp->erase_bytes_left & (smallest_erase - 1)) != 0) {
+                    flashapp->erase_bytes_left += smallest_erase - (flashapp->erase_bytes_left & (smallest_erase - 1));
+                }
 
                 sprintf(flashapp->tab.name, "4. Erasing %ld bytes...", flashapp->erase_bytes_left);
                 printf("Erasing %ld bytes at 0x%08lx\n", flashapp->erase_bytes_left, flashapp->erase_address);
