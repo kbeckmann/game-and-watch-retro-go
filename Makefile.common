@@ -12,17 +12,26 @@ CHECK_DIRTY_SUBMODULE ?= 1
 # Set to 0 to skip tools check
 CHECK_TOOLS ?= 1
 
-# Set to 1 to enable 16MB external flash support
+# Set to 1 to enable 16MB external flash support. (deprecated, use EXTFLASH_SIZE_MB instead!)
 LARGE_FLASH ?= 0
 
-# User may override external flash size by setting EXTFLASH_SIZE
+# Configure where data is stored in the external flash by 
+# setting EXTFLASH_OFFSET. Useful if the first 1MB are to be preserved.
+EXTFLASH_OFFSET ?= 0
+
+# Configure external flash size by setting EXTFLASH_SIZE
 ifeq ($(LARGE_FLASH),1)
 	# 16MB
-	EXTFLASH_SIZE ?= 16777216
+	EXTFLASH_SIZE_MB ?= 16
 else
 	# 1MB
-	EXTFLASH_SIZE ?= 1048576
+	EXTFLASH_SIZE_MB ?= 1
 endif
+
+# Configure external flash size in MB (Megabytes)
+EXTFLASH_SIZE_MB ?= 1
+
+EXTFLASH_SIZE ?= $(shell echo "$$(( $(EXTFLASH_SIZE_MB) * 1024 * 1024 ))")
 
 # Compress supported ROMs by default. Set to 0 to disable.
 COMPRESS ?= lz4
@@ -263,6 +272,7 @@ CFLAGS += -fstack-usage -Wstack-usage=20480
 # Generate dependency information
 CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)"
 
+LDFLAGS += -Wl,--defsym=__EXTFLASH_OFFSET__=$(EXTFLASH_OFFSET)
 LDFLAGS += -Wl,--defsym=__EXTFLASH_TOTAL_LENGTH__=$(EXTFLASH_SIZE)
 
 #######################################
@@ -431,7 +441,7 @@ flash_intflash_nc: $(BUILD_DIR)/$(TARGET)_intflash.bin
 .PHONY: flashx
 
 flash_extflash: $(BUILD_DIR)/$(TARGET)_extflash.bin
-	$(FLASHAPP) $(BUILD_DIR)/$(TARGET)_extflash.bin
+	$(FLASHAPP) $(BUILD_DIR)/$(TARGET)_extflash.bin $(EXTFLASH_OFFSET)
 .PHONY: flash_extflash
 
 flash_test: flash_intflash
@@ -470,7 +480,7 @@ reset_dbgmcu:
 
 reset_mcu:
 	$(V)$(OPENOCD) -f scripts/interface_$(ADAPTER).cfg -c "init; reset run; exit;" 2> $(BUILD_DIR)/openocd.log
-.PHONY: reset_dbgmcu
+.PHONY: reset_mcu
 
 gdb: $(BUILD_DIR)/$(TARGET).elf
 	$(GDB) $< -ex "target extended-remote :3333"
@@ -480,7 +490,29 @@ gdb: $(BUILD_DIR)/$(TARGET).elf
 gdb_intflash: flash_intflash_nc gdb
 .PHONY: gdb_intflash
 
-
+help:
+	@echo "Game and Watch Retro Go"
+	@echo ""
+	@echo "Configuration variables:"
+	@echo "  EXTFLASH_SIZE_MB - Sets the external flash size in MB"
+	@echo "  EXTFLASH_SIZE    - Sets the external flash size in bytes (deprecated)"
+	@echo "  LARGE_FLASH      - Sets the external flash size to 16MB  (deprecated)"
+	@echo "  EXTFLASH_OFFSET  - Places the data at an offset in the external flash (useful for dual boot)"
+	@echo "  RESET_DBGMCU     - Configures if DBGMCU should be reset after flashing."
+	@echo "                     Set to 0 to disable power saving (default=1)"
+	@echo ""
+	@echo "Targets:"
+	@echo "  flash_extflash    - Only programs the external flash"
+	@echo "  flash_intflash    - Only programs the internal flash"
+	@echo "  flash_intflash_nc - Only programs the internal flash and uses an existing openocd server"
+	@echo "  flash_test        - Runs a flash test. Will overwrite data on the external flash!"
+	@echo "  gdb               - Starts gdb and attaches to openocd"
+	@echo "  gdb_intflash      - Runs flash_intflash_nc, then starts gdb and attaches to openocd"
+	@echo "  openocd           - Starts openocd with appropriate config"
+	@echo "  reset_dbgmcu      - Resets the unit and turns off DBGMCU (lowers battery drain)"
+	@echo "  reset_mcu         - Resets the unit"
+	@echo ""
+.PHONY: help
 
 #######################################
 # download SDK files
