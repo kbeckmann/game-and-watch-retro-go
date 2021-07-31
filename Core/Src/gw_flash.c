@@ -57,7 +57,7 @@
 #define STATUS_WEL_Pos   (1U)
 #define STATUS_WEL_Msk   (1UL << STATUS_WEL_Pos)
 
-// MX (Macronix) specific SR bits
+// MX and ISSI specific
 #define STATUS_BP0_Pos   (2U)
 #define STATUS_BP0_Msk   (1UL << STATUS_BP0_Pos)
 #define STATUS_BP1_Pos   (3U)
@@ -252,18 +252,17 @@ const flash_cmd_t cmds_quad_24b_issi[CMD_COUNT] = {
     [CMD_ERASE3] = CMD_DEF(0xD8, LINES_1, LINES_1, ADDR_SIZE_24B, LINES_0,    0), // BE    Block Erase 64K
     [CMD_ERASE4] = { },
     [CMD_PP]     = CMD_DEF(0x38, LINES_1, LINES_1, ADDR_SIZE_24B, LINES_4,    0), // PPQ
-    [CMD_READ]   = CMD_DEF(0xEB, LINES_1, LINES_1, ADDR_SIZE_24B, LINES_4,    6), // FRQIO dummy=6
+    [CMD_READ]   = CMD_DEF(0xEB, LINES_1, LINES_4, ADDR_SIZE_24B, LINES_4,    6), // FRQIO dummy=6
 };
 
 static void init_spansion(void);
-static void init_mx(void);
-static void init_issi(void);
+static void init_mx_issi(void);
 
 const flash_config_t config_spi_24b       = FLASH_CONFIG_DEF(cmds_spi_24b,       0x01000,  0x8000, 0x10000, 0,  false, NULL);
-const flash_config_t config_quad_24b_mx   = FLASH_CONFIG_DEF(cmds_quad_24b_mx,   0x01000,  0x8000, 0x10000, 0,   true, init_mx);
-const flash_config_t config_quad_32b_mx   = FLASH_CONFIG_DEF(cmds_quad_32b_mx,   0x01000,  0x8000, 0x10000, 0,   true, init_mx);
+const flash_config_t config_quad_24b_mx   = FLASH_CONFIG_DEF(cmds_quad_24b_mx,   0x01000,  0x8000, 0x10000, 0,   true, init_mx_issi);
+const flash_config_t config_quad_32b_mx   = FLASH_CONFIG_DEF(cmds_quad_32b_mx,   0x01000,  0x8000, 0x10000, 0,   true, init_mx_issi);
 const flash_config_t config_quad_32b_s    = FLASH_CONFIG_DEF(cmds_quad_32b_s,    0x40000,       0,       0, 0,   true, init_spansion);
-const flash_config_t config_quad_24b_issi = FLASH_CONFIG_DEF(cmds_quad_24b_issi, 0x01000,  0x8000, 0x10000, 0,   true, init_issi);
+const flash_config_t config_quad_24b_issi = FLASH_CONFIG_DEF(cmds_quad_24b_issi, 0x01000,  0x8000, 0x10000, 0,   true, init_mx_issi);
 
 const jedec_config_t jedec_map[] = {
     // MX 24 bit address
@@ -282,8 +281,7 @@ const jedec_config_t jedec_map[] = {
 
     // ISSI 24 bit *untested*
     // TODO: Test and uncomment when it's confirmed they work well.
-    // JEDEC_CONFIG_DEF(0x17, 0x60, 0x18, "IS25LP128F",  &config_quad_24b_issi), // 16MB
-    // JEDEC_CONFIG_DEF(0x17, 0x70, 0x18, "IS25WP128F",  &config_quad_24b_issi), // 16MB
+    JEDEC_CONFIG_DEF(0x9D, 0x70, 0x18, "IS25WP128F",  &config_quad_24b_issi), // 16MB
 };
 
 // Driver struct
@@ -580,8 +578,10 @@ void OSPI_ReadCR(uint8_t dest[1])
     OSPI_ReadBytes(CMD(RDCR), 0, dest, 1);
 }
 
-static void init_mx(void)
+static void init_mx_issi(void)
 {
+    // Shared code for both MX and ISSI
+
     uint8_t rd_status;
 
     DBG("%s\n", __FUNCTION__);
@@ -603,11 +603,6 @@ static void init_mx(void)
         OSPI_ReadBytes(CMD(RDSR), 0, &rd_status, 1);
         DBG("QE bit set. Status: %02X\n", rd_status);
     }
-}
-
-static void init_issi(void)
-{
-    // TODO!
 }
 
 static void init_spansion(void)
