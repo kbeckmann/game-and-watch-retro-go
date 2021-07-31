@@ -12,6 +12,9 @@ uint16_t framebuffer1[GW_LCD_WIDTH * GW_LCD_HEIGHT];
 uint16_t framebuffer2[GW_LCD_WIDTH * GW_LCD_HEIGHT];
 #endif // GW_LCD_MODE_LUT8
 
+uint16_t *fb1 = framebuffer1;
+uint16_t *fb2 = framebuffer2;
+
 uint8_t emulator_framebuffer[(256 + 8 + 8) * 240];
 
 extern LTDC_HandleTypeDef hltdc;
@@ -20,6 +23,7 @@ extern DAC_HandleTypeDef hdac1;
 extern DAC_HandleTypeDef hdac2;
 
 uint32_t active_framebuffer;
+uint32_t frame_counter;
 
 void lcd_backlight_off()
 {
@@ -156,17 +160,18 @@ void lcd_init(SPI_HandleTypeDef *spi, LTDC_HandleTypeDef *ltdc)
   HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
   wdog_refresh();
 
-  HAL_LTDC_SetAddress(ltdc,(uint32_t) &framebuffer1, 0);
+  HAL_LTDC_SetAddress(ltdc,(uint32_t) &fb1, 0);
 
-  memset(framebuffer1, 0, sizeof(framebuffer1));
-  memset(framebuffer2, 0, sizeof(framebuffer2));
+  memset(fb1, 0, sizeof(framebuffer1));
+  memset(fb2, 0, sizeof(framebuffer1));
 }
 
 void HAL_LTDC_ReloadEventCallback (LTDC_HandleTypeDef *hltdc) {
+  frame_counter++;
   if (active_framebuffer == 0) {
-    HAL_LTDC_SetAddress(hltdc, (uint32_t) framebuffer2, 0);
+    HAL_LTDC_SetAddress(hltdc, (uint32_t) fb2, 0);
   } else {
-    HAL_LTDC_SetAddress(hltdc, (uint32_t) framebuffer1, 0);
+    HAL_LTDC_SetAddress(hltdc, (uint32_t) fb1, 0);
   }
 }
 
@@ -180,23 +185,38 @@ void lcd_sync(void)
 {
   void *active = lcd_get_active_buffer();
   void *inactive = lcd_get_inactive_buffer();
-  memcpy(inactive, active, sizeof(framebuffer1));
+
+  if (active != inactive) {
+    memcpy(inactive, active, sizeof(framebuffer1));
+  }
 }
 
 void* lcd_get_active_buffer(void)
 {
-  return active_framebuffer ? framebuffer2 : framebuffer1;
+  return active_framebuffer ? fb2 : fb1;
 }
 
 void* lcd_get_inactive_buffer(void)
 {
-  return active_framebuffer ? framebuffer1 : framebuffer2;
+  return active_framebuffer ? fb1 : fb2;
 }
 
 void lcd_reset_active_buffer(void)
 {
-  HAL_LTDC_SetAddress(&hltdc, (uint32_t) framebuffer1, 0);
+  HAL_LTDC_SetAddress(&hltdc, (uint32_t) fb1, 0);
   active_framebuffer = 0;
 }
 
+void lcd_set_buffers(uint16_t *buf1, uint16_t *buf2)
+{
+  fb1 = buf1;
+  fb2 = buf2;
+}
 
+void lcd_wait_for_vblank(void)
+{
+  uint32_t old_counter = frame_counter;
+  while (old_counter == frame_counter) {
+    __asm("nop");
+  }
+}

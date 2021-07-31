@@ -74,16 +74,6 @@ Note: `make -j8` is used as an example. You may use `make -j$(nproc)` on Linux o
 # export ADAPTER=rpi
 export ADAPTER=stlink
 
-# Clone and build flashloader:
-
-git clone https://github.com/ghidraninja/game-and-watch-flashloader
-
-cd game-and-watch-flashloader
-
-make -j8
-
-cd ..
-
 # Clone this repo with submodules:
 
 git clone --recurse-submodules https://github.com/kbeckmann/game-and-watch-retro-go

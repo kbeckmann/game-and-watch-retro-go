@@ -1,5 +1,17 @@
 #!/bin/bash
 
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+NC='\033[0m'
+
+function echo_green() {
+    echo -e "${GREEN}${@}${NC}"
+}
+
+function echo_red() {
+    echo -e "${RED}${@}${NC}"
+}
+
 if [[ "$VERBOSE" == "1" ]]; then
     set -ex
 else
@@ -14,8 +26,7 @@ else
     DEFAULT_GDB=arm-none-eabi-gdb
 fi
 
-FLSHLD_DIR=${OBJDUMP:-../game-and-watch-flashloader}
-FLASHLOADER=${FLSHLD_DIR}/flash_multi.sh
+FLASHAPP=scripts/flash_multi.sh
 
 OBJDUMP=${OBJDUMP:-$DEFAULT_OBJDUMP}
 GDB=${GDB:-$DEFAULT_GDB}
@@ -32,8 +43,8 @@ fi
 
 function get_symbol {
     name=$1
-    objdump_cmd="$OBJDUMP -t $ELF"
-    size=$($objdump_cmd | grep " $name" | cut -d " " -f1 | tr 'a-f' 'A-F')
+    objdump_cmd="${OBJDUMP} -t ${ELF}"
+    size=$(${objdump_cmd} | grep " $name$" | cut -d " " -f1 | tr 'a-f' 'A-F' | head -n 1)
     printf "$((16#${size}))\n"
 }
 
@@ -45,8 +56,8 @@ function get_number_of_saves {
 
 function reset_and_disable_debug {
     if [[ "$RESET_DBGMCU" -eq 1 ]]; then
-        ${OPENOCD} -f ${FLSHLD_DIR}/interface_${ADAPTER}.cfg -c "init; reset halt; mww 0x5C001004 0x00000000; resume; exit;"
+        ${OPENOCD} -f scripts/interface_${ADAPTER}.cfg -c "init; reset halt; mww 0x5C001004 0x00000000; resume; exit;"
     else
-        ${OPENOCD} -f ${FLSHLD_DIR}/interface_${ADAPTER}.cfg -c "init; reset run; exit;"
+        ${OPENOCD} -f scripts/interface_${ADAPTER}.cfg -c "init; reset run; exit;"
     fi
 }

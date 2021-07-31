@@ -3,23 +3,33 @@
 
 #include "stm32h7xx_hal.h"
 
+#include <stdint.h>
+#include <stdbool.h>
 
-typedef enum {
-    SPI_MODE  = 0x00,
-    QUAD_MODE = 0x01,
-    HALF_QUAD_MODE = 0x02 // almost quad as used on the MX25U8035F
-} quad_mode_t;
 
-void OSPI_Init(OSPI_HandleTypeDef *hospi, quad_mode_t quad_mode);
-void OSPI_EnableMemoryMappedMode(OSPI_HandleTypeDef *hospi1);
-void OSPI_DisableMemoryMapped(OSPI_HandleTypeDef *hospi);
-void OSPI_Read(OSPI_HandleTypeDef *hospi, uint32_t address, uint8_t *buffer, size_t buffer_size);
-void OSPI_NOR_WriteEnable(OSPI_HandleTypeDef *hospi);
-void OSPI_ChipErase(OSPI_HandleTypeDef *hospi);
-void OSPI_Program(OSPI_HandleTypeDef *hospi, uint32_t address, const uint8_t *buffer, size_t buffer_size);
-void OSPI_BlockErase64(OSPI_HandleTypeDef *hospi, uint32_t address);
-void OSPI_BlockErase32(OSPI_HandleTypeDef *hospi, uint32_t address);
-void OSPI_SectorErase(OSPI_HandleTypeDef *hospi, uint32_t address);
-void OSPI_SetQuadEnable(OSPI_HandleTypeDef *hospi, uint8_t enable);
+void OSPI_EnableMemoryMappedMode(void);
+void OSPI_DisableMemoryMappedMode(void);
+void OSPI_ChipErase(void);
+
+// Performs one erase command per call with the largest size possible.
+// Sets *address and *size to values that should be passed to
+// OSPI_Erase in the next iteration.
+// Returns true when done.
+bool OSPI_Erase(uint32_t *address, uint32_t *size);
+
+// Erases the area synchronously. Will block until it's done.
+void OSPI_EraseSync(uint32_t address, uint32_t size);
+
+void OSPI_PageProgram(uint32_t address, const uint8_t *buffer, size_t buffer_size);
+void OSPI_NOR_WriteEnable(void);
+void OSPI_Program(uint32_t address, const uint8_t *buffer, size_t buffer_size);
+
+void OSPI_ReadJedecId(uint8_t dest[3]);
+void OSPI_ReadSR(uint8_t dest[1]);
+void OSPI_ReadCR(uint8_t dest[1]);
+const char* OSPI_GetFlashName(void);
+uint32_t OSPI_GetSmallestEraseSize(void);
+
+void OSPI_Init(OSPI_HandleTypeDef *hospi);
 
 #endif

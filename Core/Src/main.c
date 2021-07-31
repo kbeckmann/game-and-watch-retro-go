@@ -28,8 +28,10 @@
 #include "gw_lcd.h"
 #include "gw_linker.h"
 #include "githash.h"
+#include "flashapp.h"
 
 #include "odroid_colors.h"
+#include "odroid_system.h"
 #include "odroid_overlay.h"
 #include "bq24072.h"
 
@@ -75,13 +77,18 @@ WWDG_HandleTypeDef hwwdg1;
 
 /* USER CODE BEGIN PV */
 
-char logbuf[1024 * 4] __attribute__((section (".persistent"))) __attribute__((aligned(4)));
-uint32_t log_idx __attribute__((section (".persistent")));
-__attribute__((used)) __attribute__((section (".persistent"))) volatile uint32_t boot_magic;
+#define BOOT_MODE_APP      0
+#define BOOT_MODE_FLASHAPP 1
+
+char logbuf[1024 * 4] PERSISTENT __attribute__((aligned(4)));
+uint32_t log_idx PERSISTENT;
+PERSISTENT volatile uint32_t boot_magic;
 
 uint32_t boot_buttons;
 
 uint32_t uptime_s;
+
+static bool wdog_enabled;
 
 /* USER CODE END PV */
 
@@ -211,35 +218,11 @@ int _write(int file, char *ptr, int len)
 }
 #endif
 
-static void flash_read(uint8_t cmd, uint8_t *buf, size_t len)
-{
-  OSPI_DisableMemoryMapped(&hospi1);
-  OSPI_ReadBytes(&hospi1, cmd, buf, len);
-  OSPI_EnableMemoryMappedMode(&hospi1);
-}
-
-void flash_read_jedec_id(uint8_t *data)
-{
-  flash_read(0x9F, data, 3);
-}
-
-void flash_read_status_reg(uint8_t *data)
-{
-  flash_read(0x05, data, 1);
-}
-
-void flash_set_quad_enable(uint8_t enable)
-{
-  OSPI_DisableMemoryMapped(&hospi1);
-  OSPI_SetQuadEnable(&hospi1, enable);
-  OSPI_EnableMemoryMappedMode(&hospi1);
-}
-
-void store_erase(const uint8_t *flash_ptr, size_t size)
+void store_erase(const uint8_t *flash_ptr, uint32_t size)
 {
   // Only allow pointers in the SAVEFLASH allocated area
   assert(
-    ((flash_ptr >= &__SAVEFLASH_START__) && ((flash_ptr + size) <= &__SAVEFLASH_END__)) ||
+    ((flash_ptr >= &__SAVEFLASH_START__)   && ((flash_ptr + size) <= &__SAVEFLASH_END__)) ||
     ((flash_ptr >= &__configflash_start__) && ((flash_ptr + size) <= &__configflash_end__))
   );
 
@@ -249,36 +232,14 @@ void store_erase(const uint8_t *flash_ptr, size_t size)
   // Only allow 4kB aligned pointers
   assert((save_address & (4*1024 - 1)) == 0);
 
-  OSPI_DisableMemoryMapped(&hospi1);
-
-  uint32_t address = save_address;
-  int32_t bytes_left = size;
-  uint32_t erase_size;
-
-  printf("Erasing %ld bytes at 0x%08lx\n", bytes_left, address);
-
-  while (bytes_left > 0) {
-    OSPI_NOR_WriteEnable(&hospi1);
-
-    if ((bytes_left >= 64*1024) && ((address & (64 * 1024 - 1)) == 0)) {
-      printf("Erasing block (64kB): 0x%08lx (%ld left)\n", address, bytes_left);
-      OSPI_BlockErase64(&hospi1, (uint32_t) address);
-      erase_size = 64 * 1024;
-    } else if ((bytes_left >= 32*1024) && ((address & (32 * 1024 - 1)) == 0)) {
-      printf("Erasing block (32kB): 0x%08lx (%ld left)\n", address, bytes_left);
-      OSPI_BlockErase32(&hospi1, (uint32_t) address);
-      erase_size = 32 * 1024;
-    } else {
-      printf("Erasing sector (4kB): 0x%08lx (%ld left)\n", address, bytes_left);
-      OSPI_SectorErase(&hospi1, (uint32_t) address);
-      erase_size = 4 * 1024;
-    }
-
-    bytes_left -= erase_size;
-    address += erase_size;
+  // Round size up to nearest 4K
+  if ((size & 0xfff) != 0) {
+    size += 0x1000 - (size & 0xfff);
   }
 
-  OSPI_EnableMemoryMappedMode(&hospi1);
+  OSPI_DisableMemoryMappedMode();
+  OSPI_EraseSync(save_address, size);
+  OSPI_EnableMemoryMappedMode();
 }
 
 void store_save(const uint8_t *flash_ptr, const uint8_t *data, size_t size)
@@ -296,12 +257,9 @@ void store_save(const uint8_t *flash_ptr, const uint8_t *data, size_t size)
 
   store_erase(flash_ptr, size);
 
-  OSPI_DisableMemoryMapped(&hospi1);
-  OSPI_NOR_WriteEnable(&hospi1);
-
-  OSPI_Program(&hospi1, save_address, data, size);
-
-  OSPI_EnableMemoryMappedMode(&hospi1);
+  OSPI_DisableMemoryMappedMode();
+  OSPI_Program(save_address, data, size);
+  OSPI_EnableMemoryMappedMode();
 }
 
 void boot_magic_set(uint32_t magic)
@@ -369,9 +327,17 @@ static void memcpy_no_check(uint32_t *dst, uint32_t *src, size_t len)
   }
 }
 
+void wdog_enable()
+{
+  MX_WWDG1_Init();
+  wdog_enabled = true;
+}
+
 void wdog_refresh()
 {
-  HAL_WWDG_Refresh(&hwwdg1);
+  if (wdog_enabled) {
+    HAL_WWDG_Refresh(&hwwdg1);
+  }
 }
 
 /* USER CODE END 0 */
@@ -384,6 +350,7 @@ int main(void)
 {
   /* USER CODE BEGIN 1 */
   uint8_t trigger_wdt_bsod = 0;
+  uint8_t boot_mode = BOOT_MODE_APP;
 
   for(int i = 0; i < 1000000; i++) {
     __NOP();
@@ -412,6 +379,9 @@ int main(void)
     printf("Boot from watchdog reset!\nboot_magic=0x%08lx\n", boot_magic);
     trigger_wdt_bsod = 1;
     break;
+  case BOOT_MAGIC_FLASHAPP:
+    boot_mode = BOOT_MODE_FLASHAPP;
+    break;
   default:
     if ((boot_magic & BOOT_MAGIC_BSOD_MASK) == BOOT_MAGIC_BSOD) {
       uint16_t fault_idx = boot_magic & 0xffff;
@@ -425,6 +395,9 @@ int main(void)
 
   // Leave a trace that indicates a warm reset
   boot_magic = BOOT_MAGIC_RESET;
+
+  // Reset the log write pointer
+  log_idx = 0;
 
   /* USER CODE END 1 */
 
@@ -460,7 +433,6 @@ int main(void)
   MX_RTC_Init();
   MX_DAC1_Init();
   MX_DAC2_Init();
-  MX_WWDG1_Init();
   MX_ADC1_Init();
   MX_TIM1_Init();
 
@@ -493,17 +465,7 @@ int main(void)
 
   // Initialize the external flash
 
-  // TODO: Default to SPI_MODE because of issues with users who don't have the quad bit set.
-  // SPI_MODE or QUAD_MODE (IS25WP128F & co) or HALF_QUAD_MODE (MX25U8035F/Nintendo Stock Flash)
-  quad_mode_t quad_mode = SPI_MODE;
-
-  OSPI_Init(&hospi1, quad_mode);
-
-  OSPI_EnableMemoryMappedMode(&hospi1);
-
-  uint8_t jedec_id[3] = {0};
-  flash_read_jedec_id(jedec_id);
-  printf("Flash JEDEC ID: %02X %02X %02X\n", jedec_id[0], jedec_id[1], jedec_id[2]);
+  OSPI_Init(&hospi1);
 
   // Copy instructions and data from extflash to axiram
   void *copy_areas[3];
@@ -521,6 +483,8 @@ int main(void)
   copy_areas2[3] = copy_areas2[2] - copy_areas2[1];
   memcpy_no_check((uint32_t *) copy_areas2[1], (uint32_t *) copy_areas2[0], copy_areas2[3]);
 
+  odroid_system_init(0, 32000);
+
   // Sanity check, sometimes this is triggered
   uint32_t add = 0x90000000;
   uint32_t* ptr = (uint32_t*)add;
@@ -530,8 +494,18 @@ int main(void)
 
   bq24072_init();
 
-  // Launch the emulator
-  app_main();
+  switch (boot_mode) {
+  case BOOT_MODE_APP:
+    wdog_enable();
+    // Launch the emulator
+    app_main();
+    break;
+  case BOOT_MODE_FLASHAPP:
+    flashapp_main();
+    break;
+  default:
+    break;
+  }
 
   while (1)
   {
@@ -889,7 +863,7 @@ static void MX_OCTOSPI1_Init(void)
   hospi1.Init.FifoThreshold = 4;
   hospi1.Init.DualQuad = HAL_OSPI_DUALQUAD_DISABLE;
   hospi1.Init.MemoryType = HAL_OSPI_MEMTYPE_MACRONIX;
-  hospi1.Init.DeviceSize = 24;
+  hospi1.Init.DeviceSize = 26;
   hospi1.Init.ChipSelectHighTime = 2;
   hospi1.Init.FreeRunningClock = HAL_OSPI_FREERUNCLK_DISABLE;
   hospi1.Init.ClockMode = HAL_OSPI_CLOCK_MODE_0;

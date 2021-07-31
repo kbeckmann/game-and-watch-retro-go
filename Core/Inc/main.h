@@ -104,10 +104,7 @@ extern RTC_HandleTypeDef hrtc;
 void Error_Handler(void);
 void BSOD(BSOD_t fault, void *pc, void *lr) __attribute__((noreturn));
 
-void flash_read_jedec_id(uint8_t *data);
-void flash_read_status_reg(uint8_t *data);
-void flash_set_quad_enable(uint8_t enable);
-void store_erase(const uint8_t *flash_ptr, size_t size);
+void store_erase(const uint8_t *flash_ptr, uint32_t size);
 void store_save(const uint8_t *flash_ptr, const uint8_t *data, size_t size);
 void boot_magic_set(uint32_t magic);
 void uptime_inc(void);
@@ -150,8 +147,11 @@ void wdog_refresh(void);
 #define BOOT_MAGIC_RESET    0x1fa1afe1
 #define BOOT_MAGIC_WATCHDOG 0xd066cafe
 #define BOOT_MAGIC_BSOD     0xbad00000
+#define BOOT_MAGIC_FLASHAPP 0xf1a5f1a5
 
 #define BOOT_MAGIC_BSOD_MASK 0xffff0000
+
+#define PERSISTENT __attribute__((used)) __attribute__((section (".persistent")))
 
 /* USER CODE END Private defines */
 

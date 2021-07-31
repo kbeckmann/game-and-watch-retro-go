@@ -145,7 +145,8 @@ SECTIONS
   {
     __ram_uc_start__ = .;
     . = ALIGN(4);
-    *(.lcd)
+    *(.lcd1)
+    *(.lcd2)
     __ram_uc_end__ = .;
   } > RAM_UC
 
