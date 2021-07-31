@@ -295,6 +295,7 @@ static struct {
     bool                  mem_mapped_enabled;
 } flash = {
     .config = &config_spi_24b, // Default config to use to probe status etc.
+    .name = "Unknown",
 };
 
 static void set_ospi_cmd(OSPI_RegularCmdTypeDef *ospi_cmd,
