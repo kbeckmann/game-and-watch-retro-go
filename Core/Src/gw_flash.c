@@ -1,5 +1,3 @@
-#pragma GCC optimize ("-O0")
-
 #include <assert.h>
 #include <stdio.h>
 #include <stdint.h>
