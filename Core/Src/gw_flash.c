@@ -277,8 +277,8 @@ const jedec_config_t jedec_map[] = {
 
     // Cypress/Infineon 32 bit address
     // These chips only have 64kB erase size which won't work well with the rest of the code.
-    // JEDEC_CONFIG_DEF(0x01, 0x02, 0x20, "S25FS512S",   &config_quad_32b_s), // 64 MB
-    // JEDEC_CONFIG_DEF(0x34, 0x2B, 0x1A, "S25FS512S",   &config_quad_32b_s), // 64 MB
+    JEDEC_CONFIG_DEF(0x01, 0x02, 0x20, "S25FS512S",   &config_quad_32b_s), // 64 MB
+    JEDEC_CONFIG_DEF(0x34, 0x2B, 0x1A, "S25FS512S",   &config_quad_32b_s), // 64 MB
 
     // ISSI 24 bit *untested*
     // TODO: Test and uncomment when it's confirmed they work well.
@@ -595,13 +595,9 @@ static void init_mx(void)
 
         DBG("Setting QE bit.\n");
 
-        // Enable write to be allowed to change the status register
-        OSPI_NOR_WriteEnable();
-
         // Set the QE bit
+        OSPI_NOR_WriteEnable();
         OSPI_WriteBytes(CMD(WRSR), 0, &wr_status, 1);
-
-        // Wait until WIP bit is cleared
         wait_for_status(STATUS_WIP_Msk, 0);
 
         OSPI_ReadBytes(CMD(RDSR), 0, &rd_status, 1);
@@ -616,18 +612,24 @@ static void init_issi(void)
 
 static void init_spansion(void)
 {
-    uint8_t rd_sr;
+    uint8_t rd_sr1;
+    uint8_t rd_sr2;
     uint8_t rd_cr1;
     uint8_t rd_cr2;
     uint8_t rd_cr3;
     uint8_t rd_cr4;
 
-    OSPI_ReadBytes(CMD(RDSR), 0x00, &rd_sr, 1);
+    // SR[1-2]V
+    OSPI_ReadBytes(CMD(RDSR), 0x00, &rd_sr1, 1);
+    OSPI_ReadBytes(CMD(RDAR), 0x00800001, &rd_sr2, 1);
+
+    // CR[1-4]NV
     OSPI_ReadBytes(CMD(RDCR), 0x00, &rd_cr1, 1);
     OSPI_ReadBytes(CMD(RDAR), 0x03, &rd_cr2, 1);
     OSPI_ReadBytes(CMD(RDAR), 0x04, &rd_cr3, 1);
     OSPI_ReadBytes(CMD(RDAR), 0x05, &rd_cr4, 1);
-    DBG("SR: %02X CR: %02X %02X %02X %02X\n", rd_sr, rd_cr1, rd_cr2, rd_cr3, rd_cr4);
+
+    DBG("SR1: %02X SR2: %02X CR: %02X %02X %02X %02X\n", rd_sr1, rd_sr2, rd_cr1, rd_cr2, rd_cr3, rd_cr4);
 
     if (flash.config->set_quad && ((rd_cr1 & S_CR_QUAD_Msk) == 0)) {
         // WRSR/WRR writes to {status, config}
@@ -644,9 +646,9 @@ static void init_spansion(void)
         // Wait until WIP bit is cleared
         wait_for_status(STATUS_WIP_Msk, 0);
 
-        OSPI_ReadBytes(CMD(RDSR), 0, &rd_sr, 1);
+        OSPI_ReadBytes(CMD(RDSR), 0, &rd_sr1, 1);
         OSPI_ReadBytes(CMD(RDCR), 0, &rd_cr1, 1);
-        DBG("QUAD bit set. SR: %02X CR: %02X\n", rd_sr, rd_cr1);
+        DBG("QUAD bit set. SR: %02X CR: %02X\n", rd_sr1, rd_cr1);
     }
 }
 
