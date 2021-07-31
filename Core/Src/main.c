@@ -244,6 +244,11 @@ void store_erase(const uint8_t *flash_ptr, uint32_t size)
 
 void store_save(const uint8_t *flash_ptr, const uint8_t *data, size_t size)
 {
+  // Temporary solution to make things work with flash with 256K erase pages
+#ifdef DISABLE_STORE
+  return;
+#endif
+
   // Convert mem mapped pointer to flash address
   uint32_t save_address = flash_ptr - &__EXTFLASH_START__;
 
