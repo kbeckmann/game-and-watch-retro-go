@@ -256,7 +256,7 @@ C_INCLUDES +=  \
 -Iretro-go-stm32/components/lupng \
 
 # Force include the configuration
-CFLAGS += -include $(BUILD_DIR)/config.h
+CFLAGS += $(CFLAGS_EXTRA) -include $(BUILD_DIR)/config.h
 
 # compile gcc flags
 ASFLAGS += $(MCU) $(AS_DEFS) $(AS_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections
