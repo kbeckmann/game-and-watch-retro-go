@@ -131,6 +131,58 @@ retro-go-stm32/huexpress-go/components/huexpress/engine/hard_pce.c \
 Core/Src/porting/pce/sound_pce.c \
 Core/Src/porting/pce/main_pce.c
 
+MIKMOD_C_SOURCES = \
+Core/Src/porting/mikmod/drv_gw.c	\
+Core/Src/porting/mikmod/main_mikmod.c	\
+	\
+3rdparty/libmikmod/drivers/drv_nos.c	\
+3rdparty/libmikmod/loaders/load_669.c	\
+3rdparty/libmikmod/loaders/load_amf.c	\
+3rdparty/libmikmod/loaders/load_asy.c	\
+3rdparty/libmikmod/loaders/load_dsm.c	\
+3rdparty/libmikmod/loaders/load_far.c	\
+3rdparty/libmikmod/loaders/load_gdm.c	\
+3rdparty/libmikmod/loaders/load_gt2.c	\
+3rdparty/libmikmod/loaders/load_it.c	\
+3rdparty/libmikmod/loaders/load_imf.c	\
+3rdparty/libmikmod/loaders/load_m15.c	\
+3rdparty/libmikmod/loaders/load_med.c	\
+3rdparty/libmikmod/loaders/load_mod.c	\
+3rdparty/libmikmod/loaders/load_mtm.c	\
+3rdparty/libmikmod/loaders/load_okt.c	\
+3rdparty/libmikmod/loaders/load_s3m.c	\
+3rdparty/libmikmod/loaders/load_stm.c	\
+3rdparty/libmikmod/loaders/load_stx.c	\
+3rdparty/libmikmod/loaders/load_ult.c	\
+3rdparty/libmikmod/loaders/load_umx.c	\
+3rdparty/libmikmod/loaders/load_uni.c	\
+3rdparty/libmikmod/loaders/load_xm.c	\
+	\
+3rdparty/libmikmod/depackers/mmcmp.c	\
+3rdparty/libmikmod/depackers/pp20.c	\
+3rdparty/libmikmod/depackers/s404.c	\
+3rdparty/libmikmod/depackers/xpk.c	\
+	\
+3rdparty/libmikmod/mmio/mmerror.c	\
+	../mmio/mmio.c		\
+3rdparty/libmikmod/posix/strcasecmp.c	\
+	\
+3rdparty/libmikmod/playercode/mdreg.c	\
+3rdparty/libmikmod/playercode/mdriver.c	\
+3rdparty/libmikmod/playercode/mloader.c	\
+3rdparty/libmikmod/playercode/mlreg.c	\
+3rdparty/libmikmod/playercode/mlutil.c	\
+3rdparty/libmikmod/playercode/mplayer.c	\
+3rdparty/libmikmod/playercode/munitrk.c	\
+3rdparty/libmikmod/playercode/mwav.c	\
+3rdparty/libmikmod/playercode/npertab.c	\
+3rdparty/libmikmod/playercode/sloader.c	\
+3rdparty/libmikmod/playercode/virtch.c	\
+3rdparty/libmikmod/playercode/virtch2.c	\
+3rdparty/libmikmod/playercode/virtch_common.c
+
+#3rdparty/libmikmod/mmio/mmalloc.c	\
+
 C_INCLUDES +=  \
 -ICore/Inc \
 -ICore/Src/porting/lib \
@@ -143,13 +195,16 @@ C_INCLUDES +=  \
 -Iretro-go-stm32/smsplusgx-go/components/smsplus \
 -Iretro-go-stm32/smsplusgx-go/components/smsplus/cpu \
 -Iretro-go-stm32/smsplusgx-go/components/smsplus/sound \
--Iretro-go-stm32/huexpress-go/components/huexpress/engine
+-Iretro-go-stm32/huexpress-go/components/huexpress/engine \
+-I3rdparty/libmikmod/include
 
 C_DEFS += \
 -DIS_LITTLE_ENDIAN \
 -DDISABLE_AHBRAM_DCACHE \
 -DMINIZ_NO_MALLOC \
--DMINIZ_NO_ZLIB_APIS
+-DMINIZ_NO_ZLIB_APIS \
+-DHAVE_LIMITS_H \
+-DDRV_GW
 
 
 include Makefile.common

@@ -34,28 +34,28 @@
 
 static void MikMod_RegisterAllLoaders_internal(void)
 {
-	_mm_registerloader(&load_669);
-	_mm_registerloader(&load_amf);
-	_mm_registerloader(&load_asy);
-	_mm_registerloader(&load_dsm);
-	_mm_registerloader(&load_far);
-	_mm_registerloader(&load_gdm);
+	// _mm_registerloader(&load_669);
+	// _mm_registerloader(&load_amf);
+	// _mm_registerloader(&load_asy);
+	// _mm_registerloader(&load_dsm);
+	// _mm_registerloader(&load_far);
+	// _mm_registerloader(&load_gdm);
 /*	_mm_registerloader(&load_gt2);*/ /* load_gt2 isn't complete */
-	_mm_registerloader(&load_it);
-	_mm_registerloader(&load_imf);
+	// _mm_registerloader(&load_it);
+	// _mm_registerloader(&load_imf);
 	_mm_registerloader(&load_mod);
-	_mm_registerloader(&load_med);
-	_mm_registerloader(&load_mtm);
-	_mm_registerloader(&load_okt);
-	_mm_registerloader(&load_s3m);
-	_mm_registerloader(&load_stm);
-	_mm_registerloader(&load_stx);
-	_mm_registerloader(&load_ult);
-	_mm_registerloader(&load_umx);
-	_mm_registerloader(&load_uni);
+	// _mm_registerloader(&load_med);
+	// _mm_registerloader(&load_mtm);
+	// _mm_registerloader(&load_okt);
+	// _mm_registerloader(&load_s3m);
+	// _mm_registerloader(&load_stm);
+	// _mm_registerloader(&load_stx);
+	// _mm_registerloader(&load_ult);
+	// _mm_registerloader(&load_umx);
+	// _mm_registerloader(&load_uni);
 	_mm_registerloader(&load_xm);
 
-	_mm_registerloader(&load_m15);
+	// _mm_registerloader(&load_m15);
 }
 
 MIKMODAPI void MikMod_RegisterAllLoaders(void)

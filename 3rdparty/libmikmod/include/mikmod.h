@@ -832,6 +832,7 @@ MIKMODAPI extern struct MDRIVER drv_dc;     /* Dreamcast driver */
 MIKMODAPI extern struct MDRIVER drv_gp32;   /* GP32 Sound driver */
 MIKMODAPI extern struct MDRIVER drv_psp;    /* PlayStation Portable driver */
 MIKMODAPI extern struct MDRIVER drv_n64;    /* Nintendo64 driver */
+MIKMODAPI extern struct MDRIVER drv_gw;     /* Game and Watch driver */
 
 MIKMODAPI extern struct MDRIVER drv_wss;    /* DOS WSS driver */
 MIKMODAPI extern struct MDRIVER drv_sb;     /* DOS S/B driver */

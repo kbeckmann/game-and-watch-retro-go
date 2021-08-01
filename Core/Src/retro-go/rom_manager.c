@@ -17,6 +17,7 @@ retro_emulator_file_t *ACTIVE_FILE = NULL;
 #include "col_roms.c"
 #include "sg1000_roms.c"
 #include "pce_roms.c"
+#include "mikmod_roms.c"
 
 const rom_system_t *systems[] = {
     &nes_system,
@@ -25,7 +26,8 @@ const rom_system_t *systems[] = {
     &gg_system,
     &col_system,
     &sg1000_system,
-    &pce_system
+    &pce_system,
+    &mikmod_system,
 };
 
 const rom_manager_t rom_mgr = {

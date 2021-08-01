@@ -501,7 +501,7 @@ int main(void)
 
   switch (boot_mode) {
   case BOOT_MODE_APP:
-    wdog_enable();
+    // wdog_enable();
     // Launch the emulator
     app_main();
     break;
