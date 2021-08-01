@@ -1,0 +1,77 @@
+# libmikmod Makefile for targetting Nintendo64
+
+CFLAGS = -std=gnu99 -O2 -G0 -Wall -mtune=vr4300 -march=vr4300 -I$(N64_INST)/include -I$(N64_INST)/mips64-elf/include
+CFLAGS+= -I$(CURDIR)/../include/
+CFLAGS+= -DDRV_N64 -DHAVE_LIMITS_H -DHAVE_SNPRINTF
+ASFLAGS = -mtune=vr4300 -march=vr4300
+N64PREFIX = $(N64_INST)/bin/mips64-elf-
+INSTALLDIR = $(N64_INST)
+CC = $(N64PREFIX)gcc
+AS = $(N64PREFIX)as
+LD = $(N64PREFIX)ld
+AR = $(N64PREFIX)ar
+
+all: libmikmod.a
+
+SRCS =	../drivers/drv_n64.c	\
+	../drivers/drv_nos.c	\
+	\
+	../loaders/load_669.c	\
+	../loaders/load_amf.c	\
+	../loaders/load_asy.c	\
+	../loaders/load_dsm.c	\
+	../loaders/load_far.c	\
+	../loaders/load_gdm.c	\
+	../loaders/load_gt2.c	\
+	../loaders/load_it.c	\
+	../loaders/load_imf.c	\
+	../loaders/load_m15.c	\
+	../loaders/load_med.c	\
+	../loaders/load_mod.c	\
+	../loaders/load_mtm.c	\
+	../loaders/load_okt.c	\
+	../loaders/load_s3m.c	\
+	../loaders/load_stm.c	\
+	../loaders/load_stx.c	\
+	../loaders/load_ult.c	\
+	../loaders/load_umx.c	\
+	../loaders/load_uni.c	\
+	../loaders/load_xm.c	\
+	\
+	../depackers/mmcmp.c	\
+	../depackers/pp20.c	\
+	../depackers/s404.c	\
+	../depackers/xpk.c	\
+	\
+	../mmio/mmalloc.c	\
+	../mmio/mmerror.c	\
+	../mmio/mmio.c		\
+	../posix/strcasecmp.c	\
+	\
+	../playercode/mdreg.c	\
+	../playercode/mdriver.c	\
+	../playercode/mloader.c	\
+	../playercode/mlreg.c	\
+	../playercode/mlutil.c	\
+	../playercode/mplayer.c	\
+	../playercode/munitrk.c	\
+	../playercode/mwav.c	\
+	../playercode/npertab.c	\
+	../playercode/sloader.c	\
+	../playercode/virtch.c	\
+	../playercode/virtch2.c	\
+	../playercode/virtch_common.c
+#	../playercode/mdulaw.c
+
+OBJS = $(SRCS:.c=.o)
+
+libmikmod.a: $(OBJS)
+	$(AR) -rcs -o libmikmod.a $(OBJS)
+
+install: libmikmod.a $(CURDIR)/../include/mikmod.h
+	install -D --mode=644 libmikmod.a $(INSTALLDIR)/lib/libmikmod.a
+	install -D --mode=644 $(CURDIR)/../include/mikmod.h $(INSTALLDIR)/include/mikmod.h
+
+.PHONY: clean
+clean:
+	rm -f $(OBJS) *.a

@@ -1,0 +1,5 @@
+Building libmikmod requires libdragon
+ (see https://github.com/DragonMinded/libdragon for pointers.)
+
+Driver for output on n64 platform:
+  See drivers/drv_n64.c for its history.

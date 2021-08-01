@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+	<title>LibMikMod Web Audio Example</title>
+
+	<style type="text/css">
+		body {
+			font-family: sans-serif;
+		}
+	</style>
+</head>
+<body>
+	<noscript>Sorry! You need to enable JavaScript in order to run the example :(</noscript>
+
+	<h1>
+		LibMikMod Web Audio Example
+	</h1>
+
+	<h2>
+		Module File
+	</h2>
+
+	<p>
+		<label for="inputModuleFile">Module file (669, amf, asy, dsm, far, gdm, gt2, imf, it, m15, med, mod, mtm, okt, s3m, stm, stx, ult, umx, uni, xm)</label>
+		<br />
+		<input type="file" id="inputModuleFile" accept=".669,.amf,.asy,.dsm,.far,.gdm,.gt2,.imf,.it,.m15,.med,.mod,.mtm,.okt,.s3m,.stm,.stx,.ult,.umx,.uni,.xm" />
+	</p>
+
+	<h2>
+		Commands
+	</h2>
+
+	<p>
+		<button type="button" onclick="load()" id="buttonLoad" disabled>(Re)Load module file</button>
+	</p>
+
+	<p>
+		<button type="button" onclick="play()" id="buttonPlay" disabled>Play</button>
+		<button type="button" onclick="pause()" id="buttonPause" disabled>Pause</button>
+	</p>
+
+	<h2>
+		Song information
+	</h2>
+
+	<pre id="songInfo"></pre>
+
+	<h2>
+		More information
+	</h2>
+
+	<pre id="versionInfo"></pre>
+
+	<ul>
+		<li>
+			<a target="_blank" href="https://github.com/sezero/mikmod">https://github.com/sezero/mikmod</a>
+		</li>
+		<li>
+			<a target="_blank" href="https://github.com/carlosrafaelgn/mikmod/tree/master/libmikmod/webaudio">https://github.com/carlosrafaelgn/mikmod/tree/master/libmikmod/webaudio</a>
+		</li>
+	</ul>
+
+	<script type="text/javascript" src="dist/libmikmod.min.js"></script>
+	<script type="text/javascript">
+		//<![CDATA[
+		"use strict";
+
+		// According to Can I Use, we can assume that if a browser supports AudioWorkletNode it
+		// also supports WebAssembly (but not the other way around).
+		// Promises, ES6 and all other dependencies are also present in a browser which
+		// supports these two features:
+		// https://caniuse.com/wasm
+		// https://caniuse.com/mdn-api_audioworkletnode
+		if (!LibMikMod.isSupported())
+			alert("Sorry, but your browser does not meet the minimum requirements :(");
+
+		var inputModuleFile = document.getElementById("inputModuleFile"),
+			buttonPlay = document.getElementById("buttonPlay"),
+			buttonPause = document.getElementById("buttonPause"),
+			songInfo = document.getElementById("songInfo"),
+			fileLoaded = false,
+			audioNode = null,
+			audioContext = new AudioContext();
+
+		audioContext.suspend();
+
+		if (LibMikMod.isSupported())
+			LibMikMod.init(audioContext, "dist/").then(function () {
+				document.getElementById("versionInfo").textContent = "WEB_VERSION: " + LibMikMod.WEB_VERSION + "\nLIB_VERSION: " + LibMikMod.LIB_VERSION;
+				document.getElementById("buttonLoad").removeAttribute("disabled");
+			}, function (reason) {
+				alert("Error loading LibMikMod: " + reason);
+			});
+
+		function cleanUp() {
+			songInfo.textContent = "";
+			buttonPlay.setAttribute("disabled", "disabled");
+			buttonPause.setAttribute("disabled", "disabled");
+			fileLoaded = false;
+			audioContext.suspend();
+			if (audioNode)
+				audioNode.disconnect();
+		}
+
+		function load() {
+			if (!LibMikMod.initialized)
+				return;
+
+			if (!inputModuleFile.files || !inputModuleFile.files.length) {
+				alert("Please, select a file first");
+				return;
+			}
+
+			cleanUp();
+
+			LibMikMod.loadModule({
+				audioContext: audioContext,
+				source: inputModuleFile.files[0],
+				onload: moduleOnload,
+				onerror: moduleOnerror,
+				onended: moduleOnended
+			});
+		}
+
+		function play() {
+			if (fileLoaded)
+				audioContext.resume();
+		}
+
+		function pause() {
+			if (fileLoaded)
+				audioContext.suspend();
+		}
+
+		function moduleOnload(newAudioNode) {
+			songInfo.textContent =
+				"Song name: " + LibMikMod.infoSongName + "\n" +
+				"Module type: " + LibMikMod.infoModType + "\n" +
+				"Comment: " + LibMikMod.infoComment
+			;
+
+			newAudioNode.connect(audioContext.destination);
+			audioNode = newAudioNode;
+			buttonPlay.removeAttribute("disabled");
+			buttonPause.removeAttribute("disabled");
+			fileLoaded = true;
+			audioContext.resume();
+		}
+
+		function moduleOnerror(errorCode, reason) {
+			songInfo.textContent = "";
+
+			switch (errorCode) {
+				case LibMikMod.ERROR_FILE_READ:
+					alert("Error reading the file: " + reason);
+					break;
+
+				case LibMikMod.ERROR_MODULE_LOAD:
+					alert("Error loading the module: " + reason);
+					break;
+
+				//case LibMikMod.ERROR_PLAYBACK:
+				default:
+					alert("Error during module playback: " + reason);
+					break;
+			}
+		}
+
+		function moduleOnended() {
+			cleanUp();
+			alert("Playback ended!");
+		}
+
+		//]]>
+	</script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+{
+	"compilerOptions": {
+		"module": "system",
+		"target": "ES2015",
+		"lib": ["ES2015", "DOM"],
+		"sourceMap": false,
+		"outDir": "./temp",
+		"emitBOM": false,
+		"strict": true,
+		"alwaysStrict": false,
+		"removeComments": true
+	},
+	"files": [
+		"../shared/shared.ts",
+		"libmikmod.ts",
+		"libmikmodclib.ts",
+		"libmikmodprocessor.ts",
+		"missingtypes.ts"
+	]
+}

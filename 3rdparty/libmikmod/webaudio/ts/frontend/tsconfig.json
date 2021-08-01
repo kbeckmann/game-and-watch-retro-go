@@ -1,0 +1,17 @@
+{
+	"compilerOptions": {
+		"module": "system",
+		"target": "ES5",
+		"lib": ["ES2015", "DOM"],
+		"sourceMap": false,
+		"outFile": "../../dist/libmikmod.js",
+		"emitBOM": false,
+		"strict": true,
+		"alwaysStrict": false,
+		"removeComments": true
+	},
+	"files": [
+		"../shared/shared.ts",
+		"libmikmod.ts"
+	]
+}
