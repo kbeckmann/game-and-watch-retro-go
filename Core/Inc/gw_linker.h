@@ -28,22 +28,31 @@ extern uint8_t __configflash_end__;
 
 // If this is not an array the compiler might put in a memory_chk with dest_size 1...
 extern void * __RAM_EMU_START__[];
+
 extern void * _OVERLAY_NES_LOAD_START[];
 extern uint8_t _OVERLAY_NES_SIZE;
 extern void * _OVERLAY_NES_BSS_START[];
 extern uint8_t _OVERLAY_NES_BSS_SIZE;
+
 extern void * _OVERLAY_GB_LOAD_START[];
 extern uint8_t _OVERLAY_GB_SIZE;
 extern void * _OVERLAY_GB_BSS_START[];
 extern uint8_t _OVERLAY_GB_BSS_SIZE;
+
 extern void * _OVERLAY_SMS_LOAD_START[];
 extern uint8_t _OVERLAY_SMS_SIZE;
 extern void * _OVERLAY_SMS_BSS_START[];
 extern uint8_t _OVERLAY_SMS_BSS_SIZE;
+
 extern void * _OVERLAY_PCE_LOAD_START[];
 extern uint8_t _OVERLAY_PCE_SIZE;
 extern void * _OVERLAY_PCE_BSS_START[];
 extern uint8_t _OVERLAY_PCE_BSS_SIZE;
+
+extern void * _OVERLAY_SNES_LOAD_START[];
+extern uint8_t _OVERLAY_SNES_SIZE;
+extern void * _OVERLAY_SNES_BSS_START[];
+extern uint8_t _OVERLAY_SNES_BSS_SIZE;
 
 extern uint8_t *_NES_ROM_UNPACK_BUFFER;
 extern uint8_t _NES_ROM_UNPACK_BUFFER_SIZE;

@@ -172,7 +172,6 @@ SECTIONS
   ._extflash :
   {
     . = ALIGN(4);
-    __extflash_nes_start__ = .;
     build/core/logo*.o (.text .text* .rodata .rodata*)
     . = ALIGN(4);
     build/core/header*.o (.text .text* .rodata .rodata*)
@@ -286,6 +285,29 @@ SECTIONS
     ASSERT(ABSOLUTE(_OVERLAY_PCE_BSS_END) < __RAM_EMU_END__, "Error: PCE BSS overflow");
   }
   _OVERLAY_PCE_BSS_SIZE = SIZEOF(.overlay_pce_bss);
+
+  .overlay_snes __RAM_EMU_START__ : {
+    . = ALIGN(4);
+    __ram_emu_snes_start__ = .;
+    build/snes9x/*.o (.data .data* .text .text* .rodata .rodata*)
+    . = ALIGN(4);
+    _OVERLAY_SNES_LOAD_END = .;
+  } AT> EXTFLASH
+  _OVERLAY_SNES_LOAD_START = LOADADDR(.overlay_snes);
+  _OVERLAY_SNES_SIZE = SIZEOF(.overlay_snes);
+
+  .overlay_snes_bss _OVERLAY_SNES_LOAD_END : {
+    . = ALIGN(4);
+    _OVERLAY_SNES_BSS_START = .;
+    build/snes9x/*.o (COMMON)
+    . = ALIGN(4);
+    build/snes9x/*.o (.bss .bss*)
+    _SNES_ROM_UNPACK_BUFFER = .;
+    _OVERLAY_SNES_BSS_END = .;
+    __ram_emu_snes_end__ = .;
+    ASSERT(ABSOLUTE(_OVERLAY_SNES_BSS_END) < __RAM_EMU_END__, "Error: SNES BSS overflow");
+  }
+  _OVERLAY_SNES_BSS_SIZE = SIZEOF(.overlay_snes_bss);
 
   /* Place this symbol after the last overlay definition */
   .overlay_end : {

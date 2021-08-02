@@ -20,6 +20,7 @@ Core/Src/retro-go/nes_roms.c
 Core/Src/retro-go/pce_roms.c
 Core/Src/retro-go/sg1000_roms.c
 Core/Src/retro-go/sms_roms.c
+Core/Src/retro-go/snes_roms.c
 
 linux/loaded_gb_rom.c
 linux/loaded_nes_rom.c

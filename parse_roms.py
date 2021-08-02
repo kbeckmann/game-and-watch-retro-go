@@ -50,6 +50,7 @@ SAVE_SIZES = {
     "col": 60 * 1024,
     "sg": 60 * 1024,
     "pce": 76 * 1024,
+    "snes": 0, # TODO change to something sane
 }
 
 
@@ -629,10 +630,21 @@ class ROMParser:
             ["pce"],
             "SAVE_PCE_",
         )
-
         total_save_size += save_size
         total_rom_size += rom_size
         build_config += "#define ENABLE_EMULATOR_PCE\n" if rom_size > 0 else ""
+
+        save_size, rom_size = self.generate_system(
+            "Core/Src/retro-go/snes_roms.c",
+            "Super Nintendo Entertainment System",
+            "snes_system",
+            "snes",
+            ["smc"],
+            "SAVE_SNES_",
+        )
+        total_save_size += save_size
+        total_rom_size += rom_size
+        build_config += "#define ENABLE_EMULATOR_SNES\n" if rom_size > 0 else ""
 
         total_size = total_save_size + total_rom_size
 

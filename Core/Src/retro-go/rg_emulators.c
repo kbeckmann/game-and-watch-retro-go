@@ -15,6 +15,7 @@
 #include "main_nes.h"
 #include "main_smsplusgx.h"
 #include "main_pce.h"
+#include "main_snes.h"
 
 // Increase when adding new emulators
 #define MAX_EMULATORS 7
@@ -415,13 +416,29 @@ void emulator_start(retro_emulator_file_t *file, bool load_state, bool start_pau
       SCB_CleanDCache_by_Addr((uint32_t *)&__RAM_EMU_START__, (size_t)&_OVERLAY_PCE_SIZE);
       app_main_pce(load_state, start_paused);
 #endif
+  } else if(strcmp(emu->system_name, "Super Nintendo Entertainment System") == 0) {
+#ifdef ENABLE_EMULATOR_SNES
+      memcpy(&__RAM_EMU_START__, &_OVERLAY_SNES_LOAD_START, (size_t)&_OVERLAY_SNES_SIZE);
+      memset(&_OVERLAY_SNES_BSS_START, 0x0, (size_t)&_OVERLAY_SNES_BSS_SIZE);
+      SCB_CleanDCache_by_Addr((uint32_t *)&__RAM_EMU_START__, (size_t)&_OVERLAY_SNES_SIZE);
+      app_main_snes(load_state, start_paused);
+#endif
   }
     
 }
 
 void emulators_init()
 {
-#if !( defined(ENABLE_EMULATOR_GB) || defined(ENABLE_EMULATOR_NES) || defined(ENABLE_EMULATOR_GG) || defined(ENABLE_EMULATOR_SMS) || defined(ENABLE_EMULATOR_COL) || defined(ENABLE_EMULATOR_SG1000) || defined(ENABLE_EMULATOR_PCE) )
+#if !(                                     \
+        defined(ENABLE_EMULATOR_GB)     || \
+        defined(ENABLE_EMULATOR_NES)    || \
+        defined(ENABLE_EMULATOR_GG)     || \
+        defined(ENABLE_EMULATOR_SMS)    || \
+        defined(ENABLE_EMULATOR_COL)    || \
+        defined(ENABLE_EMULATOR_SG1000) || \
+        defined(ENABLE_EMULATOR_PCE)    || \
+        defined(ENABLE_EMULATOR_SNES)    \
+    )
     // Add gameboy as a placeholder in case no emulator is built.
     add_emulator("Nintendo Gameboy", "gb", "gb", "gnuboy-go", 0, logo_gb, header_gb);
 #endif
@@ -454,6 +471,11 @@ void emulators_init()
 
 #ifdef ENABLE_EMULATOR_PCE
     add_emulator("PC Engine", "pce", "pce", "huexpress-go", 0, logo_nes, header_pce);
+#endif
+
+#ifdef ENABLE_EMULATOR_SNES
+    // TODO: Add a logo/header
+    add_emulator("Super Nintendo Entertainment System", "snes", "smc", "snes", 0, logo_nes, header_nes);
 #endif
 
     // add_emulator("ColecoVision", "col", "col", "smsplusgx-go", 0, logo_col, header_col);
