@@ -418,10 +418,19 @@ void emulator_start(retro_emulator_file_t *file, bool load_state, bool start_pau
 #endif
   } else if(strcmp(emu->system_name, "Super Nintendo Entertainment System") == 0) {
 #ifdef ENABLE_EMULATOR_SNES
-      memcpy(&__RAM_EMU_START__, &_OVERLAY_SNES_LOAD_START, (size_t)&_OVERLAY_SNES_SIZE);
-      memset(&_OVERLAY_SNES_BSS_START, 0x0, (size_t)&_OVERLAY_SNES_BSS_SIZE);
-      SCB_CleanDCache_by_Addr((uint32_t *)&__RAM_EMU_START__, (size_t)&_OVERLAY_SNES_SIZE);
-      app_main_snes(load_state, start_paused);
+    printf("__RAM_EMU_START__: 0x%08lx\n", &__RAM_EMU_START__);
+
+    printf("_OVERLAY_SNES_LOAD_START:  0x%08lx\n", &_OVERLAY_SNES_LOAD_START);
+    printf("_OVERLAY_SNES_SIZE:  0x%08lx\n", &_OVERLAY_SNES_SIZE);
+
+    printf("_OVERLAY_SNES_BSS_START: 0x%08lx\n", &_OVERLAY_SNES_BSS_START);
+    printf("_OVERLAY_SNES_BSS_SIZE:  0x%08lx\n", &_OVERLAY_SNES_BSS_SIZE);
+
+    memcpy(&__RAM_EMU_START__, &_OVERLAY_SNES_LOAD_START, (size_t)&_OVERLAY_SNES_SIZE);
+    memset(&_OVERLAY_SNES_BSS_START, 0x0, (size_t)&_OVERLAY_SNES_BSS_SIZE);
+    SCB_CleanDCache_by_Addr((uint32_t *)&__RAM_EMU_START__, (size_t)&_OVERLAY_SNES_SIZE);
+
+    app_main_snes(load_state, start_paused);
 #endif
   }
     

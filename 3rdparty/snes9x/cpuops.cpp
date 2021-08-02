@@ -24,7 +24,8 @@
 #include "cpuops.h"
 #include "cpumacro.h"
 
-#include <esp_attr.h>
+#include "porting_snes.h"
+
 
 /* ADC ********************************************************************* */
 
@@ -3302,7 +3303,7 @@ static void Op42 (void)
 
 /* CPU-S9xOpcodes Definitions ************************************************/
 
-DRAM_ATTR const struct SOpcodes S9xOpcodesM1X1[256] =
+DRAM_ATTR_SNES const struct SOpcodes S9xOpcodesM1X1[256] =
 {
 	{ Op00 },        { Op01E0M1 },    { Op02 },        { Op03M1 },      { Op04M1 },
 	{ Op05M1 },      { Op06M1 },      { Op07M1 },      { Op08E0 },      { Op09M1 },
@@ -3358,7 +3359,7 @@ DRAM_ATTR const struct SOpcodes S9xOpcodesM1X1[256] =
 	{ OpFFM1 }
 };
 
-DRAM_ATTR const struct SOpcodes S9xOpcodesE1[256] =
+DRAM_ATTR_SNES const struct SOpcodes S9xOpcodesE1[256] =
 {
 	{ Op00 },        { Op01E1 },      { Op02 },        { Op03M1 },      { Op04M1 },
 	{ Op05M1 },      { Op06M1 },      { Op07M1 },      { Op08E1 },      { Op09M1 },
@@ -3414,7 +3415,7 @@ DRAM_ATTR const struct SOpcodes S9xOpcodesE1[256] =
 	{ OpFFM1 }
 };
 
-DRAM_ATTR const struct SOpcodes S9xOpcodesM1X0[256] =
+DRAM_ATTR_SNES const struct SOpcodes S9xOpcodesM1X0[256] =
 {
 	{ Op00 },        { Op01E0M1 },    { Op02 },        { Op03M1 },      { Op04M1 },
 	{ Op05M1 },      { Op06M1 },      { Op07M1 },      { Op08E0 },      { Op09M1 },
@@ -3470,7 +3471,7 @@ DRAM_ATTR const struct SOpcodes S9xOpcodesM1X0[256] =
 	{ OpFFM1 }
 };
 
-DRAM_ATTR const struct SOpcodes S9xOpcodesM0X0[256] =
+DRAM_ATTR_SNES const struct SOpcodes S9xOpcodesM0X0[256] =
 {
 	{ Op00 },        { Op01E0M0 },    { Op02 },        { Op03M0 },      { Op04M0 },
 	{ Op05M0 },      { Op06M0 },      { Op07M0 },      { Op08E0 },      { Op09M0 },
@@ -3526,7 +3527,7 @@ DRAM_ATTR const struct SOpcodes S9xOpcodesM0X0[256] =
 	{ OpFFM0 }
 };
 
-DRAM_ATTR const struct SOpcodes S9xOpcodesM0X1[256] =
+DRAM_ATTR_SNES const struct SOpcodes S9xOpcodesM0X1[256] =
 {
 	{ Op00 },        { Op01E0M0 },    { Op02 },        { Op03M0 },      { Op04M0 },
 	{ Op05M0 },      { Op06M0 },      { Op07M0 },      { Op08E0 },      { Op09M0 },
@@ -3582,7 +3583,7 @@ DRAM_ATTR const struct SOpcodes S9xOpcodesM0X1[256] =
 	{ OpFFM0 }
 };
 
-DRAM_ATTR const struct SOpcodes S9xOpcodesSlow[256] =
+DRAM_ATTR_SNES const struct SOpcodes S9xOpcodesSlow[256] =
 {
 	{ Op00 },        { Op01Slow },    { Op02 },        { Op03Slow },    { Op04Slow },
 	{ Op05Slow },    { Op06Slow },    { Op07Slow },    { Op08Slow },    { Op09Slow },
@@ -3639,7 +3640,7 @@ DRAM_ATTR const struct SOpcodes S9xOpcodesSlow[256] =
 };
 
 
-DRAM_ATTR const uint8 S9xOpLengthsM0X0[256] =
+DRAM_ATTR_SNES const uint8 S9xOpLengthsM0X0[256] =
 {
 //  0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F
 	2, 2, 2, 2, 2, 2, 2, 2, 1, 3, 1, 1, 3, 3, 3, 4, // 0
@@ -3660,7 +3661,7 @@ DRAM_ATTR const uint8 S9xOpLengthsM0X0[256] =
 	2, 2, 2, 2, 3, 2, 2, 2, 1, 3, 1, 1, 3, 3, 3, 4  // F
 };
 
-DRAM_ATTR const uint8 S9xOpLengthsM0X1[256] =
+DRAM_ATTR_SNES const uint8 S9xOpLengthsM0X1[256] =
 {
 //  0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F
 	2, 2, 2, 2, 2, 2, 2, 2, 1, 3, 1, 1, 3, 3, 3, 4, // 0
@@ -3681,7 +3682,7 @@ DRAM_ATTR const uint8 S9xOpLengthsM0X1[256] =
 	2, 2, 2, 2, 3, 2, 2, 2, 1, 3, 1, 1, 3, 3, 3, 4  // F
 };
 
-DRAM_ATTR const uint8 S9xOpLengthsM1X0[256] =
+DRAM_ATTR_SNES const uint8 S9xOpLengthsM1X0[256] =
 {
 //  0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F
 	2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 1, 1, 3, 3, 3, 4, // 0
@@ -3702,7 +3703,7 @@ DRAM_ATTR const uint8 S9xOpLengthsM1X0[256] =
 	2, 2, 2, 2, 3, 2, 2, 2, 1, 3, 1, 1, 3, 3, 3, 4  // F
 };
 
-DRAM_ATTR const uint8 S9xOpLengthsM1X1[256] =
+DRAM_ATTR_SNES const uint8 S9xOpLengthsM1X1[256] =
 {
 //  0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F
 	2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 1, 1, 3, 3, 3, 4, // 0

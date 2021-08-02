@@ -22,7 +22,14 @@ extern FILE	*trace;
 
 static bool parse_controller_spec (int port, const char *arg)
 {
-	if (!strcasecmp(arg, "none"))
+	return (true);
+	char *cmp = "none";
+
+	printf("** 1 %p\n", cmp);
+	printf("** 2 %p\n", cmp);
+	printf("** 3 %p\n", cmp);
+
+	if (!strcasecmp(arg, cmp))
 		S9xSetController(port, CTL_NONE,       0, 0, 0, 0);
 	else
 	if (!strncasecmp(arg, "pad",   3) && arg[3] >= '1' && arg[3] <= '8' && arg[4] == '\0')

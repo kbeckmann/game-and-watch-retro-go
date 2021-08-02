@@ -15,7 +15,7 @@
 #include "65c816.h"
 #include "messages.h"
 
-#include <esp_attr.h>
+
 
 #ifdef ZLIB
 #include <zlib.h>

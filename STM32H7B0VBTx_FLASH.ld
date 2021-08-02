@@ -70,7 +70,8 @@ __RAM_UC_LENGTH__   = 300K;
 __RAM_CORE_LENGTH__ = 68K;
 __RAM_EMU_LENGTH__  = 1024K - __RAM_UC_LENGTH__ - __RAM_CORE_LENGTH__;
 __AHBRAM_LENGTH__   = 128K;
-__FLASH_LENGTH__    = 128K;
+__FLASH_LENGTH__    = 256K; /* bank1 */
+__FLASH2_LENGTH__   = 256K; /* bank2 */
 
 __EXTFLASH_OFFSET__ = DEFINED(__EXTFLASH_OFFSET__) ? __EXTFLASH_OFFSET__ : 0;
 __EXTFLASH_START__ = 0x90000000 + __EXTFLASH_OFFSET__;
@@ -81,6 +82,7 @@ __RAM_CORE_START__  = __RAM_START__ + __RAM_UC_LENGTH__;
 __RAM_EMU_START__   = __RAM_CORE_START__ + __RAM_CORE_LENGTH__;
 
 __RAM_EMU_END__     = __RAM_EMU_START__ + __RAM_EMU_LENGTH__;
+__RAM_END__         = 0x24000000 + 1024K;
 
 /* saveflash.ld sets __SAVEFLASH_LENGTH__ */
 INCLUDE build/saveflash.ld
@@ -107,7 +109,8 @@ MEMORY
   AHBRAM   (xrw) : ORIGIN = 0x30000000, LENGTH =  __AHBRAM_LENGTH__
 
   /* FLASH */
-  FLASH    (xr ) : ORIGIN = 0x08000000,          LENGTH =  __FLASH_LENGTH__
+  FLASH    (xr ) : ORIGIN = 0x08000000,          LENGTH = __FLASH_LENGTH__
+  FLASH2   (xr ) : ORIGIN = 0x08100000,          LENGTH = __FLASH2_LENGTH__
   EXTFLASH (xr ) : ORIGIN = __EXTFLASH_START__,  LENGTH = __EXTFLASH_LENGTH__
   SAVEFLASH(xr ) : ORIGIN = __SAVEFLASH_START__, LENGTH = __SAVEFLASH_LENGTH__
   CONFIGFLASH(xr ) : ORIGIN = __CONFIGFLASH_START__, LENGTH = __CONFIGFLASH_LENGTH__
@@ -191,6 +194,11 @@ SECTIONS
     __extflash_game_rom_start__ = .;
     *(.extflash_game_rom)
     __extflash_game_rom_end__ = .;
+
+    __extflash_snes_ro_start__ = .;
+    build/snes9x/*.o (.text .text* .rodata .rodata*)
+    __extflash_snes_ro_end__ = .;
+
   } > EXTFLASH
 
   .overlay_nes __RAM_EMU_START__ : {
@@ -289,7 +297,7 @@ SECTIONS
   .overlay_snes __RAM_EMU_START__ : {
     . = ALIGN(4);
     __ram_emu_snes_start__ = .;
-    build/snes9x/*.o (.data .data* .text .text* .rodata .rodata*)
+    build/snes9x/*.o (.data .data*)
     . = ALIGN(4);
     _OVERLAY_SNES_LOAD_END = .;
   } AT> EXTFLASH
@@ -436,7 +444,15 @@ SECTIONS
     . = ALIGN(4);
     __flash_end__ = .;
   }
-  
+
+  /* put the SNES read only stuff on the second bank */
+  .snes_text_rodata :
+  {
+    __flash2_start__ = .;
+    . = ALIGN(4);
+    __flash2_end__ = .;
+  } >FLASH2
+
   /* Uninitialized data section */
   . = ALIGN(4);
   .bss :

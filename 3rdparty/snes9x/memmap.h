@@ -78,7 +78,7 @@ struct CMemory
 	uint32	CalculatedSize;
 	uint32	CalculatedChecksum;
 
-	bool8	Init (void);
+	bool8	Init (uint8_t * rom_data);
 	void	Deinit (void);
 
 	int		ScoreHiROM (bool8, int32 romoff = 0);

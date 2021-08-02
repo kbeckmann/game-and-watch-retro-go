@@ -32,6 +32,10 @@ static inline void RenderScreen (bool8);
 
 #define TILE_PLUS(t, x)	(((t) & 0xfc00) | ((t + x) & 0x3ff))
 
+extern "C" {
+	#include "gw_lcd.h"
+}
+
 bool8 S9xGraphicsInit (void)
 {
 	S9xInitTileRenderer();
@@ -45,9 +49,14 @@ bool8 S9xGraphicsInit (void)
 
 	GFX.ScreenSize = GFX.Pitch / 2 * SNES_HEIGHT_EXTENDED;
 
-	GFX.SubScreen  = (uint16 *) malloc(GFX.ScreenSize * sizeof(uint16));
-	GFX.ZBuffer    = (uint8 *)  malloc(GFX.ScreenSize);
-	GFX.SubZBuffer = (uint8 *)  malloc(GFX.ScreenSize);
+	// TODO: Download more RAM!
+	GFX.SubScreen  = (uint16 *) framebuffer2;
+	GFX.ZBuffer    = (uint8 *)  framebuffer2;
+	GFX.SubZBuffer = (uint8 *)  framebuffer2;
+
+	// GFX.SubScreen  = (uint16 *) malloc(GFX.ScreenSize * sizeof(uint16));
+	// GFX.ZBuffer    = (uint8 *)  malloc(GFX.ScreenSize);
+	// GFX.SubZBuffer = (uint8 *)  malloc(GFX.ScreenSize);
 	// GFX.ZERO = (uint16 *) malloc(0x10000, sizeof(uint16));
 	GFX.ZERO       = (uint16 *)GFX.SubScreen; // This will cause garbage but for now it's okay
 

@@ -93,7 +93,11 @@ LoopFillZerobss:
   bcc  FillZerobss
    
 /* Call static constructors */
+/*
+  ... or not.. call after extflash init
     bl __libc_init_array
+*/
+
 /* Call the application's entry point.*/
   bl  main
   bx  lr
