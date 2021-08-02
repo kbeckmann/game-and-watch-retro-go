@@ -52,6 +52,7 @@ extern uint8_t _OVERLAY_PCE_BSS_SIZE;
 extern void * _OVERLAY_SNES_LOAD_START[];
 extern uint8_t _OVERLAY_SNES_SIZE;
 extern void * _OVERLAY_SNES_BSS_START[];
+extern void * _OVERLAY_SNES_BSS_END[];
 extern uint8_t _OVERLAY_SNES_BSS_SIZE;
 
 extern uint8_t *_NES_ROM_UNPACK_BUFFER;
@@ -59,3 +60,5 @@ extern uint8_t _NES_ROM_UNPACK_BUFFER_SIZE;
 
 extern uint8_t *_GB_ROM_UNPACK_BUFFER;
 extern uint8_t _GB_ROM_UNPACK_BUFFER_SIZE;
+
+extern void * __RAM_END__[];

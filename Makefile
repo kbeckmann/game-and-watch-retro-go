@@ -37,6 +37,11 @@ Core/Src/stm32h7xx_hal_msp.c \
 Core/Src/stm32h7xx_it.c \
 Core/Src/system_stm32h7xx.c
 
+# Add common C++ sources here
+CXX_SOURCES = \
+Core/Src/heap.cpp \
+
+
 GNUBOY_C_SOURCES = \
 Core/Src/porting/gb/main_gb.c \
 retro-go-stm32/gnuboy-go/components/gnuboy/cpu.c \
@@ -131,8 +136,40 @@ retro-go-stm32/huexpress-go/components/huexpress/engine/hard_pce.c \
 Core/Src/porting/pce/sound_pce.c \
 Core/Src/porting/pce/main_pce.c
 
-SNES9X_C_SOURCES = \
-Core/Src/porting/snes9x/main_snes9x.c
+SNES9X_CXX_SOURCES = \
+Core/Src/porting/snes9x/main_snes9x.cpp \
+3rdparty/snes9x/c4.cpp \
+3rdparty/snes9x/c4emu.cpp \
+3rdparty/snes9x/clip.cpp \
+3rdparty/snes9x/controls.cpp \
+3rdparty/snes9x/cpu.cpp \
+3rdparty/snes9x/cpuexec.cpp \
+3rdparty/snes9x/cpuops.cpp \
+3rdparty/snes9x/debug.cpp \
+3rdparty/snes9x/dma.cpp \
+3rdparty/snes9x/dsp1.cpp \
+3rdparty/snes9x/dsp2.cpp \
+3rdparty/snes9x/dsp.cpp \
+3rdparty/snes9x/gfx.cpp \
+3rdparty/snes9x/globals.cpp \
+3rdparty/snes9x/memmap.cpp \
+3rdparty/snes9x/ppu.cpp \
+3rdparty/snes9x/snapshot.cpp \
+3rdparty/snes9x/snes9x.cpp \
+3rdparty/snes9x/statemanager.cpp \
+3rdparty/snes9x/stream.cpp \
+3rdparty/snes9x/tile.cpp \
+\
+3rdparty/snes9x/apu/apu.cpp \
+3rdparty/snes9x/apu/bapu/dsp/SPC_DSP.cpp \
+3rdparty/snes9x/apu/bapu/dsp/sdsp.cpp \
+3rdparty/snes9x/apu/bapu/smp/smp.cpp \
+3rdparty/snes9x/apu/bapu/smp/smp_state.cpp \
+
+
+#3rdparty/snes9x/apu/bapu/smp/debugger/debugger.cpp \
+#3rdparty/snes9x/apu/bapu/smp/debugger/disassembler.cpp \
+
 
 
 C_INCLUDES +=  \

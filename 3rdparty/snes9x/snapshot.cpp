@@ -709,6 +709,8 @@ int S9xUnfreezeGameMem (const uint8 *buf, uint32 bufSize)
 
 bool8 S9xUnfreezeGame (const char *filename)
 {
+	return 0;
+#if 0
 	STREAM	stream = NULL;
 	char	drive[_MAX_DRIVE + 1], dir[_MAX_DIR + 1], def[_MAX_FNAME + 1], ext[_MAX_EXT + 1];
 
@@ -768,6 +770,7 @@ bool8 S9xUnfreezeGame (const char *filename)
 	S9xMessage(S9X_INFO, S9X_FREEZE_FILE_INFO, String);
 
 	return (FALSE);
+#endif
 }
 
 void S9xFreezeToStream (STREAM stream)

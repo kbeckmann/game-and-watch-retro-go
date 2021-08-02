@@ -15,9 +15,11 @@
 #include "missing.h"
 #endif
 
+#include "porting_snes.h"
+
 static inline void S9xReschedule (void);
 
-IRAM_ATTR void S9xMainLoop (void)
+IRAM_ATTR_SNES void S9xMainLoop (void)
 {
 	#define CHECK_FOR_IRQ_CHANGE() \
 	if (Timings.IRQFlagChanging) \
@@ -171,7 +173,7 @@ IRAM_ATTR void S9xMainLoop (void)
 	S9xPackStatus();
 }
 
-IRAM_ATTR static inline void S9xReschedule (void)
+IRAM_ATTR_SNES static inline void S9xReschedule (void)
 {
 	switch (CPU.WhichEvent)
 	{
@@ -207,7 +209,7 @@ IRAM_ATTR static inline void S9xReschedule (void)
 	}
 }
 
-IRAM_ATTR void S9xDoHEventProcessing (void)
+IRAM_ATTR_SNES void S9xDoHEventProcessing (void)
 {
 #ifdef DEBUGGER
 	static char	eventname[7][32] =

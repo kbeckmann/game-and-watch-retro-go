@@ -17,6 +17,10 @@
 #include "controls.h"
 #include "display.h"
 
+extern "C" {
+//#include "rom_manager.h"
+}
+
 #ifndef SET_UI_COLOR
 #define SET_UI_COLOR(r, g, b) ;
 #endif
@@ -863,45 +867,66 @@ static void S9xDeinterleaveGD24 (int size, uint8 *base)
 }
 
 // allocation and deallocation
+#define GW_LCD_WIDTH  320
+#define GW_LCD_HEIGHT 240
+extern uint16_t framebuffer2[GW_LCD_WIDTH * GW_LCD_HEIGHT]  __attribute__((section (".lcd2"))) __attribute__ ((aligned (16)));
 
-bool8 CMemory::Init (void)
+bool8 CMemory::Init (uint8 * rom_data)
 {
-    RAM	 = (uint8 *) calloc(1, 0x20000);
-    SRAM = (uint8 *) calloc(1, 0x10000);//calloc(0x20000);
-    VRAM = (uint8 *) calloc(1, 0x10000);
-    ROM  = (uint8 *) calloc(1, MAX_ROM_SIZE + 0x200 + 0x8000);
+    RAM	 = (uint8 *) new uint8_t[0x20000];
+    SRAM = (uint8 *) new uint8_t[0x10000];
+    VRAM = (uint8 *) new uint8_t[0x10000];
+    ROM  = (uint8 *) rom_data;
 
-	IPPU.TileCache[TILE_2BIT]       = (uint8 *) calloc(1, MAX_2BIT_TILES * 64);
-	IPPU.TileCache[TILE_4BIT]       = (uint8 *) calloc(1, MAX_4BIT_TILES * 64);
-	IPPU.TileCache[TILE_8BIT]       = (uint8 *) calloc(1, MAX_8BIT_TILES * 64);
-	IPPU.TileCache[TILE_2BIT_EVEN]  = (uint8 *) calloc(1, MAX_2BIT_TILES * 64);
-	IPPU.TileCache[TILE_2BIT_ODD]   = (uint8 *) calloc(1, MAX_2BIT_TILES * 64);
-	IPPU.TileCache[TILE_4BIT_EVEN]  = (uint8 *) calloc(1, MAX_4BIT_TILES * 64);
-	IPPU.TileCache[TILE_4BIT_ODD]   = (uint8 *) calloc(1, MAX_4BIT_TILES * 64);
+	IPPU.TileCache[TILE_2BIT]       = (uint8 *) framebuffer2;
+	IPPU.TileCache[TILE_4BIT]       = (uint8 *) framebuffer2;
+	IPPU.TileCache[TILE_8BIT]       = (uint8 *) framebuffer2;
+	IPPU.TileCache[TILE_2BIT_EVEN]  = (uint8 *) framebuffer2;
+	IPPU.TileCache[TILE_2BIT_ODD]   = (uint8 *) framebuffer2;
+	IPPU.TileCache[TILE_4BIT_EVEN]  = (uint8 *) framebuffer2;
+	IPPU.TileCache[TILE_4BIT_ODD]   = (uint8 *) framebuffer2;
 
-	IPPU.TileCached[TILE_2BIT]      = (uint8 *) calloc(1, MAX_2BIT_TILES);
-	IPPU.TileCached[TILE_4BIT]      = (uint8 *) calloc(1, MAX_4BIT_TILES);
-	IPPU.TileCached[TILE_8BIT]      = (uint8 *) calloc(1, MAX_8BIT_TILES);
-	IPPU.TileCached[TILE_2BIT_EVEN] = (uint8 *) calloc(1, MAX_2BIT_TILES);
-	IPPU.TileCached[TILE_2BIT_ODD]  = (uint8 *) calloc(1, MAX_2BIT_TILES);
-	IPPU.TileCached[TILE_4BIT_EVEN] = (uint8 *) calloc(1, MAX_4BIT_TILES);
-	IPPU.TileCached[TILE_4BIT_ODD]  = (uint8 *) calloc(1, MAX_4BIT_TILES);
+	// IPPU.TileCached[TILE_2BIT]      = (uint8 *) framebuffer2;
+	// IPPU.TileCached[TILE_4BIT]      = (uint8 *) framebuffer2;
+	// IPPU.TileCached[TILE_8BIT]      = (uint8 *) framebuffer2;
+	// IPPU.TileCached[TILE_2BIT_EVEN] = (uint8 *) framebuffer2;
+	// IPPU.TileCached[TILE_2BIT_ODD]  = (uint8 *) framebuffer2;
+	// IPPU.TileCached[TILE_4BIT_EVEN] = (uint8 *) framebuffer2;
+	// IPPU.TileCached[TILE_4BIT_ODD]  = (uint8 *) framebuffer2;
 
-	if (!RAM || !SRAM || !VRAM || !ROM ||
-		!IPPU.TileCache[TILE_2BIT]       ||
-		!IPPU.TileCache[TILE_4BIT]       ||
-		!IPPU.TileCache[TILE_8BIT]       ||
-		!IPPU.TileCache[TILE_2BIT_EVEN]  ||
-		!IPPU.TileCache[TILE_2BIT_ODD]   ||
-		!IPPU.TileCache[TILE_4BIT_EVEN]  ||
-		!IPPU.TileCache[TILE_4BIT_ODD]   ||
-		!IPPU.TileCached[TILE_2BIT]      ||
-		!IPPU.TileCached[TILE_4BIT]      ||
-		!IPPU.TileCached[TILE_8BIT]      ||
-		!IPPU.TileCached[TILE_2BIT_EVEN] ||
-		!IPPU.TileCached[TILE_2BIT_ODD]  ||
-		!IPPU.TileCached[TILE_4BIT_EVEN] ||
-		!IPPU.TileCached[TILE_4BIT_ODD])
+	// IPPU.TileCache[TILE_2BIT]       = (uint8 *) new uint8_t[MAX_2BIT_TILES * 64];
+	IPPU.TileCache[TILE_4BIT]       = (uint8 *) new uint8_t[MAX_4BIT_TILES * 64];
+	// IPPU.TileCache[TILE_8BIT]       = (uint8 *) new uint8_t[MAX_8BIT_TILES * 64];
+	// IPPU.TileCache[TILE_2BIT_EVEN]  = (uint8 *) new uint8_t[MAX_2BIT_TILES * 64];
+	// IPPU.TileCache[TILE_2BIT_ODD]   = (uint8 *) new uint8_t[MAX_2BIT_TILES * 64];
+	// IPPU.TileCache[TILE_4BIT_EVEN]  = (uint8 *) new uint8_t[MAX_4BIT_TILES * 64];
+	// IPPU.TileCache[TILE_4BIT_ODD]   = (uint8 *) new uint8_t[MAX_4BIT_TILES * 64];
+
+	IPPU.TileCached[TILE_2BIT]      = (uint8 *) new uint8_t[MAX_2BIT_TILES];
+	IPPU.TileCached[TILE_4BIT]      = (uint8 *) new uint8_t[MAX_4BIT_TILES];
+	IPPU.TileCached[TILE_8BIT]      = (uint8 *) new uint8_t[MAX_8BIT_TILES];
+	IPPU.TileCached[TILE_2BIT_EVEN] = (uint8 *) new uint8_t[MAX_2BIT_TILES];
+	IPPU.TileCached[TILE_2BIT_ODD]  = (uint8 *) new uint8_t[MAX_2BIT_TILES];
+	IPPU.TileCached[TILE_4BIT_EVEN] = (uint8 *) new uint8_t[MAX_4BIT_TILES];
+	IPPU.TileCached[TILE_4BIT_ODD]  = (uint8 *) new uint8_t[MAX_4BIT_TILES];
+
+	if (!RAM || !SRAM || !VRAM /* || !ROM */
+	    // ||
+		// !IPPU.TileCache[TILE_2BIT]       ||
+		// !IPPU.TileCache[TILE_4BIT]       ||
+		// !IPPU.TileCache[TILE_8BIT]       ||
+		// !IPPU.TileCache[TILE_2BIT_EVEN]  ||
+		// !IPPU.TileCache[TILE_2BIT_ODD]   ||
+		// !IPPU.TileCache[TILE_4BIT_EVEN]  ||
+		// !IPPU.TileCache[TILE_4BIT_ODD]   ||
+		// !IPPU.TileCached[TILE_2BIT]      ||
+		// !IPPU.TileCached[TILE_4BIT]      ||
+		// !IPPU.TileCached[TILE_8BIT]      ||
+		// !IPPU.TileCached[TILE_2BIT_EVEN] ||
+		// !IPPU.TileCached[TILE_2BIT_ODD]  ||
+		// !IPPU.TileCached[TILE_4BIT_EVEN] ||
+		// !IPPU.TileCached[TILE_4BIT_ODD]
+		)
     {
 		Deinit();
 		return (FALSE);
@@ -910,7 +935,8 @@ bool8 CMemory::Init (void)
 	// FillRAM uses first 32K of ROM image area, otherwise space just
 	// wasted. Might be read by the SuperFX code.
 
-	FillRAM = ROM;
+	FillRAM = new uint8_t[32*1024];
+	memcpy(FillRAM, ROM, 32 * 1024);
 
 	// Add 0x8000 to ROM image pointer to stop SuperFX code accessing
 	// unallocated memory (can cause crash on some ports).
@@ -1198,17 +1224,21 @@ uint32 CMemory::FileLoader (uint8 *buffer, const char *filename, uint32 maxsize)
 
 bool8 CMemory::LoadROMMem (const uint8 *source, uint32 sourceSize)
 {
-    if(!source || sourceSize > MAX_ROM_SIZE)
-        return FALSE;
+    // if(!source || sourceSize > MAX_ROM_SIZE)
+    //     return FALSE;
 
-    strcpy(ROMFilename,"MemoryROM");
+    // strcpy(ROMFilename,"MemoryROM");
 
-    do
-    {
-        memset(ROM,0, MAX_ROM_SIZE);
-        memcpy(ROM,source,sourceSize);
-    }
-    while(!LoadROMInt(sourceSize));
+    // do
+    // {
+    //     memset(ROM,0, MAX_ROM_SIZE);
+    //     memcpy(ROM,source,sourceSize);
+    // }
+    // while(!LoadROMInt(sourceSize));
+
+	strcpy(ROMFilename,"MemoryROM");
+	ROM = (uint8_t *) source;
+	LoadROMInt(sourceSize);
 
     return TRUE;
 }
@@ -2542,7 +2572,7 @@ void CMemory::ApplyROMFixes (void)
 // BPS % UPS % IPS
 
 // number decoding used for both BPS and UPS
-static uint32 XPSdecode (const uint8 *data, unsigned &addr, unsigned size)
+static uint32 XPSdecode (const uint8 *data, uint32 &addr, uint32 size)
 {
 	uint32 offset = 0, shift = 1;
 	while(addr < size) {
@@ -2604,7 +2634,7 @@ static bool8 ReadUPSPatch (Stream *r, long, int32 &rom_size)
 
 	//fill expanded area with 0x00s; so that XORing works as expected below.
 	//note that this is needed (and works) whether output ROM is larger or smaller than pre-patched ROM
-	for(int i = min((uint32) rom_size, out_size); i < max((uint32) rom_size, out_size); i++) {
+	for(unsigned i = min((uint32) rom_size, out_size); i < max((uint32) rom_size, out_size); i++) {
 		Memory.ROM[i] = 0x00;
 	}
 

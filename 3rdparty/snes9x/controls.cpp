@@ -579,12 +579,12 @@ void S9xApplyCommand (s9xcommand_t cmd, int16 data1, int16 data2)
 
 					case QuickLoad000:
 					case LoadFreezeFile:
-						S9xUnfreezeGame(S9xChooseFilename(TRUE));
+						S9xUnfreezeGame("");
 						break;
 
 					case QuickSave000:
 					case SaveFreezeFile:
-						S9xFreezeGame(S9xChooseFilename(FALSE));
+						S9xFreezeGame("");
 						break;
 
 					case Pause:
