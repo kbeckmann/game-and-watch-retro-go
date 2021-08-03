@@ -507,6 +507,8 @@ help:
 	@echo "  LARGE_FLASH=$(LARGE_FLASH)"
 	@echo "  EXTFLASH_OFFSET=$(EXTFLASH_OFFSET)"
 	@echo "  RESET_DBGMCU=$(RESET_DBGMCU)"
+	@echo "  GCC_PATH=$(GCC_PATH)"
+	@echo "  PREFIX=$(PREFIX)"
 	@echo ""
 	@echo "Targets:"
 	@echo "  flash_extflash    - Only programs the external flash"
