@@ -15,6 +15,8 @@
 // in the active flash configuration.
 #define CMD(cmd_name) &flash.config->commands[CMD_##cmd_name]
 
+#define TMO_DEFAULT 1000
+
 // 3-byte JEDEC ID to uint32_t
 #define JEDEC_ID(_x0, _x1, _x2) ( (uint32_t) ( \
      ((_x0)       ) |                          \
@@ -273,11 +275,12 @@ const jedec_config_t jedec_map[] = {
     JEDEC_CONFIG_DEF(0xC2, 0x25, 0x3A, "MX25U51245G", &config_quad_32b_mx),   // 64 MB
 
     // Cypress/Infineon 32 bit address
-    // These chips don't have 4kB erase size which won't work well with the rest of the code.
-    // JEDEC_CONFIG_DEF(0x01, 0x02, 0x20, "S25FS512S",   &config_quad_32b_s),    // 64 MB
-    // JEDEC_CONFIG_DEF(0x34, 0x2B, 0x1A, "S25FS512S",   &config_quad_32b_s),    // 64 MB
+    // These chips only have 64kB erase size which won't work well with the rest of the code.
+    JEDEC_CONFIG_DEF(0x01, 0x02, 0x20, "S25FS512S",   &config_quad_32b_s), // 64 MB
+    JEDEC_CONFIG_DEF(0x34, 0x2B, 0x1A, "S25FS512S",   &config_quad_32b_s), // 64 MB
 
-    // ISSI 24 bit (untested)
+    // ISSI 24 bit *untested*
+    // TODO: Test and uncomment when it's confirmed they work well.
     JEDEC_CONFIG_DEF(0x9D, 0x70, 0x18, "IS25WP128F",  &config_quad_24b_issi), // 16MB
 };
 
@@ -381,9 +384,11 @@ static void OSPI_WriteBytes(const flash_cmd_t *cmd,
     }
 }
 
-static void wait_for_status(uint8_t mask, uint8_t value)
+static void wait_for_status(uint8_t mask, uint8_t value, uint32_t timeout)
 {
     uint8_t status;
+
+    uint32_t t0 = HAL_GetTick();
 
     do {
         OSPI_ReadBytes(CMD(RDSR), 0, &status, 1);
@@ -393,6 +398,10 @@ static void wait_for_status(uint8_t mask, uint8_t value)
         printf("Status: %02X\n", status);
         HAL_Delay(500);
 #endif
+        if ((timeout > 0) && (HAL_GetTick() > t0 + timeout)) {
+            assert(!"Status poll timeout!");
+            break;
+        }
     } while ((status & mask) != value);
 }
 
@@ -450,7 +459,7 @@ static void _OSPI_Erase(const flash_cmd_t *cmd, uint32_t address)
     OSPI_WriteBytes(cmd, address, NULL, 0);
 
     // Wait for Write In Progress Bit to become zero
-    wait_for_status(STATUS_WIP_Msk, 0);
+    wait_for_status(STATUS_WIP_Msk, 0, 0);
 }
 
 void OSPI_ChipErase(void)
@@ -531,7 +540,7 @@ void OSPI_PageProgram(uint32_t address,
     OSPI_WriteBytes(CMD(PP), address, buffer, buffer_size);
 
     // Wait for Write In Progress Bit to become zero
-    wait_for_status(STATUS_WIP_Msk, 0);
+    wait_for_status(STATUS_WIP_Msk, 0, TMO_DEFAULT);
 }
 
 void OSPI_NOR_WriteEnable(void)
@@ -539,7 +548,7 @@ void OSPI_NOR_WriteEnable(void)
     OSPI_WriteBytes(CMD(WREN), 0, NULL, 0);
 
     // Wait for Write Enable Latch to be set
-    wait_for_status(STATUS_WEL_Msk, STATUS_WEL_Msk);
+    wait_for_status(STATUS_WEL_Msk, STATUS_WEL_Msk, TMO_DEFAULT);
 }
 
 void OSPI_Program(uint32_t address,
@@ -595,7 +604,7 @@ static void init_mx_issi(void)
         // Set the QE bit
         OSPI_NOR_WriteEnable();
         OSPI_WriteBytes(CMD(WRSR), 0, &wr_status, 1);
-        wait_for_status(STATUS_WIP_Msk, 0);
+        wait_for_status(STATUS_WIP_Msk, 0, TMO_DEFAULT);
 
         OSPI_ReadBytes(CMD(RDSR), 0, &rd_status, 1);
         DBG("QE bit set. Status: %02X\n", rd_status);
@@ -636,7 +645,7 @@ static void init_spansion(void)
         OSPI_WriteBytes(CMD(WRSR), 0, wr_sr, sizeof(wr_sr));
 
         // Wait until WIP bit is cleared
-        wait_for_status(STATUS_WIP_Msk, 0);
+        wait_for_status(STATUS_WIP_Msk, 0, TMO_DEFAULT);
 
         OSPI_ReadBytes(CMD(RDSR), 0, &rd_sr1, 1);
         OSPI_ReadBytes(CMD(RDCR), 0, &rd_cr1, 1);
