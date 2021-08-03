@@ -135,7 +135,7 @@ void osd_vsync()
     // Wait until the audio buffer has been transmitted
     static uint32_t last_dma_counter = 0;
     t0 = get_elapsed_time();
-    if(draw_frame){
+    if(!common_emu_state.skip_frames){
         for(uint8_t p = 0; p < common_emu_state.pause_frames + 1; p++) {
             while (dma_counter == last_dma_counter) {
                 cpumon_sleep();

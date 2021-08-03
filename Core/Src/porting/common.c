@@ -89,13 +89,14 @@ bool common_emu_frame_loop(void){
     static int32_t frame_integrator = 0;
     int16_t frame_time_10us = common_emu_state.frame_time_10us;
     int16_t elapsed_10us = 100 * get_elapsed_time_since(common_emu_state.last_sync_time);
-    bool draw_frame = !common_emu_state.skip_frames;
+    bool draw_frame = common_emu_state.skip_frames < 2;
 
+    if( !cpumon_stats.busy_ms ) cpumon_busy();
     odroid_system_tick(!draw_frame, 0, cpumon_stats.busy_ms);
     cpumon_reset();
 
     common_emu_state.pause_frames = 0;
-    if(!draw_frame) common_emu_state.skip_frames = 0;
+    common_emu_state.skip_frames = 0;
 
     common_emu_state.last_sync_time = get_elapsed_time();
 
@@ -128,7 +129,8 @@ bool common_emu_frame_loop(void){
             break;
     }
     frame_integrator += (elapsed_10us - frame_time_10us);
-    if(frame_integrator > frame_time_10us) common_emu_state.skip_frames = 1;
+    if(frame_integrator > frame_time_10us << 1) common_emu_state.skip_frames = 2;
+    else if(frame_integrator > frame_time_10us) common_emu_state.skip_frames = 1;
     else if(frame_integrator < -frame_time_10us) common_emu_state.pause_frames = 1;
     common_emu_state.skipped_frames += common_emu_state.skip_frames;
 
@@ -258,7 +260,7 @@ void common_emu_input_loop(odroid_gamepad_state_t *joystick, odroid_dialog_choic
     }
 }
 
-void cpumon_sleep(void){
+static void cpumon_common(bool sleep){
     uint t0 = get_elapsed_time();
     if(cpumon_stats.last_busy){
         cpumon_stats.busy_ms += t0 - cpumon_stats.last_busy;
@@ -266,10 +268,19 @@ void cpumon_sleep(void){
     else{
         cpumon_stats.busy_ms = 0;
     }
-    __WFI();
+    if(sleep) __WFI();
     uint t1 = get_elapsed_time();
     cpumon_stats.last_busy = t1;
     cpumon_stats.sleep_ms += t1 - t0;
+}
+
+
+void cpumon_busy(void){
+    cpumon_common(false);
+}
+
+void cpumon_sleep(void){
+    cpumon_common(true);
 }
 
 void cpumon_reset(void){
