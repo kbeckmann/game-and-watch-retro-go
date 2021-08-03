@@ -74,16 +74,6 @@ Note: `make -j8` is used as an example. You may use `make -j$(nproc)` on Linux o
 # export ADAPTER=rpi
 export ADAPTER=stlink
 
-# Clone and build flashloader:
-
-git clone https://github.com/ghidraninja/game-and-watch-flashloader
-
-cd game-and-watch-flashloader
-
-make -j8
-
-cd ..
-
 # Clone this repo with submodules:
 
 git clone --recurse-submodules https://github.com/kbeckmann/game-and-watch-retro-go
@@ -103,9 +93,9 @@ python3 -m pip install -r requirements.txt
 
 # Build and program external and internal flash.
 # Notes:
-#     * If you are using the 16MB external flash, build using:
-#           make -j8 LARGE_FLASH=1 flash
-#       A custom flash size in bytes may be specified with the EXTFLASH_SIZE variable.
+#     * If you are using a modified unit with a larger external flash,
+#       set the EXTFLASH_SIZE_MB to its size in MB (16MB used in the example):
+#           make -j8 EXTFLASH_SIZE_MB=16 flash
 #     * If you'd like to apply more advanced experimental ROM compression, add the
 #       field COMPRESS=zopfli to the make command.
 
@@ -135,10 +125,10 @@ cd game-and-watch-retro-go
 docker build -f Dockerfile --tag kbeckmann/retro-go-builder .
 
 # Run it with usb passthrough. Set your ADAPTER and LARGE_FLASH appropriately.
-docker run --rm -it --privileged -v /dev/bus/usb:/dev/bus/usb kbeckmann/retro-go-builder make ADAPTER=stlink LARGE_FLASH=0 -j$(nproc) flash
+docker run --rm -it --privileged -v /dev/bus/usb:/dev/bus/usb kbeckmann/retro-go-builder make ADAPTER=stlink EXTFLASH_SIZE_MB=1 -j$(nproc) flash
 
 # In case you get access errors when flashing, you may run sudo inside the docker container. The proper way is to fix the udev rules, but at least this is a way forward in case you are stuck.
-# docker run --rm -it --privileged -v /dev/bus/usb:/dev/bus/usb kbeckmann/retro-go-builder sudo -E make ADAPTER=stlink LARGE_FLASH=0 -j$(nproc) flash
+# docker run --rm -it --privileged -v /dev/bus/usb:/dev/bus/usb kbeckmann/retro-go-builder sudo -E make ADAPTER=stlink EXTFLASH_SIZE_MB=1 -j$(nproc) flash
 ```
 
 ## Experimental
@@ -164,8 +154,12 @@ To use zopfli compression, make sure the python dependencies are installed
 and add `COMPRESS=zopfli` to the `make` command. For example:
 
 ```
-make -j8 LARGE_FLASH=1 COMPRESS=zopfli flash
+make -j8 EXTFLASH_SIZE_MB=16 COMPRESS=zopfli flash
 ```
+
+### Place external flash data at an offset
+
+By specifying EXTFLASH_OFFSET you may place the external flash data at an offset to allow for multi booting.
 
 ## Backing up and restoring save state files
 
