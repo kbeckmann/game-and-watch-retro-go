@@ -48,6 +48,7 @@ extern cpumon_stats_t cpumon_stats;
  * Just calls `__WFI()` and measures time spent sleeping.
  */
 void cpumon_sleep(void);
+void cpumon_busy(void);
 void cpumon_reset(void);
 
 /**
@@ -60,7 +61,7 @@ typedef struct {
     uint32_t last_sync_time;
     uint16_t skipped_frames;
     int16_t frame_time_10us;
-    uint8_t skip_frames:1;
+    uint8_t skip_frames:2;
     uint8_t pause_frames:1;
     uint8_t pause_after_frames:3;
     uint8_t startup_frames:2;

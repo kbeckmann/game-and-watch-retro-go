@@ -588,7 +588,7 @@ void app_main_gb(uint8_t load_state, uint8_t start_paused)
             }
         }
 
-        if(drawFrame)
+        if(!common_emu_state.skip_frames)
         {
             // odroid_audio_submit(pcm.buf, pcm.pos >> 1);
             // handled in pcm_submit instead.

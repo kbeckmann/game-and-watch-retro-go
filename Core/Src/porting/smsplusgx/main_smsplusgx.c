@@ -390,11 +390,13 @@ app_main_smsplusgx(uint8_t load_state, uint8_t start_paused, uint8_t is_coleco)
 
         system_frame(!drawFrame);
 
-        if (drawFrame) sms_draw_frame();
-
-        if (drawFrame)
-        {
+        if (drawFrame) {
+            sms_draw_frame();
             sms_pcm_submit();
+        }
+
+        if(!common_emu_state.skip_frames)
+        {
             for(uint8_t p = 0; p < common_emu_state.pause_frames + 1; p++) {
                 static dma_transfer_state_t last_dma_state = DMA_TRANSFER_STATE_HF;
                 while (dma_state == last_dma_state) {
