@@ -143,6 +143,7 @@ __attribute__((optimize("-O0"))) void BSOD(BSOD_t fault, void *pc, void *lr)
 
   lcd_sync();
   lcd_reset_active_buffer();
+  lcd_backlight_set(0xff);
 
   odroid_overlay_draw_text(0, 0, GW_LCD_WIDTH, msg, C_RED, C_BLUE);
 
@@ -487,15 +488,6 @@ int main(void)
   copy_areas2[2] = (uint32_t) &__itcram_hot_end__;
   copy_areas2[3] = copy_areas2[2] - copy_areas2[1];
   memcpy_no_check((uint32_t *) copy_areas2[1], (uint32_t *) copy_areas2[0], copy_areas2[3]);
-
-  odroid_system_init(0, 32000);
-
-  // Sanity check, sometimes this is triggered
-  uint32_t add = 0x90000000;
-  uint32_t* ptr = (uint32_t*)add;
-  if(*ptr == 0x88888888) {
-    Error_Handler();
-  }
 
   bq24072_init();
 
