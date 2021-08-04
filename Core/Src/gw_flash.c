@@ -273,6 +273,8 @@ const jedec_config_t jedec_map[] = {
     // MX 32 bit address
     JEDEC_CONFIG_DEF(0xC2, 0x25, 0x39, "MX25U25635F", &config_quad_32b_mx),   // 32 MB
     JEDEC_CONFIG_DEF(0xC2, 0x25, 0x3A, "MX25U51245G", &config_quad_32b_mx),   // 64 MB
+    JEDEC_CONFIG_DEF(0xC2, 0x25, 0x3B, "MX66U1G45G",  &config_quad_32b_mx),   // 128 MB
+    JEDEC_CONFIG_DEF(0xC2, 0x25, 0x3C, "MX66U2G45G",  &config_quad_32b_mx),   // 256 MB
 
     // Cypress/Infineon 32 bit address
     // These chips only have 64kB erase size which won't work well with the rest of the code.
