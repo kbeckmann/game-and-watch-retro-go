@@ -490,6 +490,10 @@ gdb: $(BUILD_DIR)/$(TARGET).elf
 gdb_intflash: flash_intflash_nc gdb
 .PHONY: gdb_intflash
 
+dump_logs: $(BUILD_DIR)/$(TARGET).elf
+	$(V)./scripts/dump_logs.sh
+.PHONY: dump_logs
+
 help:
 	@echo "Game and Watch Retro Go"
 	@echo ""
@@ -520,6 +524,7 @@ help:
 	@echo "  openocd           - Starts openocd with appropriate config"
 	@echo "  reset_dbgmcu      - Resets the unit and turns off DBGMCU (lowers battery drain)"
 	@echo "  reset_mcu         - Resets the unit"
+	@echo "  dump_logs         - Dumps the callstack and logbuf. Starts openocd and gdb under the hood."
 	@echo ""
 .PHONY: help
 
