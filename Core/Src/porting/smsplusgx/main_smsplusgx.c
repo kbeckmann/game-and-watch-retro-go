@@ -364,8 +364,12 @@ app_main_smsplusgx(uint8_t load_state, uint8_t start_paused, uint8_t is_coleco)
     consoleIsCOL = sms.console == CONSOLE_COLECO;
     consoleIsSG  = sms.console == CONSOLE_SG1000;
 
-    const int refresh_rate = (sms.display == DISPLAY_NTSC) ? FPS_NTSC : FPS_PAL;
-    common_emu_state.frame_time_10us = 100 * get_frame_time(refresh_rate);
+    if (sms.display == DISPLAY_NTSC) {
+        common_emu_state.frame_time_10us = (uint16_t)(100000 / FPS_NTSC + 0.5f);
+    }
+    else {
+        common_emu_state.frame_time_10us = (uint16_t)(100000 / FPS_PAL + 0.5f);
+    }
 
     // Video
     memset(framebuffer1, 0, sizeof(framebuffer1));

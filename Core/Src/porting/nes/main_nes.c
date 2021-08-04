@@ -525,12 +525,12 @@ int app_main_nes(uint8_t load_state, uint8_t start_paused)
 
     if (ACTIVE_FILE->region == REGION_PAL) {
         nes_region = NES_PAL;
-        common_emu_state.frame_time_10us = 100000 / 50;
+        common_emu_state.frame_time_10us = (uint16_t)(100000 / 50 + 0.5f);
         samplesPerFrame = (AUDIO_SAMPLE_RATE) / 50;
         HAL_SAI_Transmit_DMA(&hsai_BlockA1, (uint8_t *) audiobuffer_dma,  (2 * AUDIO_SAMPLE_RATE) / 50);
     } else {
         nes_region = NES_NTSC;
-        common_emu_state.frame_time_10us = 100000 / 60;
+        common_emu_state.frame_time_10us = (uint16_t)(100000 / 60 + 0.5f);
         //printf("frame_time_10us: %d\n", common_emu_state.frame_time_10us);
         samplesPerFrame = (AUDIO_SAMPLE_RATE) / 60;
         HAL_SAI_Transmit_DMA(&hsai_BlockA1, (uint8_t *) audiobuffer_dma, (2 * AUDIO_SAMPLE_RATE) / 60);
