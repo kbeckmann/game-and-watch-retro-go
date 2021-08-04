@@ -27,9 +27,6 @@ RUN wget https://nightly.link/kbeckmann/ubuntu-openocd-git-builder/workflows/doc
     sudo apt -y install ./openocd-git_*_amd64.deb
 ENV OPENOCD="/opt/openocd-git/bin/openocd"
 
-RUN git clone --depth 1 https://github.com/ghidraninja/game-and-watch-flashloader
-RUN cd game-and-watch-flashloader && make -j$(nproc)
-
 COPY . /opt/game-and-watch-retro-go
 RUN sudo chown -R docker:docker /opt/game-and-watch-retro-go
 

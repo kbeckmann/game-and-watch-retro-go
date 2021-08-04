@@ -72,7 +72,8 @@ __RAM_EMU_LENGTH__  = 1024K - __RAM_UC_LENGTH__ - __RAM_CORE_LENGTH__;
 __AHBRAM_LENGTH__   = 128K;
 __FLASH_LENGTH__    = 128K;
 
-__EXTFLASH_START__  = 0x90000000;
+__EXTFLASH_OFFSET__ = DEFINED(__EXTFLASH_OFFSET__) ? __EXTFLASH_OFFSET__ : 0;
+__EXTFLASH_START__ = 0x90000000 + __EXTFLASH_OFFSET__;
 
 __RAM_START__       = 0x24000000;
 __RAM_UC_START__    = __RAM_START__;
@@ -145,7 +146,8 @@ SECTIONS
   {
     __ram_uc_start__ = .;
     . = ALIGN(4);
-    *(.lcd)
+    *(.lcd1)
+    *(.lcd2)
     __ram_uc_end__ = .;
   } > RAM_UC
 

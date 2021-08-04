@@ -108,7 +108,7 @@ void odroid_settings_reset()
 {
     memcpy(&persistent_config_ram, &persistent_config_default, sizeof(persistent_config_t));
 
-    odroid_settings_commit();
+    // odroid_settings_commit();
 }
 
 char* odroid_settings_string_get(const char *key, const char *default_value)
