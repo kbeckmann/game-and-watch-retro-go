@@ -3,17 +3,12 @@
 from elftools.elf.elffile import ELFFile
 from time import sleep
 
+import argparse
 import socket
 import sys
 
-with open("build/gw_retro_go.elf", "rb") as f:
-    elffile = ELFFile(f)
-    logbuf_addr = elffile.get_section_by_name('.symtab').get_symbol_by_name("logbuf")[0].entry.st_value
-    log_idx_addr = elffile.get_section_by_name('.symtab').get_symbol_by_name("log_idx")[0].entry.st_value
-    print("logbuf_addr:  0x%08X" % logbuf_addr)
-    print("log_idx_addr: 0x%08X" % log_idx_addr)
-
-
+def get_address_by_symbol_name(elffile, symbol_name):
+    return elffile.get_section_by_name('.symtab').get_symbol_by_name(symbol_name)[0].entry.st_value
 
 def strtohex(data):
     return map(strtohex, data) if isinstance(data, list) else int(data, 16)
@@ -23,16 +18,15 @@ def strtohex(data):
 class OpenOCD():
     COMMAND_TOKEN = '\x1a'
 
-    def __init__(self, verbose=False, tcl_ip="127.0.0.1", tcl_port=6666):
-        self.verbose = verbose
-        self.tcl_ip = tcl_ip
-        self.tcl_port = tcl_port
+    def __init__(self, host, port):
+        self.host = host
+        self.port = port
         self.buffer_size = 4096
 
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     def __enter__(self):
-        self.sock.connect((self.tcl_ip, self.tcl_port))
+        self.sock.connect((self.host, self.port))
         return self
 
     def __exit__(self, type, value, traceback):
@@ -70,20 +64,58 @@ class OpenOCD():
         return [int(output[2*i+1]) for i in range(len(output)//2)]
 
 
-with OpenOCD() as ocd:
-    last_idx = 0
-    ocd.send("resume")
-    while True:
-        log_idx = ocd.read_memory(32, log_idx_addr, 1)[0]
-        if log_idx > last_idx:
-            # print the new data since last iteration
-            logbuf = ocd.read_memory(8, logbuf_addr + last_idx,  log_idx - last_idx)
-            logbuf_str = "".join([chr(c) for c in logbuf])
-            sys.stdout.write(logbuf_str)
-        elif log_idx > 0 and log_idx < last_idx:
-            # print the whole buffer from 0
-            logbuf = ocd.read_memory(8, logbuf_addr,  log_idx)
-            logbuf_str = "".join([chr(c) for c in logbuf])
-            sys.stdout.write(logbuf_str)
-        last_idx = log_idx
-        sleep(0.1)
+def logpoll(args):
+    with OpenOCD(host=args.host, port=args.port) as ocd:
+        last_idx = 0
+
+        with open(args.elf, "rb") as f:
+            elffile = ELFFile(f)
+            logbuf_addr = get_address_by_symbol_name(elffile, "logbuf")
+            log_idx_addr = get_address_by_symbol_name(elffile, "log_idx")
+
+        ocd.send("resume")
+
+        while True:
+            log_idx = ocd.read_memory(32, log_idx_addr, 1)[0]
+            if log_idx > last_idx:
+                # print the new data since last iteration
+                logbuf = ocd.read_memory(8, logbuf_addr + last_idx, log_idx - last_idx)
+                logbuf_str = "".join([chr(c) for c in logbuf])
+                sys.stdout.write(logbuf_str)
+            elif log_idx > 0 and log_idx < last_idx:
+                # print the new data starting from 0
+                logbuf = ocd.read_memory(8, logbuf_addr, log_idx)
+                logbuf_str = "".join([chr(c) for c in logbuf])
+                sys.stdout.write(logbuf_str)
+            last_idx = log_idx
+            sleep(args.interval / 1000)
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Polls the stdout log from a running target")
+    parser.add_argument(
+        "--elf",
+        type=str,
+        default="build/gw_retro_go.elf",
+        help="Game and Watch Retro-Go ELF file",
+    )
+    parser.add_argument(
+        "--interval",
+        "-i",
+        type=int,
+        default=100,
+        help="Polling interval (ms)",
+    )
+    parser.add_argument(
+        "--host",
+        type=str,
+        default="127.0.0.1",
+        help="OpenOCD TCL hostname",
+    )
+    parser.add_argument(
+        "--port",
+        type=int,
+        default=6666,
+        help="OpenOCD TCL port",
+    )
+
+    logpoll(parser.parse_args())
