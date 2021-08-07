@@ -353,47 +353,52 @@ static void draw_rectangle(pixel_t *fb, uint16_t x1, uint16_t y1, uint16_t x2, u
 }
 
 __attribute__((optimize("unroll-loops")))
+static void draw_darken_rectangle(pixel_t *fb, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2){
+    for(uint16_t i=y1; i < y2; i++){
+        for(uint16_t j=x1; j < x2; j++){
+            darken_pixel(&fb[j + GW_LCD_WIDTH * i]);
+        }
+    }
+}
+
+__attribute__((optimize("unroll-loops")))
 static void draw_darken_rounded_rectangle(pixel_t *fb, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2){
     // *1 is inclusive, *2 is exclusive
     uint16_t h = y2 - y1;
     uint16_t w = x2 - x1;
     if (w < 16 || h < 16) {
         // Draw not rounded rectangle
-        for(uint16_t i=y1; i < y2; i++){
-            for(uint16_t j=x1; j < x2; j++){
-                darken_pixel(&fb[j + GW_LCD_WIDTH * i]);
-            }
-        }
+        draw_darken_rectangle(fb, x1, y1, x2, y2);
+        return;
     }
-    else {
-        // Draw upper left round
-        for(uint8_t i=0; i < 8; i++) for(uint8_t j=0; j < 8; j++)
-            if(ROUND[i] & (1 << (7 - j))) darken_pixel(&fb[x1 + j + GW_LCD_WIDTH * (y1 + i)]);
 
-        // Draw upper right round
-        for(uint8_t i=0; i < 8; i++) for(uint8_t j=0; j < 8; j++)
-            if(ROUND[i] & (1 << (7 - j))) darken_pixel(&fb[x2 - j - 1 + GW_LCD_WIDTH * (y1 + i)]);
+    // Draw upper left round
+    for(uint8_t i=0; i < 8; i++) for(uint8_t j=0; j < 8; j++)
+        if(ROUND[i] & (1 << (7 - j))) darken_pixel(&fb[x1 + j + GW_LCD_WIDTH * (y1 + i)]);
 
-        // Draw lower left round
-        for(uint8_t i=0; i < 8; i++) for(uint8_t j=0; j < 8; j++)
-            if(ROUND[i] & (1 << (7 - j))) darken_pixel(&fb[x1 + j + GW_LCD_WIDTH * (y2 - i - 1)]);
+    // Draw upper right round
+    for(uint8_t i=0; i < 8; i++) for(uint8_t j=0; j < 8; j++)
+        if(ROUND[i] & (1 << (7 - j))) darken_pixel(&fb[x2 - j - 1 + GW_LCD_WIDTH * (y1 + i)]);
 
-        // Draw lower right round
-        for(uint8_t i=0; i < 8; i++) for(uint8_t j=0; j < 8; j++)
-            if(ROUND[i] & (1 <<  (7 - j))) darken_pixel(&fb[x2 - j - 1 + GW_LCD_WIDTH * (y2 - i - 1)]);
+    // Draw lower left round
+    for(uint8_t i=0; i < 8; i++) for(uint8_t j=0; j < 8; j++)
+        if(ROUND[i] & (1 << (7 - j))) darken_pixel(&fb[x1 + j + GW_LCD_WIDTH * (y2 - i - 1)]);
 
-        // Draw upper rectangle
-        for(uint16_t i=x1+8; i < x2 - 8; i++) for(uint8_t j=0; j < 8; j++)
-            darken_pixel(&fb[ i + GW_LCD_WIDTH * (y1 + j)]);
+    // Draw lower right round
+    for(uint8_t i=0; i < 8; i++) for(uint8_t j=0; j < 8; j++)
+        if(ROUND[i] & (1 <<  (7 - j))) darken_pixel(&fb[x2 - j - 1 + GW_LCD_WIDTH * (y2 - i - 1)]);
 
-        // Draw central rectangle
-        for(uint16_t i=x1; i < x2; i++) for(uint16_t j=y1+8; j < y2-8; j++)
-            darken_pixel(&fb[i+GW_LCD_WIDTH * j]);
+    // Draw upper rectangle
+    for(uint16_t i=x1+8; i < x2 - 8; i++) for(uint8_t j=0; j < 8; j++)
+        darken_pixel(&fb[ i + GW_LCD_WIDTH * (y1 + j)]);
 
-        // Draw lower rectangle
-        for(uint16_t i=x1+8; i < x2 - 8; i++) for(uint8_t j=0; j < 8; j++)
-            darken_pixel(&fb[ i + GW_LCD_WIDTH * (y2 - j - 1)]);
-    }
+    // Draw central rectangle
+    for(uint16_t i=x1; i < x2; i++) for(uint16_t j=y1+8; j < y2-8; j++)
+        darken_pixel(&fb[i+GW_LCD_WIDTH * j]);
+
+    // Draw lower rectangle
+    for(uint16_t i=x1+8; i < x2 - 8; i++) for(uint8_t j=0; j < 8; j++)
+        darken_pixel(&fb[ i + GW_LCD_WIDTH * (y2 - j - 1)]);
 }
 
 #define INGAME_OVERLAY_X 265
@@ -401,13 +406,40 @@ static void draw_darken_rounded_rectangle(pixel_t *fb, uint16_t x1, uint16_t y1,
 #define INGAME_OVERLAY_H 128
 #define INGAME_OVERLAY_W 45
 
-#define INGAME_OVERLAY_BOX_W (INGAME_OVERLAY_W - 10)
+#define INGAME_OVERLAY_BORDER 4
 
-#define IMG_X (INGAME_OVERLAY_X + ((INGAME_OVERLAY_W - IMG_W) / 2))
-#define IMG_Y (INGAME_OVERLAY_Y + INGAME_OVERLAY_H - IMG_H - 4)
+#define INGAME_OVERLAY_BOX_W (INGAME_OVERLAY_W - (2 * INGAME_OVERLAY_BORDER))
+#define INGAME_OVERLAY_BOX_X (INGAME_OVERLAY_X + ((INGAME_OVERLAY_W - INGAME_OVERLAY_BOX_W) / 2))
+#define INGAME_OVERLAY_BOX_GAP 2
+
+#define INGAME_OVERLAY_IMG_X (INGAME_OVERLAY_X + ((INGAME_OVERLAY_W - IMG_W) / 2))
+#define INGAME_OVERLAY_IMG_Y (INGAME_OVERLAY_Y + INGAME_OVERLAY_H - IMG_H - INGAME_OVERLAY_BORDER)
+
+static uint8_t box_height(uint8_t n) {
+    return (((INGAME_OVERLAY_IMG_Y - INGAME_OVERLAY_Y - (2 * INGAME_OVERLAY_BORDER))) / n) - INGAME_OVERLAY_BOX_GAP;
+}
 
 void common_ingame_overlay(void) {
     pixel_t *fb = lcd_get_active_buffer();
-    draw_darken_rounded_rectangle(fb, INGAME_OVERLAY_X, INGAME_OVERLAY_Y, INGAME_OVERLAY_X + INGAME_OVERLAY_W, INGAME_OVERLAY_Y + INGAME_OVERLAY_H);
-    draw_img(fb, IMG_SPEAKER, IMG_X, IMG_Y);
+    int8_t level;
+    uint8_t bh;
+    uint16_t by = INGAME_OVERLAY_Y + INGAME_OVERLAY_BORDER;
+
+    {
+        level = odroid_audio_volume_get();
+        bh = box_height(ODROID_AUDIO_VOLUME_MAX + 1);
+
+        draw_darken_rounded_rectangle(fb, INGAME_OVERLAY_X, INGAME_OVERLAY_Y, INGAME_OVERLAY_X + INGAME_OVERLAY_W, INGAME_OVERLAY_Y + INGAME_OVERLAY_H);
+        draw_img(fb, IMG_SPEAKER, INGAME_OVERLAY_IMG_X, INGAME_OVERLAY_IMG_Y);
+
+        for(uint8_t i=0; i < ODROID_AUDIO_VOLUME_MAX+1; i++){
+            if(i >= level)
+                draw_rectangle(fb, INGAME_OVERLAY_BOX_X, by, INGAME_OVERLAY_BOX_X + INGAME_OVERLAY_BOX_W, by + bh);
+            else{
+                draw_darken_rectangle(fb, INGAME_OVERLAY_BOX_X, by, INGAME_OVERLAY_BOX_X + INGAME_OVERLAY_BOX_W, by + bh);
+
+            by += bh + INGAME_OVERLAY_BOX_GAP;
+        }
+    }
+
 }
