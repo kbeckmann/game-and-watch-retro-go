@@ -18,7 +18,6 @@ odroid_system.c \
 odroid_display.c \
 odroid_audio.c \
 gw_lcd.c \
-loaded_nes_rom.c \
 crc32.c \
 porting.c
 
