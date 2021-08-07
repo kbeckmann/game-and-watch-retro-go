@@ -14,6 +14,9 @@
 #include "gw_lcd.h"
 #include "gw_linker.h"
 
+
+static void set_ingame_overlay(ingame_overlay_t type);
+
 cpumon_stats_t cpumon_stats = {0};
 
 uint32_t audioBuffer[AUDIO_BUFFER_LENGTH];
@@ -75,15 +78,6 @@ common_emu_state_t common_emu_state = {
 };
 
 
-/**
- * Call this each time a frame is drawn.
- *
- * Currently assumes that framerate is 60 fps.
- *
- * Emu responsibilities:
- *    * increment `common_emu_state.skip_frames` if a frame came in too slow.
- * @returns bool Whether or not to draw the frame.
- */
 bool common_emu_frame_loop(void){
     rg_app_desc_t *app = odroid_system_get_app();
     static int32_t frame_integrator = 0;
@@ -182,24 +176,28 @@ void common_emu_input_loop(odroid_gamepad_state_t *joystick, odroid_dialog_choic
                 last_key = ODROID_INPUT_LEFT;
                 int8_t level = odroid_audio_volume_get();
                 if (level > ODROID_AUDIO_VOLUME_MIN) odroid_audio_volume_set(--level);
+                set_ingame_overlay(INGAME_OVERLAY_VOLUME);
             }
             else if(joystick->values[ODROID_INPUT_RIGHT]){
                 // Volume Down
                 last_key = ODROID_INPUT_RIGHT;
                 int8_t level = odroid_audio_volume_get();
                 if (level < ODROID_AUDIO_VOLUME_MAX) odroid_audio_volume_set(++level);
+                set_ingame_overlay(INGAME_OVERLAY_VOLUME);
             }
             else if(joystick->values[ODROID_INPUT_UP]){
                 // Brightness Up
                 last_key = ODROID_INPUT_UP;
                 int8_t level = odroid_display_get_backlight();
                 if (level < ODROID_BACKLIGHT_LEVEL_COUNT - 1) odroid_display_set_backlight(++level);
+                set_ingame_overlay(INGAME_OVERLAY_BRIGHTNESS);
             }
             else if(joystick->values[ODROID_INPUT_DOWN]){
                 // Brightness Down
                 last_key = ODROID_INPUT_DOWN;
                 int8_t level = odroid_display_get_backlight();
                 if (level > 0) odroid_display_set_backlight(--level);
+                set_ingame_overlay(INGAME_OVERLAY_BRIGHTNESS);
             }
             else if(joystick->values[ODROID_INPUT_A]){
                 // Save State
@@ -228,6 +226,9 @@ void common_emu_input_loop(odroid_gamepad_state_t *joystick, odroid_dialog_choic
             memset(joystick, '\x00', sizeof(odroid_gamepad_state_t));
         }
 
+        // Refresh the last_overlay_time so that it won't disappear until after
+        // PAUSE/SET has been released.
+        common_emu_state.last_overlay_time = get_elapsed_time();
     }
     else if (pause_pressed && !joystick->values[ODROID_INPUT_VOLUME] && !macro_activated){
         // PAUSE/SET has been released without performing any macro. Launch menu
@@ -243,6 +244,10 @@ void common_emu_input_loop(odroid_gamepad_state_t *joystick, odroid_dialog_choic
         pause_pressed = false;
         macro_activated = false;
         last_key = -1;
+    }
+
+    if(get_elapsed_time_since(common_emu_state.last_overlay_time) > 1000){
+        set_ingame_overlay(INGAME_OVERLAY_NONE);
     }
 
     if (joystick->values[ODROID_INPUT_POWER]) {
@@ -314,6 +319,18 @@ static const uint8_t IMG_SPEAKER[] = {
     0x00, 0xF1, 0x09, 0x00, 0x70, 0x11, 0x00, 0x30,
     0x21, 0x00, 0x00, 0x42, 0x00, 0x00, 0x04, 0x00,
     0x00, 0x08, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00,
+};
+
+static const uint8_t IMG_SUN[] = {
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x10, 0x00, 0x00, 0x10, 0x00, 0x04,
+    0x10, 0x40, 0x02, 0x00, 0x80, 0x01, 0x01, 0x00,
+    0x00, 0x38, 0x00, 0x00, 0x7C, 0x00, 0x00, 0xFE,
+    0x00, 0x1C, 0xFE, 0x70, 0x00, 0xFE, 0x00, 0x00,
+    0x7C, 0x00, 0x00, 0x38, 0x00, 0x01, 0x00, 0x80,
+    0x02, 0x00, 0x40, 0x04, 0x10, 0x20, 0x00, 0x10,
+    0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 };
 
 __attribute__((optimize("unroll-loops")))
@@ -396,7 +413,7 @@ static void draw_darken_rounded_rectangle(pixel_t *fb, uint16_t x1, uint16_t y1,
 #define INGAME_OVERLAY_X 265
 #define INGAME_OVERLAY_Y 10
 #define INGAME_OVERLAY_H 128
-#define INGAME_OVERLAY_W 45
+#define INGAME_OVERLAY_W 39
 
 #define INGAME_OVERLAY_BORDER 4
 
@@ -418,21 +435,72 @@ void common_ingame_overlay(void) {
     uint8_t bh;
     uint16_t by = INGAME_OVERLAY_BOX_Y;
 
+    switch(common_emu_state.overlay)
     {
-        level = odroid_audio_volume_get();
-        bh = box_height(ODROID_AUDIO_VOLUME_MAX + 1);
+        case INGAME_OVERLAY_NONE:
+            break;
+        case INGAME_OVERLAY_VOLUME:
+            level = odroid_audio_volume_get();
+            bh = box_height(ODROID_AUDIO_VOLUME_MAX);
 
-        draw_darken_rounded_rectangle(fb, INGAME_OVERLAY_X, INGAME_OVERLAY_Y, INGAME_OVERLAY_X + INGAME_OVERLAY_W, INGAME_OVERLAY_Y + INGAME_OVERLAY_H);
-        draw_img(fb, IMG_SPEAKER, INGAME_OVERLAY_IMG_X, INGAME_OVERLAY_IMG_Y);
+            draw_darken_rounded_rectangle(fb,
+                    INGAME_OVERLAY_X,
+                    INGAME_OVERLAY_Y,
+                    INGAME_OVERLAY_X + INGAME_OVERLAY_W,
+                    INGAME_OVERLAY_Y + INGAME_OVERLAY_H);
+            draw_img(fb, IMG_SPEAKER, INGAME_OVERLAY_IMG_X, INGAME_OVERLAY_IMG_Y);
 
-        for(uint8_t i=0; i < ODROID_AUDIO_VOLUME_MAX+1; i++){
-            if(i >= level)
-                draw_rectangle(fb, INGAME_OVERLAY_BOX_X, by, INGAME_OVERLAY_BOX_X + INGAME_OVERLAY_BOX_W, by + bh);
-            else
-                draw_darken_rectangle(fb, INGAME_OVERLAY_BOX_X, by, INGAME_OVERLAY_BOX_X + INGAME_OVERLAY_BOX_W, by + bh);
+            for(int8_t i=ODROID_AUDIO_VOLUME_MAX; i > 0; i--){
+                if(i <= level)
+                    draw_rectangle(fb,
+                            INGAME_OVERLAY_BOX_X,
+                            by,
+                            INGAME_OVERLAY_BOX_X + INGAME_OVERLAY_BOX_W,
+                            by + bh);
+                else
+                    draw_darken_rectangle(fb,
+                            INGAME_OVERLAY_BOX_X,
+                            by,
+                            INGAME_OVERLAY_BOX_X + INGAME_OVERLAY_BOX_W,
+                            by + bh);
 
-            by += bh + INGAME_OVERLAY_BOX_GAP;
-        }
+                by += bh + INGAME_OVERLAY_BOX_GAP;
+            }
+            break;
+        case INGAME_OVERLAY_BRIGHTNESS:
+            level = odroid_display_get_backlight();
+            bh = box_height(ODROID_BACKLIGHT_LEVEL_COUNT - 1);
+
+            draw_darken_rounded_rectangle(fb,
+                    INGAME_OVERLAY_X,
+                    INGAME_OVERLAY_Y,
+                    INGAME_OVERLAY_X + INGAME_OVERLAY_W,
+                    INGAME_OVERLAY_Y + INGAME_OVERLAY_H);
+            draw_img(fb, IMG_SUN, INGAME_OVERLAY_IMG_X, INGAME_OVERLAY_IMG_Y);
+
+            for(int8_t i=ODROID_BACKLIGHT_LEVEL_COUNT-1; i > 0; i--){
+                if(i <= level)
+                    draw_rectangle(fb,
+                            INGAME_OVERLAY_BOX_X,
+                            by,
+                            INGAME_OVERLAY_BOX_X + INGAME_OVERLAY_BOX_W,
+                            by + bh);
+                else
+                    draw_darken_rectangle(fb,
+                            INGAME_OVERLAY_BOX_X,
+                            by,
+                            INGAME_OVERLAY_BOX_X + INGAME_OVERLAY_BOX_W,
+                            by + bh);
+
+                by += bh + INGAME_OVERLAY_BOX_GAP;
+            }
+            break;
+
     }
 
+}
+
+static void set_ingame_overlay(ingame_overlay_t type){
+    common_emu_state.overlay = type;
+    common_emu_state.last_overlay_time = get_elapsed_time();
 }

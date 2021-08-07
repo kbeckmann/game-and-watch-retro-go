@@ -51,6 +51,14 @@ void cpumon_sleep(void);
 void cpumon_busy(void);
 void cpumon_reset(void);
 
+
+enum {
+    INGAME_OVERLAY_NONE,
+    INGAME_OVERLAY_VOLUME,
+    INGAME_OVERLAY_BRIGHTNESS,
+};
+typedef uint8_t ingame_overlay_t;
+
 /**
  * Holds common higher-level emu options that need to be used at not-neat
  * locations in each emulator.
@@ -59,13 +67,14 @@ void cpumon_reset(void);
  */
 typedef struct {
     uint32_t last_sync_time;
+    uint32_t last_overlay_time;
     uint16_t skipped_frames;
     int16_t frame_time_10us;
     uint8_t skip_frames:2;
     uint8_t pause_frames:1;
     uint8_t pause_after_frames:3;
     uint8_t startup_frames:2;
-    uint8_t draw_brightness:1;
+    uint8_t overlay:3;
 } common_emu_state_t;
 
 extern common_emu_state_t common_emu_state;
