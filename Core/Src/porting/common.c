@@ -288,8 +288,8 @@ void cpumon_reset(void){
     cpumon_stats.sleep_ms = 0;
 }
 
-#define DARKEN_MASK_565 0x7BEF
 #define OVERLAY_COLOR_565 0xFFFF
+
 static const uint8_t ROUND[] = {  // This is the top/left of a 8-pixel radius circle
     0b00000001,
     0b00000111,
@@ -301,9 +301,55 @@ static const uint8_t ROUND[] = {  // This is the top/left of a 8-pixel radius ci
     0b11111111,
 };
 
+// These must be multiples of 8
+#define IMG_H 32
+#define IMG_W 32
+
+static const uint8_t IMG_SPEAKER[] = {
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x80,
+    0x00, 0x00, 0x00, 0x40, 0x00, 0x03, 0x04, 0x20,
+    0x00, 0x07, 0x02, 0x10, 0x00, 0x0F, 0x01, 0x10,
+    0x07, 0xFF, 0x10, 0x90, 0x0F, 0xFF, 0x08, 0x90,
+    0x0F, 0xFF, 0x04, 0x90, 0x0F, 0xFF, 0x04, 0x90,
+    0x0F, 0xFF, 0x04, 0x90, 0x0F, 0xFF, 0x04, 0x90,
+    0x0F, 0xFF, 0x04, 0x90, 0x0F, 0xFF, 0x04, 0x90,
+    0x07, 0xFF, 0x08, 0x90, 0x00, 0x0F, 0x10, 0x90,
+    0x00, 0x07, 0x01, 0x10, 0x00, 0x03, 0x02, 0x10,
+    0x00, 0x00, 0x04, 0x20, 0x00, 0x00, 0x00, 0x40,
+    0x00, 0x00, 0x00, 0x80, 0x00, 0x00, 0x01, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+};
+
+__attribute__((optimize("unroll-loops")))
+static void draw_img(pixel_t *fb, const uint8_t *img, uint16_t x, uint16_t y){
+    uint16_t idx = 0;
+    for(uint8_t i=0; i < IMG_H; i++) {
+        for(uint8_t j=0; j < IMG_W; j++) {
+            if(img[idx / 8] & (1 << (7 - idx % 8))){
+                fb[x + j +  GW_LCD_WIDTH * (y + i)] = OVERLAY_COLOR_565;
+            }
+            idx++;
+        }
+    }
+}
+
+#define DARKEN_MASK_565 0x7BEF
 static inline void darken_pixel(pixel_t *p){
     // Quickly divide all colors by 2
     *p = (*p >> 1) & DARKEN_MASK_565;
+}
+
+__attribute__((optimize("unroll-loops")))
+static void draw_rectangle(pixel_t *fb, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2){
+    for(uint16_t i=y1; i < y2; i++){
+        for(uint16_t j=x1; j < x2; j++){
+            fb[j + GW_LCD_WIDTH * i] = OVERLAY_COLOR_565;
+        }
+    }
 }
 
 __attribute__((optimize("unroll-loops")))
@@ -350,7 +396,18 @@ static void draw_darken_rounded_rectangle(pixel_t *fb, uint16_t x1, uint16_t y1,
     }
 }
 
+#define INGAME_OVERLAY_X 265
+#define INGAME_OVERLAY_Y 10
+#define INGAME_OVERLAY_H 128
+#define INGAME_OVERLAY_W 45
+
+#define INGAME_OVERLAY_BOX_W (INGAME_OVERLAY_W - 10)
+
+#define IMG_X (INGAME_OVERLAY_X + ((INGAME_OVERLAY_W - IMG_W) / 2))
+#define IMG_Y (INGAME_OVERLAY_Y + INGAME_OVERLAY_H - IMG_H - 4)
+
 void common_ingame_overlay(void) {
     pixel_t *fb = lcd_get_active_buffer();
-    draw_darken_rounded_rectangle(fb, 265, 10, 265 + 45, 128+10);
+    draw_darken_rounded_rectangle(fb, INGAME_OVERLAY_X, INGAME_OVERLAY_Y, INGAME_OVERLAY_X + INGAME_OVERLAY_W, INGAME_OVERLAY_Y + INGAME_OVERLAY_H);
+    draw_img(fb, IMG_SPEAKER, IMG_X, IMG_Y);
 }
