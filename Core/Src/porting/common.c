@@ -287,3 +287,70 @@ void cpumon_reset(void){
     cpumon_stats.busy_ms = 0;
     cpumon_stats.sleep_ms = 0;
 }
+
+#define DARKEN_MASK_565 0x7BEF
+#define OVERLAY_COLOR_565 0xFFFF
+static const uint8_t ROUND[] = {  // This is the top/left of a 8-pixel radius circle
+    0b00000001,
+    0b00000111,
+    0b00001111,
+    0b00011111,
+    0b00111111,
+    0b01111111,
+    0b01111111,
+    0b11111111,
+};
+
+static inline void darken_pixel(pixel_t *p){
+    // Quickly divide all colors by 2
+    *p = (*p >> 1) & DARKEN_MASK_565;
+}
+
+__attribute__((optimize("unroll-loops")))
+static void draw_darken_rounded_rectangle(pixel_t *fb, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2){
+    // *1 is inclusive, *2 is exclusive
+    uint16_t h = y2 - y1;
+    uint16_t w = x2 - x1;
+    if (w < 16 || h < 16) {
+        // Draw not rounded rectangle
+        for(uint16_t i=y1; i < y2; i++){
+            for(uint16_t j=x1; j < x2; j++){
+                darken_pixel(&fb[j + GW_LCD_WIDTH * i]);
+            }
+        }
+    }
+    else {
+        // Draw upper left round
+        for(uint8_t i=0; i < 8; i++) for(uint8_t j=0; j < 8; j++)
+            if(ROUND[i] & (1 << (7 - j))) darken_pixel(&fb[x1 + j + GW_LCD_WIDTH * (y1 + i)]);
+
+        // Draw upper right round
+        for(uint8_t i=0; i < 8; i++) for(uint8_t j=0; j < 8; j++)
+            if(ROUND[i] & (1 << (7 - j))) darken_pixel(&fb[x2 - j - 1 + GW_LCD_WIDTH * (y1 + i)]);
+
+        // Draw lower left round
+        for(uint8_t i=0; i < 8; i++) for(uint8_t j=0; j < 8; j++)
+            if(ROUND[i] & (1 << (7 - j))) darken_pixel(&fb[x1 + j + GW_LCD_WIDTH * (y2 - i - 1)]);
+
+        // Draw lower right round
+        for(uint8_t i=0; i < 8; i++) for(uint8_t j=0; j < 8; j++)
+            if(ROUND[i] & (1 <<  (7 - j))) darken_pixel(&fb[x2 - j - 1 + GW_LCD_WIDTH * (y2 - i - 1)]);
+
+        // Draw upper rectangle
+        for(uint16_t i=x1+8; i < x2 - 8; i++) for(uint8_t j=0; j < 8; j++)
+            darken_pixel(&fb[ i + GW_LCD_WIDTH * (y1 + j)]);
+
+        // Draw central rectangle
+        for(uint16_t i=x1; i < x2; i++) for(uint16_t j=y1+8; j < y2-8; j++)
+            darken_pixel(&fb[i+GW_LCD_WIDTH * j]);
+
+        // Draw lower rectangle
+        for(uint16_t i=x1+8; i < x2 - 8; i++) for(uint8_t j=0; j < 8; j++)
+            darken_pixel(&fb[ i + GW_LCD_WIDTH * (y2 - j - 1)]);
+    }
+}
+
+void common_ingame_overlay(void) {
+    pixel_t *fb = lcd_get_active_buffer();
+    draw_darken_rounded_rectangle(fb, 265, 10, 265 + 45, 128+10);
+}

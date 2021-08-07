@@ -68,3 +68,9 @@ typedef struct {
 } common_emu_state_t;
 
 extern common_emu_state_t common_emu_state;
+
+
+/**
+ * Drawable stuff over current emulation.
+ */
+void common_ingame_overlay(void);
