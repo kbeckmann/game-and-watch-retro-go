@@ -361,21 +361,15 @@ void osd_blitscreen(bitmap_t *bmp)
     PROFILING_START(t_blit);
 
     // This takes less than 1ms
-    if(active_framebuffer == 0) {
-        blit(bmp, framebuffer1);
-        active_framebuffer = 1;
-    } else {
-        blit(bmp, framebuffer2);
-        active_framebuffer = 0;
-    }
+    pixel_t *fb = lcd_get_active_buffer();
+    blit(bmp, fb);
+    lcd_swap();
 
     PROFILING_END(t_blit);
 
 #ifdef PROFILING_ENABLED
     printf("Blit: %d us\n", (1000000 * PROFILING_DIFF(t_blit)) / t_blit_t0.SecondFraction);
 #endif
-
-    HAL_LTDC_Reload(&hltdc, LTDC_RELOAD_VERTICAL_BLANKING);
 }
 
 static bool palette_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat)
