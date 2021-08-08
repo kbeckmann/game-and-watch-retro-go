@@ -1,20 +1,24 @@
 #!/usr/bin/env python3
 
-from elftools.elf.elffile import ELFFile
+import argparse
+import subprocess
+import sys
+from time import sleep
 
+from elftools.elf.elffile import ELFFile
 from openocd import OpenOCD
 
-import argparse
-import time
-import sys
 
 def get_symbol_by_symbol_name(elffile, symbol_name):
-    return elffile.get_section_by_name('.symtab').get_symbol_by_name(symbol_name)[0]
+    return elffile.get_section_by_name(".symtab").get_symbol_by_name(symbol_name)[0]
+
 
 def strtohex(data):
     return map(strtohex, data) if isinstance(data, list) else int(data, 16)
 
+
 # OpenOCD class cherry-picked/inspired from from https://github.com/zmarvel/python-openocd
+
 
 def logpoll(args):
     with OpenOCD(host=args.host, port=args.port) as ocd:
@@ -42,7 +46,9 @@ def logpoll(args):
                 sys.stdout.write(logbuf_str)
             elif log_idx > 0 and log_idx < last_idx:
                 # Get new data from the end of the buffer until the first null byte
-                logbuf = ocd.read_memory(8, logbuf_addr + last_idx, logbuf_size - last_idx)
+                logbuf = ocd.read_memory(
+                    8, logbuf_addr + last_idx, logbuf_size - last_idx
+                )
                 if 0 in logbuf:
                     end = logbuf.index(0) - 1
                 else:
@@ -58,10 +64,13 @@ def logpoll(args):
                 ocd.send("resume")
 
             last_idx = log_idx
-            time.sleep(args.interval / 1000)
+            sleep(args.interval / 1000)
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Polls the stdout log from a running target")
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Polls the stdout log from a running target"
+    )
     parser.add_argument(
         "--elf",
         type=str,
@@ -93,5 +102,30 @@ if __name__ == "__main__":
         action="store_true",
         help="Halts the target during memory reads",
     )
+    args = parser.parse_args()
 
-    logpoll(parser.parse_args())
+    try:
+        logpoll(args)
+        return
+    except ConnectionRefusedError:
+        pass
+
+    # Attempt to automagically launch openocd
+    try:
+        p = subprocess.Popen(
+            ["make", "openocd"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+        )
+        sleep(1)  # Give openocd some time to launch
+        logpoll(args)
+    except KeyboardInterrupt:
+        pass
+
+    try:
+        p.terminate()
+    except OSError:
+        pass
+    p.wait()
+
+
+if __name__ == "__main__":
+    main()

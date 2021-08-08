@@ -15,7 +15,7 @@ CHECK_TOOLS ?= 1
 # Set to 1 to enable 16MB external flash support. (deprecated, use EXTFLASH_SIZE_MB instead!)
 LARGE_FLASH ?= 0
 
-# Configure where data is stored in the external flash by 
+# Configure where data is stored in the external flash by
 # setting EXTFLASH_OFFSET. Useful if the first 1MB are to be preserved.
 EXTFLASH_OFFSET ?= 0
 
@@ -462,6 +462,14 @@ flash:
 	$(V)$(MAKE) flash_extflash
 	$(V)$(RESET_DBGMCU_CMD)
 .PHONY: flash
+
+monitor:
+	$(V)$(PYTHON3) tools/logpoll.py
+.PHONY: monitor
+
+flash-monitor: flash
+	$(V)$(MAKE) monitor
+.PHONY: flash-monitor
 
 # Alias for flash
 flash_all: flash
