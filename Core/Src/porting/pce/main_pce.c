@@ -399,6 +399,7 @@ void pce_osd_gfx_blit(bool drawFrame) {
     odroid_overlay_draw_text(0,0, GW_LCD_WIDTH, debugMsg,  C_GW_YELLOW, C_GW_RED);
 #endif
 
+    common_ingame_overlay();
     lcd_swap();
 
     memset(emulator_framebuffer_pce,0,sizeof(emulator_framebuffer_pce));
