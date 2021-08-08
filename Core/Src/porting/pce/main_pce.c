@@ -346,7 +346,7 @@ void pce_osd_gfx_blit(bool drawFrame) {
 #endif
 
     uint8_t *emuFrameBuffer = osd_gfx_framebuffer();
-    uint16_t *framebuffer_active = (active_framebuffer == 0 ? framebuffer1 : framebuffer2);
+    pixel_t *framebuffer_active = lcd_get_active_buffer();
     int x2=0,y=0, offsetY;
     int xScaleDownModulo = 0;
     int xScaleUpModulo = 0;
