@@ -206,12 +206,14 @@ void common_emu_input_loop(odroid_gamepad_state_t *joystick, odroid_dialog_choic
                 odroid_system_emu_save_state(0);
                 odroid_audio_mute(false);
                 common_emu_state.startup_frames = 0;
+                set_ingame_overlay(INGAME_OVERLAY_SAVE);
             }
             else if(joystick->values[ODROID_INPUT_B]){
                 // Load State
                 last_key = ODROID_INPUT_B;
                 odroid_system_emu_load_state(0);
                 common_emu_state.startup_frames = 0;
+                set_ingame_overlay(INGAME_OVERLAY_LOAD);
             }
         }
 
@@ -333,6 +335,30 @@ static const uint8_t IMG_SUN[] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 };
 
+static const uint8_t IMG_FOLDER[] = {
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x3E, 0x00, 0x00, 0x7F, 0x00, 0x00, 0x63,
+    0x80, 0x00, 0x61, 0xFF, 0xE0, 0x60, 0xFF, 0xF0,
+    0x60, 0x00, 0x30, 0x60, 0x00, 0x30, 0x60, 0x00,
+    0x30, 0x60, 0x00, 0x00, 0x60, 0x3F, 0xFE, 0x60,
+    0x7F, 0xFE, 0x60, 0xFF, 0xFC, 0x60, 0xFF, 0xF8,
+    0x61, 0xFF, 0xF8, 0x63, 0xFF, 0xF0, 0x63, 0xFF,
+    0xE0, 0x67, 0xFF, 0xE0, 0x7F, 0xFF, 0xC0, 0x3F,
+    0xFF, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+};
+
+static const uint8_t IMG_DISKETTE[] = {
+    0x00, 0x00, 0x00, 0x3F, 0xFF, 0xE0, 0x7C, 0x00,
+    0x70, 0x7C, 0x03, 0x78, 0x7C, 0x03, 0x7C, 0x7C,
+    0x03, 0x7E, 0x7C, 0x00, 0x7E, 0x7F, 0xFF, 0xFE,
+    0x7F, 0xFF, 0xFE, 0x7F, 0xFF, 0xFE, 0x7F, 0xFF,
+    0xFE, 0x7F, 0xFF, 0xFE, 0x7F, 0xFF, 0xFE, 0x7E,
+    0x00, 0x7E, 0x7C, 0x00, 0x3E, 0x7C, 0x00, 0x3E,
+    0x7D, 0xFF, 0xBE, 0x7C, 0x00, 0x3E, 0x7C, 0x00,
+    0x3E, 0x7D, 0xFF, 0xBE, 0x7C, 0x00, 0x3E, 0x7C,
+    0x00, 0x3E, 0x3F, 0xFF, 0xFC, 0x00, 0x00, 0x00,
+};
+
 __attribute__((optimize("unroll-loops")))
 static void draw_img(pixel_t *fb, const uint8_t *img, uint16_t x, uint16_t y){
     uint16_t idx = 0;
@@ -412,21 +438,28 @@ static void draw_darken_rounded_rectangle(pixel_t *fb, uint16_t x1, uint16_t y1,
 
 #define INGAME_OVERLAY_X 265
 #define INGAME_OVERLAY_Y 10
-#define INGAME_OVERLAY_H 128
+#define INGAME_OVERLAY_BARS_H 128
 #define INGAME_OVERLAY_W 39
-
 #define INGAME_OVERLAY_BORDER 4
-
 #define INGAME_OVERLAY_BOX_GAP 2
-#define INGAME_OVERLAY_BOX_W (INGAME_OVERLAY_W - (2 * INGAME_OVERLAY_BORDER) - 6)
-#define INGAME_OVERLAY_BOX_X (INGAME_OVERLAY_X + ((INGAME_OVERLAY_W - INGAME_OVERLAY_BOX_W) / 2))
+
+#define INGAME_OVERLAY_BARS_W INGAME_OVERLAY_W
+#define INGAME_OVERLAY_IMG_H  (IMG_H + 2 * INGAME_OVERLAY_BORDER)  // For when only an image is showing
+
+#define INGAME_OVERLAY_BOX_W (INGAME_OVERLAY_BARS_W - (2 * INGAME_OVERLAY_BORDER) - 6)
+#define INGAME_OVERLAY_BOX_X (INGAME_OVERLAY_X + ((INGAME_OVERLAY_BARS_W - INGAME_OVERLAY_BOX_W) / 2))
 #define INGAME_OVERLAY_BOX_Y (INGAME_OVERLAY_Y + INGAME_OVERLAY_BORDER + 1)
 
-#define INGAME_OVERLAY_IMG_X (INGAME_OVERLAY_X + ((INGAME_OVERLAY_W - IMG_W) / 2))
-#define INGAME_OVERLAY_IMG_Y (INGAME_OVERLAY_Y + INGAME_OVERLAY_H - IMG_H - INGAME_OVERLAY_BORDER)
+// For when only an image is shown
+#define INGAME_OVERLAY_IMG_X (INGAME_OVERLAY_X + ((INGAME_OVERLAY_BARS_W - IMG_W) / 2))
+#define INGAME_OVERLAY_IMG_Y (INGAME_OVERLAY_Y + INGAME_OVERLAY_BORDER)
+
+// Places the image at the bottom for bars-related overlay (volume, brightness)
+#define INGAME_OVERLAY_BARS_IMG_X INGAME_OVERLAY_IMG_X
+#define INGAME_OVERLAY_BARS_IMG_Y (INGAME_OVERLAY_Y + INGAME_OVERLAY_BARS_H - IMG_H - INGAME_OVERLAY_BORDER)
 
 static uint8_t box_height(uint8_t n) {
-    return ((INGAME_OVERLAY_IMG_Y - INGAME_OVERLAY_BOX_Y) / n) - INGAME_OVERLAY_BOX_GAP;
+    return ((INGAME_OVERLAY_BARS_IMG_Y - INGAME_OVERLAY_BOX_Y) / n) - INGAME_OVERLAY_BOX_GAP;
 }
 
 void common_ingame_overlay(void) {
@@ -446,9 +479,9 @@ void common_ingame_overlay(void) {
             draw_darken_rounded_rectangle(fb,
                     INGAME_OVERLAY_X,
                     INGAME_OVERLAY_Y,
-                    INGAME_OVERLAY_X + INGAME_OVERLAY_W,
-                    INGAME_OVERLAY_Y + INGAME_OVERLAY_H);
-            draw_img(fb, IMG_SPEAKER, INGAME_OVERLAY_IMG_X, INGAME_OVERLAY_IMG_Y);
+                    INGAME_OVERLAY_X + INGAME_OVERLAY_BARS_W,
+                    INGAME_OVERLAY_Y + INGAME_OVERLAY_BARS_H);
+            draw_img(fb, IMG_SPEAKER, INGAME_OVERLAY_BARS_IMG_X, INGAME_OVERLAY_BARS_IMG_Y);
 
             for(int8_t i=ODROID_AUDIO_VOLUME_MAX; i > 0; i--){
                 if(i <= level)
@@ -474,9 +507,9 @@ void common_ingame_overlay(void) {
             draw_darken_rounded_rectangle(fb,
                     INGAME_OVERLAY_X,
                     INGAME_OVERLAY_Y,
-                    INGAME_OVERLAY_X + INGAME_OVERLAY_W,
-                    INGAME_OVERLAY_Y + INGAME_OVERLAY_H);
-            draw_img(fb, IMG_SUN, INGAME_OVERLAY_IMG_X, INGAME_OVERLAY_IMG_Y);
+                    INGAME_OVERLAY_X + INGAME_OVERLAY_BARS_W,
+                    INGAME_OVERLAY_Y + INGAME_OVERLAY_BARS_H);
+            draw_img(fb, IMG_SUN, INGAME_OVERLAY_BARS_IMG_X, INGAME_OVERLAY_BARS_IMG_Y);
 
             for(int8_t i=ODROID_BACKLIGHT_LEVEL_COUNT-1; i > 0; i--){
                 if(i <= level)
@@ -495,9 +528,23 @@ void common_ingame_overlay(void) {
                 by += bh + INGAME_OVERLAY_BOX_GAP;
             }
             break;
-
+        case INGAME_OVERLAY_LOAD:
+            draw_darken_rounded_rectangle(fb,
+                    INGAME_OVERLAY_X,
+                    INGAME_OVERLAY_Y,
+                    INGAME_OVERLAY_X + INGAME_OVERLAY_BARS_W,
+                    INGAME_OVERLAY_Y + INGAME_OVERLAY_IMG_H);
+            draw_img(fb, IMG_FOLDER, INGAME_OVERLAY_IMG_X, INGAME_OVERLAY_IMG_Y);
+            break;
+        case INGAME_OVERLAY_SAVE:
+            draw_darken_rounded_rectangle(fb,
+                    INGAME_OVERLAY_X,
+                    INGAME_OVERLAY_Y,
+                    INGAME_OVERLAY_X + INGAME_OVERLAY_BARS_W,
+                    INGAME_OVERLAY_Y + INGAME_OVERLAY_IMG_H);
+            draw_img(fb, IMG_DISKETTE, INGAME_OVERLAY_IMG_X, INGAME_OVERLAY_IMG_Y);
+            break;
     }
-
 }
 
 static void set_ingame_overlay(ingame_overlay_t type){

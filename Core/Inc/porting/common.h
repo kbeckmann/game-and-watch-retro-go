@@ -56,6 +56,8 @@ enum {
     INGAME_OVERLAY_NONE,
     INGAME_OVERLAY_VOLUME,
     INGAME_OVERLAY_BRIGHTNESS,
+    INGAME_OVERLAY_SAVE,
+    INGAME_OVERLAY_LOAD,
 };
 typedef uint8_t ingame_overlay_t;
 
