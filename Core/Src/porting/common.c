@@ -462,10 +462,11 @@ static void draw_img(pixel_t *fb, const uint8_t *img, uint16_t x, uint16_t y){
     }
 }
 
-#define DARKEN_MASK_565 0x7BEF
+#define DARKEN_MASK_565 0x7BEF  // Mask off the MSb of each color
+#define DARKEN_ADD_565 0x2104  // value of 4-red, 8-green, 4-blue to add back in a little gray, especially on black backgrounds
 static inline void darken_pixel(pixel_t *p){
     // Quickly divide all colors by 2
-    *p = (*p >> 1) & DARKEN_MASK_565;
+    *p = ((*p >> 1) & DARKEN_MASK_565) + DARKEN_ADD_565;
 }
 
 __attribute__((optimize("unroll-loops")))
