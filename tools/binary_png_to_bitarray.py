@@ -19,7 +19,8 @@ def main():
     img = imageio.imread(args.png)
     if img.ndim == 3:
         if img.shape[-1] == 4:
-            img = (img != [0, 0, 0, 255]).all(axis=-1)
+            img = (img == [0, 0, 0, 255]).all(axis=-1)
+            img = ~img
         else:
             raise NotImplementedError
     img = img.astype(bool)
@@ -35,8 +36,6 @@ def main():
             f"0x{img_packed[i+6]:02X}, 0x{img_packed[i+7]:02X},"
         )
     print("};")
-
-    print("meow")
 
 
 if __name__ == "__main__":

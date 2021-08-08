@@ -58,6 +58,7 @@ enum {
     INGAME_OVERLAY_BRIGHTNESS,
     INGAME_OVERLAY_SAVE,
     INGAME_OVERLAY_LOAD,
+    INGAME_OVERLAY_SPEEDUP,
 };
 typedef uint8_t ingame_overlay_t;
 
