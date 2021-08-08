@@ -67,8 +67,7 @@ __NULLPTR_LENGTH__  = 0x100;
 __ITCMRAM_LENGTH__  = 64K;
 __DTCMRAM_LENGTH__  = 128K;
 __RAM_UC_LENGTH__   = 300K;
-__RAM_CORE_LENGTH__ = 68K;
-__RAM_EMU_LENGTH__  = 1024K - __RAM_UC_LENGTH__ - __RAM_CORE_LENGTH__;
+__RAM_EMU_LENGTH__  = 1024K - __RAM_UC_LENGTH__;
 __AHBRAM_LENGTH__   = 128K;
 __FLASH_LENGTH__    = 256K; /* bank1 */
 __FLASH2_LENGTH__   = 256K; /* bank2 */
@@ -78,8 +77,7 @@ __EXTFLASH_START__ = 0x90000000 + __EXTFLASH_OFFSET__;
 
 __RAM_START__       = 0x24000000;
 __RAM_UC_START__    = __RAM_START__;
-__RAM_CORE_START__  = __RAM_START__ + __RAM_UC_LENGTH__;
-__RAM_EMU_START__   = __RAM_CORE_START__ + __RAM_CORE_LENGTH__;
+__RAM_EMU_START__  = __RAM_START__ + __RAM_UC_LENGTH__;
 
 __RAM_EMU_END__     = __RAM_EMU_START__ + __RAM_EMU_LENGTH__;
 __RAM_END__         = 0x24000000 + 1024K;
@@ -104,7 +102,6 @@ MEMORY
   ITCMRAM  (xrw) : ORIGIN = 0x00000000 + __NULLPTR_LENGTH__, LENGTH = __ITCMRAM_LENGTH__ - __NULLPTR_LENGTH__
   DTCMRAM  (xrw) : ORIGIN = 0x20000000, LENGTH =  __DTCMRAM_LENGTH__
   RAM_UC   (xrw) : ORIGIN = __RAM_UC_START__, LENGTH = __RAM_UC_LENGTH__
-  RAM      (xrw) : ORIGIN = __RAM_CORE_START__, LENGTH = __RAM_CORE_LENGTH__
   RAM_EMU  (xrw) : ORIGIN = __RAM_EMU_START__, LENGTH = __RAM_EMU_LENGTH__
   AHBRAM   (xrw) : ORIGIN = 0x30000000, LENGTH =  __AHBRAM_LENGTH__
 
@@ -154,24 +151,7 @@ SECTIONS
     __ram_uc_end__ = .;
   } > RAM_UC
 
-  /* Data that should be copied from extflash to axiram */
-  /* used by the startup to initialize data */
-  _siramdata = LOADADDR(._ram_exec);
-  __extflash_start__ = LOADADDR(._ram_exec);
-  ._ram_exec :
-  {
-    __ram_start__ = .;
-    __ram_exec_start__ = .;
-    . = ALIGN(4);
-    _sram_text = .;
-    *(.ram_text)
-    _eram_text = .;
-    _sram_data = .;
-    *(.ram_data)
-    _eram_data = .;
-    __ram_exec_end__ = .;
-  } >RAM AT> EXTFLASH
-
+  __extflash_start__ = LOADADDR(._extflash);
   ._extflash :
   {
     . = ALIGN(4);
@@ -298,6 +278,9 @@ SECTIONS
     . = ALIGN(4);
     __ram_emu_snes_start__ = .;
     build/snes9x/*.o (.data .data*)
+
+    *(.snes_hot4)
+
     . = ALIGN(4);
     _OVERLAY_SNES_LOAD_END = .;
   } AT> EXTFLASH
@@ -342,19 +325,15 @@ SECTIONS
     __configflash_end__ = .;
   } > CONFIGFLASH
 
-  ._ram (NOLOAD) :
-  {
-    . = ALIGN(4);
-    *(.emulator_data)
-    __ram_end__ = .;
-  } > RAM
-
   ._ahbram (NOLOAD) :
   {
     __ahbram_start__ = .;
     . = ALIGN(4);
     *(.audio)
+    . = ALIGN(4);
     *(.ahb)
+    . = ALIGN(4);
+    *(.emulator_data)
     . = ALIGN(4);
     __ahbram_end__ = .;
   } > AHBRAM
@@ -380,6 +359,8 @@ SECTIONS
 
     KEEP (*(.init))
     KEEP (*(.fini))
+
+    *(.snes_hot3)
 
     . = ALIGN(4);
     _etext = .;        /* define a global symbols at end of code */
@@ -445,11 +426,12 @@ SECTIONS
     __flash_end__ = .;
   }
 
-  /* put the SNES read only stuff on the second bank */
-  .snes_text_rodata :
+  /* put *fast access* SNES read only stuff on the second bank */
+  .flash2 :
   {
     __flash2_start__ = .;
     . = ALIGN(4);
+    *(.snes_hot2)
     __flash2_end__ = .;
   } >FLASH2
 

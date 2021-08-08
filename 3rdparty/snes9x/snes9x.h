@@ -11,6 +11,8 @@
 #define VERSION	"1.60"
 #endif
 
+#include "porting_snes.h"
+
 #include "port.h"
 #include "65c816.h"
 #include "messages.h"

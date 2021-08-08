@@ -15,8 +15,6 @@
 #include "missing.h"
 #endif
 
-#include "porting_snes.h"
-
 static inline void S9xReschedule (void);
 
 IRAM_ATTR_SNES void S9xMainLoop (void)

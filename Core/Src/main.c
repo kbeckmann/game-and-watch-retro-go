@@ -204,7 +204,141 @@ void abort(void)
   BSOD(BSOD_ABORT, 0, 0);
 }
 
-#if 1
+// If you want to stream trace data, run `mkfifo itm.fifo`.
+// 
+// To enable SWO, issue the following commands to OpenOCD:
+// stm32h7x.swo configure -protocol uart -traceclk 280000000 -output itm.fifo -formatter off -pin-freq 10000000
+// stm32h7x.swo enable
+//
+// Now itm.fifo can be read in realtime.
+// https://github.com/japaric/itm-tools is a provides usefull tools.
+// `itm-decode itm.fifo` will decode itm data in realtime.
+// `pcsampl itm.bin -e build/gw_retro_go.elf` will provide a sorted list of symbols based on usage.
+
+#define ENABLE_SWO_PC_SAMPLING
+// #define ENABLE_SWO_STDOUT
+
+#if defined(ENABLE_SWO_PC_SAMPLING)
+
+int swo_initialized;
+
+static void init_swo(void)
+{
+  uint32_t cpuCoreFreqHz = 280000000; // 280 MHz
+  // uint32_t SWOSpeed = 1000000; /* 1M baud rate */
+  uint32_t SWOSpeed = 10000000; /* 10M baud rate */
+  uint32_t SWOPrescaler = (cpuCoreFreqHz/(SWOSpeed*2)) - 1; /* SWOSpeed in Hz, note that cpuCoreFreqHz is expected to be match the CPU core clock */
+  /* Configure the TPIU - pages and info from ATSAMS70N20 datasheet */
+  CoreDebug->DEMCR = CoreDebug_DEMCR_TRCENA_Msk; /* page 83, step 1 - "Debug exception and monitor register": bit 24 is TRCENA which enables DWT and ITM units. page 766 at https://static.docs.arm.com/ddi0403/eb/DDI0403E_B_armv7m_arm.pdf */
+  TPI->SPPR = 0x00000002;       /* page 83, step 2 - "Selected PIN Protocol Register": Select which protocol to use for trace output (2: SWO UART/NRZ, 1: SWO Manchester encoding) */
+  TPI->FFCR = TPI_FFCR_TrigIn_Msk;       /* page 83, step 3 - Formatter and Flush Control Register */
+  TPI->ACPR = SWOPrescaler;     /* page 83, step 4 - "Async Clock Prescaler Register". Scale the baud rate of the asynchronous output */
+  ITM->LAR = 0xC5ACCE55;        /* ITM Lock Access Register, C5ACCE55 enables more write access to Control Register 0xE00 :: 0xFFC */
+  ITM->TCR |= (
+      (1 << 16)
+    | ITM_TCR_SWOENA_Msk
+    | ITM_TCR_SYNCENA_Msk
+    | ITM_TCR_ITMENA_Msk); /* pg 776, ITM Trace Control Register at https://static.docs.arm.com/ddi0403/eb/DDI0403E_B_armv7m_arm.pdf;
+                                                                - set TraceBusID to 1,
+                                                                - enable SWOENA (async clocking of timestamp counter
+                                                                - enable SYNCENA (Synchronization packet transmission for a synchronous TPIU)
+                                                                - enable ITMENA (enable ITM)*/
+  ITM->TER = (0xFFFF);  /* ITM Trace Enable Register. Each bit location corresponds to a virtual stimulus register; when a bit is set, a write to the appropriate stimulus location results in a packet being generated, except when the FIFO is full.
+                        - only ITM_TER0 is implemented as ITM_TER according to one register in .h file. Registers ITM_TER1 to ITM_TER7 seem unimplemented
+                        - ITM_TER0.0 - ITM_STIM0 (ITM->PORT[0])
+                        - ITM_TER0.1 - ITM_STIM1 (ITM->PORT[1])
+                        - ITM_TER0.31 - ITM_STIM31 (ITM->PORT[31]) */
+  // DWT->CTRL = (
+  //     (1 << 30) // DWT_CTRL_NUMCOMP_Msk
+  //   | DWT_CTRL_CYCTAP_Msk
+  //   | DWT_CTRL_POSTINIT_Msk
+  //   | DWT_CTRL_POSTPRESET_Msk); /* DWT_CTRL */
+
+  DWT->CTRL = (
+      DWT_CTRL_PCSAMPLENA_Msk
+    | DWT_CTRL_CYCCNTENA_Msk
+    | DWT_CTRL_CYCTAP_Msk
+    | (0b11 << DWT_CTRL_POSTPRESET_Pos) // lower = faster
+    ); /* DWT_CTRL */
+
+  /* Check if Trace Control Register (ITM->TCR at 0xE0000E80) is set */
+  if ((ITM->TCR & ITM_TCR_ITMENA_Msk) == 0) /* check Trace Control Register if ITM trace is enabled (ITM->TCR.ITMENA)*/
+    while(1){} /* not enabled? */
+
+  /* Check if the requested channel stimulus port (ITM->TER at 0xE0000E00) is enabled */
+  if ((ITM->TER & (1UL<<0))==0) /* check Trace Enable Register if requested port is enabled */
+    while(1){} /* requested port not enabled? */
+
+}
+
+#elif defined(ENABLE_SWO_STDOUT)
+
+int swo_initialized;
+
+void init_swo(void)
+{
+  uint32_t cpuCoreFreqHz = 280000000; // 280 MHz
+  uint32_t SWOSpeed = 1000000; /* 1M baud rate */
+  uint32_t SWOPrescaler = (cpuCoreFreqHz/(SWOSpeed*2)) - 1; /* SWOSpeed in Hz, note that cpuCoreFreqHz is expected to be match the CPU core clock */
+  /* Configure the TPIU - pages and info from ATSAMS70N20 datasheet */
+  CoreDebug->DEMCR = CoreDebug_DEMCR_TRCENA_Msk; /* page 83, step 1 - "Debug exception and monitor register": bit 24 is TRCENA which enables DWT and ITM units. page 766 at https://static.docs.arm.com/ddi0403/eb/DDI0403E_B_armv7m_arm.pdf */
+  TPI->SPPR = 0x00000002;       /* page 83, step 2 - "Selected PIN Protocol Register": Select which protocol to use for trace output (2: SWO UART/NRZ, 1: SWO Manchester encoding) */
+  TPI->FFCR = TPI_FFCR_TrigIn_Msk;       /* page 83, step 3 - Formatter and Flush Control Register */
+  TPI->ACPR = SWOPrescaler;     /* page 83, step 4 - "Async Clock Prescaler Register". Scale the baud rate of the asynchronous output */
+  ITM->LAR = 0xC5ACCE55;        /* ITM Lock Access Register, C5ACCE55 enables more write access to Control Register 0xE00 :: 0xFFC */
+  ITM->TCR |= (
+      (1 << 16)
+    | ITM_TCR_SWOENA_Msk
+    | ITM_TCR_SYNCENA_Msk
+    | ITM_TCR_ITMENA_Msk); /* pg 776, ITM Trace Control Register at https://static.docs.arm.com/ddi0403/eb/DDI0403E_B_armv7m_arm.pdf;
+                                                                - set TraceBusID to 1,
+                                                                - enable SWOENA (async clocking of timestamp counter
+                                                                - enable SYNCENA (Synchronization packet transmission for a synchronous TPIU)
+                                                                - enable ITMENA (enable ITM)*/
+  ITM->TER = (0xFFFF);  /* ITM Trace Enable Register. Each bit location corresponds to a virtual stimulus register; when a bit is set, a write to the appropriate stimulus location results in a packet being generated, except when the FIFO is full.
+                        - only ITM_TER0 is implemented as ITM_TER according to one register in .h file. Registers ITM_TER1 to ITM_TER7 seem unimplemented
+                        - ITM_TER0.0 - ITM_STIM0 (ITM->PORT[0])
+                        - ITM_TER0.1 - ITM_STIM1 (ITM->PORT[1])
+                        - ITM_TER0.31 - ITM_STIM31 (ITM->PORT[31]) */
+  DWT->CTRL = (
+      (1 << 30) // DWT_CTRL_NUMCOMP_Msk
+    | DWT_CTRL_CYCTAP_Msk
+    | DWT_CTRL_POSTINIT_Msk
+    | DWT_CTRL_POSTPRESET_Msk); /* DWT_CTRL */
+
+  /* Check if Trace Control Register (ITM->TCR at 0xE0000E80) is set */
+  if ((ITM->TCR & ITM_TCR_ITMENA_Msk) == 0) /* check Trace Control Register if ITM trace is enabled (ITM->TCR.ITMENA)*/
+    while(1){} /* not enabled? */
+
+  /* Check if the requested channel stimulus port (ITM->TER at 0xE0000E00) is enabled */
+  if ((ITM->TER & (1UL<<0))==0) /* check Trace Enable Register if requested port is enabled */
+    while(1){} /* requested port not enabled? */
+
+}
+
+void SWO_send_char(char c)
+{
+  if (!swo_initialized) {
+    init_swo();
+    swo_initialized = 1;
+  }
+
+  while (ITM->PORT[0].u32 == 0) /* Wait until STIMx is ready, then send data */
+  {
+  }
+  ITM->PORT[0].u8 = c;
+}
+
+int SWO_send_buf(char *ptr, int len)
+{
+  for (int i = 0; i < len; i++) {
+    SWO_send_char(ptr[i]);
+  }
+}
+
+#endif // ENABLE_SWO_STDOUT
+
+
 int _write(int file, char *ptr, int len)
 {
   if (log_idx + len + 1 > sizeof(logbuf)) {
@@ -215,9 +349,12 @@ int _write(int file, char *ptr, int len)
   log_idx += len;
   logbuf[log_idx + 1] = '\0';
 
+#if defined(ENABLE_SWO_STDOUT)
+  SWO_send_buf(ptr, len);
+#endif
+
   return len;
 }
-#endif
 
 void store_erase(const uint8_t *flash_ptr, uint32_t size)
 {
@@ -476,11 +613,6 @@ int main(void)
   // Copy instructions and data from extflash to axiram
   void *copy_areas[3];
 
-  copy_areas[0] = &_siramdata;  // 0x90000000
-  copy_areas[1] = &__ram_exec_start__;  // 0x24000000
-  copy_areas[2] = &__ram_exec_end__;  // 0x24000000 + length
-  memcpy_no_check(copy_areas[1], copy_areas[0], copy_areas[2] - copy_areas[1]);
-
   // Copy ITCRAM HOT section
   static uint32_t copy_areas2[4] __attribute__((used));
   copy_areas2[0] = (uint32_t) &_sitcram_hot;
@@ -490,6 +622,8 @@ int main(void)
   memcpy_no_check((uint32_t *) copy_areas2[1], (uint32_t *) copy_areas2[0], copy_areas2[3]);
 
   bq24072_init();
+
+  // init_swo();
 
   switch (boot_mode) {
   case BOOT_MODE_APP:

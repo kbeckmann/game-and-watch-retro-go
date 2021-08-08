@@ -482,7 +482,16 @@ flash_intflash: $(BUILD_DIR)/$(TARGET)_intflash.bin
 # Flashes using an existing openocd instance
 flash_intflash_nc: $(BUILD_DIR)/$(TARGET)_intflash.bin
 	echo "program $< 0x08000000 verify reset" | nc -c localhost 4444
-.PHONY: flashx
+.PHONY: flash_intflash_nc
+
+flash_intflash2: $(BUILD_DIR)/$(TARGET)_intflash2.bin
+	$(OPENOCD) -f scripts/interface_$(ADAPTER).cfg -c "program $< 0x08100000 verify reset exit"
+.PHONY: flash_intflash2
+
+# Flashes using an existing openocd instance
+flash_intflash2_nc: $(BUILD_DIR)/$(TARGET)_intflash2.bin
+	echo "program $< 0x08100000 verify reset" | nc -c localhost 4444
+.PHONY: flash_intflash2_nc
 
 flash_extflash: $(BUILD_DIR)/$(TARGET)_extflash.bin
 	$(FLASHAPP) $(BUILD_DIR)/$(TARGET)_extflash.bin $(EXTFLASH_OFFSET)
@@ -495,6 +504,7 @@ flash_test: flash_intflash
 # Programs both the external and internal flash.
 flash:
 	$(V)$(MAKE) flash_intflash
+	# $(V)$(MAKE) flash_intflash2
 	$(V)$(MAKE) flash_extflash
 	$(V)$(RESET_DBGMCU_CMD)
 .PHONY: flash
