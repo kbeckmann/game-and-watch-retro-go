@@ -204,10 +204,15 @@ void common_emu_input_loop(odroid_gamepad_state_t *joystick, odroid_dialog_choic
                 // Save State
                 last_key = ODROID_INPUT_A;
                 odroid_audio_mute(true);
+
+                // Call ingame overlay so that the save icon gets displayed first.
+                set_ingame_overlay(INGAME_OVERLAY_SAVE);
+                common_ingame_overlay();
+                lcd_sync();
+
                 odroid_system_emu_save_state(0);
                 odroid_audio_mute(false);
                 common_emu_state.startup_frames = 0;
-                set_ingame_overlay(INGAME_OVERLAY_SAVE);
             }
             else if(joystick->values[ODROID_INPUT_B]){
                 // Load State
