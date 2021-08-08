@@ -74,14 +74,15 @@ Core/Src/retro-go/bitmaps/header_gg.c \
 Core/Src/retro-go/bitmaps/header_col.c \
 Core/Src/retro-go/bitmaps/header_sg1000.c \
 Core/Src/retro-go/bitmaps/header_pce.c \
+Core/Src/retro-go/bitmaps/header_gw.c \
 Core/Src/retro-go/bitmaps/logo_gb.c \
 Core/Src/retro-go/bitmaps/logo_nes.c \
 Core/Src/retro-go/bitmaps/logo_sms.c \
 Core/Src/retro-go/bitmaps/logo_gg.c \
 Core/Src/retro-go/bitmaps/logo_col.c \
 Core/Src/retro-go/bitmaps/logo_sg1000.c \
-Core/Src/retro-go/bitmaps/logo_pce.c
-
+Core/Src/retro-go/bitmaps/logo_pce.c \
+Core/Src/retro-go/bitmaps/logo_gw.c
 
 # Version and URL for the STM32CubeH7 SDK
 SDK_VERSION ?= v1.8.0
@@ -247,6 +248,7 @@ C_INCLUDES +=  \
 -ICore/Inc/porting/nes \
 -ICore/Inc/porting/smsplusgx \
 -ICore/Inc/porting/pce \
+-ICore/Inc/porting/gw \
 -ICore/Inc/retro-go \
 -IDrivers/STM32H7xx_HAL_Driver/Inc \
 -IDrivers/STM32H7xx_HAL_Driver/Inc/Legacy \
@@ -298,8 +300,9 @@ GNUBOY_OBJECTS = $(addprefix $(BUILD_DIR)/gnuboy/,$(notdir $(GNUBOY_C_SOURCES:.c
 NES_OBJECTS = $(addprefix $(BUILD_DIR)/nes/,$(notdir $(NES_C_SOURCES:.c=.o)))
 SMSPLUSGX_OBJECTS = $(addprefix $(BUILD_DIR)/smsplusgx/,$(notdir $(SMSPLUSGX_C_SOURCES:.c=.o)))
 PCE_OBJECTS = $(addprefix $(BUILD_DIR)/pce/,$(notdir $(PCE_C_SOURCES:.c=.o)))
+GW_OBJECTS = $(addprefix $(BUILD_DIR)/gw/,$(notdir $(GW_C_SOURCES:.c=.o)))
 
-vpath %.c $(sort $(dir $(C_SOURCES) $(NES_C_SOURCES) $(GNUBOY_C_SOURCES) $(SMSPLUSGX_C_SOURCES) $(PCE_C_SOURCES) $(SDK_C_SOURCES)))
+vpath %.c $(sort $(dir $(C_SOURCES) $(NES_C_SOURCES) $(GNUBOY_C_SOURCES) $(SMSPLUSGX_C_SOURCES) $(PCE_C_SOURCES) $(GW_C_SOURCES) $(SDK_C_SOURCES)))
 # list of ASM program objects
 OBJECTS += $(addprefix $(BUILD_DIR)/,$(notdir $(SDK_ASM_SOURCES:.s=.o)))
 vpath %.s $(sort $(dir $(SDK_ASM_SOURCES)))
@@ -324,7 +327,7 @@ Core/Inc/githash.h: FORCE | $(BUILD_DIR)
 # Run parse_roms.py to generate information about the roms
 $(BUILD_DIR)/rom_files.txt: FORCE | $(BUILD_DIR)
 	$(V)$(ECHO) [ BASH ] Checking for updated roms
-	$(V)./scripts/update_rom_files.sh build/rom_files.txt roms/gb roms/nes roms/sms roms/gg roms/col roms/pce roms/sg
+	$(V)./scripts/update_rom_files.sh build/rom_files.txt roms/gb roms/nes roms/sms roms/gg roms/pce roms/gw roms/col roms/sg
 
 $(BUILD_DIR)/roms.a: $(BUILD_DIR)/rom_files.txt parse_roms.py
 	$(V)$(ECHO) [ PYTHON3 ] $(notdir $<)
@@ -382,9 +385,9 @@ $(BUILD_DIR)/%.o: %.s Makefile.common Makefile $(BUILD_DIR)/config.h | $(BUILD_D
 	$(V)$(ECHO) [ AS ] $(notdir $<)
 	$(V)$(AS) -c $(CFLAGS) $< -o $@
 
-$(BUILD_DIR)/$(TARGET).elf: CheckTools $(OBJECTS) $(NES_OBJECTS) $(GNUBOY_OBJECTS) $(SMSPLUSGX_OBJECTS) $(PCE_OBJECTS) Makefile.common Makefile $(LDSCRIPT)
+$(BUILD_DIR)/$(TARGET).elf: CheckTools $(OBJECTS) $(NES_OBJECTS) $(GNUBOY_OBJECTS) $(SMSPLUSGX_OBJECTS) $(PCE_OBJECTS) $(GW_OBJECTS) Makefile.common Makefile $(LDSCRIPT)
 	$(V)$(ECHO) [ LD ] $(notdir $@)
-	$(V)$(CC) $(OBJECTS) $(NES_OBJECTS) $(GNUBOY_OBJECTS) $(SMSPLUSGX_OBJECTS) $(PCE_OBJECTS) $(LDFLAGS) -o $@
+	$(V)$(CC) $(OBJECTS) $(NES_OBJECTS) $(GNUBOY_OBJECTS) $(SMSPLUSGX_OBJECTS) $(PCE_OBJECTS) $(GW_OBJECTS) $(LDFLAGS) -o $@
 	$(V)$(SZ) $@
 	$(V)./scripts/size.sh $@
 
@@ -408,6 +411,10 @@ $(BUILD_DIR)/pce/%.o: %.c Makefile Makefile.common $(SDK_HEADERS) $(BUILD_DIR)/c
 	$(V)$(ECHO) [ CC pce ] $(notdir $<)
 	$(V)$(CC) -c $(CFLAGS) -Wa,-a,-ad,-alms=$(BUILD_DIR)/pce/$(notdir $(<:.c=.lst)) $< -o $@
 	
+$(BUILD_DIR)/gw/%.o: %.c Makefile Makefile.common $(SDK_HEADERS) $(BUILD_DIR)/config.h | $(BUILD_DIR) CheckDirtySubmodules
+	$(V)$(ECHO) [ CC gw ] $(notdir $<)
+	$(V)$(CC) -c $(CFLAGS) -Wa,-a,-ad,-alms=$(BUILD_DIR)/gw/$(notdir $(<:.c=.lst)) $< -o $@
+
 $(BUILD_DIR):
 	$(V)mkdir $@
 	$(V)mkdir $@/core
@@ -415,6 +422,7 @@ $(BUILD_DIR):
 	$(V)mkdir $@/gnuboy
 	$(V)mkdir $@/smsplusgx
 	$(V)mkdir $@/pce
+	$(V)mkdir $@/gw
 
 #######################################
 # Flashing

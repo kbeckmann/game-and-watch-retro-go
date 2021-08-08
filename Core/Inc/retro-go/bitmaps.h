@@ -27,3 +27,6 @@ extern const unsigned char logo_pce[];
 
 extern const unsigned char header_sms[];
 extern const unsigned char logo_sms[];
+
+extern const unsigned char header_gw[];
+extern const unsigned char logo_gw[];

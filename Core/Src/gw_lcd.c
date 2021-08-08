@@ -175,6 +175,19 @@ void HAL_LTDC_ReloadEventCallback (LTDC_HandleTypeDef *hltdc) {
   }
 }
 
+/* copy of register def */
+#define LTDC_SRCR_IMR_Pos            (0U)
+#define LTDC_SRCR_IMR_Msk            (0x1UL << LTDC_SRCR_IMR_Pos)              /*!< 0x00000001 */
+#define LTDC_SRCR_IMR                LTDC_SRCR_IMR_Msk                         /*!< Immediate Reload         */
+#define LTDC_SRCR_VBR_Pos            (1U)
+#define LTDC_SRCR_VBR_Msk            (0x1UL << LTDC_SRCR_VBR_Pos)              /*!< 0x00000002 */
+#define LTDC_SRCR_VBR                LTDC_SRCR_VBR_Msk                         /*!< Vertical Blanking Reload */
+
+uint32_t is_lcd_swap_pending()
+{
+  return (uint32_t)(hltdc.Instance->SRCR) & ( LTDC_SRCR_VBR | LTDC_SRCR_IMR);
+}
+
 void lcd_swap(void)
 {
   HAL_LTDC_Reload(&hltdc, LTDC_RELOAD_VERTICAL_BLANKING);
@@ -220,3 +233,4 @@ void lcd_wait_for_vblank(void)
     __asm("nop");
   }
 }
+
