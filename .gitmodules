@@ -1,3 +1,6 @@
 [submodule "retro-go-stm32"]
 	path = retro-go-stm32
 	url = https://github.com/kbeckmann/retro-go-stm32
+[submodule "LCD-Game-Emulator"]
+	path = LCD-Game-Emulator
+	url = https://github.com/bzhxx/LCD-Game-Emulator.git

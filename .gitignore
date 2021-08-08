@@ -18,6 +18,7 @@ Core/Src/retro-go/gb_roms.c
 Core/Src/retro-go/gg_roms.c
 Core/Src/retro-go/nes_roms.c
 Core/Src/retro-go/pce_roms.c
+Core/Src/retro-go/gw_roms.c
 Core/Src/retro-go/sg1000_roms.c
 Core/Src/retro-go/sms_roms.c
 

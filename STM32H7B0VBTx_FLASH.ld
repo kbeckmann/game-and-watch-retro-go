@@ -287,6 +287,29 @@ SECTIONS
   }
   _OVERLAY_PCE_BSS_SIZE = SIZEOF(.overlay_pce_bss);
 
+  .overlay_gw __RAM_EMU_START__ : {
+    . = ALIGN(4);
+    __ram_emu_gw_start__ = .;
+    build/gw/*.o (.data. data* .text .text* .rodata .rodata*)
+    . = ALIGN(4);
+    _OVERLAY_GW_LOAD_END = .;
+  } AT> EXTFLASH
+  _OVERLAY_GW_LOAD_START = LOADADDR(.overlay_gw);
+  _OVERLAY_GW_SIZE = SIZEOF(.overlay_gw);
+
+  .overlay_gw_bss _OVERLAY_GW_LOAD_END : {
+    . = ALIGN(4);
+    _OVERLAY_GW_BSS_START = .;
+    build/gw/*.o (.bss .bss*)
+    . = ALIGN(4);
+    build/gw/*.o (COMMON)
+    __ram_emu_gw_end__ = .;
+    _OVERLAY_GW_BSS_END = .;
+    ASSERT(ABSOLUTE(_OVERLAY_GW_BSS_END) < __RAM_EMU_END__, "Error: GW BSS overflow");
+  }
+  _OVERLAY_GW_BSS_SIZE = SIZEOF(.overlay_gw_bss);
+
+
   /* Place this symbol after the last overlay definition */
   .overlay_end : {
     __extflash_end__ = .;

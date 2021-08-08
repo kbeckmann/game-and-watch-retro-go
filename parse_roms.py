@@ -50,6 +50,7 @@ SAVE_SIZES = {
     "col": 60 * 1024,
     "sg": 60 * 1024,
     "pce": 76 * 1024,
+    "gw":   4 * 1024
 }
 
 
@@ -633,6 +634,18 @@ class ROMParser:
         total_save_size += save_size
         total_rom_size += rom_size
         build_config += "#define ENABLE_EMULATOR_PCE\n" if rom_size > 0 else ""
+
+        save_size, rom_size = self.generate_system(
+            "Core/Src/retro-go/gw_roms.c",
+            "Game & Watch",
+            "gw_system",
+            "gw",
+            ["gw"],
+            "SAVE_GW_",
+        )
+        total_save_size += save_size
+        total_rom_size += rom_size
+        build_config += "#define ENABLE_EMULATOR_GW\n" if rom_size > 0 else ""
 
         total_size = total_save_size + total_rom_size
 
