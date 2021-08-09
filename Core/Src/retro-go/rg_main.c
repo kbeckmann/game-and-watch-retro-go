@@ -302,6 +302,15 @@ void retro_loop()
                 odroid_overlay_settings_menu(choices);
                 gui_redraw();
             }
+            else if (last_key == ODROID_INPUT_SELECT) {
+                odroid_dialog_choice_t rtcinfo[] = {
+                    {0, "Clock Settings", "", 1, NULL},
+                    ODROID_DIALOG_CHOICE_LAST
+                };
+                int sel = odroid_overlay_dialog("RTC", rtcinfo, -1);
+                (void) sel;
+                gui_redraw();
+            }
             else if (last_key == ODROID_INPUT_UP) {
                 gui_scroll_list(tab, LINE_UP);
                 repeat++;
