@@ -363,6 +363,7 @@ void osd_blitscreen(bitmap_t *bmp)
     // This takes less than 1ms
     pixel_t *fb = lcd_get_active_buffer();
     blit(bmp, fb);
+    common_ingame_overlay();
     lcd_swap();
 
     PROFILING_END(t_blit);
