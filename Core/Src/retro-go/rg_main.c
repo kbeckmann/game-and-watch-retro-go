@@ -159,6 +159,10 @@ void retro_loop()
     int selected_tab_last = -1;
     uint32_t idle_s;
 
+    // For testing RTC functionality
+    RTC_TimeTypeDef currentTime = {0};
+    RTC_DateTypeDef currentDate = {0};
+
     // Read the initial state as to not trigger on button held down during boot
     odroid_input_read_gamepad(&gui.joystick);
 
@@ -303,8 +307,17 @@ void retro_loop()
                 gui_redraw();
             }
             else if (last_key == ODROID_INPUT_SELECT) {
+                
+                char time_str[14];
+
+                // For testing RTC functionality
+                HAL_RTC_GetTime(&hrtc, &currentTime, RTC_FORMAT_BIN);
+                HAL_RTC_GetDate(&hrtc, &currentDate, RTC_FORMAT_BIN);
+
+                snprintf(time_str, sizeof(time_str), "%02d:%02d:%02d \n", currentTime.Hours, currentTime.Minutes, currentTime.Seconds);
+
                 odroid_dialog_choice_t rtcinfo[] = {
-                    {0, "Clock Settings", "", 1, NULL},
+                    {0, "Current Time", (char *) time_str, 1, NULL},
                     ODROID_DIALOG_CHOICE_LAST
                 };
                 int sel = odroid_overlay_dialog("RTC", rtcinfo, -1);
