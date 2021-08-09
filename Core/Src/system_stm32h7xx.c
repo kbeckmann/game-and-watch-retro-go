@@ -59,6 +59,9 @@
   #define HSI_VALUE    ((uint32_t)64000000) /*!< Value of the Internal oscillator in Hz*/
 #endif /* HSI_VALUE */
 
+#if !defined  (INTFLASH_BANK)
+  #define INTFLASH_BANK 1
+#endif /* INTFLASH_BANK */
 
 /**
   * @}
@@ -164,7 +167,7 @@ void SystemInit (void)
 
   /* Reset HSEON, HSECSSON, CSION, HSI48ON, CSIKERON, PLL1ON, PLL2ON and PLL3ON bits */
   RCC->CR &= 0xEAF6ED7FU;
-  
+
    /* Decreasing the number of wait states because of lower CPU frequency */
   if(FLASH_LATENCY_DEFAULT  < (READ_BIT((FLASH->ACR), FLASH_ACR_LATENCY)))
   {
@@ -264,7 +267,15 @@ void SystemInit (void)
 #ifdef VECT_TAB_SRAM
   SCB->VTOR = D1_AXISRAM_BASE  | VECT_TAB_OFFSET; /* Vector Table Relocation in Internal AXI-RAM */
 #else
+
+#if INTFLASH_BANK == 1
   SCB->VTOR = FLASH_BANK1_BASE | VECT_TAB_OFFSET; /* Vector Table Relocation in Internal FLASH */
+#elif INTFLASH_BANK == 2
+  SCB->VTOR = FLASH_BANK2_BASE | VECT_TAB_OFFSET; /* Vector Table Relocation in Internal FLASH */
+#else
+#error INTFLASH_BANK must be either 1 (default) or 2
+#endif
+
 #endif
 
 #endif /*DUAL_CORE && CORE_CM4*/
