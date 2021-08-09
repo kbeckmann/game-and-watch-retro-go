@@ -306,21 +306,25 @@ void retro_loop()
                 odroid_overlay_settings_menu(choices);
                 gui_redraw();
             }
+            // TIME menu
             else if (last_key == ODROID_INPUT_SELECT) {
                 
                 char time_str[14];
+                char date_str[24];
 
                 // For testing RTC functionality
                 HAL_RTC_GetTime(&hrtc, &currentTime, RTC_FORMAT_BIN);
                 HAL_RTC_GetDate(&hrtc, &currentDate, RTC_FORMAT_BIN);
 
                 snprintf(time_str, sizeof(time_str), "%02d:%02d:%02d \n", currentTime.Hours, currentTime.Minutes, currentTime.Seconds);
+                snprintf(date_str, sizeof(date_str), "%02d.%02d.%04d %d \n", currentDate.Date, currentDate.Month, currentDate.Year, currentDate.WeekDay);
 
                 odroid_dialog_choice_t rtcinfo[] = {
                     {0, "Current Time", (char *) time_str, 1, NULL},
+                    {1, "Current Date", (char *) date_str, 1, NULL},
                     ODROID_DIALOG_CHOICE_LAST
                 };
-                int sel = odroid_overlay_dialog("RTC", rtcinfo, -1);
+                int sel = odroid_overlay_dialog("TIME", rtcinfo, -1);
                 (void) sel;
                 gui_redraw();
             }
