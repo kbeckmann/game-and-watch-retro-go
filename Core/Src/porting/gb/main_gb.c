@@ -224,6 +224,7 @@ static inline void screen_blit_v3to5(void) {
 #ifdef PROFILING_ENABLED
     printf("Blit: %d us\n", (1000000 * PROFILING_DIFF(t_blit)) / t_blit_t0.SecondFraction);
 #endif
+    common_ingame_overlay();
 
     lcd_swap();
 }

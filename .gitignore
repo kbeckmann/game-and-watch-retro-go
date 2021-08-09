@@ -29,3 +29,6 @@ save_states
 venv
 
 **/.DS_Store
+
+**/*.pyc
+

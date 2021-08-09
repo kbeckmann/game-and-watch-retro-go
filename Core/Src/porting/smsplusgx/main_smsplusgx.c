@@ -239,7 +239,7 @@ static void sms_draw_frame()
 
   uint32_t currentTime = HAL_GetTick();
   uint32_t delta = currentTime - lastFPSTime;
-  uint16_t* curr_framebuffer = NULL;
+  pixel_t* curr_framebuffer = NULL;
 
   frames++;
 
@@ -258,13 +258,11 @@ static void sms_draw_frame()
                           ((0b0000000000011111 & p));
   }
 
-  curr_framebuffer = (active_framebuffer == 0 ? framebuffer1 : framebuffer2);
-  active_framebuffer ^= 1; // swap framebuffers
-
+  curr_framebuffer = lcd_get_active_buffer();
   if (sms.console == CONSOLE_GG)     blit_gg(&bitmap, curr_framebuffer);
   else                               blit_sms(&bitmap, curr_framebuffer);
-
-  HAL_LTDC_Reload(&hltdc, LTDC_RELOAD_VERTICAL_BLANKING);
+  common_ingame_overlay();
+  lcd_swap();
 }
 
 static void sms_update_keys( odroid_gamepad_state_t* joystick )
