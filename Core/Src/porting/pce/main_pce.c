@@ -21,9 +21,8 @@
 //#define XBUF_HEIGHT	(242 + 32)
 //#define GW_LCD_WIDTH  (320)
 //#define GW_LCD_HEIGHT (240)
-//#define AUDIO_SAMPLE_RATE   (22050)
 #define FB_INTERNAL_OFFSET (((XBUF_HEIGHT - current_height) / 2 + 16) * XBUF_WIDTH + (XBUF_WIDTH - current_width) / 2)
-#define AUDIO_BUFFER_LENGTH_PCE  (AUDIO_SAMPLE_RATE / 60)
+#define AUDIO_BUFFER_LENGTH_PCE  (PCE_SAMPLE_RATE / 60)
 #define JOY_A       0x01
 #define JOY_B       0x02
 #define JOY_SELECT  0x04
@@ -407,8 +406,7 @@ void pce_osd_gfx_blit(bool drawFrame) {
 
 void pce_pcm_submit() {
     uint8_t volume = odroid_audio_volume_get();
-    //int32_t factor = volume_tbl[volume]  ;
-    int32_t factor = volume_tbl[volume] / 2 ;
+    int32_t factor = volume_tbl[volume] / 2; // Divide by 2 to prevent overflow in stereo mixing
     pce_snd_update(audioBuffer_pce, AUDIO_BUFFER_LENGTH_PCE );
     size_t offset = (dma_state == DMA_TRANSFER_STATE_HF) ? 0 : AUDIO_BUFFER_LENGTH_PCE;
     if (audio_mute || volume == ODROID_AUDIO_VOLUME_MIN) {
@@ -417,8 +415,8 @@ void pce_pcm_submit() {
         }
     } else {
         for (int i = 0; i < AUDIO_BUFFER_LENGTH_PCE; i++) {
+            /* mix left & right */
             int32_t sample = (audioBuffer_pce[i*2] + audioBuffer_pce[i*2+1]);
-            //int32_t sample = (audioBuffer_pce[i*2] );
             audiobuffer_dma[offset + i] = (sample * factor) >> 8;
         }
     }
@@ -433,7 +431,7 @@ int app_main_pce(uint8_t load_state, uint8_t start_paused) {
         common_emu_state.pause_after_frames = 0;
     }
 
-    odroid_system_init(APP_ID, AUDIO_SAMPLE_RATE);
+    odroid_system_init(APP_ID, PCE_SAMPLE_RATE);
     odroid_system_emu_init(&LoadState, &SaveState, &netplay_callback);
     pce_log[0]=0;
 
