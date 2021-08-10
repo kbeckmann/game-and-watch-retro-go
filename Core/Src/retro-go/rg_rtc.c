@@ -1,6 +1,8 @@
 #include "main.h"
 #include "rg_rtc.h"
 #include "stm32h7xx_hal.h"
+#include <time.h>
+
 
 RTC_TimeTypeDef GW_currentTime = {0};
 RTC_DateTypeDef GW_currentDate = {0};
@@ -262,6 +264,29 @@ bool day_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, 
     sprintf(option->value, "%d", day);
     return event == ODROID_DIALOG_ENTER;
     return false;
+
+}
+
+time_t GW_GetUnixTime(void) {
+    // Function to return Unix timestamp since 1st Jan 1970
+    
+    time_t timestamp;
+    struct tm timeStruct;
+
+    HAL_RTC_GetTime(&hrtc, &GW_currentTime, RTC_FORMAT_BIN);
+    HAL_RTC_GetDate(&hrtc, &GW_currentDate, RTC_FORMAT_BIN);
+
+    timeStruct.tm_year = GW_currentDate.Year + 100;  // tm_year base is 1900, RTC can only save 0 - 99, so bump to 2000.
+    timeStruct.tm_mday = GW_currentDate.Date;
+    timeStruct.tm_mon  = GW_currentDate.Month - 1;
+
+    timeStruct.tm_hour = GW_currentTime.Hours;
+    timeStruct.tm_min  = GW_currentTime.Minutes;
+    timeStruct.tm_sec  = GW_currentTime.Seconds;
+
+    timestamp = mktime(&timeStruct);
+
+    return timestamp;
 
 }
 

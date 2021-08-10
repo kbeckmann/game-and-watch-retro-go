@@ -27,6 +27,8 @@ uint8_t GW_GetCurrentDay(void);
 uint8_t GW_GetCurrentWeekday(void);
 uint8_t GW_GetCurrentYear(void);
 
+time_t GW_GetUnixTime(void);
+
 // Setters
 uint8_t GW_SetCurrentHour(const uint8_t hour);
 uint8_t GW_SetCurrentMinute(const uint8_t minute);
