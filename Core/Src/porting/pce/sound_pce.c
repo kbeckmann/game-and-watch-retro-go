@@ -3,6 +3,13 @@
 #include "sound_pce.h"
 #include "pce.h"
 
+static const uint32_t vol_tbl[32] = {
+    100  , 451  , 508  , 573   , 646   , 728   , 821   , 925   ,
+    1043 , 1175 , 1325 , 1493  , 1683  , 1898  , 2139  , 2411  ,
+    2718 , 3064 , 3454 , 3893  , 4388  , 4947  , 5576  , 6285  ,
+    7085 , 7986 , 9002 , 10148 , 11439 , 12894 , 14535 , 16384 
+};
+
 typedef int16_t sample_t;
 static uint32_t noise_rand[PSG_CHANNELS];
 static int32_t noise_level[PSG_CHANNELS];
@@ -24,8 +31,11 @@ psg_update_chan(sample_t *buf, int ch, size_t dwSize)
     /*
     * This gives us a volume level of (0...15).
     */
-    int lvol = (((chan->balance >> 4) * 1.1) * (chan->control & 0x1F)) / 32;
-    int rvol = (((chan->balance & 0xF) * 1.1) * (chan->control & 0x1F)) / 32;
+    int lvol = (((chan->balance >>  4) * 1.1) * (chan->control & 0x1E)) / 32;
+    int rvol = (((chan->balance & 0xF) * 1.1) * (chan->control & 0x1E)) / 32;
+
+    lvol = vol_tbl[lvol & 0x1F];
+    rvol = vol_tbl[rvol & 0x1F];
 
     if (!host.sound.stereo) {
         lvol = (lvol + rvol) / 2;
@@ -62,10 +72,10 @@ psg_update_chan(sample_t *buf, int ch, size_t dwSize)
             }
 
             for (int i = 0; i < repeat; i++) {
-                *buf++ = (sample * lvol);
+                *buf++ = (sample * lvol) >> 8;
 
                 if (host.sound.stereo) {
-                    *buf++ = (sample * rvol);
+                    *buf++ = (sample * rvol) >> 8;
                 }
             }
         }
@@ -97,10 +107,10 @@ psg_update_chan(sample_t *buf, int ch, size_t dwSize)
                 chan->noise_accum -= host.sound.freq * Tp;
             }
 
-            *buf++ = (noise_level[ch] * lvol);
+            *buf++ = (noise_level[ch] * lvol) >> 8;
 
             if (host.sound.stereo) {
-                *buf++ = (noise_level[ch] * rvol);
+                *buf++ = (noise_level[ch] * rvol) >> 8;
             }
         }
     }
@@ -143,10 +153,10 @@ psg_update_chan(sample_t *buf, int ch, size_t dwSize)
             if ((sample = (chan->wave_data[chan->wave_index] - 16)) >= 0)
                 sample++;
 
-            *buf++ = (sample * lvol);
+            *buf++ = (sample * lvol) >> 8;
 
             if (host.sound.stereo) {
-                *buf++ = (sample * rvol);
+                *buf++ = (sample * rvol) >> 8;
             }
 
             chan->wave_accum += fixed_inc;
