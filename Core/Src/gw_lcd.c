@@ -175,6 +175,11 @@ void HAL_LTDC_ReloadEventCallback (LTDC_HandleTypeDef *hltdc) {
   }
 }
 
+uint32_t is_lcd_swap_pending()
+{
+  return (uint32_t)(hltdc.Instance->SRCR) & ( LTDC_SRCR_VBR | LTDC_SRCR_IMR);
+}
+
 void lcd_swap(void)
 {
   HAL_LTDC_Reload(&hltdc, LTDC_RELOAD_VERTICAL_BLANKING);
@@ -220,3 +225,4 @@ void lcd_wait_for_vblank(void)
     __asm("nop");
   }
 }
+

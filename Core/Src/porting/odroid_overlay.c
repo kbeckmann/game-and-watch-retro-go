@@ -553,25 +553,25 @@ bool speedup_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t eve
 
     switch(app->speedupEnabled){
         case SPEEDUP_0_5x:
-            strcpy(option->value, "0.5x");
+            strcpy(option->value, "0.5x ");
             break;
         case SPEEDUP_0_75x:
             strcpy(option->value, "0.75x");
             break;
         case SPEEDUP_1x:
-            strcpy(option->value, "1x");
+            strcpy(option->value, "1x   ");
             break;
         case SPEEDUP_1_25x:
             strcpy(option->value, "1.25x");
             break;
         case SPEEDUP_1_5x:
-            strcpy(option->value, "1.5x");
+            strcpy(option->value, "1.5x ");
             break;
         case SPEEDUP_2x:
-            strcpy(option->value, "2x");
+            strcpy(option->value, "2x   ");
             break;
         case SPEEDUP_3x:
-            strcpy(option->value, "3x");
+            strcpy(option->value, "3x   ");
             break;
     }
 

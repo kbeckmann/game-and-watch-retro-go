@@ -131,6 +131,19 @@ retro-go-stm32/huexpress-go/components/huexpress/engine/hard_pce.c \
 Core/Src/porting/pce/sound_pce.c \
 Core/Src/porting/pce/main_pce.c
 
+GW_C_SOURCES = \
+LCD-Game-Emulator/src/cpus/sm500op.c \
+LCD-Game-Emulator/src/cpus/sm510op.c \
+LCD-Game-Emulator/src/cpus/sm500core.c \
+LCD-Game-Emulator/src/cpus/sm5acore.c \
+LCD-Game-Emulator/src/cpus/sm510core.c \
+LCD-Game-Emulator/src/cpus/sm511core.c \
+LCD-Game-Emulator/src/cpus/sm510base.c \
+LCD-Game-Emulator/src/gw_sys/gw_romloader.c \
+LCD-Game-Emulator/src/gw_sys/gw_graphic.c \
+LCD-Game-Emulator/src/gw_sys/gw_system.c \
+Core/Src/porting/gw/main_gw.c
+
 C_INCLUDES +=  \
 -ICore/Inc \
 -ICore/Src/porting/lib \
@@ -143,7 +156,10 @@ C_INCLUDES +=  \
 -Iretro-go-stm32/smsplusgx-go/components/smsplus \
 -Iretro-go-stm32/smsplusgx-go/components/smsplus/cpu \
 -Iretro-go-stm32/smsplusgx-go/components/smsplus/sound \
--Iretro-go-stm32/huexpress-go/components/huexpress/engine
+-Iretro-go-stm32/huexpress-go/components/huexpress/engine \
+-ILCD-Game-Emulator/src \
+-ILCD-Game-Emulator/src/cpus \
+-ILCD-Game-Emulator/src/gw_sys
 
 C_DEFS += \
 -DIS_LITTLE_ENDIAN \
@@ -157,7 +173,7 @@ include Makefile.common
 
 $(BUILD_DIR)/$(TARGET)_extflash.bin: $(BUILD_DIR)/$(TARGET).elf | $(BUILD_DIR)
 	$(V)$(ECHO) [ BIN ] $(notdir $@)
-	$(V)$(BIN) -j ._itcram_hot -j ._ram_exec -j ._extflash -j .overlay_nes -j .overlay_gb -j .overlay_sms -j .overlay_col -j .overlay_pce $< $(BUILD_DIR)/$(TARGET)_extflash.bin
+	$(V)$(BIN) -j ._itcram_hot -j ._ram_exec -j ._extflash -j .overlay_nes -j .overlay_gb -j .overlay_sms -j .overlay_col -j .overlay_pce -j .overlay_gw $< $(BUILD_DIR)/$(TARGET)_extflash.bin
 
 $(BUILD_DIR)/$(TARGET)_intflash.bin: $(BUILD_DIR)/$(TARGET).elf | $(BUILD_DIR)
 	$(V)$(ECHO) [ BIN ] $(notdir $@)
