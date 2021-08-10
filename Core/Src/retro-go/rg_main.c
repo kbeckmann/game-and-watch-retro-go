@@ -320,6 +320,22 @@ void retro_loop()
                     ODROID_DIALOG_CHOICE_LAST
                 };
                 int sel = odroid_overlay_dialog("TIME", rtcinfo, -1);
+
+                if (sel == 0) {
+                    static char hour_value[8];
+                    static char minute_value[8];
+                    static char second_value[8];
+
+                    // Time setup
+                    odroid_dialog_choice_t timeoptions[32] = {
+                        {0, "Hour", hour_value, 1, &hour_update_cb},
+                        {1, "Minute", minute_value, 1, &minute_update_cb},
+                        {2, "Second", second_value, 1, &second_update_cb},
+                        ODROID_DIALOG_CHOICE_LAST
+                    };
+                    sel = odroid_overlay_dialog("Time setup", timeoptions, 0);
+                }
+
                 (void) sel;
                 gui_redraw();
             }

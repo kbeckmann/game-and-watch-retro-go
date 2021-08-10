@@ -65,24 +65,168 @@ uint8_t GW_GetCurrentYear(void) {
 
     return GW_currentDate.Year;
 }
-/*
+
 // Setters
-uint8_t GW_SetCurrentHour(const uint8_t hour) {}
-uint8_t GW_SetCurrentMinute(const uint8_t minute) {}
+uint8_t GW_SetCurrentHour(const uint8_t hour) {
 
-uint8_t GW_SetCurrentMonth(const uint8_t month) {}
-uint8_t GW_SetCurrentDay(const uint8_t day) {}
+    // Update time before we can set it
+    HAL_RTC_GetTime(&hrtc, &GW_currentTime, RTC_FORMAT_BIN);
+    HAL_RTC_GetDate(&hrtc, &GW_currentDate, RTC_FORMAT_BIN);
 
-uint8_t GW_SetCurrentWeekday(const uint8_t weekday) {}
-uint8_t GW_SetCurrentYear(const uint8_t year) {}
+    // Set time
+    GW_currentTime.Hours = hour;
+    if (HAL_RTC_SetTime(&hrtc, &GW_currentTime, RTC_FORMAT_BIN) != HAL_OK)
+    {
+        Error_Handler();
+    }
+}
+uint8_t GW_SetCurrentMinute(const uint8_t minute) {
+
+    // Update time before we can set it
+    HAL_RTC_GetTime(&hrtc, &GW_currentTime, RTC_FORMAT_BIN);
+    HAL_RTC_GetDate(&hrtc, &GW_currentDate, RTC_FORMAT_BIN);
+
+    // Set time
+    GW_currentTime.Minutes = minute;
+    if (HAL_RTC_SetTime(&hrtc, &GW_currentTime, RTC_FORMAT_BIN) != HAL_OK)
+    {
+        Error_Handler();
+    }
+}
+
+uint8_t GW_SetCurrentSecond(const uint8_t second) {
+
+    // Update time before we can set it
+    HAL_RTC_GetTime(&hrtc, &GW_currentTime, RTC_FORMAT_BIN);
+    HAL_RTC_GetDate(&hrtc, &GW_currentDate, RTC_FORMAT_BIN);
+
+    // Set time
+    GW_currentTime.Seconds = second;
+    if (HAL_RTC_SetTime(&hrtc, &GW_currentTime, RTC_FORMAT_BIN) != HAL_OK)
+    {
+        Error_Handler();
+    }
+}
+
+uint8_t GW_SetCurrentMonth(const uint8_t month) {
+
+    // Update time before we can set it
+    HAL_RTC_GetTime(&hrtc, &GW_currentTime, RTC_FORMAT_BIN);
+    HAL_RTC_GetDate(&hrtc, &GW_currentDate, RTC_FORMAT_BIN);
+
+    // Set date
+    GW_currentDate.Month = month;
+
+    if (HAL_RTC_SetDate(&hrtc, &GW_currentDate, RTC_FORMAT_BIN) != HAL_OK)
+    {
+        Error_Handler();
+    }
+}
+uint8_t GW_SetCurrentDay(const uint8_t day) {
+
+    // Update time before we can set it
+    HAL_RTC_GetTime(&hrtc, &GW_currentTime, RTC_FORMAT_BIN);
+    HAL_RTC_GetDate(&hrtc, &GW_currentDate, RTC_FORMAT_BIN);
+
+    // Set date
+    GW_currentDate.Date = day;
+
+    if (HAL_RTC_SetDate(&hrtc, &GW_currentDate, RTC_FORMAT_BIN) != HAL_OK)
+    {
+        Error_Handler();
+    }
+}
+
+uint8_t GW_SetCurrentWeekday(const uint8_t weekday) {
+
+    // Update time before we can set it
+    HAL_RTC_GetTime(&hrtc, &GW_currentTime, RTC_FORMAT_BIN);
+    HAL_RTC_GetDate(&hrtc, &GW_currentDate, RTC_FORMAT_BIN);
+
+    // Set date
+    GW_currentDate.WeekDay = weekday;
+
+    if (HAL_RTC_SetDate(&hrtc, &GW_currentDate, RTC_FORMAT_BIN) != HAL_OK)
+    {
+        Error_Handler();
+    }
+}
+uint8_t GW_SetCurrentYear(const uint8_t year) {
+
+    // Update time before we can set it
+    HAL_RTC_GetTime(&hrtc, &GW_currentTime, RTC_FORMAT_BIN);
+    HAL_RTC_GetDate(&hrtc, &GW_currentDate, RTC_FORMAT_BIN);
+
+    // Set date
+    GW_currentDate.Year = year;
+
+    if (HAL_RTC_SetDate(&hrtc, &GW_currentDate, RTC_FORMAT_BIN) != HAL_OK)
+    {
+        Error_Handler();
+    }
+}
 
 // Callbacks for UI purposes
-bool hour_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat) {}
-bool minute_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat) {}
+bool hour_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat) {
 
-bool month_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat) {}
-bool day_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat) {}
+    int8_t hour = GW_GetCurrentHour();
+    int8_t min = 0;
+    int8_t max = 23;
 
-bool weekday_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat) {}
-bool year_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat) {}
-*/
+    if (event == ODROID_DIALOG_PREV && hour > min) {
+        GW_SetCurrentHour(--hour);
+    }
+
+    if (event == ODROID_DIALOG_NEXT && hour < max) {
+        GW_SetCurrentHour(++hour);
+    }
+
+    sprintf(option->value, "%d", hour);
+    return event == ODROID_DIALOG_ENTER;
+    return false;
+
+}
+bool minute_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat) { 
+    
+    int8_t minute = GW_GetCurrentMinute();
+    int8_t min = 0;
+    int8_t max = 59;
+
+    if (event == ODROID_DIALOG_PREV && minute > min) {
+        GW_SetCurrentMinute(--minute);
+    }
+
+    if (event == ODROID_DIALOG_NEXT && minute < max) {
+        GW_SetCurrentMinute(++minute);
+    }
+
+    sprintf(option->value, "%d", minute);
+    return event == ODROID_DIALOG_ENTER;
+    return false;
+
+}
+bool second_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat) { 
+    
+    int8_t second = GW_GetCurrentSecond();
+    int8_t min = 0;
+    int8_t max = 59;
+
+    if (event == ODROID_DIALOG_PREV && second > min) {
+        GW_SetCurrentSecond(--second);
+    }
+
+    if (event == ODROID_DIALOG_NEXT && second < max) {
+        GW_SetCurrentSecond(++second);
+    }
+
+    sprintf(option->value, "%d", second);
+    return event == ODROID_DIALOG_ENTER;
+    return false;
+
+}
+
+bool month_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat) { return false; }
+bool day_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat) { return false; }
+
+bool weekday_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat) { return false; }
+bool year_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat) { return false; }
