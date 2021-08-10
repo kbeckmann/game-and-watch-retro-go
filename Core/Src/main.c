@@ -933,8 +933,8 @@ static void MX_RTC_Init(void)
   */
   hrtc.Instance = RTC;
   hrtc.Init.HourFormat = RTC_HOURFORMAT_24;
-  hrtc.Init.AsynchPrediv = 127; // Recommended value from application note for LSI 32 kHz, the higher the value the better the accuracy and power consumption
-  hrtc.Init.SynchPrediv = 249; // Recommended value from application note for LSI 32 kHz
+  hrtc.Init.AsynchPrediv = 127; // Recommended value from application note for LSE, the higher the value the better the accuracy and power consumption
+  hrtc.Init.SynchPrediv = 255; // Recommended value from application note for LSE
   hrtc.Init.OutPut = RTC_OUTPUT_DISABLE;
   hrtc.Init.OutPutPolarity = RTC_OUTPUT_POLARITY_HIGH;
   hrtc.Init.OutPutType = RTC_OUTPUT_TYPE_OPENDRAIN;
