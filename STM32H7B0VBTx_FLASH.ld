@@ -281,11 +281,15 @@ SECTIONS
     build/pce/*.o (.bss .bss*)
     . = ALIGN(4);
     build/pce/*.o (COMMON)
+    . = ALIGN(4);
+    _PCE_ROM_UNPACK_BUFFER = .;
+    _OVERLAY_PCE_BSS_END = .;
     __ram_emu_pce_end__ = .;
     _OVERLAY_PCE_BSS_END = .;
     ASSERT(ABSOLUTE(_OVERLAY_PCE_BSS_END) < __RAM_EMU_END__, "Error: PCE BSS overflow");
   }
   _OVERLAY_PCE_BSS_SIZE = SIZEOF(.overlay_pce_bss);
+  _PCE_ROM_UNPACK_BUFFER_SIZE = __RAM_EMU_START__ + __RAM_EMU_LENGTH__ - _PCE_ROM_UNPACK_BUFFER;
 
   .overlay_gw __RAM_EMU_START__ : {
     . = ALIGN(4);
