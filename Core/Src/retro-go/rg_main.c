@@ -13,6 +13,7 @@
 #include "main.h"
 #include "gw_buttons.h"
 #include "gw_flash.h"
+#include "rg_rtc.h"
 
 #if 0
 #define KEY_SELECTED_TAB  "SelectedTab"
@@ -159,9 +160,7 @@ void retro_loop()
     int selected_tab_last = -1;
     uint32_t idle_s;
 
-    // For testing RTC functionality
-    RTC_TimeTypeDef currentTime = {0};
-    RTC_DateTypeDef currentDate = {0};
+
 
     // Read the initial state as to not trigger on button held down during boot
     odroid_input_read_gamepad(&gui.joystick);
@@ -312,12 +311,8 @@ void retro_loop()
                 char time_str[14];
                 char date_str[24];
 
-                // For testing RTC functionality
-                HAL_RTC_GetTime(&hrtc, &currentTime, RTC_FORMAT_BIN);
-                HAL_RTC_GetDate(&hrtc, &currentDate, RTC_FORMAT_BIN);
-
-                snprintf(time_str, sizeof(time_str), "%02d:%02d:%02d \n", currentTime.Hours, currentTime.Minutes, currentTime.Seconds);
-                snprintf(date_str, sizeof(date_str), "%02d.%02d.%04d %d \n", currentDate.Date, currentDate.Month, currentDate.Year, currentDate.WeekDay);
+                snprintf(time_str, sizeof(time_str), "%02d:%02d:%02d \n", GW_GetCurrentHour(), GW_GetCurrentMinute(), GW_GetCurrentSecond());
+                snprintf(date_str, sizeof(date_str), "%02d.%02d.%04d %d \n", GW_GetCurrentDay(), GW_GetCurrentMonth(), GW_GetCurrentYear(), GW_GetCurrentWeekday());
 
                 odroid_dialog_choice_t rtcinfo[] = {
                     {0, "Current Time", (char *) time_str, 1, NULL},
