@@ -311,15 +311,12 @@ void retro_loop()
                 char time_str[14];
                 char date_str[24];
 
-                snprintf(time_str, sizeof(time_str), "%02d:%02d:%02d \n", GW_GetCurrentHour(), GW_GetCurrentMinute(), GW_GetCurrentSecond());
-                snprintf(date_str, sizeof(date_str), "%02d.%02d.%02d %d \n", GW_GetCurrentDay(), GW_GetCurrentMonth(), GW_GetCurrentYear(), GW_GetCurrentWeekday());
-
                 odroid_dialog_choice_t rtcinfo[] = {
-                    {0, "Current Time", (char *) time_str, 1, NULL},
-                    {1, "Current Date", (char *) date_str, 1, NULL},
+                    {0, "Time", time_str, 1, &time_display_cb},
+                    {1, "Date", date_str, 1, &date_display_cb},
                     ODROID_DIALOG_CHOICE_LAST
                 };
-                int sel = odroid_overlay_dialog("TIME", rtcinfo, -1);
+                int sel = odroid_overlay_dialog("TIME", rtcinfo, 0);
 
                 if (sel == 0) {
                     static char hour_value[8];

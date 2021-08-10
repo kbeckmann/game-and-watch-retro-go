@@ -303,3 +303,21 @@ bool year_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event,
     return false;
     
 }
+
+bool time_display_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat) {
+    HAL_RTC_GetTime(&hrtc, &GW_currentTime, RTC_FORMAT_BIN);
+    HAL_RTC_GetDate(&hrtc, &GW_currentDate, RTC_FORMAT_BIN);
+
+    sprintf(option->value, "%02d:%02d:%02d", GW_currentTime.Hours, GW_currentTime.Minutes, GW_currentTime.Seconds);
+    return event == ODROID_DIALOG_ENTER;
+    return false;    
+}
+bool date_display_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat) {
+
+    HAL_RTC_GetTime(&hrtc, &GW_currentTime, RTC_FORMAT_BIN);
+    HAL_RTC_GetDate(&hrtc, &GW_currentDate, RTC_FORMAT_BIN);
+    
+    sprintf(option->value, "%02d.%02d.%02d %s", GW_currentDate.Date, GW_currentDate.Month, GW_currentDate.Year, (char *) GW_RTC_Weekday[GW_currentDate.WeekDay-1]);
+    return event == ODROID_DIALOG_ENTER;
+    return false;
+}
