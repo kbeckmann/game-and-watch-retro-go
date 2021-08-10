@@ -230,7 +230,7 @@ while true; do
             exit 5
         fi
     else
-        printf '% -50s\r' "State: $(state_to_string $STATE_REG)"
+        echo "State: $(state_to_string $STATE_REG)"
     fi
     sleep 1
 done
