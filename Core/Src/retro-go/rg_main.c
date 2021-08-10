@@ -312,7 +312,7 @@ void retro_loop()
                 char date_str[24];
 
                 snprintf(time_str, sizeof(time_str), "%02d:%02d:%02d \n", GW_GetCurrentHour(), GW_GetCurrentMinute(), GW_GetCurrentSecond());
-                snprintf(date_str, sizeof(date_str), "%02d.%02d.%04d %d \n", GW_GetCurrentDay(), GW_GetCurrentMonth(), GW_GetCurrentYear(), GW_GetCurrentWeekday());
+                snprintf(date_str, sizeof(date_str), "%02d.%02d.%02d %d \n", GW_GetCurrentDay(), GW_GetCurrentMonth(), GW_GetCurrentYear(), GW_GetCurrentWeekday());
 
                 odroid_dialog_choice_t rtcinfo[] = {
                     {0, "Current Time", (char *) time_str, 1, NULL},
@@ -334,6 +334,23 @@ void retro_loop()
                         ODROID_DIALOG_CHOICE_LAST
                     };
                     sel = odroid_overlay_dialog("Time setup", timeoptions, 0);
+                }
+                else if (sel == 1) {
+
+                    static char day_value[8];
+                    static char month_value[8];
+                    static char year_value[8];
+                    static char weekday_value[8];
+
+                    // Date setup
+                    odroid_dialog_choice_t dateoptions[32] = {
+                        {0, "Day", day_value, 1, &day_update_cb},
+                        {1, "Month", month_value, 1, &month_update_cb},
+                        {2, "Year", year_value, 1, &year_update_cb},
+                        {3, "Weekday", weekday_value, 1, &weekday_update_cb},
+                        ODROID_DIALOG_CHOICE_LAST
+                    };
+                    sel = odroid_overlay_dialog("Date setup", dateoptions, 0);
                 }
 
                 (void) sel;

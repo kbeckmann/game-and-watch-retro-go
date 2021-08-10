@@ -12,6 +12,7 @@ extern "C" {
 /* Exported constants --------------------------------------------------------*/
 extern RTC_TimeTypeDef GW_currentTime;
 extern RTC_DateTypeDef GW_currentDate;
+extern const char * GW_RTC_Weekday[];
 
 /* Exported functions prototypes ---------------------------------------------*/
 

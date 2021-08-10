@@ -4,6 +4,7 @@
 
 RTC_TimeTypeDef GW_currentTime = {0};
 RTC_DateTypeDef GW_currentDate = {0};
+const char * GW_RTC_Weekday[] = {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
 
 // Getters
 uint8_t GW_GetCurrentHour(void) {
@@ -225,8 +226,80 @@ bool second_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t even
 
 }
 
-bool month_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat) { return false; }
-bool day_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat) { return false; }
+bool month_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat) { 
+        
+    int8_t month = GW_GetCurrentMonth();
+    int8_t min = 1;
+    int8_t max = 12;
 
-bool weekday_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat) { return false; }
-bool year_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat) { return false; }
+    if (event == ODROID_DIALOG_PREV && month > min) {
+        GW_SetCurrentMonth(--month);
+    }
+
+    if (event == ODROID_DIALOG_NEXT && month < max) {
+        GW_SetCurrentMonth(++month);
+    }
+
+    sprintf(option->value, "%d", month);
+    return event == ODROID_DIALOG_ENTER;
+    return false;
+    
+}
+bool day_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat) { 
+        
+    int8_t day = GW_GetCurrentDay();
+    int8_t min = 1;
+    int8_t max = 31;
+
+    if (event == ODROID_DIALOG_PREV && day > min) {
+        GW_SetCurrentDay(--day);
+    }
+
+    if (event == ODROID_DIALOG_NEXT && day < max) {
+        GW_SetCurrentDay(++day);
+    }
+
+    sprintf(option->value, "%d", day);
+    return event == ODROID_DIALOG_ENTER;
+    return false;
+
+}
+
+bool weekday_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat) { 
+                
+    int8_t weekday = GW_GetCurrentWeekday();
+    int8_t min = 1;
+    int8_t max = 7;
+
+    if (event == ODROID_DIALOG_PREV && weekday > min) {
+        GW_SetCurrentWeekday(--weekday);
+    }
+
+    if (event == ODROID_DIALOG_NEXT && weekday < max) {
+        GW_SetCurrentWeekday(++weekday);
+    }
+
+    sprintf(option->value, "%s", (char *) GW_RTC_Weekday[weekday-1]);
+    return event == ODROID_DIALOG_ENTER;
+    return false;
+    
+}
+bool year_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat) { 
+            
+    int8_t year = GW_GetCurrentYear();
+    int8_t min = 0;
+    int8_t max = 99;
+
+    if (event == ODROID_DIALOG_PREV && year > min) {
+        GW_SetCurrentYear(--year);
+    }
+
+    if (event == ODROID_DIALOG_NEXT && year < max) {
+        GW_SetCurrentYear(++year);
+    }
+
+    sprintf(option->value, "%d", year);
+    return event == ODROID_DIALOG_ENTER;
+    return false;
+    
+}
