@@ -24,10 +24,10 @@ const rom_system_t *systems[] = {
     &gb_system,
     &sms_system,
     &gg_system,
+    &col_system,
+    &sg1000_system,
     &pce_system,
     &gw_system,
-    &col_system,
-    &sg1000_system
 };
 
 const rom_manager_t rom_mgr = {

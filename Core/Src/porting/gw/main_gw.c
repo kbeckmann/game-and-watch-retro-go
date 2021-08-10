@@ -216,7 +216,6 @@ int app_main_gw(uint8_t load_state)
     printf("G&W reset\n");
 
     /*** Main emulator loop */
-    unsigned int power_pressed = 0;
     printf("Main emulator loop start\n");
 
     /* check if we to have to load state */
@@ -233,44 +232,39 @@ int app_main_gw(uint8_t load_state)
         wdog_refresh();
 
         odroid_input_read_gamepad(&joystick);
+        odroid_dialog_choice_t options[] = {
+            ODROID_DIALOG_CHOICE_LAST
+        };
+        common_emu_input_loop(&joystick, options);
 
-        if (joystick.values[ODROID_INPUT_VOLUME])
-        {
-
-            // TODO: Sync framebuffers in a nicer way
-            lcd_sync();
-
-            odroid_dialog_choice_t options[] = {
-                ODROID_DIALOG_CHOICE_LAST};
-            odroid_overlay_game_menu(options);
-        }
-
-        if (power_pressed != joystick.values[ODROID_INPUT_POWER])
-        {
-            printf("Power toggle %d=>%d\n", power_pressed, !power_pressed);
-            power_pressed = joystick.values[ODROID_INPUT_POWER];
-            if (power_pressed)
-            {
-                printf("Power PRESSED %d\n", power_pressed);
-                HAL_SAI_DMAStop(&hsai_BlockA1);
-                GW_EnterDeepSleep();
-            }
-        }
+        bool drawFrame = common_emu_frame_loop();
 
         /* Emulate and Blit */
         // Call the emulator function with number of clock cycles
         // to execute on the emulated device
         // multiply the number of cycles to emulate by speedup factor
-        gw_system_run(GW_SYSTEM_CYCLES * (1 + app->speedupEnabled));
+        uint32_t cycles = GW_SYSTEM_CYCLES;
+        switch (app->speedupEnabled) {
+            case SPEEDUP_0_5x:  cycles = GW_SYSTEM_CYCLES * 1 / 2; break;
+            case SPEEDUP_0_75x: cycles = GW_SYSTEM_CYCLES * 3 / 4; break;
+            case SPEEDUP_1x:    cycles = GW_SYSTEM_CYCLES * 1;     break;
+            case SPEEDUP_1_25x: cycles = GW_SYSTEM_CYCLES * 5 / 4; break;
+            case SPEEDUP_1_5x:  cycles = GW_SYSTEM_CYCLES * 3 / 2; break;
+            case SPEEDUP_2x:    cycles = GW_SYSTEM_CYCLES * 2;     break;
+            case SPEEDUP_3x:    cycles = GW_SYSTEM_CYCLES * 3;     break;
+        }
+
+        gw_system_run(cycles);
 
         /* get how many cycles have been spent in the emulator */
         proc_cycles = get_dwt_cycles();
 
         /* update the screen only if there is no pending frame to render */
-        if (!is_lcd_swap_pending())
+        if (!is_lcd_swap_pending() && drawFrame)
         {
             gw_system_blit(lcd_get_active_buffer());
             gw_debug_bar();
+            common_ingame_overlay();
             lcd_swap();
 
             /* get how many cycles have been spent in graphics rendering */
@@ -279,17 +273,24 @@ int app_main_gw(uint8_t load_state)
         /****************************************************************************/
 
         /* copy audio samples for DMA */
-        gw_sound_submit();
+        if (drawFrame) {
+            gw_sound_submit();
+        }
 
         /* get how many cycles have been spent to process everything */
         end_cycles = get_dwt_cycles();
 
         static dma_transfer_state_t last_dma_state = DMA_TRANSFER_STATE_HF;
-        while (dma_state == last_dma_state)
+        if(!common_emu_state.skip_frames)
         {
-            __NOP();
+            for(uint8_t p = 0; p < common_emu_state.pause_frames + 1; p++) {
+                static dma_transfer_state_t last_dma_state = DMA_TRANSFER_STATE_HF;
+                while (dma_state == last_dma_state) {
+                    cpumon_sleep();
+                }
+                last_dma_state = dma_state;
+            }
         }
-        last_dma_state = dma_state;
 
         /* get how cycles have been spent inside this loop */
         loop_cycles = get_dwt_cycles();
