@@ -94,7 +94,7 @@ python3 -m pip install -r requirements.txt
 # Build and program external and internal flash.
 # Notes:
 #     * If you are using a modified unit with a larger external flash,
-#       set the EXTFLASH_SIZE_MB to its size in MB (16MB used in the example):
+#       set the EXTFLASH_SIZE_MB to its size in megabytes (MB) (16MB used in the example):
 #           make -j8 EXTFLASH_SIZE_MB=16 flash
 #     * If you'd like to apply more advanced experimental ROM compression, add the
 #       field COMPRESS=zopfli to the make command.
@@ -182,6 +182,33 @@ The Nintendo® Game & Watch™ comes with a 1MB external flash. This can be upgr
 The flash operates at 1.8V so make sure the one you change to also matches this.
 
 The recommended flash to upgrade to is MX25U12835FM2I-10G. It's 16MB, the commands are compatible with the stock firmware and it's also the largest flash that comes in the same package as the original.
+
+## Advanced Flash Examples
+
+### Tim's patched firmware
+In this example, we'll be compiling retro-go to be used with a 64MB (512Mb) `MX25U51245GZ4I00` flash
+chip and [tim's patched firmware](https://www.schuerewegen.tk/gnw/#win_stock_firmware_patcher).
+The internal patched stock firmware is located at `0x08000000`, which corresponds to `INTFLASH_BANK=1`.
+The internal retro-go firmware will be flashed to `0x08100000`, which corresponds to `INTFLASH_BANK=2`.
+The stock extflash firmware is `1048576` bytes long at address `0x90000000`.
+The stock extflash is taking up the first 1MB of the 64MB external flash chip, so we will set
+`EXTFLASH_SIZE_MB=63`. Since we have to flash it after the end of the stock extflash,
+we will set `EXTFLASH_OFFSET=1048576`. We can now build the firmware with the
+following command:
+
+```
+make clean
+make -j8 EXTFLASH_SIZE_MB=63 EXTFLASH_OFFSET=1048576 INTFLASH_BANK=2
+```
+
+To actually perform the flash, we will need the [SPI flash external loaders for STM32CubeProgrammer and STM32CubeIDESPI flash external loaders for STM32CubeProgrammer and STM32CubeIDE](https://www.schuerewegen.tk/download/STM32CubeProgrammer%20External%20Loaders%20(2021-05-02%29.zip).
+
+Using a windows computer, we can now flash the intflash and extflash portions of retro-go using the following commands:
+
+```
+STM32_Programmer_CLI.exe -c port=SWD -w gw_retro_go_intflash.bin 0x08100000
+STM32_Programmer_CLI.exe -c port=SWD reset=HWrst -w gw_retro_go_extflash.bin 0x90100000 -el "PATH_TO_THIS_FILE\MX25U51245G_GAME-AND-WATCH.stldr" -rst
+```
 
 ## Contact, discussion
 

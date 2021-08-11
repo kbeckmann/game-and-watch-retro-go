@@ -72,6 +72,7 @@ __RAM_EMU_LENGTH__  = 1024K - __RAM_UC_LENGTH__ - __RAM_CORE_LENGTH__;
 __AHBRAM_LENGTH__   = 128K;
 __FLASH_LENGTH__    = 128K;
 
+__EXTFLASH_TOTAL_LENGTH__ = DEFINED(__EXTFLASH_TOTAL_LENGTH__) ? __EXTFLASH_TOTAL_LENGTH__ : 1024K;
 __EXTFLASH_OFFSET__ = DEFINED(__EXTFLASH_OFFSET__) ? __EXTFLASH_OFFSET__ : 0;
 __EXTFLASH_START__ = 0x90000000 + __EXTFLASH_OFFSET__;
 
@@ -88,11 +89,13 @@ INCLUDE build/saveflash.ld
 /* saveflash.ld sets __SAVEFLASH_LENGTH__ */
 __CONFIGFLASH_LENGTH__ = 4096;
 
-__EXTFLASH_LENGTH__ = DEFINED(__EXTFLASH_TOTAL_LENGTH__) ? __EXTFLASH_TOTAL_LENGTH__ - (__CONFIGFLASH_LENGTH__ + __SAVEFLASH_LENGTH__) : 1024K - (__CONFIGFLASH_LENGTH__ + __SAVEFLASH_LENGTH__);
+__EXTFLASH_LENGTH__ = __EXTFLASH_TOTAL_LENGTH__ - (__CONFIGFLASH_LENGTH__ + __SAVEFLASH_LENGTH__);
 __SAVEFLASH_START__ = __EXTFLASH_START__ + __EXTFLASH_LENGTH__;
 __SAVEFLASH_END__   = __SAVEFLASH_START__ + __SAVEFLASH_LENGTH__;
 __CONFIGFLASH_START__ = __SAVEFLASH_START__ + __SAVEFLASH_LENGTH__;
 __CONFIGFLASH_END__   = __CONFIGFLASH_START__ + __CONFIGFLASH_LENGTH__;
+
+__INTFLASH__ = DEFINED(__INTFLASH__) ? __INTFLASH__ : 0x08000000;
 
 /* Specify the memory areas */
 MEMORY
@@ -107,7 +110,7 @@ MEMORY
   AHBRAM   (xrw) : ORIGIN = 0x30000000, LENGTH =  __AHBRAM_LENGTH__
 
   /* FLASH */
-  FLASH    (xr ) : ORIGIN = 0x08000000,          LENGTH =  __FLASH_LENGTH__
+  FLASH    (xr ) : ORIGIN = __INTFLASH__,          LENGTH =  __FLASH_LENGTH__
   EXTFLASH (xr ) : ORIGIN = __EXTFLASH_START__,  LENGTH = __EXTFLASH_LENGTH__
   SAVEFLASH(xr ) : ORIGIN = __SAVEFLASH_START__, LENGTH = __SAVEFLASH_LENGTH__
   CONFIGFLASH(xr ) : ORIGIN = __CONFIGFLASH_START__, LENGTH = __CONFIGFLASH_LENGTH__
@@ -264,7 +267,7 @@ SECTIONS
     ASSERT(ABSOLUTE(_OVERLAY_SMS_BSS_END) < __RAM_EMU_END__, "Error: SMS BSS overflow");
   }
   _OVERLAY_SMS_BSS_SIZE = SIZEOF(.overlay_sms_bss);
-  
+
    .overlay_pce __RAM_EMU_START__ : {
       . = ALIGN(4);
     __ram_emu_pce_start__ = .;
@@ -423,7 +426,7 @@ SECTIONS
   _sidata = LOADADDR(.data);
 
   /* Initialized data sections goes into RAM, load LMA copy after code */
-  .data : 
+  .data :
   {
     __dtcram_start__ = .;
 
@@ -441,7 +444,7 @@ SECTIONS
     . = ALIGN(4);
     __flash_end__ = .;
   }
-  
+
   /* Uninitialized data section */
   . = ALIGN(4);
   .bss :
