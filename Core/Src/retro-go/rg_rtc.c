@@ -70,7 +70,7 @@ uint8_t GW_GetCurrentYear(void) {
 }
 
 // Setters
-uint8_t GW_SetCurrentHour(const uint8_t hour) {
+void GW_SetCurrentHour(const uint8_t hour) {
 
     // Update time before we can set it
     HAL_RTC_GetTime(&hrtc, &GW_currentTime, RTC_FORMAT_BIN);
@@ -83,7 +83,7 @@ uint8_t GW_SetCurrentHour(const uint8_t hour) {
         Error_Handler();
     }
 }
-uint8_t GW_SetCurrentMinute(const uint8_t minute) {
+void GW_SetCurrentMinute(const uint8_t minute) {
 
     // Update time before we can set it
     HAL_RTC_GetTime(&hrtc, &GW_currentTime, RTC_FORMAT_BIN);
@@ -97,7 +97,7 @@ uint8_t GW_SetCurrentMinute(const uint8_t minute) {
     }
 }
 
-uint8_t GW_SetCurrentSecond(const uint8_t second) {
+void GW_SetCurrentSecond(const uint8_t second) {
 
     // Update time before we can set it
     HAL_RTC_GetTime(&hrtc, &GW_currentTime, RTC_FORMAT_BIN);
@@ -111,7 +111,7 @@ uint8_t GW_SetCurrentSecond(const uint8_t second) {
     }
 }
 
-uint8_t GW_SetCurrentMonth(const uint8_t month) {
+void GW_SetCurrentMonth(const uint8_t month) {
 
     // Update time before we can set it
     HAL_RTC_GetTime(&hrtc, &GW_currentTime, RTC_FORMAT_BIN);
@@ -125,7 +125,7 @@ uint8_t GW_SetCurrentMonth(const uint8_t month) {
         Error_Handler();
     }
 }
-uint8_t GW_SetCurrentDay(const uint8_t day) {
+void GW_SetCurrentDay(const uint8_t day) {
 
     // Update time before we can set it
     HAL_RTC_GetTime(&hrtc, &GW_currentTime, RTC_FORMAT_BIN);
@@ -140,7 +140,7 @@ uint8_t GW_SetCurrentDay(const uint8_t day) {
     }
 }
 
-uint8_t GW_SetCurrentWeekday(const uint8_t weekday) {
+void GW_SetCurrentWeekday(const uint8_t weekday) {
 
     // Update time before we can set it
     HAL_RTC_GetTime(&hrtc, &GW_currentTime, RTC_FORMAT_BIN);
@@ -154,7 +154,7 @@ uint8_t GW_SetCurrentWeekday(const uint8_t weekday) {
         Error_Handler();
     }
 }
-uint8_t GW_SetCurrentYear(const uint8_t year) {
+void GW_SetCurrentYear(const uint8_t year) {
 
     // Update time before we can set it
     HAL_RTC_GetTime(&hrtc, &GW_currentTime, RTC_FORMAT_BIN);
@@ -268,7 +268,8 @@ bool day_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, 
 }
 
 time_t GW_GetUnixTime(void) {
-    // Function to return Unix timestamp since 1st Jan 1970
+    // Function to return Unix timestamp since 1st Jan 1970.
+    // The time is returned as an 64-bit value, but only the top 32-bits are populated.
     
     time_t timestamp;
     struct tm timeStruct;
