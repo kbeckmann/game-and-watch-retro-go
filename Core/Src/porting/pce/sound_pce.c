@@ -3,14 +3,11 @@
 #include "sound_pce.h"
 #include "pce.h"
 
-// Dont forget to change in main.c as well
-#define AUDIO_SAMPLE_RATE   (22050)
-
-static const uint8_t vol_tbl[32] = {
-    100 >> 8, 451 >> 8, 508 >> 8, 573 >> 8, 646 >> 8, 728 >> 8, 821 >> 8, 925 >> 8,
-    1043 >> 8, 1175 >> 8, 1325 >> 8, 1493 >> 8, 1683 >> 8, 1898 >> 8, 2139 >> 8, 2411 >> 8,
-    2718 >> 8, 3064 >> 8, 3454 >> 8, 3893 >> 8, 4388 >> 8, 4947 >> 8, 5576 >> 8, 6285 >> 8,
-    7085 >> 8, 7986 >> 8, 9002 >> 8, 10148 >> 8, 11439 >> 8, 12894 >> 8, 14535 >> 8, 16384 >> 8
+static const uint32_t vol_tbl[32] = {
+    100  , 451  , 508  , 573   , 646   , 728   , 821   , 925   ,
+    1043 , 1175 , 1325 , 1493  , 1683  , 1898  , 2139  , 2411  ,
+    2718 , 3064 , 3454 , 3893  , 4388  , 4947  , 5576  , 6285  ,
+    7085 , 7986 , 9002 , 10148 , 11439 , 12894 , 14535 , 16384 
 };
 
 typedef int16_t sample_t;
@@ -19,7 +16,7 @@ static int32_t noise_level[PSG_CHANNELS];
 // The buffer should be signed but it seems to sound better
 // unsigned. I am still reviewing the implementation bellow.
 // static uint8_t mix_buffer[44100 / 60 * 2];
-static sample_t mix_buffer[44100 / 60 * 2];
+static sample_t mix_buffer[PCE_SAMPLE_RATE / 60 * 2];
 
 struct host_machine host;
 
@@ -34,8 +31,11 @@ psg_update_chan(sample_t *buf, int ch, size_t dwSize)
     /*
     * This gives us a volume level of (0...15).
     */
-    int lvol = (((chan->balance >> 4) * 1.1) * (chan->control & 0x1F)) / 32;
-    int rvol = (((chan->balance & 0xF) * 1.1) * (chan->control & 0x1F)) / 32;
+    int lvol = (((chan->balance >>  4) * 1.1) * (chan->control & 0x1E)) / 32;
+    int rvol = (((chan->balance & 0xF) * 1.1) * (chan->control & 0x1E)) / 32;
+
+    lvol = vol_tbl[lvol & 0x1F];
+    rvol = vol_tbl[rvol & 0x1F];
 
     if (!host.sound.stereo) {
         lvol = (lvol + rvol) / 2;
@@ -63,9 +63,6 @@ psg_update_chan(sample_t *buf, int ch, size_t dwSize)
 
         int repeat = 3; // MIN(2, (dwSize / 2) / chan->dda_count) + 1;
 
-        lvol = vol_tbl[lvol << 1];
-        rvol = vol_tbl[rvol << 1];
-
         while (buf < buf_end && (chan->dda_count || chan->control & PSG_DDA_ENABLE)) {
             if (chan->dda_count) {
                 // sample = chan->dda_data[(start++) & 0x7F];
@@ -75,10 +72,10 @@ psg_update_chan(sample_t *buf, int ch, size_t dwSize)
             }
 
             for (int i = 0; i < repeat; i++) {
-                *buf++ = (sample * lvol);
+                *buf++ = (sample * lvol) >> 8;
 
                 if (host.sound.stereo) {
-                    *buf++ = (sample * rvol);
+                    *buf++ = (sample * rvol) >> 8;
                 }
             }
         }
@@ -110,10 +107,10 @@ psg_update_chan(sample_t *buf, int ch, size_t dwSize)
                 chan->noise_accum -= host.sound.freq * Tp;
             }
 
-            *buf++ = (noise_level[ch] * lvol);
+            *buf++ = (noise_level[ch] * lvol) >> 8;
 
             if (host.sound.stereo) {
-                *buf++ = (noise_level[ch] * rvol);
+                *buf++ = (noise_level[ch] * rvol) >> 8;
             }
         }
     }
@@ -156,10 +153,10 @@ psg_update_chan(sample_t *buf, int ch, size_t dwSize)
             if ((sample = (chan->wave_data[chan->wave_index] - 16)) >= 0)
                 sample++;
 
-            *buf++ = (sample * lvol);
+            *buf++ = (sample * lvol) >> 8;
 
             if (host.sound.stereo) {
-                *buf++ = (sample * rvol);
+                *buf++ = (sample * rvol) >> 8;
             }
 
             chan->wave_accum += fixed_inc;
@@ -176,7 +173,7 @@ psg_update_chan(sample_t *buf, int ch, size_t dwSize)
 
 void osd_snd_init(void) {
     host.sound.stereo = true;
-    host.sound.freq = AUDIO_SAMPLE_RATE;
+    host.sound.freq = PCE_SAMPLE_RATE;
     host.sound.sample_size = 1;
     //xTaskCreatePinnedToCore(&audioTask, "audioTask", 1024 * 2, NULL, 5, NULL, 1);
 }
@@ -206,11 +203,6 @@ void pce_snd_update(int16_t *output, unsigned length) {
 
     for (int i = 0; i < PSG_CHANNELS; i++) {
         psg_update_chan((void*)mix_buffer, i, length);
-        /*for (int j = 0; j < length; j += 2) {
-            output[j] += (uint8_t)mix_buffer[j] * lvol;
-            output[j + 1] += (uint8_t)mix_buffer[j + 1] * rvol;
-        }*/
-
         for (int j = 0; j < length; j += 2) {
             output[j] += mix_buffer[j] * lvol;
             output[j + 1] += mix_buffer[j + 1] * rvol;
