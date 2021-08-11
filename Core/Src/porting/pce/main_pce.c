@@ -2,7 +2,9 @@
 #include <string.h>
 #include <hard_pce.h>
 #include <romdb_pce.h>
+#include "lz4_depack.h"
 #include <assert.h>
+#include "miniz.h"
 #include <gfx.h>
 #include "main.h"
 #include "bilinear.h"
@@ -186,13 +188,63 @@ static bool LoadState(char *pathName) {
     return true;
 }
 
+size_t 
+pce_osd_getromdata(unsigned char **data)
+{
+    /* src pointer to the ROM data in the external flash (raw or LZ4) */
+    const unsigned char *src = ROM_DATA;
+    unsigned char *dest = (unsigned char *)&_PCE_ROM_UNPACK_BUFFER;
+    uint32_t available_size = (uint32_t)&_PCE_ROM_UNPACK_BUFFER_SIZE;
+
+    if (memcmp(&src[0], LZ4_MAGIC, LZ4_MAGIC_SIZE) == 0) {
+        /* dest pointer to the ROM data in the internal RAM (raw) */
+        uint32_t lz4_original_size;
+        int32_t lz4_uncompressed_size;
+
+        printf("LZ4 compressed ROM detected.\n");
+        printf("Uncompressing to %p. %ld bytes available.\n", dest, available_size);
+
+        /* get the content size to uncompress */
+        lz4_original_size = lz4_get_original_size(src);
+
+        printf("Original size is %ld\n", lz4_original_size);
+        /* Check if there is enough memory to uncompress it */
+        assert(available_size >= lz4_original_size);
+
+        /* Uncompress the content to RAM */
+        lz4_uncompressed_size = lz4_uncompress(src, dest);
+
+        printf("Uncompressed size: %ld bytes.\n", lz4_uncompressed_size);
+
+        /* Check if the uncompressed content size is as expected */
+        assert(lz4_original_size == lz4_uncompressed_size);
+
+        *data = dest;
+
+        return lz4_uncompressed_size;
+    } else if(strcmp(ROM_EXT, "zopfli") == 0) {
+        /* DEFLATE decompression */
+        printf("Zopfli compressed ROM detected.\n");
+        size_t n_decomp_bytes;
+        int flags = 0;
+        flags |= TINFL_FLAG_USING_NON_WRAPPING_OUTPUT_BUF;
+        n_decomp_bytes = tinfl_decompress_mem_to_mem(dest, available_size, src, ROM_DATA_LENGTH, flags);
+        assert(n_decomp_bytes != TINFL_DECOMPRESS_MEM_TO_MEM_FAILED);
+        *data = dest;
+        return n_decomp_bytes;
+    } else {
+        *data = (unsigned char *)ROM_DATA;
+        return ROM_DATA_LENGTH;
+    }
+}
+
 void LoadCartPCE() {
     int offset;
-    PCE.ROM = (uint8 *)ROM_DATA;
-    offset = ROM_DATA_LENGTH & 0x1fff;
-    PCE.ROM_SIZE = (ROM_DATA_LENGTH - offset) / 0x2000;
+    size_t rom_length = pce_osd_getromdata(&PCE.ROM);
+    offset = rom_length & 0x1fff;
+    PCE.ROM_SIZE = (rom_length - offset) / 0x2000;
      PCE.ROM_DATA = PCE.ROM + offset;
-       PCE.ROM_CRC = crc32_le(0, PCE.ROM, ROM_DATA_LENGTH);
+       PCE.ROM_CRC = crc32_le(0, PCE.ROM, rom_length);
        uint IDX = 0;
        uint ROM_MASK = 1;
 
@@ -200,7 +252,7 @@ void LoadCartPCE() {
        ROM_MASK--;
 
 #ifdef PCE_SHOW_DEBUG
-       printf("Rom Size: %d, B1:%X, B2:%X, B3:%X, B4:%X" , ROM_DATA_LENGTH, PCE.ROM[0], PCE.ROM[1],PCE.ROM[2],PCE.ROM[3]);
+       printf("Rom Size: %d, B1:%X, B2:%X, B3:%X, B4:%X" , rom_length, PCE.ROM[0], PCE.ROM[1],PCE.ROM[2],PCE.ROM[3]);
 #endif
 
        for (int index = 0; index < KNOWN_ROM_COUNT; index++) {
