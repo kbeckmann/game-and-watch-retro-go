@@ -201,7 +201,7 @@ make clean
 make -j8 EXTFLASH_SIZE_MB=63 EXTFLASH_OFFSET=1048576 INTFLASH_BANK=2
 ```
 
-To actually perform the flash, we will need the [SPI flash external loaders for STM32CubeProgrammer and STM32CubeIDESPI flash external loaders for STM32CubeProgrammer and STM32CubeIDE](https://www.schuerewegen.tk/download/STM32CubeProgrammer%20External%20Loaders%20(2021-05-02%29.zip).
+To actually perform the flash, we will need the [SPI flash external loaders for STM32CubeProgrammer and STM32CubeIDESPI flash external loaders for STM32CubeProgrammer and STM32CubeIDE](https://www.schuerewegen.tk/download/STM32CubeProgrammer%20External%20Loaders%20(2021-05-02%29.zip)).
 
 Using a windows computer, we can now flash the intflash and extflash portions of retro-go using the following commands:
 
