@@ -110,7 +110,7 @@ static void gw_sound_submit()
 /* performance monitoring */
 /* Emulator loop monitoring
     ( unit is 1/systemcoreclock 1/280MHz )
-    loop_cycles 
+    loop_cycles
         -measured duration of the loop.
     proc_cycles
         - estimated duration of emulated CPU for a bunch of emulated system clock.
@@ -194,6 +194,8 @@ int app_main_gw(uint8_t load_state)
 
     // const int frameTime = get_frame_time(GW_REFRESH_RATE);
 
+    common_emu_state.frame_time_10us = (uint16_t)(100000 / GW_REFRESH_RATE + 0.5f);
+
     /*** load ROM  */
     bool rom_status = gw_system_romload();
 
@@ -242,19 +244,7 @@ int app_main_gw(uint8_t load_state)
         /* Emulate and Blit */
         // Call the emulator function with number of clock cycles
         // to execute on the emulated device
-        // multiply the number of cycles to emulate by speedup factor
-        uint32_t cycles = GW_SYSTEM_CYCLES;
-        switch (app->speedupEnabled) {
-            case SPEEDUP_0_5x:  cycles = GW_SYSTEM_CYCLES * 1 / 2; break;
-            case SPEEDUP_0_75x: cycles = GW_SYSTEM_CYCLES * 3 / 4; break;
-            case SPEEDUP_1x:    cycles = GW_SYSTEM_CYCLES * 1;     break;
-            case SPEEDUP_1_25x: cycles = GW_SYSTEM_CYCLES * 5 / 4; break;
-            case SPEEDUP_1_5x:  cycles = GW_SYSTEM_CYCLES * 3 / 2; break;
-            case SPEEDUP_2x:    cycles = GW_SYSTEM_CYCLES * 2;     break;
-            case SPEEDUP_3x:    cycles = GW_SYSTEM_CYCLES * 3;     break;
-        }
-
-        gw_system_run(cycles);
+        gw_system_run(GW_SYSTEM_CYCLES);
 
         /* get how many cycles have been spent in the emulator */
         proc_cycles = get_dwt_cycles();
