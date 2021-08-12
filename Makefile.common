@@ -280,9 +280,13 @@ CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)"
 LDFLAGS += -Wl,--defsym=__EXTFLASH_OFFSET__=$(EXTFLASH_OFFSET)
 LDFLAGS += -Wl,--defsym=__EXTFLASH_TOTAL_LENGTH__=$(EXTFLASH_SIZE)
 
-ifeq ($(INTFLASH_BANK), 2)
-LDFLAGS += -Wl,--defsym=__INTFLASH__=0x08100000
+ifeq ($(INTFLASH_BANK), 1)
+	INTFLASH_ADDRESS = 0x08000000
+else ifeq ($(INTFLASH_BANK), 2)
+	INTFLASH_ADDRESS = 0x08100000
 endif
+
+LDFLAGS += -Wl,--defsym=__INTFLASH__=$(INTFLASH_ADDRESS)
 
 #######################################
 # LDFLAGS
@@ -447,12 +451,12 @@ openocd:
 
 # Programs the internal flash using a new OpenOCD instance
 flash_intflash: $(BUILD_DIR)/$(TARGET)_intflash.bin
-	$(OPENOCD) -f scripts/interface_$(ADAPTER).cfg -c "program $< 0x08000000 verify reset exit"
+	$(OPENOCD) -f scripts/interface_$(ADAPTER).cfg -c "program $< $(INTFLASH_ADDRESS) verify reset exit"
 .PHONY: flash_intflash
 
 # Flashes using an existing openocd instance
 flash_intflash_nc: $(BUILD_DIR)/$(TARGET)_intflash.bin
-	echo "program $< 0x08000000 verify reset" | nc -c localhost 4444
+	echo "program $< $(INTFLASH_ADDRESS) verify reset" | nc -c localhost 4444
 .PHONY: flashx
 
 flash_extflash: $(BUILD_DIR)/$(TARGET)_extflash.bin
