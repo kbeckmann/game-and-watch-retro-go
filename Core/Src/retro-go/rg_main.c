@@ -13,6 +13,7 @@
 #include "main.h"
 #include "gw_buttons.h"
 #include "gw_flash.h"
+#include "rg_rtc.h"
 
 #if 0
 #define KEY_SELECTED_TAB  "SelectedTab"
@@ -159,6 +160,8 @@ void retro_loop()
     int selected_tab_last = -1;
     uint32_t idle_s;
 
+
+
     // Read the initial state as to not trigger on button held down during boot
     odroid_input_read_gamepad(&gui.joystick);
 
@@ -300,6 +303,54 @@ void retro_loop()
                     ODROID_DIALOG_CHOICE_LAST
                 };
                 odroid_overlay_settings_menu(choices);
+                gui_redraw();
+            }
+            // TIME menu
+            else if (last_key == ODROID_INPUT_SELECT) {
+                
+                char time_str[14];
+                char date_str[24];
+
+                odroid_dialog_choice_t rtcinfo[] = {
+                    {0, "Time", time_str, 1, &time_display_cb},
+                    {1, "Date", date_str, 1, &date_display_cb},
+                    ODROID_DIALOG_CHOICE_LAST
+                };
+                int sel = odroid_overlay_dialog("TIME", rtcinfo, 0);
+
+                if (sel == 0) {
+                    static char hour_value[8];
+                    static char minute_value[8];
+                    static char second_value[8];
+
+                    // Time setup
+                    odroid_dialog_choice_t timeoptions[32] = {
+                        {0, "Hour", hour_value, 1, &hour_update_cb},
+                        {1, "Minute", minute_value, 1, &minute_update_cb},
+                        {2, "Second", second_value, 1, &second_update_cb},
+                        ODROID_DIALOG_CHOICE_LAST
+                    };
+                    sel = odroid_overlay_dialog("Time setup", timeoptions, 0);
+                }
+                else if (sel == 1) {
+
+                    static char day_value[8];
+                    static char month_value[8];
+                    static char year_value[8];
+                    static char weekday_value[8];
+
+                    // Date setup
+                    odroid_dialog_choice_t dateoptions[32] = {
+                        {0, "Day", day_value, 1, &day_update_cb},
+                        {1, "Month", month_value, 1, &month_update_cb},
+                        {2, "Year", year_value, 1, &year_update_cb},
+                        {3, "Weekday", weekday_value, 1, &weekday_update_cb},
+                        ODROID_DIALOG_CHOICE_LAST
+                    };
+                    sel = odroid_overlay_dialog("Date setup", dateoptions, 0);
+                }
+
+                (void) sel;
                 gui_redraw();
             }
             else if (last_key == ODROID_INPUT_UP) {

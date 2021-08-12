@@ -65,6 +65,7 @@ retro-go-stm32/components/lupng/miniz.c \
 retro-go-stm32/retro-go/main/gui.c \
 Core/Src/porting/gw_alloc.c \
 Core/Src/retro-go/rg_main.c \
+Core/Src/retro-go/rg_rtc.c \
 Core/Src/retro-go/rg_emulators.c \
 Core/Src/retro-go/rom_manager.c \
 Core/Src/porting/odroid_settings.c \
