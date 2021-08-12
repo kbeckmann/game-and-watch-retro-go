@@ -23,3 +23,6 @@ mv UP-19PCE.pce ./roms/pce/
 
 # sg (placeholder)
 dd if=/dev/zero of=roms/col/placeholder.col bs=1024 count=16
+
+# gw (placeholder)
+dd if=/dev/zero of=roms/gw/placeholder.gw bs=1024 count=16

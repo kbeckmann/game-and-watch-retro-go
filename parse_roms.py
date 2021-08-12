@@ -59,6 +59,7 @@ SAVE_SIZES = {
 
 # TODO: Find a better way to find this before building
 MAX_COMPRESSED_NES_SIZE = 0x00081000
+MAX_COMPRESSED_PCE_SIZE = 0x00049000
 
 """
 All ``compress_*`` functions must be decorated ``@COMPRESSIONS`` and have the
@@ -483,6 +484,14 @@ class ROMParser:
                 return
             compressed_data = compress(data)
             output_file.write_bytes(compressed_data)
+        elif "pce_system" in variable_name:  # PCE
+            if rom.path.stat().st_size > MAX_COMPRESSED_PCE_SIZE:
+                print(
+                    f"INFO: {rom.name} is too large to compress, skipping compression!"
+                )
+                return
+            compressed_data = compress(data)
+            output_file.write_bytes(compressed_data)
         elif "gb_system" in variable_name:  # GB/GBC
             BANK_SIZE = 16384
             banks = [data[i : i + BANK_SIZE] for i in range(0, len(data), BANK_SIZE)]
@@ -735,6 +744,7 @@ class ROMParser:
             "pce",
             ["pce"],
             "SAVE_PCE_",
+            args.compress,
         )
 
         total_save_size += save_size

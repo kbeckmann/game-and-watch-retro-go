@@ -30,6 +30,7 @@ endif
 
 # Configure external flash size in MB (Megabytes)
 EXTFLASH_SIZE_MB ?= 1
+INTFLASH_BANK ?= 1
 
 EXTFLASH_SIZE ?= $(shell echo "$$(( $(EXTFLASH_SIZE_MB) * 1024 * 1024 ))")
 
@@ -231,6 +232,7 @@ AS_DEFS +=
 
 # C defines
 C_DEFS +=  \
+-DINTFLASH_BANK=$(INTFLASH_BANK) \
 -DUSE_HAL_DRIVER \
 -DSTM32H7B0xx \
 -DVECT_TAB_ITCM \
@@ -277,6 +279,10 @@ CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)"
 
 LDFLAGS += -Wl,--defsym=__EXTFLASH_OFFSET__=$(EXTFLASH_OFFSET)
 LDFLAGS += -Wl,--defsym=__EXTFLASH_TOTAL_LENGTH__=$(EXTFLASH_SIZE)
+
+ifeq ($(INTFLASH_BANK), 2)
+LDFLAGS += -Wl,--defsym=__INTFLASH__=0x08100000
+endif
 
 #######################################
 # LDFLAGS
@@ -519,6 +525,7 @@ help:
 	@echo "  EXTFLASH_SIZE    - Sets the external flash size in bytes (deprecated)"
 	@echo "  LARGE_FLASH      - Sets the external flash size to 16MB  (deprecated)"
 	@echo "  EXTFLASH_OFFSET  - Places the data at an offset in the external flash (useful for dual boot)"
+	@echo "  INTFLASH_BANK    - Sets the internal flash bank. Valid values {1,2} (default=1).
 	@echo "  RESET_DBGMCU     - Configures if DBGMCU should be reset after flashing."
 	@echo "                     Set to 0 to disable power saving (default=1)"
 	@echo ""
@@ -527,6 +534,7 @@ help:
 	@echo "  EXTFLASH_SIZE=$(EXTFLASH_SIZE)"
 	@echo "  LARGE_FLASH=$(LARGE_FLASH)"
 	@echo "  EXTFLASH_OFFSET=$(EXTFLASH_OFFSET)"
+	#echo "  INTFLASH_BANK=$(INTFLASH_BANK)"
 	@echo "  RESET_DBGMCU=$(RESET_DBGMCU)"
 	@echo "  GCC_PATH=$(GCC_PATH)"
 	@echo "  PREFIX=$(PREFIX)"
