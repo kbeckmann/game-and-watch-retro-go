@@ -48,7 +48,7 @@ static const persistent_config_t persistent_config_default = {
     .magic = CONFIG_MAGIC,
     .version = 1,
 
-    .backlight = ODROID_BACKLIGHT_LEVEL4,
+    .backlight = ODROID_BACKLIGHT_LEVEL3,
     .start_action = ODROID_START_ACTION_RESUME,
     .volume = ODROID_AUDIO_VOLUME_MAX / 2, // Too high volume can cause brown out if the battery isn't connected.
     .font_size = 8,
