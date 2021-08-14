@@ -39,6 +39,12 @@ VAR_program_chunk_idx=$(       printf '0x%08x\n' $(get_symbol "program_chunk_idx
 VAR_program_chunk_count=$(     printf '0x%08x\n' $(get_symbol "program_chunk_count"))
 VAR_program_expected_sha256=$( printf '0x%08x\n' $(get_symbol "program_expected_sha256"))
 
+INTFLASH_BANK=${INTFLASH_BANK:-1}
+if [ $INTFLASH_BANK -eq 2 ]; then
+    INTFLASH_ADDRESS=0x08100000
+else
+    INTFLASH_ADDRESS=0x08000000
+fi
 
 # $1: file to hash
 # $2: file to write hash to in hex
@@ -174,6 +180,10 @@ rm -f "${HASH_FILE}"
 if [[ ${CHUNK_IDX} -eq "1" ]]; then
     ${OPENOCD} -f ${DIR}/interface_${ADAPTER}.cfg \
         -c "init; reset halt;" \
+        -c "set MSP 0x[string range [mdw $INTFLASH_ADDRESS] 12 19]" \
+        -c "set PC 0x[string range [mdw [format 0x%x [expr {$INTFLASH_ADDRESS + 0x4}]]] 12 19]" \
+        -c 'reg msp $MSP' \
+        -c 'reg pc $PC' \
         -c "mww ${VAR_boot_magic} ${BOOT_MAGIC_FLASHAPP}" \
         -c "mww ${VAR_program_chunk_idx} ${CHUNK_IDX}" \
         -c "mww ${VAR_program_chunk_count} ${CHUNK_COUNT}" \
