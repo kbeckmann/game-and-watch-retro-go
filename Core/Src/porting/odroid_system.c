@@ -82,12 +82,30 @@ IRAM_ATTR void odroid_system_tick(uint skippedFrame, uint fullFrame, uint busyTi
     statistics.lastTickTime = get_elapsed_time();
 }
 
+extern uint32_t __INTFLASH__;  // From linker, usually value 0x08000000 for bank 1, or 0x08100000 for bank 2
 void odroid_system_switch_app(int app)
 {
     printf("%s: Switching to app %d.\n", __FUNCTION__, app);
 
     switch (app) {
     case 0:
+        /**
+         * Setting these two places in memory tell tim's patched firmware
+         * bootloader running in bank 1 (0x08000000) to boot into retro-go
+         * immediately instead of the patched-stock-firmware..
+         *
+         * These are the last 8 bytes of the 128KB of TCM RAM.
+         *
+         * This uses a technique described here:
+         *      https://stackoverflow.com/a/56439572
+         *
+         *
+         * For stuff not running a bootloader like this, these commands are
+         * harmless.
+         */
+        *((uint32_t *)0x2001FFF8) = 0x544F4F42; // "BOOT"
+        *((uint32_t *)0x2001FFFC) = &__INTFLASH__; // vector table
+
         odroid_settings_StartupFile_set(0);
         odroid_settings_commit();
         NVIC_SystemReset();

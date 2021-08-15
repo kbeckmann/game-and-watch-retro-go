@@ -461,6 +461,18 @@ erase_intflash_2:
 	$(OPENOCD) -f scripts/interface_$(ADAPTER).cfg -c "init; halt; flash erase_address 0x08100000 131072; resume; exit"
 .PHONY: erase_intflash2
 
+start_bank_1:
+	$(OPENOCD) -f scripts/interface_$(ADAPTER).cfg \
+		-c 'init; reset halt' \
+		-c 'set MSP 0x[string range [mdw 0x08000000] 12 19]' \
+		-c 'set PC 0x[string range [mdw 0x08000004] 12 19]' \
+		-c 'echo "Setting MSP -> $$MSP"' \
+		-c 'echo "Setting PC -> $$PC"' \
+		-c 'reg msp $$MSP' \
+		-c 'reg pc $$PC' \
+		-c 'resume;exit'
+.PHONY: start_bank_1
+
 start_bank_2:
 	$(OPENOCD) -f scripts/interface_$(ADAPTER).cfg \
 		-c 'init; reset halt' \
