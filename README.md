@@ -163,7 +163,7 @@ By specifying EXTFLASH_OFFSET you may place the external flash data at an offset
 
 ## Backing up and restoring save state files
 
-Save states can be backed up using `./scripts/saves_backup.sh build/gw_retro_go.elf`. Make sure to use the elf file that matches what is running on your device! It is a good idea to keep this elf file in case you want to back up at a later time.
+Save states can be backed up using `./scripts/saves_backup.sh build/gw_retro_go.elf`. Make sure to use the elf file that matches what is running on your device! It is a good idea to keep this elf file in case you want to back up at a later time. This can also be achieved with `make flash_saves_backup`.
 
 This downloads all save states to the local directory `./save_states`. Each save state will be located in `./save_states/<emu>/<rom name>.save`.
 
