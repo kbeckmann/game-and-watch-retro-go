@@ -34,6 +34,8 @@ INTFLASH_BANK ?= 1
 
 EXTFLASH_SIZE ?= $(shell echo "$$(( $(EXTFLASH_SIZE_MB) * 1024 * 1024 ))")
 
+EXTFLASH_FORCE_SPI ?= 0
+
 # Compress supported ROMs by default. Set to 0 to disable.
 COMPRESS ?= lz4
 ifdef COMPRESS
@@ -234,6 +236,7 @@ AS_DEFS +=
 # C defines
 C_DEFS +=  \
 -DINTFLASH_BANK=$(INTFLASH_BANK) \
+-DEXTFLASH_FORCE_SPI=$(EXTFLASH_FORCE_SPI) \
 -DUSE_HAL_DRIVER \
 -DSTM32H7B0xx \
 -DVECT_TAB_ITCM \
@@ -522,15 +525,17 @@ help:
 	@echo "Game and Watch Retro Go"
 	@echo ""
 	@echo "Configuration variables:"
-	@echo "  EXTFLASH_SIZE_MB - Sets the external flash size in MB"
-	@echo "  EXTFLASH_SIZE    - Sets the external flash size in bytes (deprecated)"
-	@echo "  LARGE_FLASH      - Sets the external flash size to 16MB  (deprecated)"
-	@echo "  EXTFLASH_OFFSET  - Places the data at an offset in the external flash (useful for dual boot)"
-	@echo "  INTFLASH_BANK    - Sets the internal flash bank. Valid values {1,2} (default=1)."
-	@echo "  RESET_DBGMCU     - Configures if DBGMCU should be reset after flashing."
-	@echo "                     Set to 0 to disable power saving (default=1)"
+	@echo "  EXTFLASH_FORCE_SPI  - Forces the use of legacy SPI mode for the external flash driver"
+	@echo "  EXTFLASH_SIZE_MB    - Sets the external flash size in MB"
+	@echo "  EXTFLASH_SIZE       - Sets the external flash size in bytes (deprecated)"
+	@echo "  LARGE_FLASH         - Sets the external flash size to 16MB  (deprecated)"
+	@echo "  EXTFLASH_OFFSET     - Places the data at an offset in the external flash (useful for dual boot)"
+	@echo "  INTFLASH_BANK       - Sets the internal flash bank. Valid values {1,2} (default=1)."
+	@echo "  RESET_DBGMCU        - Configures if DBGMCU should be reset after flashing."
+	@echo "                        Set to 0 to disable power saving (default=1)"
 	@echo ""
 	@echo "Current configuration:"
+	@echo "  EXTFLASH_FORCE_SPI=$(EXTFLASH_FORCE_SPI)"
 	@echo "  EXTFLASH_SIZE_MB=$(EXTFLASH_SIZE_MB)"
 	@echo "  EXTFLASH_SIZE=$(EXTFLASH_SIZE)"
 	@echo "  LARGE_FLASH=$(LARGE_FLASH)"

@@ -265,6 +265,7 @@ const flash_config_t config_quad_32b_s    = FLASH_CONFIG_DEF(cmds_quad_32b_s,   
 const flash_config_t config_quad_24b_issi = FLASH_CONFIG_DEF(cmds_quad_24b_issi, 0x01000,  0x8000, 0x10000, 0,   true, init_mx_issi);
 
 const jedec_config_t jedec_map[] = {
+#if (EXTFLASH_FORCE_SPI == 0)
     // MX 24 bit address
     JEDEC_CONFIG_DEF(0xC2, 0x25, 0x34, "MX25U8035F",  &config_quad_24b_mx),   // Stock 1MB
     JEDEC_CONFIG_DEF(0xC2, 0x25, 0x37, "MX25U6432F",  &config_quad_24b_mx),   // 8MB
@@ -284,6 +285,7 @@ const jedec_config_t jedec_map[] = {
     // ISSI 24 bit *untested*
     // TODO: Test and uncomment when it's confirmed they work well.
     JEDEC_CONFIG_DEF(0x9D, 0x70, 0x18, "IS25WP128F",  &config_quad_24b_issi), // 16MB
+#endif
 };
 
 // Driver struct
