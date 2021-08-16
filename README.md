@@ -6,6 +6,7 @@ Supported emulators:
 
 - ColecoVision (col)
 - Gameboy / Gameboy Color (gb/gbc)
+- Game & Watch / LCD Games (gw)
 - Nintendo Entertainment System (nes)
 - PC Engine / TurboGrafx-16 (pce)
 - Sega Game Gear (gg)
