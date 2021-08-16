@@ -284,9 +284,13 @@ CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)"
 LDFLAGS += -Wl,--defsym=__EXTFLASH_OFFSET__=$(EXTFLASH_OFFSET)
 LDFLAGS += -Wl,--defsym=__EXTFLASH_TOTAL_LENGTH__=$(EXTFLASH_SIZE)
 
-ifeq ($(INTFLASH_BANK), 2)
-LDFLAGS += -Wl,--defsym=__INTFLASH__=0x08100000
+ifeq ($(INTFLASH_BANK), 1)
+	INTFLASH_ADDRESS = 0x08000000
+else ifeq ($(INTFLASH_BANK), 2)
+	INTFLASH_ADDRESS = 0x08100000
 endif
+
+LDFLAGS += -Wl,--defsym=__INTFLASH__=$(INTFLASH_ADDRESS)
 
 #######################################
 # LDFLAGS
@@ -449,14 +453,50 @@ openocd:
 	$(OPENOCD) -f scripts/interface_$(ADAPTER).cfg -c "init; halt"
 .PHONY: openocd
 
+reset:
+	$(OPENOCD) -f scripts/interface_$(ADAPTER).cfg -c "init; reset; exit"
+.PHONY: reset
+
+erase_intflash_1:
+	$(OPENOCD) -f scripts/interface_$(ADAPTER).cfg -c "init; halt; flash erase_address 0x08000000 131072; resume; exit"
+.PHONY: erase_intflash1
+
+erase_intflash_2:
+	$(OPENOCD) -f scripts/interface_$(ADAPTER).cfg -c "init; halt; flash erase_address 0x08100000 131072; resume; exit"
+.PHONY: erase_intflash2
+
+start_bank_1:
+	$(OPENOCD) -f scripts/interface_$(ADAPTER).cfg \
+		-c 'init; reset halt' \
+		-c 'set MSP 0x[string range [mdw 0x08000000] 12 19]' \
+		-c 'set PC 0x[string range [mdw 0x08000004] 12 19]' \
+		-c 'echo "Setting MSP -> $$MSP"' \
+		-c 'echo "Setting PC -> $$PC"' \
+		-c 'reg msp $$MSP' \
+		-c 'reg pc $$PC' \
+		-c 'resume;exit'
+.PHONY: start_bank_1
+
+start_bank_2:
+	$(OPENOCD) -f scripts/interface_$(ADAPTER).cfg \
+		-c 'init; reset halt' \
+		-c 'set MSP 0x[string range [mdw 0x08100000] 12 19]' \
+		-c 'set PC 0x[string range [mdw 0x08100004] 12 19]' \
+		-c 'echo "Setting MSP -> $$MSP"' \
+		-c 'echo "Setting PC -> $$PC"' \
+		-c 'reg msp $$MSP' \
+		-c 'reg pc $$PC' \
+		-c 'resume;exit'
+.PHONY: start_bank_2
+
 # Programs the internal flash using a new OpenOCD instance
 flash_intflash: $(BUILD_DIR)/$(TARGET)_intflash.bin
-	$(OPENOCD) -f scripts/interface_$(ADAPTER).cfg -c "program $< 0x08000000 verify reset exit"
+	$(OPENOCD) -f scripts/interface_$(ADAPTER).cfg -c "program $< $(INTFLASH_ADDRESS) verify reset exit"
 .PHONY: flash_intflash
 
 # Flashes using an existing openocd instance
 flash_intflash_nc: $(BUILD_DIR)/$(TARGET)_intflash.bin
-	echo "program $< 0x08000000 verify reset" | nc -c localhost 4444
+	echo "program $< $(INTFLASH_ADDRESS) verify reset" | nc -c localhost 4444
 .PHONY: flashx
 
 flash_extflash: $(BUILD_DIR)/$(TARGET)_extflash.bin

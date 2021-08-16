@@ -36,7 +36,7 @@ fi
 # stat on macOS has different flags
 if [[ "$(uname -s)" == "Darwin" ]]; then
     FILESIZE=$(stat -f%z "${IMAGE}")
-else 
+else
     FILESIZE=$(stat -c%s "${IMAGE}")
 fi
 
@@ -105,7 +105,7 @@ while [[ $SIZE -gt 0 ]]; do
         echo ""
         echo ""
         exit 1
-    else 
+    else
         echo ""
         echo ""
         echo_green "Programming of chunk $((i + 1)) / ${CHUNKS} succeeded."

@@ -174,7 +174,7 @@ By specifying EXTFLASH_OFFSET you may place the external flash data at an offset
 
 ## Backing up and restoring save state files
 
-Save states can be backed up using `./scripts/saves_backup.sh build/gw_retro_go.elf`. Make sure to use the elf file that matches what is running on your device! It is a good idea to keep this elf file in case you want to back up at a later time.
+Save states can be backed up using `./scripts/saves_backup.sh build/gw_retro_go.elf`. Make sure to use the elf file that matches what is running on your device! It is a good idea to keep this elf file in case you want to back up at a later time. This can also be achieved with `make flash_saves_backup`.
 
 This downloads all save states to the local directory `./save_states`. Each save state will be located in `./save_states/<emu>/<rom name>.save`.
 
@@ -212,13 +212,18 @@ make clean
 make -j8 EXTFLASH_SIZE_MB=63 EXTFLASH_OFFSET=1048576 INTFLASH_BANK=2
 ```
 
-To actually perform the flash, we will need the [SPI flash external loaders for STM32CubeProgrammer and STM32CubeIDESPI flash external loaders for STM32CubeProgrammer and STM32CubeIDE](https://www.schuerewegen.tk/download/STM32CubeProgrammer%20External%20Loaders%20(2021-05-02%29.zip)).
-
-Using a windows computer, we can now flash the intflash and extflash portions of retro-go using the following commands:
+To flash the produced binaries to your device, you have two options:
+1. Using a windows computer with [these SPI flash external loaders](https://www.schuerewegen.tk/download/STM32CubeProgrammer%20External%20Loaders%20%282021-05-02%29.zip):
 
 ```
 STM32_Programmer_CLI.exe -c port=SWD -w gw_retro_go_intflash.bin 0x08100000
-STM32_Programmer_CLI.exe -c port=SWD reset=HWrst -w gw_retro_go_extflash.bin 0x90100000 -el "PATH_TO_THIS_FILE\MX25U51245G_GAME-AND-WATCH.stldr" -rst
+STM32_Programmer_CLI.exe -c port=SWD reset=HWrst -w gw_retro_go_extflash.bin 0x90100000 -el "PATH_TO_THE_STLDR_FILE\MX25U51245G_GAME-AND-WATCH.stldr" -rst
+```
+
+2. Use a [patched version of openocd](https://github.com/kbeckmann/ubuntu-openocd-git-builder) that allows access to the undocumented flash regions of the microcontroller. For mac users, you can use [this homebrew formula](https://github.com/northskysl/homebrew-core/blob/master/Formula/open-ocd.rb):
+
+```
+make -j8 EXTFLASH_SIZE_MB=63 EXTFLASH_OFFSET=1048576 INTFLASH_BANK=2 flash
 ```
 
 ## Contact, discussion
