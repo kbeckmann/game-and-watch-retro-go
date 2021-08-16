@@ -19,7 +19,7 @@ fi
 
 mkdir -p "$INDIR"
 
-for emu in gb gg nes pce sms; do
+for emu in gb gg gw nes pce sms; do
     mkdir -p "${INDIR}/${emu}"
     COUNT=$(get_number_of_saves SAVE_$(echo ${emu} | awk '{print toupper($0)}')_)
     for (( i = 0; i < COUNT; i++ )); do
