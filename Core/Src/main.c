@@ -228,7 +228,7 @@ void store_erase(const uint8_t *flash_ptr, uint32_t size)
   );
 
   // Convert mem mapped pointer to flash address
-  uint32_t save_address = flash_ptr - &__EXTFLASH_START__;
+  uint32_t save_address = flash_ptr - &__EXTFLASH_BASE__;
 
   // Only allow 4kB aligned pointers
   assert((save_address & (4*1024 - 1)) == 0);
@@ -251,7 +251,7 @@ void store_save(const uint8_t *flash_ptr, const uint8_t *data, size_t size)
 #endif
 
   // Convert mem mapped pointer to flash address
-  uint32_t save_address = flash_ptr - &__EXTFLASH_START__;
+  uint32_t save_address = flash_ptr - &__EXTFLASH_BASE__;
 
   // Only allow 4kB aligned pointers
   assert((save_address & (4*1024 - 1)) == 0);
@@ -1292,7 +1292,7 @@ void MPU_Config(void)
 
     HAL_MPU_ConfigRegion(&MPU_InitStruct);
   }
-  
+
   // Stack redzone
   if (__builtin_popcount((size_t)&_Stack_Redzone_Size) == 1) {
     /* Only continue if a single bit set in _Stack_Redzone_Size.
