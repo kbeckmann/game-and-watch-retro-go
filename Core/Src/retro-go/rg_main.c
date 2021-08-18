@@ -382,7 +382,7 @@ void retro_loop()
                 (void) sel;
                 gui_redraw();
             }
-            else if (last_key == ODROID_INPUT_UP) {
+            else if (last_key == ODROID_INPUT_LEFT) {
                 gui_scroll_list(tab, LINE_UP);
                 repeat++;
             }
