@@ -371,7 +371,7 @@ endif
 ifeq (${CHECK_TOOLS},1)
 CheckTools:
 	@# Check that the tools in the toolchain exist
-	$(V)/bin/env bash -c " \
+	$(V)/usr/bin/env bash -c " \
 		for tool in $(CC) $(CP) $(SZ) $(GDB) $(DUMP); do \
 		which \$$tool 2> /dev/null > /dev/null || \
 		( \
