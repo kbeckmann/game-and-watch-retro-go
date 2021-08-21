@@ -370,6 +370,17 @@ endif
 
 ifeq (${CHECK_TOOLS},1)
 CheckTools:
+	@# Check that the tools in the toolchain exist
+	$(V)/usr/bin/env bash -c " \
+		for tool in $(CC) $(CP) $(SZ) $(GDB) $(DUMP); do \
+		which \$$tool 2> /dev/null > /dev/null || \
+		( \
+			echo -e \"\nCannot find \$$tool\n\" && \
+			exit 1 \
+		) \
+		done"
+
+	@# Check that GCC version 10 or 11 is used
 	$(V)$(CC) -v 2>&1 | grep "gcc version 1[01]" > /dev/null || \
 		( \
 			echo -e "\n\n\nPlease use GCC version 10\n\n\nYou are using:" && \
@@ -380,13 +391,13 @@ CheckTools:
 
 	$(V)$(CP) --info | grep "elf32-littlearm" > /dev/null || \
 		( \
-			echo -e "\n\n\nobjcopy seems to be missing or not suport elf32-littlearm. Please install binutils.\n\n\n" && \
+			echo -e "\n\n\n$(CP) does not suport elf32-littlearm.\nPlease install a toolchain that supports elf32-littlearm and armv7e-m.\n\n\n" && \
 			exit 1 \
 		)
 
 	$(V)$(DUMP) --help | grep "armv7e-m" > /dev/null || \
 		( \
-			echo -e "\n\n\nobjdump seems to be missing or not suport armv7e-m. Please install binutils.\n\n\n" && \
+			echo -e "\n\n\nobjdump does not suport armv7e-m.\nPlease install a toolchain that supports elf32-littlearm and armv7e-m.\n\n\n" && \
 			exit 1 \
 		)
 
