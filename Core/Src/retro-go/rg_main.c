@@ -152,6 +152,21 @@ static inline bool tab_enabled(tab_t *tab)
     return (disabled_tabs == gui.tabcount) || (tab->initialized && !tab->is_empty);
 }
 
+
+#if COVERFLOW_UI
+#define MAIN_MENU_INPUT_SCROLL_NEXT ODROID_INPUT_RIGHT
+#define MAIN_MENU_INPUT_SCROLL_PREV ODROID_INPUT_LEFT
+#define MAIN_MENU_INPUT_EMU_NEXT ODROID_INPUT_DOWN
+#define MAIN_MENU_INPUT_EMU_PREV ODROID_INPUT_UP
+
+#else
+#define MAIN_MENU_INPUT_SCROLL_NEXT ODROID_INPUT_DOWN
+#define MAIN_MENU_INPUT_SCROLL_PREV ODROID_INPUT_UP
+#define MAIN_MENU_INPUT_EMU_NEXT ODROID_INPUT_RIGHT
+#define MAIN_MENU_INPUT_EMU_PREV ODROID_INPUT_LEFT 
+
+#endif
+
 void retro_loop()
 {
     tab_t *tab = gui_get_current_tab();
@@ -233,8 +248,12 @@ void retro_loop()
                     {0, "By", "ducalex", 1, NULL},
                     {0, "", "kbeckmann", 1, NULL},
                     {0, "", "stacksmashing", 1, NULL},
+#if COVERFLOW_UI
                     {0, "UI Mod", "orzeus", -1, NULL},
                     {0, "---", "", -1, NULL},
+#else
+                    {0, "", "", -1, NULL},
+#endif
                     {2, "Debug menu", "", 1, NULL},
                     {1, "Reset settings", "", 1, NULL},
                     {0, "Close", "", 1, NULL},
@@ -280,7 +299,11 @@ void retro_loop()
                         {0, "Flash SR", (char *) status_str, 1, NULL},
                         {0, "Flash CR", (char *) config_str, 1, NULL},
                         {0, "Smallest erase", erase_size_str, 1, NULL},
+#if COVERFLOW_UI
                         {0, "---", "", 1, NULL},
+#else
+                        {0, "------------------", "", 1, NULL},
+#endif
                         {0, "DBGMCU IDCODE", dbgmcu_id_str, 1, NULL},
                         {1, "Enable DBGMCU CK", dbgmcu_cr_str, 1, NULL},
                         {2, "Disable DBGMCU CK", "", 1, NULL},
@@ -382,22 +405,22 @@ void retro_loop()
                 (void) sel;
                 gui_redraw();
             }
-            else if (last_key == ODROID_INPUT_LEFT) {
+            else if (last_key == MAIN_MENU_INPUT_SCROLL_PREV) {
                 gui_scroll_list(tab, LINE_UP);
                 repeat++;
             }
-            else if (last_key == ODROID_INPUT_RIGHT) {
+            else if (last_key == MAIN_MENU_INPUT_SCROLL_NEXT) {
                 gui_scroll_list(tab, LINE_DOWN);
                 repeat++;
             }
-            else if (last_key == ODROID_INPUT_UP) {
+            else if (last_key == MAIN_MENU_INPUT_EMU_PREV) {
                 gui.selected--;
                 if(gui.selected < 0) {
                     gui.selected = gui.tabcount - 1;
                 }
                 repeat++;
             }
-            else if (last_key == ODROID_INPUT_DOWN) {
+            else if (last_key == MAIN_MENU_INPUT_EMU_NEXT) {
                 gui.selected++;
                 if(gui.selected >= gui.tabcount) {
                     gui.selected = 0;

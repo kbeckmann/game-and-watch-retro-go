@@ -29,13 +29,42 @@ Core/Src/porting/odroid_audio.c \
 Core/Src/porting/odroid_display.c \
 Core/Src/porting/odroid_input.c \
 Core/Src/porting/odroid_netplay.c \
-Core/Src/porting/odroid_overlay.c \
 Core/Src/porting/odroid_sdcard.c \
 Core/Src/porting/odroid_system.c \
 Core/Src/porting/crc32.c \
 Core/Src/stm32h7xx_hal_msp.c \
 Core/Src/stm32h7xx_it.c \
 Core/Src/system_stm32h7xx.c
+
+ifdef COVERFLOW_UI
+C_SOURCES += \
+Core/Src/porting/odroid_overlay_coverflow.c \
+retro-go-stm32/retro-go/main/gui_coverflow.c \
+Core/Src/retro-go/bitmaps/coverflow/logo_cover_missed.c \
+Core/Src/retro-go/bitmaps/coverflow/header_gb.c \
+Core/Src/retro-go/bitmaps/coverflow/header_nes.c \
+Core/Src/retro-go/bitmaps/coverflow/header_sms.c \
+Core/Src/retro-go/bitmaps/coverflow/header_gg.c \
+Core/Src/retro-go/bitmaps/coverflow/header_col.c \
+Core/Src/retro-go/bitmaps/coverflow/header_sg1000.c \
+Core/Src/retro-go/bitmaps/coverflow/header_pce.c \
+Core/Src/retro-go/bitmaps/coverflow/header_gw.c \
+
+else
+C_SOURCES += \
+Core/Src/porting/odroid_overlay_stock.c \
+retro-go-stm32/retro-go/main/gui_stock.c \
+Core/Src/retro-go/bitmaps/coverflow/logo_cover_missed.c \
+Core/Src/retro-go/bitmaps/stock/header_gb.c \
+Core/Src/retro-go/bitmaps/stock/header_nes.c \
+Core/Src/retro-go/bitmaps/stock/header_sms.c \
+Core/Src/retro-go/bitmaps/stock/header_gg.c \
+Core/Src/retro-go/bitmaps/stock/header_col.c \
+Core/Src/retro-go/bitmaps/stock/header_sg1000.c \
+Core/Src/retro-go/bitmaps/stock/header_pce.c \
+Core/Src/retro-go/bitmaps/stock/header_gw.c \
+
+endif
 
 GNUBOY_C_SOURCES = \
 Core/Src/porting/gb/main_gb.c \

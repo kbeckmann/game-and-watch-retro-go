@@ -71,15 +71,6 @@ Core/Src/retro-go/rg_rtc.c \
 Core/Src/retro-go/rg_emulators.c \
 Core/Src/retro-go/rom_manager.c \
 Core/Src/porting/odroid_settings.c \
-Core/Src/retro-go/bitmaps/logo_cover_missed.c \
-Core/Src/retro-go/bitmaps/header_gb.c \
-Core/Src/retro-go/bitmaps/header_nes.c \
-Core/Src/retro-go/bitmaps/header_sms.c \
-Core/Src/retro-go/bitmaps/header_gg.c \
-Core/Src/retro-go/bitmaps/header_col.c \
-Core/Src/retro-go/bitmaps/header_sg1000.c \
-Core/Src/retro-go/bitmaps/header_pce.c \
-Core/Src/retro-go/bitmaps/header_gw.c \
 Core/Src/retro-go/bitmaps/logo_gb.c \
 Core/Src/retro-go/bitmaps/logo_nes.c \
 Core/Src/retro-go/bitmaps/logo_sms.c \
@@ -88,6 +79,7 @@ Core/Src/retro-go/bitmaps/logo_col.c \
 Core/Src/retro-go/bitmaps/logo_sg1000.c \
 Core/Src/retro-go/bitmaps/logo_pce.c \
 Core/Src/retro-go/bitmaps/logo_gw.c
+
 
 # Version and URL for the STM32CubeH7 SDK
 SDK_VERSION ?= v1.8.0
@@ -243,6 +235,10 @@ C_DEFS +=  \
 -DIS_LITTLE_ENDIAN \
 -DDEBUG_RG_ALLOC \
 -DMINIZ_NO_TIME
+
+ifdef COVERFLOW_UI
+	C_DEFS += -DCOVERFLOW_UI
+endif
 
 # AS includes
 AS_INCLUDES +=
