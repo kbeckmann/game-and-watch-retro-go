@@ -19,7 +19,7 @@
 /* access to internals for debug purpose */
 #include "sm510.h"
 
-/* Uncoment to enable debug menu in overlay */
+/* Uncomment to enable debug menu in overlay */
 //#define GW_EMU_DEBUG_OVERLAY
 
 #define ODROID_APPID_GW 6
@@ -51,7 +51,21 @@ static bool gw_system_LoadState(char *pathName)
 }
 
 /* callback to get buttons state */
-unsigned int gw_get_buttons() { return buttons_get(); }
+unsigned int gw_get_buttons()
+{
+    unsigned int hw_buttons = 0;
+    hw_buttons |= joystick.values[ODROID_INPUT_LEFT];
+    hw_buttons |= joystick.values[ODROID_INPUT_UP] << 1;
+    hw_buttons |= joystick.values[ODROID_INPUT_RIGHT] << 2;
+    hw_buttons |= joystick.values[ODROID_INPUT_DOWN] << 3;
+    hw_buttons |= joystick.values[ODROID_INPUT_A] << 4;
+    hw_buttons |= joystick.values[ODROID_INPUT_B] << 5;
+    hw_buttons |= joystick.values[ODROID_INPUT_SELECT] << 6;
+    hw_buttons |= joystick.values[ODROID_INPUT_START] << 7;
+    hw_buttons |= joystick.values[ODROID_INPUT_VOLUME] << 8;
+    hw_buttons |= joystick.values[ODROID_INPUT_POWER] << 9;
+    return hw_buttons;
+}
 
 static void gw_sound_init()
 {
@@ -119,9 +133,8 @@ static void gw_sound_submit()
     end_cycles
         - estimated duration of overall processing.
     */
-static unsigned int loop_duration_us = 1, end_duration_us = 1, proc_duration_us = 1, blit_duration_us = 1;
+
 static unsigned int loop_cycles = 1, end_cycles = 1, proc_cycles = 1, blit_cycles = 1;
-static const unsigned int SYSTEM_CORE_CLOCK_MHZ = 280;
 
 /* DWT counter used to measure time execution */
 volatile unsigned int *DWT_CONTROL = (unsigned int *)0xE0001000;
@@ -132,6 +145,7 @@ volatile unsigned int *LAR = (unsigned int *)0xE0001FB0; // <-- lock access regi
 #define get_dwt_cycles() *DWT_CYCCNT
 #define clear_dwt_cycles() *DWT_CYCCNT = 0
 
+#ifdef GW_EMU_DEBUG_OVERLAY
 static void enable_dwt_cycles()
 {
 
@@ -144,11 +158,14 @@ static void enable_dwt_cycles()
     *DWT_CYCCNT = 0;                 // clear DWT cycle counter
     *DWT_CONTROL = *DWT_CONTROL | 1; // enable DWT cycle counter
 }
+#endif
 
 static void gw_debug_bar()
 {
 
 #ifdef GW_EMU_DEBUG_OVERLAY
+    static unsigned int loop_duration_us = 1, end_duration_us = 1, proc_duration_us = 1, blit_duration_us = 1;
+    static const unsigned int SYSTEM_CORE_CLOCK_MHZ = 280;
 
     static bool debug_init_done = false;
 
@@ -270,13 +287,16 @@ int app_main_gw(uint8_t load_state)
         /* get how many cycles have been spent to process everything */
         end_cycles = get_dwt_cycles();
 
-        static dma_transfer_state_t last_dma_state = DMA_TRANSFER_STATE_HF;
         if(!common_emu_state.skip_frames)
         {
             for(uint8_t p = 0; p < common_emu_state.pause_frames + 1; p++) {
                 static dma_transfer_state_t last_dma_state = DMA_TRANSFER_STATE_HF;
                 while (dma_state == last_dma_state) {
+                    #ifdef GW_EMU_DEBUG_OVERLAY
+                    __NOP();
+                    #else
                     cpumon_sleep();
+                    #endif
                 }
                 last_dma_state = dma_state;
             }
