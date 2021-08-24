@@ -532,6 +532,13 @@ flash-monitor: flash
 # Alias for flash
 flash_all: flash
 
+backup_artwork:
+	# Copies all ".bmp" files from the rom directories into artwork/
+	rsync -armR --include="*/" --include="*.bmp" --exclude="*" roms artwork
+	# Zip it up incase you want to share.
+	zip -r -o artwork.zip artwork
+.PHONY: backup_artwork
+
 # Transfers save files from the device to the host machine
 flash_saves_backup: $(BUILD_DIR)/$(TARGET).elf
 	$(V)./scripts/saves_backup.sh $<
