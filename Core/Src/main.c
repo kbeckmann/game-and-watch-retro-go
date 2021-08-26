@@ -143,7 +143,7 @@ __attribute__((optimize("-O0"))) void BSOD(BSOD_t fault, void *pc, void *lr)
 
   lcd_sync();
   lcd_reset_active_buffer();
-  odroid_display_set_backlight(ODROID_BACKLIGHT_LEVEL3);
+  odroid_display_set_backlight(ODROID_BACKLIGHT_LEVEL6);
 
   odroid_overlay_draw_text(0, 0, GW_LCD_WIDTH, msg, C_RED, C_BLUE);
 
