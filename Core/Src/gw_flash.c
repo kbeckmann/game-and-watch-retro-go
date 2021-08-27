@@ -218,6 +218,24 @@ const flash_cmd_t cmds_quad_32b_mx[CMD_COUNT] = {
     [CMD_READ]   = CMD_DEF(0xEC, LINES_1, LINES_4, ADDR_SIZE_32B, LINES_4,    6), // 4READ4B dummy=6
 };
 
+const flash_cmd_t cmds_quad_32b_mx54[CMD_COUNT] = {
+    // cmd                  cmd  i_lines  a_lines         a_size  d_lines  dummy
+    [CMD_WRSR]   = CMD_DEF(0x01, LINES_1, LINES_0, ADDR_SIZE_24B, LINES_1,    0),
+    [CMD_RDSR]   = CMD_DEF(0x05, LINES_1, LINES_0, ADDR_SIZE_24B, LINES_1,    0),
+    [CMD_RDCR]   = CMD_DEF(0x15, LINES_1, LINES_0, ADDR_SIZE_24B, LINES_1,    0),
+    [CMD_WREN]   = CMD_DEF(0x06, LINES_1, LINES_0, ADDR_SIZE_24B, LINES_0,    0),
+    [CMD_RDID]   = CMD_DEF(0x9F, LINES_1, LINES_0, ADDR_SIZE_24B, LINES_1,    0),
+    [CMD_RSTEN]  = CMD_DEF(0x66, LINES_1, LINES_0, ADDR_SIZE_24B, LINES_0,    0),
+    [CMD_RST]    = CMD_DEF(0x99, LINES_1, LINES_0, ADDR_SIZE_24B, LINES_0,    0),
+    [CMD_CE]     = CMD_DEF(0x60, LINES_1, LINES_0, ADDR_SIZE_24B, LINES_0,    0), // CE    Chip Erase
+    [CMD_ERASE1] = CMD_DEF(0x20, LINES_1, LINES_1, ADDR_SIZE_32B, LINES_0,    0), // SE    Sector Erase
+    [CMD_ERASE2] = CMD_DEF(0x52, LINES_1, LINES_1, ADDR_SIZE_32B, LINES_0,    0), // BE32K Block Erase 32K
+    [CMD_ERASE3] = CMD_DEF(0xD8, LINES_1, LINES_1, ADDR_SIZE_32B, LINES_0,    0), // BE    Block Erase 64K
+    [CMD_ERASE4] = { },
+    [CMD_PP]     = CMD_DEF(0x38, LINES_1, LINES_4, ADDR_SIZE_32B, LINES_4,    0), // 4PP
+    [CMD_READ]   = CMD_DEF(0xEB, LINES_1, LINES_4, ADDR_SIZE_32B, LINES_4,   10), // 4READ dummy=10
+};
+
 const flash_cmd_t cmds_quad_32b_s[CMD_COUNT] = {
     // cmd                  cmd  i_lines  a_lines         a_size  d_lines  dummy
     [CMD_WRSR]   = CMD_DEF(0x01, LINES_1, LINES_0, ADDR_SIZE_24B, LINES_1,     0),
@@ -261,6 +279,7 @@ static void init_mx_issi(void);
 const flash_config_t config_spi_24b       = FLASH_CONFIG_DEF(cmds_spi_24b,       0x01000,  0x8000, 0x10000, 0,  false, NULL);
 const flash_config_t config_quad_24b_mx   = FLASH_CONFIG_DEF(cmds_quad_24b_mx,   0x01000,  0x8000, 0x10000, 0,   true, init_mx_issi);
 const flash_config_t config_quad_32b_mx   = FLASH_CONFIG_DEF(cmds_quad_32b_mx,   0x01000,  0x8000, 0x10000, 0,   true, init_mx_issi);
+const flash_config_t config_quad_32b_mx54 = FLASH_CONFIG_DEF(cmds_quad_32b_mx54, 0x01000,  0x8000, 0x10000, 0,   true, init_mx_issi);
 const flash_config_t config_quad_32b_s    = FLASH_CONFIG_DEF(cmds_quad_32b_s,    0x40000,       0,       0, 0,   true, init_spansion);
 const flash_config_t config_quad_24b_issi = FLASH_CONFIG_DEF(cmds_quad_24b_issi, 0x01000,  0x8000, 0x10000, 0,   true, init_mx_issi);
 
@@ -272,10 +291,11 @@ const jedec_config_t jedec_map[] = {
     JEDEC_CONFIG_DEF(0xC2, 0x25, 0x38, "MX25U1283xF", &config_quad_24b_mx),   // 16MB MX25U12832F, MX25U12835F
 
     // MX 32 bit address
-    JEDEC_CONFIG_DEF(0xC2, 0x25, 0x39, "MX25U25635F", &config_quad_32b_mx),   // 32 MB
-    JEDEC_CONFIG_DEF(0xC2, 0x25, 0x3A, "MX25U51245G", &config_quad_32b_mx),   // 64 MB
-    JEDEC_CONFIG_DEF(0xC2, 0x25, 0x3B, "MX66U1G45G",  &config_quad_32b_mx),   // 128 MB
-    JEDEC_CONFIG_DEF(0xC2, 0x25, 0x3C, "MX66U2G45G",  &config_quad_32b_mx),   // 256 MB
+    JEDEC_CONFIG_DEF(0xC2, 0x25, 0x39, "MX25U25635F",    &config_quad_32b_mx),   // 32 MB
+    JEDEC_CONFIG_DEF(0xC2, 0x25, 0x3A, "MX25U51245G",    &config_quad_32b_mx),   // 64 MB
+    JEDEC_CONFIG_DEF(0xC2, 0x95, 0x3A, "MX25U51245G-54", &config_quad_32b_mx54), // 64 MB
+    JEDEC_CONFIG_DEF(0xC2, 0x25, 0x3B, "MX66U1G45G",     &config_quad_32b_mx),   // 128 MB
+    JEDEC_CONFIG_DEF(0xC2, 0x25, 0x3C, "MX66U2G45G",     &config_quad_32b_mx),   // 256 MB
 
     // Cypress/Infineon 32 bit address
     // These chips only have 64kB erase size which won't work well with the rest of the code.
