@@ -149,7 +149,7 @@ static void draw_progress(flashapp_t *flashapp)
     draw_text_line_centered(LIST_Y_OFFSET + 2 * LIST_LINE_HEIGHT, flashapp->tab.name, C_GW_YELLOW, C_BLACK);
 
     if (flashapp->progress_max != 0) {
-        int32_t progress_percent = (100 * flashapp->progress_value) / flashapp->progress_max;
+        int32_t progress_percent = (100 * (uint64_t)flashapp->progress_value) / flashapp->progress_max;
         int32_t progress_width = (PROGRESS_WIDTH * (uint64_t)flashapp->progress_value) / flashapp->progress_max;
 
         sprintf(progress_str, "%ld%%", progress_percent);
