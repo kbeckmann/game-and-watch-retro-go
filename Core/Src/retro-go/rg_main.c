@@ -14,6 +14,7 @@
 #include "gw_buttons.h"
 #include "gw_flash.h"
 #include "rg_rtc.h"
+#include "odroid_overlay_ex.h"
 
 #if 0
 #define KEY_SELECTED_TAB  "SelectedTab"
@@ -229,14 +230,15 @@ void retro_loop()
 
             if (last_key == ODROID_INPUT_START) {
                 odroid_dialog_choice_t choices[] = {
-                    {0, "Ver.", GIT_HASH, 1, NULL},
-                    {0, "By", "ducalex", 1, NULL},
-                    {0, "", "kbeckmann", 1, NULL},
-                    {0, "", "stacksmashing", 1, NULL},
-                    {0, "UI Mod", "orzeus", -1, NULL},
-                    {0, "---", "", -1, NULL},
+                    {0, "Ver.  :", GIT_HASH, 1, NULL},
+                    {0, "By    :", "ducalex", 1, NULL},
+                    {0, "      :", "kbeckmann", 1, NULL},
+                    {0, "      :", "stacksmashing", 1, NULL},
+                    {0, "UI Mod:", "orzeus", -1, NULL},
+                    ODROID_DIALOG_CHOICE_SEPARATOR,
                     {2, "Debug menu", "", 1, NULL},
                     {1, "Reset settings", "", 1, NULL},
+					ODROID_DIALOG_CHOICE_SEPARATOR,
                     {0, "Close", "", 1, NULL},
                     ODROID_DIALOG_CHOICE_LAST
                 };
@@ -280,10 +282,11 @@ void retro_loop()
                         {0, "Flash SR", (char *) status_str, 1, NULL},
                         {0, "Flash CR", (char *) config_str, 1, NULL},
                         {0, "Smallest erase", erase_size_str, 1, NULL},
-                        {0, "---", "", 1, NULL},
+                        ODROID_DIALOG_CHOICE_SEPARATOR,
                         {0, "DBGMCU IDCODE", dbgmcu_id_str, 1, NULL},
                         {1, "Enable DBGMCU CK", dbgmcu_cr_str, 1, NULL},
                         {2, "Disable DBGMCU CK", "", 1, NULL},
+						ODROID_DIALOG_CHOICE_SEPARATOR,
                         {0, "Close", "", 1, NULL},
                         ODROID_DIALOG_CHOICE_LAST
                     };
@@ -321,7 +324,7 @@ void retro_loop()
             else if (last_key == ODROID_INPUT_VOLUME) {
                 char timeout_value[32];
                 odroid_dialog_choice_t choices[] = {
-                    {0, "---", "", -1, NULL},
+                    ODROID_DIALOG_CHOICE_SEPARATOR,
                     {0, "Idle power off", timeout_value, 1, &main_menu_timeout_cb},
                     // {0, "Color theme", "1/10", 1, &color_shift_cb},
                     // {0, "Font size", "Small", 1, &font_size_cb},

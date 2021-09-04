@@ -15,6 +15,7 @@
 #include "main_nes.h"
 #include "main_smsplusgx.h"
 #include "main_pce.h"
+#include "odroid_overlay_ex.h"
 #include "main_gw.h"
 
 // Increase when adding new emulators
@@ -302,7 +303,7 @@ void emulator_show_file_info(retro_emulator_file_t *file)
         {0, "Type", type_value, 1, NULL},
         {0, "Size", size_value, 1, NULL},
         {0, "ImgSize", img_size, 1, NULL},
-        {0, "---", "", -1, NULL},
+        ODROID_DIALOG_CHOICE_SEPARATOR,
         {1, "Close", "", 1, NULL},
         ODROID_DIALOG_CHOICE_LAST
     };
@@ -330,8 +331,9 @@ void emulator_show_file_menu(retro_emulator_file_t *file)
     odroid_dialog_choice_t choices[] = {
         {0, "Resume game ", "", has_save, NULL},
         {1, "New game    ", "", 1, NULL},
-        {0, "---", "", -1, NULL},
+        ODROID_DIALOG_CHOICE_SEPARATOR,
         {3, is_fav ? "Del favorite" : "Add favorite", "", 1, NULL},
+		ODROID_DIALOG_CHOICE_SEPARATOR,
         {2, "Delete save ", "", has_save || has_sram, NULL},
         ODROID_DIALOG_CHOICE_LAST
     };

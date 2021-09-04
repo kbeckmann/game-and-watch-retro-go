@@ -383,19 +383,26 @@ class ROMParser:
 
         prefix = Path(prefix)
 
-        if not rom.img_path.exists():
-            # Attempt to generate a bmp from another filetype
-            # Check if a png exists
-            png_path = rom.img_path.with_suffix(".png")
+        png_path = rom.img_path.with_suffix(".png")
+        # TODO: add jpg and other paths
+        if png_path.exists():
+            from PIL import Image, ImageOps
+
+            img = Image.open(png_path).convert(mode="RGB").resize((128, 96), Image.ANTIALIAS)
+            #img = ImageOps.resize(img, (128, 96))
+            write_rgb565(img, rom.img_path)
+        else:
+            jpg_path = rom.img_path.with_suffix(".jpg")
             # TODO: add jpg and other paths
-            if png_path.exists():
+            if jpg_path.exists():
                 from PIL import Image, ImageOps
 
-                img = Image.open(png_path).convert(mode="RGB").resize((130, 98), Image.ANTIALIAS).crop((1,1,129,97))
+                img = Image.open(jpg_path).convert(mode="RGB").resize((128, 96), Image.ANTIALIAS)
                 #img = ImageOps.resize(img, (128, 96))
                 write_rgb565(img, rom.img_path)
             else:
-                raise NoArtworkError
+                if not rom.img_path.exists():
+                    raise NoArtworkError
 
         subprocess.check_output(
             [

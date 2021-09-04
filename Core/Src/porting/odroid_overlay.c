@@ -224,35 +224,47 @@ uint16_t get_darken_pixel(uint16_t color, uint16_t darken)
     return r | g | b;
 }
 
+void odroid_overlay_darken_all()
+{
+    if (dialog_open_depth <= 0) {   //darken bg
+        uint16_t mgic = 0b0000100000100001;
+        uint16_t *dst_img = lcd_get_active_buffer();
+        if ((dst_img[0] == mgic) || is_lcd_swap_pending())
+            return; 
+        //lcd_sync();
+        for (int y = 0; y < ODROID_SCREEN_HEIGHT; y++) {
+            for (int x = 0; x < ODROID_SCREEN_WIDTH; x++)
+                dst_img[y * ODROID_SCREEN_WIDTH + x] = get_darken_pixel(dst_img[y * ODROID_SCREEN_WIDTH + x], 40);
+        }
+        dst_img[0] = mgic;
+        lcd_sync();
+        //HAL_Delay(20);
+        //lcd_swap();
+    }
+}
 
 void odroid_overlay_draw_dialog(const char *header, odroid_dialog_choice_t *options, int sel)
 {
-    int width = header ? strlen(header) : 8;
+    int width = header ? strlen(header) + 2 : 8;
     int padding = 0;
     int len = 0;
 
     int row_margin = 1;
-    int row_height = odroid_overlay_get_font_size() + row_margin * 2;
+    int row_height = odroid_overlay_get_big_font_size() + row_margin * 2;
 
     int box_width = 64;
     int box_height = 64;
     int box_padding = 6;
     int box_color = C_BLACK;
-    int box_border_color = C_GW_YELLOW;
+    int box_border_color = C_GW_OPAQUE_YELLOW;
     int box_text_color = C_GW_YELLOW;
-
-    if (dialog_open_depth <= 0) {
-        uint16_t *dst_img = lcd_get_active_buffer();
-        for (int y = 0; y < ODROID_SCREEN_HEIGHT; y++) {
-            for (int x = 0; x < ODROID_SCREEN_WIDTH; x++)
-                dst_img[y * ODROID_SCREEN_WIDTH + x] = get_darken_pixel(dst_img[y * ODROID_SCREEN_WIDTH + x], 40);
-        }
-
-    }
+    odroid_dialog_choice_t separator = ODROID_DIALOG_CHOICE_SEPARATOR;
 
     int options_count = get_dialog_items_count(options);
 
     char *rows = rg_alloc(options_count * 256, MEM_ANY);
+
+    odroid_overlay_darken_all();
 
     for (int i = 0; i < options_count; i++)
     {
@@ -268,7 +280,7 @@ void odroid_overlay_draw_dialog(const char *header, odroid_dialog_choice_t *opti
             options[i].update_cb(&options[i], ODROID_DIALOG_INIT, 0);
         }
         if (options[i].value[0]) {
-            len = sprintf(rows + i * 256, " %*s: %s ", -padding, options[i].label, options[i].value);
+            len = sprintf(rows + i * 256, " %*s %s ", -padding, options[i].label, options[i].value);
         } else {
             len = sprintf(rows + i * 256, " %s ", options[i].label);
         }
@@ -277,7 +289,7 @@ void odroid_overlay_draw_dialog(const char *header, odroid_dialog_choice_t *opti
 
     if (width > 32) width = 32;
 
-    box_width = (odroid_overlay_get_font_width() * width) + box_padding * 2;
+    box_width = (odroid_overlay_get_big_font_width() * width) + box_padding * 2;
     box_height = (row_height * options_count) + (header ? row_height + 8 : 0) + box_padding * 2;
 
     int box_x = (ODROID_SCREEN_WIDTH - box_width) / 2;
@@ -286,28 +298,37 @@ void odroid_overlay_draw_dialog(const char *header, odroid_dialog_choice_t *opti
     int x = box_x + box_padding;
     int y = box_y + box_padding;
 
+    uint16_t fg, bg, color, inner_width = box_width - (box_padding * 2);
     if (header)
     {
-        int pad = (0.5f * (width - strlen(header)) * odroid_overlay_get_font_width());
+        //int pad = (0.5f * (width - strlen(header)) * odroid_overlay_get_chn_font_width());
         odroid_overlay_draw_rect(box_x - 1, box_y - 1, box_width + 2, row_height + 8, 1, box_border_color);
-        odroid_overlay_draw_rect(box_x, box_y, box_width, row_height + 7, 1, C_GW_OPAQUE_YELLOW);
-        odroid_overlay_draw_fill_rect(box_x + 1, box_y + 1, box_width - 2, row_height + 5, C_GW_RED);
-        odroid_overlay_draw_big_text_line(x + pad, box_y + 2, box_width - 2 * pad - 8, header, C_GW_YELLOW, C_GW_RED);
+        //odroid_overlay_draw_rect(box_x, box_y, box_width, row_height + 7, 1, C_GW_OPAQUE_YELLOW);
+        odroid_overlay_draw_fill_rect(box_x, box_y, box_width, row_height + 7, C_GW_RED);
+        odroid_overlay_draw_big_text_line(x , box_y + 5, inner_width, header, C_GW_YELLOW, C_GW_RED);
+        odroid_overlay_draw_fill_rect(x + inner_width - 2, box_y + 5, 4, 4, C_GW_YELLOW);
+        odroid_overlay_draw_fill_rect(x + inner_width, box_y + 11, 2, 4, C_GW_OPAQUE_YELLOW);
         y += row_height + 8;
     }
 
-    uint16_t fg, bg, color, inner_width = box_width - (box_padding * 2);
     for (int i = 0; i < options_count; i++)
     {
-        color = options[i].enabled == 1 ? box_text_color : C_GRAY;
-        fg = (i == sel) ? box_color : color;
-        bg = (i == sel) ? color : box_color;
-        if (strncmp((char *)(rows + i * 256), " --- ", 5) == 0) {
-            odroid_overlay_draw_fill_rect(x, y, inner_width, row_height + 2 * row_margin, bg);
-            odroid_overlay_draw_fill_rect(x, y + row_height / 2 - row_margin, inner_width, 1, C_GW_OPAQUE_YELLOW);
+        color = options[i].enabled == 1 ? box_text_color : C_GW_OPAQUE_YELLOW;
+        if (options[i].enabled == 1) {
+            fg = (i == sel) ? box_color : color;
+            bg = (i == sel) ? color : box_color;
         }
         else {
-            row_height = odroid_overlay_draw_text(x, y + row_margin, inner_width, rows + i * 256, fg, bg);
+            fg = color;
+            bg = C_BLACK;
+        }
+
+        if (options[i].id == separator.id) {
+            odroid_overlay_draw_fill_rect(x, y, inner_width, row_height + 3 * row_margin, bg);
+            odroid_overlay_draw_fill_rect(x + 6, y + row_height / 2 - row_margin, inner_width - 12, 1, box_border_color);
+        }
+        else {
+            row_height = odroid_overlay_draw_big_text(x, y + row_margin, inner_width, rows + i * 256, fg, bg);
             row_height += row_margin * 2;
             odroid_overlay_draw_rect(x, y, inner_width, row_height, row_margin, bg);
         }
@@ -332,9 +353,10 @@ int odroid_overlay_dialog(const char *header, odroid_dialog_choice_t *options, i
     bool select = false;
     odroid_gamepad_state_t joystick;
 
-    odroid_overlay_draw_dialog(header, options, sel);
     lcd_sync();
-
+    lcd_swap();
+    HAL_Delay(20);
+    odroid_overlay_draw_dialog(header, options, sel);
     dialog_open_depth++;
 
     while (odroid_input_key_is_pressed(ODROID_INPUT_ANY))
@@ -444,20 +466,24 @@ int odroid_overlay_dialog(const char *header, odroid_dialog_choice_t *options, i
 int odroid_overlay_confirm(const char *text, bool yes_selected)
 {
     odroid_dialog_choice_t choices[] = {
+        {0, text, "", -1, NULL},
+        ODROID_DIALOG_CHOICE_SEPARATOR,
         {1, "Yes", "", 1, NULL},
         {0, "No ", "", 1, NULL},
         ODROID_DIALOG_CHOICE_LAST
     };
-    return odroid_overlay_dialog(text, choices, yes_selected ? 0 : 1);
+    return odroid_overlay_dialog("Please choose:", choices, yes_selected ? 2 : 3);
 }
 
 void odroid_overlay_alert(const char *text)
 {
     odroid_dialog_choice_t choices[] = {
+        {0, text, "", -1, NULL},
+        ODROID_DIALOG_CHOICE_SEPARATOR,
         {1, "OK", "", 1, NULL},
         ODROID_DIALOG_CHOICE_LAST
     };
-    odroid_overlay_dialog(text, choices, 0);
+    odroid_overlay_dialog("Confirm", choices, 2);
 }
 
 bool odroid_overlay_dialog_is_open(void)
@@ -675,13 +701,13 @@ int odroid_overlay_game_menu(odroid_dialog_choice_t *extra_options)
         // {0, "Continue", "",  1, NULL},
         {10, "Save & Continue", "",  1, NULL},
         {20, "Save & Quit", "", 1, NULL},
-        {0, "---", "",  -1, NULL},
+        ODROID_DIALOG_CHOICE_SEPARATOR,
         {30, "Reload", "", 1, NULL},
         {40, "Options", "", 1, NULL},
         // {50, "Tools", "", 1, NULL},
-        {0, "---", "",  -1, NULL},
+        ODROID_DIALOG_CHOICE_SEPARATOR,
         {90, "Power off", "", 1, NULL},
-        {0, "---", "",  -1, NULL},
+        ODROID_DIALOG_CHOICE_SEPARATOR,
         {100, "Quit to menu", "", 1, NULL},
         ODROID_DIALOG_CHOICE_LAST
     };

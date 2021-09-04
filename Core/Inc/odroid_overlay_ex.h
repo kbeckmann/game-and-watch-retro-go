@@ -3,6 +3,8 @@
 #include "stdbool.h"
 #include "stdint.h"
 
+#define ODROID_DIALOG_CHOICE_SEPARATOR {0x0F0F0F0E, "-", "-", -1, NULL}
+
 int  odroid_overlay_get_small_font_size();
 int  odroid_overlay_get_small_font_width();
 int  odroid_overlay_get_big_font_size();

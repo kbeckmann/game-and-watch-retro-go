@@ -613,7 +613,7 @@ void common_ingame_overlay(void) {
                     INGAME_OVERLAY_Y + INGAME_OVERLAY_BARS_H);
             draw_img(fb, IMG_SUN, INGAME_OVERLAY_BARS_IMG_X, INGAME_OVERLAY_BARS_IMG_Y);
 
-            for(int8_t i=10-1; i > 0; i--){
+            for(int8_t i=ODROID_BACKLIGHT_LEVEL_COUNT-1; i > 0; i--){
                 if(i <= level)
                     draw_rectangle(fb,
                             INGAME_OVERLAY_BOX_X,

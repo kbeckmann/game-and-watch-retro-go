@@ -5,7 +5,7 @@
 #include "gw_lcd.h"
 
 static const uint8_t backlightLevels[] = {128, 130, 133, 139, 149, 162, 178, 198, 222, 255};
-static odroid_display_backlight_t backlightLevel = ODROID_BACKLIGHT_LEVEL3;
+static odroid_display_backlight_t backlightLevel = ODROID_BACKLIGHT_LEVEL6;
 static odroid_display_rotation_t rotationMode = ODROID_DISPLAY_ROTATION_OFF;
 static odroid_display_scaling_t scalingMode = ODROID_DISPLAY_SCALING_FILL;
 static odroid_display_filter_t filterMode = ODROID_DISPLAY_FILTER_OFF;
