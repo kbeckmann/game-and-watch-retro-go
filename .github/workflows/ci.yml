@@ -5,6 +5,10 @@ on:
     branches:
       - main
       - ci
+  pull_request:
+    branches:
+      - main
+
 
 jobs:
   build-ubuntu:

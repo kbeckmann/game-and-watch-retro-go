@@ -57,13 +57,17 @@ rg_app_desc_t *odroid_system_get_app()
 
 bool odroid_system_emu_load_state(int slot)
 {
-    (*currentApp.loadState)("");
+    if (currentApp.loadState != NULL) {
+        (*currentApp.loadState)("");
+    }
     return true;
 }
 
 bool odroid_system_emu_save_state(int slot)
 {
-    (*currentApp.saveState)("");
+    if (currentApp.saveState != NULL) {
+        (*currentApp.saveState)("");
+    }
     return true;
 }
 
