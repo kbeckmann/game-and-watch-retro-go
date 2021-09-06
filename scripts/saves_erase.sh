@@ -23,7 +23,7 @@ fi
 /usr/bin/env python3 -c "with open('${DUMMY_FILE}', 'wb') as f: f.write(b'\xFF'*${saveflash_size})"
 
 # Flash it to the saveflash_start
-${FLASHAPP} "${DUMMY_FILE}" $(( saveflash_start - 0x90000000 ))
+${FLASH_MULTI} "${DUMMY_FILE}" $(( saveflash_start - 0x90000000 ))
 
 # Reset the device and disable clocks from running when device is suspended
 reset_and_disable_debug
