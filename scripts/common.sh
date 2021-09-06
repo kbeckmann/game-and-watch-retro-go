@@ -26,7 +26,8 @@ else
     DEFAULT_GDB=arm-none-eabi-gdb
 fi
 
-FLASHAPP=scripts/flash_multi.sh
+FLASHAPP=scripts/flashapp.sh
+FLASH_MULTI=scripts/flash_multi.sh
 
 OBJDUMP=${OBJDUMP:-$DEFAULT_OBJDUMP}
 GDB=${GDB:-$DEFAULT_GDB}

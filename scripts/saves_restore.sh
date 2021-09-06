@@ -38,7 +38,7 @@ for emu in gb gg gw nes pce sms; do
             echo "    save_size=$size"
             echo ""
             echo ""
-            ${FLASHAPP} "${image}" ${address} ${size}
+            ${FLASH_MULTI} "${image}" ${address} ${size}
         else
             echo ""
             echo ""

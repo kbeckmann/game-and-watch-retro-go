@@ -456,7 +456,7 @@ $(BUILD_DIR):
 
 OPENOCD ?= openocd
 ADAPTER ?= stlink
-FLASHAPP ?= scripts/flash_multi.sh
+FLASH_MULTI ?= scripts/flash_multi.sh
 FLASHTEST ?= scripts/flashapp.sh --test
 
 # Starts openocd and attaches to the target. To be used with 'flash_intflash_nc' and 'gdb'
@@ -475,6 +475,10 @@ erase_intflash_1:
 erase_intflash_2:
 	$(OPENOCD) -f scripts/interface_$(ADAPTER).cfg -c "init; halt; flash erase_address 0x08100000 131072; resume; exit"
 .PHONY: erase_intflash2
+
+erase_extflash: flash_intflash
+	$(V)./scripts/extflash_erase.sh $(EXTFLASH_SIZE)
+.PHONY: erase_extflash
 
 start_bank_1:
 	$(OPENOCD) -f scripts/interface_$(ADAPTER).cfg \
@@ -511,7 +515,7 @@ flash_intflash_nc: $(BUILD_DIR)/$(TARGET)_intflash.bin
 .PHONY: flashx
 
 flash_extflash: $(BUILD_DIR)/$(TARGET)_extflash.bin
-	$(FLASHAPP) $(BUILD_DIR)/$(TARGET)_extflash.bin $(EXTFLASH_OFFSET)
+	$(FLASH_MULTI) $(BUILD_DIR)/$(TARGET)_extflash.bin $(EXTFLASH_OFFSET)
 .PHONY: flash_extflash
 
 flash_test: flash_intflash
