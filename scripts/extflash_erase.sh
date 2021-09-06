@@ -17,7 +17,7 @@ if [[ ! -e "${DUMMY_FILE}" ]]; then
 fi
 
 # Create dummy file with one page of 0xFF.
-SIZE = 256
+SIZE=256
 /usr/bin/env python3 -c "with open('${DUMMY_FILE}', 'wb') as f: f.write(b'\xFF'*${SIZE})"
 
 # Flash it to start of the extflash and perform a Chip Erase
