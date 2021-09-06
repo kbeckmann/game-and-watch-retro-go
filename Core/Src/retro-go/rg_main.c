@@ -463,10 +463,10 @@ void app_main(void)
     // favorites_init();
 
     // Start the previously running emulator directly if it's a valid pointer.
-    // If the user holds down any key more than the power button,
-    // start the retro-go gui as a fallback.
+    // If the user holds down the TIME button during startup,start the retro-go 
+    // gui instead of the last ROM as a fallback.
     retro_emulator_file_t *file = odroid_settings_StartupFile_get();
-    if (emulator_is_file_valid(file) && ((GW_GetBootButtons() & ~B_POWER) == 0)) {
+    if (emulator_is_file_valid(file) && ((GW_GetBootButtons() & B_TIME) == 0)) {
         emulator_start(file, true, true);
     } else {
         retro_loop();
