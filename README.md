@@ -195,6 +195,8 @@ The flash operates at 1.8V so make sure the one you change to also matches this.
 
 The recommended flash to upgrade to is MX25U12835FM2I-10G. It's 16MB, the commands are compatible with the stock firmware and it's also the largest flash that comes in the same package as the original.
 
+:exclamation: Make sure to backup and unlock your device before changing the external flash. The backup process requires the external flash to contain the original data.
+
 ## Advanced Flash Examples
 
 ### Tim's patched firmware
