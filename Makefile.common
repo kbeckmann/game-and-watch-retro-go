@@ -99,7 +99,6 @@ Core/Src/retro-go/rg_emulators.c \
 Core/Src/retro-go/rom_manager.c \
 Core/Src/porting/odroid_settings.c \
 Core/Src/retro-go/i18n/rg_i18n_en_us.c \
-Core/Src/retro-go/i18n/rg_i18n_zh_cn.c \
 Core/Src/retro-go/bitmaps/logo_cover_missed.c \
 Core/Src/retro-go/bitmaps/header_gb.c \
 Core/Src/retro-go/bitmaps/header_nes.c \
