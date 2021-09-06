@@ -223,7 +223,7 @@ void retro_loop()
         {
             gui_event(TAB_IDLE, tab);
 
-            if (idle_s % 10 == 0)
+            //if (idle_s % 10 == 0)
                 gui_draw_status(tab);
         }
 
@@ -249,13 +249,13 @@ void retro_loop()
 
             if (last_key == ODROID_INPUT_START) {
                 odroid_dialog_choice_t choices[] = {
-                    {0, s_Version, GIT_HASH, 1, NULL},
-                    {0, s_Author, "ducalex", 1, NULL},
-                    {0, s_Author_, "kbeckmann", 1, NULL},
-                    {0, s_Author_, "stacksmashing", 1, NULL},
-                    {0, s_UI_Mod, "orzeus", -1, NULL},
+                    {9, s_Version, GIT_HASH, 1, NULL},
+                    {9, s_Author, "ducalex", 1, NULL},
+                    {9, s_Author_, "kbeckmann", 1, NULL},
+                    {9, s_Author_, "stacksmashing", 1, NULL},
+                    {9, s_UI_Mod, "orzeus", 1, NULL},
                     ODROID_DIALOG_CHOICE_SEPARATOR,
-                    {0, s_Lang, s_LangAuthor, -1, NULL},
+                    {9, s_Lang, s_LangAuthor, 1, NULL},
                     ODROID_DIALOG_CHOICE_SEPARATOR,
                     {2, s_Debug_menu, "", 1, NULL},
                     {1, s_Reset_settings, "", 1, NULL},
