@@ -17,11 +17,12 @@ if [[ ! -e "${DUMMY_FILE}" ]]; then
     exit 1
 fi
 
-# Create dummy file with 0xFF of the size extflash
-/usr/bin/env python3 -c "with open('${DUMMY_FILE}', 'wb') as f: f.write(b'\xFF'*${EXTFLASH_SIZE})"
+# Create dummy file with one page of 0xFF.
+SIZE = 256
+/usr/bin/env python3 -c "with open('${DUMMY_FILE}', 'wb') as f: f.write(b'\xFF'*${SIZE})"
 
-# Flash it to start of the extflash
-${FLASHAPP} "${DUMMY_FILE}"  0
+# Flash it to start of the extflash and perform a Chip Erase
+${FLASHAPP} "${DUMMY_FILE}"  0 ${SIZE} 1 0
 
 # Reset the device and disable clocks from running when device is suspended
 reset_and_disable_debug
