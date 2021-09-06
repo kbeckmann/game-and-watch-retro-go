@@ -386,7 +386,7 @@ void gui_draw_prior_cover(retro_emulator_file_t *file)
         47,    //top
         width, //width
         str_buffer,
-        C_GW_OPAQUE_YELLOW,
+        get_darken_pixel(C_GW_OPAQUE_YELLOW, 70),
         C_BLACK,
         NULL);
 }
@@ -416,7 +416,7 @@ void gui_draw_next_cover(retro_emulator_file_t *file)
         47,    //top
         width, //width
         str_buffer,
-        C_GW_OPAQUE_YELLOW,
+        get_darken_pixel(C_GW_OPAQUE_YELLOW, 70),
         C_BLACK,
         NULL);
 }
@@ -457,7 +457,7 @@ void gui_draw_current_cover(retro_emulator_file_t *file)
     size_t width = len * odroid_overlay_get_local_font_width();
     odroid_overlay_draw_local_text_line(
         (ODROID_SCREEN_WIDTH - width) / 2,
-        167,
+        169,
         width,
         str_buffer,
         C_GW_YELLOW,
@@ -490,7 +490,7 @@ void gui_draw_prior_cover_h(retro_emulator_file_t *file)
     uint16_t *dst_img = lcd_get_active_buffer();
     odroid_overlay_draw_rect(2, 40, 132, 22, 1, C_GW_OPAQUE_YELLOW);
     odroid_overlay_draw_rect(2, 61, 132, 1, 1, C_BLACK);
-    odroid_overlay_draw_rect(4, 38, 128, 1, 1, get_darken_pixel(C_GW_OPAQUE_YELLOW, 40));
+    odroid_overlay_draw_rect(4, 38, 128, 1, 1, get_darken_pixel(C_GW_OPAQUE_YELLOW, 80));
 
     for (int y = 0; y < 20; y++)
     {
