@@ -516,6 +516,7 @@ static bool volume_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event
     int8_t level = odroid_audio_volume_get();
     int8_t min = ODROID_AUDIO_VOLUME_MIN;
     int8_t max = ODROID_AUDIO_VOLUME_MAX;
+    char volume_value[ODROID_AUDIO_VOLUME_MAX - ODROID_AUDIO_VOLUME_MIN + 2];
 
     if (event == ODROID_DIALOG_PREV && level > min) {
         odroid_audio_volume_set(--level);
@@ -524,8 +525,12 @@ static bool volume_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event
     if (event == ODROID_DIALOG_NEXT && level < max) {
         odroid_audio_volume_set(++level);
     }
-    printf("volume:e%d v%d",event, level);
-    sprintf(option->value, "%d/%d", level, max);
+
+    for (int i = ODROID_AUDIO_VOLUME_MIN; i <= ODROID_AUDIO_VOLUME_MAX; i ++) {
+        volume_value[i - ODROID_AUDIO_VOLUME_MIN] = (i - ODROID_AUDIO_VOLUME_MIN) <= level ? s_Full : s_Fill;  
+    }
+    volume_value[ODROID_AUDIO_VOLUME_MAX + 1] = 0;
+    sprintf(option->value, "%s", (char *)volume_value);
     return event == ODROID_DIALOG_ENTER;
 }
 
@@ -562,6 +567,7 @@ static bool brightness_update_cb(odroid_dialog_choice_t *option, odroid_dialog_e
 {
     int8_t level = odroid_display_get_backlight();
     int8_t max = ODROID_BACKLIGHT_LEVEL_COUNT - 1;
+    char bright_value[max + 1];
 
     if (event == ODROID_DIALOG_PREV && level > 0) {
         odroid_display_set_backlight(--level);
@@ -571,7 +577,11 @@ static bool brightness_update_cb(odroid_dialog_choice_t *option, odroid_dialog_e
         odroid_display_set_backlight(++level);
     }
 
-    sprintf(option->value, "%d/%d", level + 1, max + 1);
+    for (int i = ODROID_BACKLIGHT_LEVEL0; i <= ODROID_BACKLIGHT_LEVEL9; i ++) {
+        bright_value[i - ODROID_BACKLIGHT_LEVEL0] = (i - ODROID_BACKLIGHT_LEVEL0) <= level ? s_Full : s_Fill;  
+    }
+    bright_value[ODROID_BACKLIGHT_LEVEL9 + 1] = 0;
+    sprintf(option->value, "%s", (char *)bright_value);
     return event == ODROID_DIALOG_ENTER;
 }
 

@@ -390,7 +390,7 @@ static bool palette_update_cb(odroid_dialog_choice_t *option, odroid_dialog_even
    char* pal_short = strchr( pal_name, ' ');
    if (pal_short) pal_name = pal_short + 1;
 
-   sprintf(option->value, "%s", pal_name);
+   sprintf(option->value, "%10s", pal_name);
    return event == ODROID_DIALOG_ENTER;
 }
 
@@ -402,9 +402,10 @@ void osd_getinput(void)
 
     odroid_gamepad_state_t joystick;
     odroid_input_read_gamepad(&joystick);
-
+    char palette_values[16];
+    snprintf(palette_values, sizeof(palette_values), "%s", s_Default);
     odroid_dialog_choice_t options[] = {
-            {100, s_Palette, s_Default, 1, &palette_update_cb},
+            {100, s_Palette, (char *)palette_values, 1, &palette_update_cb},
             // {101, "More...", "", 1, &advanced_settings_cb},
             ODROID_DIALOG_CHOICE_LAST
     };

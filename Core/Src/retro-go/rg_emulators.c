@@ -17,6 +17,7 @@
 #include "main_smsplusgx.h"
 #include "main_pce.h"
 #include "main_gw.h"
+#include "rg_rtc.h"
 
 #if !defined(COVERFLOW)
 #define COVERFLOW 0
@@ -38,6 +39,18 @@ static void event_handler(gui_event_t event, tab_t *tab)
     retro_emulator_t *emu = (retro_emulator_t *)tab->arg;
     listbox_item_t *item = gui_get_selected_item(tab);
     retro_emulator_file_t *file = (retro_emulator_file_t *)(item ? item->arg : NULL);
+    
+    if (GW_currentDate.WeekDay < 1)
+        GW_currentDate.WeekDay = 1;
+    fmt_Title_Date_Format(
+        tab->status, 
+        s_Title_Date_Format,
+        GW_currentDate.Date, 
+        GW_currentDate.Month, 
+        (char *) GW_RTC_Weekday[GW_currentDate.WeekDay-1],
+        GW_currentTime.Hours, 
+        GW_currentTime.Minutes,
+        GW_currentTime.Seconds);
 
     if (event == TAB_INIT)
     {
@@ -45,7 +58,7 @@ static void event_handler(gui_event_t event, tab_t *tab)
 
         if (emu->roms.count > 0)
         {
-            sprintf(tab->status, "%s", emu->system_name);
+            //sprintf(tab->status, "%s", emu->system_name);
             gui_resize_list(tab, emu->roms.count);
 
             for (int i = 0; i < emu->roms.count; i++)
@@ -93,8 +106,10 @@ static void event_handler(gui_event_t event, tab_t *tab)
     }
     else if (event == TAB_REDRAW)
     {
-        if (gui.show_cover)
-            gui_draw_cover(file);
+        gui_draw_status(tab);
+        //if (gui.show_cover)
+        //    gui_draw_cover(file);
+        
     }
 }
 

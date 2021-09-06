@@ -9,6 +9,9 @@
 #define s_Default               "Default"
 
 //Core\Src\porting\odroid_overlay.c
+#define s_Full                  0x07
+#define s_Fill                  0x08
+
 #define s_Yes                   "Yes"
 #define s_No                    "No"
 #define s_PlsChose              "Please choose:"
@@ -39,6 +42,11 @@
 #define s_Theme_CoverV          "Coverflow H"
 
 //Core\Src\retro-go\rg_emulators.c
+
+#define s_Title_Date_Format               "%02d-%02d %s %02d:%02d:%02d"
+#define fmt_Title_Date_Format(outstr,datefmt,day,month,weekday,hour,minutes,seconds) sprintf(outstr,datefmt,day,month,weekday,hour,minutes,seconds) 
+
+
 #define s_File                  "File"
 #define s_Type                  "Type"
 #define s_Size                  "Size"
@@ -101,6 +109,5 @@
 #define s_Weekday_Sun                "Sun"
 
 #define s_Date_Format               "%02d.%02d.20%02d %s"
-
-#define fmtDate(x,fmt,d,m,y,w) sprintf(x,fmt,d,m,y,w) 
+#define fmtDate(outstr,datefmt,day,month,year,weekday) sprintf(outstr,datefmt,day,month,year,weekday) 
 
