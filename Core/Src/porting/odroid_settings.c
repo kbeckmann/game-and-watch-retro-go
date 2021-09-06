@@ -4,6 +4,7 @@
 #include "odroid_system.h"
 #include "odroid_settings.h"
 #include "main.h"
+#include "rg_i18n.h"
 
 #define CONFIG_MAGIC 0xcafef00d
 #define ODROID_APPID_COUNT 4
@@ -131,6 +132,25 @@ void odroid_settings_int32_set(const char *key, int32_t value)
 {
 }
 
+#if COVERFLOW == 1
+int32_t odroid_settings_theme_get()
+{
+    int theme = persistent_config_ram.font_size;
+    if (theme < 0)
+        persistent_config_ram.font_size = 0;
+    else if (theme > 2)
+        persistent_config_ram.font_size = 2;
+    return persistent_config_ram.font_size;
+}
+void odroid_settings_theme_set(int32_t theme)
+{
+    if (theme < 0)
+        theme = 0;
+    else if (theme > 2)
+        theme = 2;
+    persistent_config_ram.font_size = theme;
+}
+#endif
 
 int32_t odroid_settings_app_int32_get(const char *key, int32_t default_value)
 {
@@ -151,7 +171,7 @@ int32_t odroid_settings_FontSize_get()
 }
 void odroid_settings_FontSize_set(int32_t value)
 {
-    persistent_config_ram.font_size = value;
+    //persistent_config_ram.font_size = value;
 }
 
 

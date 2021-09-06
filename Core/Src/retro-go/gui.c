@@ -618,9 +618,8 @@ void gui_draw_list(tab_t *tab)
 */
 
 #if COVERFLOW == 1
-    int theme_index = odroid_overlay_get_font_size();
-    odroid_overlay_set_font_size(0);
-    theme_index = 0;
+    int theme_index = odroid_settings_theme_get();
+    //theme_index = 0;
     switch (theme_index)
     {
     case 2:

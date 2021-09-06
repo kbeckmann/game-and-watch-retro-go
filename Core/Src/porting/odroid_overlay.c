@@ -49,13 +49,13 @@ static short font_size = 8;
 void odroid_overlay_init()
 {
     // overlay_buffer = (uint16_t *)rg_alloc(ODROID_SCREEN_WIDTH * 32 * 2, MEM_SLOW);
-    odroid_overlay_set_font_size(odroid_settings_FontSize_get());
+    odroid_overlay_set_font_size(font_size);
 }
 
 void odroid_overlay_set_font_size(int size)
 {
     font_size = MAX(8, MIN(32, size));
-    odroid_settings_FontSize_set(font_size);
+    //odroid_settings_FontSize_set(font_size);
 }
 
 int odroid_overlay_get_font_size()
@@ -524,7 +524,7 @@ static bool volume_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event
     if (event == ODROID_DIALOG_NEXT && level < max) {
         odroid_audio_volume_set(++level);
     }
-
+    printf("volume:e%d v%d",event, level);
     sprintf(option->value, "%d/%d", level, max);
     return event == ODROID_DIALOG_ENTER;
 }
@@ -535,21 +535,24 @@ const char * GW_Themes[] = {s_Theme_sList, s_Theme_CoverH, s_Theme_CoverV};
 
 static bool theme_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat)
 {
-    int8_t theme = odroid_overlay_get_font_size();
+    int8_t theme = odroid_settings_theme_get();
 
     if (event == ODROID_DIALOG_PREV && theme > 0) {
-        odroid_overlay_set_font_size(--theme);
-    } else {
-        odroid_overlay_set_font_size(2);
-        theme = 2;
-    }
+        odroid_settings_theme_set(--theme);
+    } 
+    //else {
+    //    odroid_settings_theme_get(2);
+    //    theme = 2;
+    //}
 
     if (event == ODROID_DIALOG_NEXT && theme < 2) {
-        odroid_overlay_set_font_size(++theme);
-    } else {
-        odroid_overlay_set_font_size(0);
-        theme = 0;
-    } 
+        odroid_settings_theme_set(++theme);
+    }
+    // else {
+    //    odroid_settings_theme_get(0);
+    //    theme = 0;
+    //} 
+    printf("Theme:e%d v%d",event, theme);
     sprintf(option->value, "%s",  (char *) GW_Themes[theme]);
     return event == ODROID_DIALOG_ENTER;
 }
@@ -651,9 +654,9 @@ bool speedup_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t eve
 
 int odroid_overlay_settings_menu(odroid_dialog_choice_t *extra_options)
 {
-    static char bright_value[8];
-    static char volume_value[8];
-    static char theme_value[8];
+    static char bright_value[25];
+    static char volume_value[25];
+    static char theme_value[25];
 
     odroid_dialog_choice_t options[32] = {
         {0, s_Brightness, bright_value, 1, &brightness_update_cb},
@@ -707,6 +710,7 @@ int odroid_overlay_game_settings_menu(odroid_dialog_choice_t *extra_options)
     char speedup_value[8];
 
     odroid_dialog_choice_t options[32] = {
+        ODROID_DIALOG_CHOICE_SEPARATOR,
         {200, s_Scaling, s_SCalingFull, 1, &scaling_update_cb},
         {210, s_Filtering, s_FilteringNone, 1, &filter_update_cb}, // Interpolation
         {220, s_Speed, speedup_value, 1, &speedup_update_cb},

@@ -237,7 +237,7 @@ void retro_loop()
             int key_left = ODROID_INPUT_LEFT;
             int key_right = ODROID_INPUT_RIGHT;
 #if COVERFLOW == 1
-            hori_view = odroid_overlay_get_font_size() == 2;
+            hori_view = odroid_settings_theme_get()  == 2;
             if (hori_view)
             {
                 key_up = ODROID_INPUT_LEFT;

@@ -33,10 +33,10 @@
 #define s_Quit_to_menu          "Quit to menu"
 #define s_Retro_Go_options      "Retro-Go"
 
-#define s_Theme_Title           "User Interface"
+#define s_Theme_Title           "UI Theme"
 #define s_Theme_sList           "Simple List"
-#define s_Theme_CoverH          "Coverflow vertical"
-#define s_Theme_CoverV          "Coverflow horizontal"
+#define s_Theme_CoverH          "Coverflow V"
+#define s_Theme_CoverV          "Coverflow H"
 
 //Core\Src\retro-go\rg_emulators.c
 #define s_File                  "File"
