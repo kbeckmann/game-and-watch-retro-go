@@ -565,7 +565,7 @@ void gui_draw_simple_list(int posx, tab_t *tab)
         //draw currpostion
         sprintf(str_buffer, "%d/%d", list->cursor + 1, list->length);
         gui_draw_item_postion(ODROID_SCREEN_WIDTH - 5, list->cursor + 1, list->length);
-        int w = (ODROID_SCREEN_WIDTH - posx - 14) / odroid_overlay_get_local_font_width();
+        int w = (ODROID_SCREEN_WIDTH - posx - 10) / odroid_overlay_get_local_font_width();
         w = w * odroid_overlay_get_local_font_width();
         listbox_item_t *item = &list->items[list->cursor];
         if (item) //drawcurrent title
