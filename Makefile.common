@@ -475,6 +475,10 @@ erase_intflash_2:
 	$(OPENOCD) -f scripts/interface_$(ADAPTER).cfg -c "init; halt; flash erase_address 0x08100000 131072; resume; exit"
 .PHONY: erase_intflash2
 
+erase_extflash: flash_intflash
+	$(V)./scripts/extflash_erase.sh $(EXTFLASH_SIZE)
+.PHONY: erase_extflash
+
 start_bank_1:
 	$(OPENOCD) -f scripts/interface_$(ADAPTER).cfg \
 		-c 'init; reset halt' \
