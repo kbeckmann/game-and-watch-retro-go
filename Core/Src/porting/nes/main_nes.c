@@ -14,7 +14,7 @@
 #include "gw_linker.h"
 #include "common.h"
 #include "rom_manager.h"
-
+#include "rg_i18n.h"
 #include "lz4_depack.h"
 #include <assert.h>
 #include  "miniz.h"
@@ -390,7 +390,7 @@ static bool palette_update_cb(odroid_dialog_choice_t *option, odroid_dialog_even
    char* pal_short = strchr( pal_name, ' ');
    if (pal_short) pal_name = pal_short + 1;
 
-   sprintf(option->value, "% -9s", pal_name);
+   sprintf(option->value, "%s", pal_name);
    return event == ODROID_DIALOG_ENTER;
 }
 
@@ -404,7 +404,7 @@ void osd_getinput(void)
     odroid_input_read_gamepad(&joystick);
 
     odroid_dialog_choice_t options[] = {
-            {100, "Palette", "Default", 1, &palette_update_cb},
+            {100, s_Palette, s_Default, 1, &palette_update_cb},
             // {101, "More...", "", 1, &advanced_settings_cb},
             ODROID_DIALOG_CHOICE_LAST
     };

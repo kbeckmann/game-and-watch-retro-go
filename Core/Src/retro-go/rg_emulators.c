@@ -5,6 +5,7 @@
 
 #include "gw_linker.h"
 #include "rg_emulators.h"
+#include "rg_i18n.h"
 // #include "rg_favorites.h"
 #include "bitmaps.h"
 #include "gui.h"
@@ -15,9 +16,11 @@
 #include "main_nes.h"
 #include "main_smsplusgx.h"
 #include "main_pce.h"
-#include "odroid_overlay_ex.h"
 #include "main_gw.h"
 
+#if !defined(COVERFLOW)
+#define COVERFLOW 0
+#endif /* COVERFLOW */
 // Increase when adding new emulators
 #define MAX_EMULATORS 8
 static retro_emulator_t emulators[MAX_EMULATORS];
@@ -42,7 +45,7 @@ static void event_handler(gui_event_t event, tab_t *tab)
 
         if (emu->roms.count > 0)
         {
-            sprintf(tab->status, " Games: %d", emu->roms.count);
+            sprintf(tab->status, "%s", emu->system_name);
             gui_resize_list(tab, emu->roms.count);
 
             for (int i = 0; i < emu->roms.count; i++)
@@ -299,21 +302,25 @@ void emulator_show_file_info(retro_emulator_file_t *file)
     crc_value[0] = '\x00';
 
     odroid_dialog_choice_t choices[] = {
-        {0, "File", filename_value, 1, NULL},
-        {0, "Type", type_value, 1, NULL},
-        {0, "Size", size_value, 1, NULL},
-        {0, "ImgSize", img_size, 1, NULL},
+        {0, s_File, filename_value, 1, NULL},
+        {0, s_Type, type_value, 1, NULL},
+        {0, s_Size, size_value, 1, NULL},
+		#if COVERFLOW == 1
+        {0, s_ImgSize, img_size, 1, NULL},
+		#endif
         ODROID_DIALOG_CHOICE_SEPARATOR,
-        {1, "Close", "", 1, NULL},
+        {1, s_Close, "", 1, NULL},
         ODROID_DIALOG_CHOICE_LAST
     };
 
     sprintf(choices[0].value, "%.127s", file->name);
     sprintf(choices[1].value, "%s", file->ext);
     sprintf(choices[2].value, "%d KB", file->size / 1024);
+    #if COVERFLOW == 1
     sprintf(choices[3].value, "%d KB", file->img_size / 1024);
+	#endif
 
-    odroid_overlay_dialog("Properties", choices, -1);
+    odroid_overlay_dialog(s_GameProp, choices, -1);
 }
 
 void emulator_show_file_menu(retro_emulator_file_t *file)
@@ -329,12 +336,12 @@ void emulator_show_file_menu(retro_emulator_file_t *file)
     bool is_fav = 0;
 
     odroid_dialog_choice_t choices[] = {
-        {0, "Resume game ", "", has_save, NULL},
-        {1, "New game    ", "", 1, NULL},
+        {0, s_Resume_game, "", has_save, NULL},
+        {1, s_New_game, "", 1, NULL},
         ODROID_DIALOG_CHOICE_SEPARATOR,
-        {3, is_fav ? "Del favorite" : "Add favorite", "", 1, NULL},
+        {3, is_fav ? s_Del_favorite : s_Add_favorite, "", 1, NULL},
 		ODROID_DIALOG_CHOICE_SEPARATOR,
-        {2, "Delete save ", "", has_save || has_sram, NULL},
+        {2, s_Delete_save, "", has_save || has_sram, NULL},
         ODROID_DIALOG_CHOICE_LAST
     };
     int sel = odroid_overlay_dialog(file->name, choices, has_save ? 0 : 1);
@@ -344,7 +351,7 @@ void emulator_show_file_menu(retro_emulator_file_t *file)
         emulator_start(file, sel == 0, false);
     }
     else if (sel == 2) {
-        if (odroid_overlay_confirm("Delete save file?", false) == 1) {
+        if (odroid_overlay_confirm(s_Confiem_del_save, false) == 1) {
             store_erase(file->save_address, file->save_size);
         }
     }

@@ -59,7 +59,34 @@ PYTHON3 ?= /usr/bin/env python3
 # Build path
 BUILD_DIR ?= build
 
+#######################################
+# i18n Codepage
+#######################################
+CODEPAGE ?= 1252
+ifeq ($(CODEPAGE), 936)
+	SCODEPAGE = "gbk"
+else ifeq ($(CODEPAGE), 950)
+	SCODEPAGE = "big5"
+else ifeq ($(CODEPAGE), 932)
+	SCODEPAGE = "shift_jis"
+else ifeq ($(CODEPAGE), 949)
+	SCODEPAGE = "cp949"
+else
+    SCODEPAGE = "utf-8"
+endif
 
+ifdef CODEPAGE
+	CODEPAGE_PARAM := --codepage=$(SCODEPAGE)
+endif
+
+#######################################
+# cover flow
+#######################################
+COVERFLOW ?= 0
+
+ifdef COVERFLOW
+	COVERFLOW_PARAM := --coverflow=$(COVERFLOW)
+endif
 
 # Common C sources
 C_SOURCES +=  \
@@ -71,6 +98,8 @@ Core/Src/retro-go/rg_rtc.c \
 Core/Src/retro-go/rg_emulators.c \
 Core/Src/retro-go/rom_manager.c \
 Core/Src/porting/odroid_settings.c \
+Core/Src/retro-go/i18n/rg_i18n_en_us.c \
+Core/Src/retro-go/i18n/rg_i18n_zh_cn.c \
 Core/Src/retro-go/bitmaps/logo_cover_missed.c \
 Core/Src/retro-go/bitmaps/header_gb.c \
 Core/Src/retro-go/bitmaps/header_nes.c \
@@ -95,7 +124,6 @@ SDK_URL ?= https://raw.githubusercontent.com/STMicroelectronics/STM32CubeH7
 
 # Local path for the SDK
 SDK_DIR ?= Drivers
-
 
 
 # SDK C sources
@@ -236,6 +264,8 @@ AS_DEFS +=
 # C defines
 C_DEFS +=  \
 -DINTFLASH_BANK=$(INTFLASH_BANK) \
+-DCODEPAGE=$(CODEPAGE) \
+-DCOVERFLOW=$(COVERFLOW) \
 -DEXTFLASH_FORCE_SPI=$(EXTFLASH_FORCE_SPI) \
 -DUSE_HAL_DRIVER \
 -DSTM32H7B0xx \
@@ -346,7 +376,7 @@ $(BUILD_DIR)/rom_files.txt: FORCE | $(BUILD_DIR)
 
 $(BUILD_DIR)/roms.a: $(BUILD_DIR)/rom_files.txt parse_roms.py
 	$(V)$(ECHO) [ PYTHON3 ] $(notdir $<)
-	$(V)$(PYTHON3) parse_roms.py --flash-size $(EXTFLASH_SIZE) $(COMPRESS_PARAM)
+	$(V)$(PYTHON3) parse_roms.py --flash-size $(EXTFLASH_SIZE) $(COMPRESS_PARAM) $(CODEPAGE_PARAM) $(COVERFLOW_PARAM)
 
 $(BUILD_DIR)/config.h $(BUILD_DIR)/saveflash.ld &: $(BUILD_DIR)/roms.a
 	$(V)/bin/sh -c true
@@ -585,6 +615,9 @@ help:
 	@echo "  COMPRESS            - Configures ROM compression, Valid values {0,lz4} (default=lz4)."
 	@echo "  RESET_DBGMCU        - Configures if DBGMCU should be reset after flashing."
 	@echo "                        Set to 0 to disable power saving (default=1)"
+	@echo "  CODEPAGE            - Sets codepage to configures display langrage.(default=1252)"
+	@echo "                        set 932 as Japanese; 936 as simple Chinese; 950 as traditional Chinese..."
+	@echo "  COVERFLOW           - Set to 1 include cover art with rom (default=0)"
 	@echo ""
 	@echo "Current configuration:"
 	@echo "  EXTFLASH_FORCE_SPI=$(EXTFLASH_FORCE_SPI)"
@@ -597,6 +630,8 @@ help:
 	@echo "  RESET_DBGMCU=$(RESET_DBGMCU)"
 	@echo "  GCC_PATH=$(GCC_PATH)"
 	@echo "  PREFIX=$(PREFIX)"
+	@echo "  CODEPAGE=$(CODEPAGE)"
+	@echo "  COVERFLOW=$(COVERFLOW)"
 	@echo ""
 	@echo "Targets:"
 	@echo "  flash_extflash    - Only programs the external flash"
@@ -609,8 +644,22 @@ help:
 	@echo "  reset_dbgmcu      - Resets the unit and turns off DBGMCU (lowers battery drain)"
 	@echo "  reset_mcu         - Resets the unit"
 	@echo "  dump_logs         - Dumps the callstack and logbuf. Starts openocd and gdb under the hood."
+	@echo "  romdef            - Dumps all rom info to roms.json in roms directory to custom display name and"
+	@echo "                      publish property under edit that file before make flash "
 	@echo ""
 .PHONY: help
+
+#######################################
+# Define rom's display name and publish property
+#######################################
+romdef:
+	$(V)$(ECHO) [ PYTHON3 ] $(notdir $<)
+	$(V)$(PYTHON3) parse_romdef.py
+	$(V)$(ECHO) [ RM ] $(BUILD_DIR)/roms.a
+	$(V)rm -rf $(BUILD_DIR)/roms.a
+	$(V)$(ECHO) [ RM ] $(BUILD_DIR)/core/rom_manager.*
+	$(V)rm -rf $(BUILD_DIR)/core/rom_manager.*
+.PHONY: romdef
 
 #######################################
 # download SDK files

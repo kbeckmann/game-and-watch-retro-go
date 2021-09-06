@@ -604,7 +604,7 @@ void common_ingame_overlay(void) {
             break;
         case INGAME_OVERLAY_BRIGHTNESS:
             level = odroid_display_get_backlight();
-            bh = box_height(10 - 1);
+            bh = box_height(ODROID_BACKLIGHT_LEVEL_COUNT - 1);
 
             draw_darken_rounded_rectangle(fb,
                     INGAME_OVERLAY_X,

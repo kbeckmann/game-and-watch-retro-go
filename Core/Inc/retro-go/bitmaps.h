@@ -1,3 +1,7 @@
+#if !defined  (COVERFLOW)
+  #define COVERFLOW 0
+#endif /* COVERFLOW */
+
 extern const unsigned char header_sg1000[];
 extern const unsigned char logo_sg1000[];
 
@@ -31,4 +35,6 @@ extern const unsigned char logo_sms[];
 extern const unsigned char header_gw[];
 extern const unsigned char logo_gw[];
 
+#if COVERFLOW == 1
 extern const unsigned char cover_missed[];
+#endif

@@ -8,6 +8,9 @@
 #define CONFIG_MAGIC 0xcafef00d
 #define ODROID_APPID_COUNT 4
 
+#if !defined  (COVERFLOW)
+  #define COVERFLOW 0
+#endif /* COVERFLOW */
 // Global
 static const char* Key_RomFilePath  = "RomFilePath";
 static const char* Key_AudioSink    = "AudioSink";
@@ -47,11 +50,10 @@ typedef struct persistent_config {
 static const persistent_config_t persistent_config_default = {
     .magic = CONFIG_MAGIC,
     .version = 1,
-
     .backlight = ODROID_BACKLIGHT_LEVEL6,
     .start_action = ODROID_START_ACTION_RESUME,
     .volume = ODROID_AUDIO_VOLUME_MAX / 2, // Too high volume can cause brown out if the battery isn't connected.
-    .font_size = 8,
+    .font_size = 0,  //use as theme index
     .startup_app = 0,
     .main_menu_timeout_s = 60 * 10, // Turn off after 10 minutes of idle time in the main menu
     .main_menu_selected_tab = 0,
@@ -181,6 +183,7 @@ void odroid_settings_AudioSink_set(int32_t value)
 {
   odroid_settings_int32_set(Key_AudioSink, value);
 }
+
 
 
 int32_t odroid_settings_Backlight_get()
