@@ -2,6 +2,7 @@
 import argparse
 import os
 import shutil
+import struct
 import subprocess
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -207,6 +208,22 @@ def compress_zopfli(data, level=None):
     c = zlib.compressobj(level=9, method=zlib.DEFLATED, wbits=-15, memLevel=9)
 
     compressed_data = c.compress(data) + c.flush()
+    return compressed_data
+
+@COMPRESSIONS
+def compress_lzma(data, level=None):
+    if level == DONT_COMPRESS:
+        pass
+        #raise NotImplementedError
+    import lzma
+    compressed_data = lzma.compress(data, format=lzma.FORMAT_ALONE, filters=[{
+            "id": lzma.FILTER_LZMA1,
+            "preset": 6,
+            "dict_size": 16 * 1024,
+        }])
+
+    compressed_data = compressed_data[:5] + struct.pack('<Q', len(data)) + compressed_data[13:]
+
     return compressed_data
 
 
