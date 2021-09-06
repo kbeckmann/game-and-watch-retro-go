@@ -29,10 +29,10 @@
 #define s_Speed                 "速度"
 #define s_Speed_Unit            "倍"
 #define s_Save_Cont             "■ 保存进度"
-#define s_Save_Quit             "× 保存退出"
+#define s_Save_Quit             "▲ 保存退出"
 #define s_Reload                "∞ 重新加载"
 #define s_Options               "◎ 游戏设置"
-#define s_Power_off             "∽ 关机休眠"
+#define s_Power_off             "ω 关机休眠"
 #define s_Quit_to_menu          "× 退出游戏"
 #define s_Retro_Go_options      "游戏选项"
 
