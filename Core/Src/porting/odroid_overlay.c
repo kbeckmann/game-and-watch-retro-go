@@ -248,12 +248,9 @@ void odroid_overlay_draw_dialog(const char *header, odroid_dialog_choice_t *opti
     int padding = 0;
     int value_padding = 0;
     int len = 0;
-    int max_titlen = header ? strlen(header) : 8;
-    //printf("%d : %s", max_titlen, header); 17
-
+    int max_titlen = 8;
     int row_margin = 1;
     int row_height = odroid_overlay_get_local_font_size() + row_margin * 2;
-
     int box_width = 64;
     int box_height = 64;
     int box_padding = 6;
