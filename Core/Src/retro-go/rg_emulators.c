@@ -355,8 +355,8 @@ void emulator_show_file_menu(retro_emulator_file_t *file)
         {0, s_Resume_game, "", has_save, NULL},
         {1, s_New_game, "", 1, NULL},
         ODROID_DIALOG_CHOICE_SEPARATOR,
-        {3, is_fav ? s_Del_favorite : s_Add_favorite, "", 1, NULL},
-		ODROID_DIALOG_CHOICE_SEPARATOR,
+        //{3, is_fav ? s_Del_favorite : s_Add_favorite, "", 1, NULL},
+		//ODROID_DIALOG_CHOICE_SEPARATOR,
         {2, s_Delete_save, "", has_save || has_sram, NULL},
         ODROID_DIALOG_CHOICE_LAST
     };

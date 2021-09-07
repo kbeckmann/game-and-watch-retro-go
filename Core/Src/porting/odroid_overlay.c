@@ -40,6 +40,7 @@ int odroid_overlay_game_menu()
 #include "odroid_system.h"
 #include "odroid_overlay.h"
 #include "main.h"
+#include "rom_manager.h"
 
 // static uint16_t *overlay_buffer = NULL;
 static uint16_t overlay_buffer[ODROID_SCREEN_WIDTH * 32 * 2]  __attribute__ ((aligned (4)));
@@ -695,15 +696,13 @@ static void draw_game_status_bar(runtime_stats_t stats)
     int pad_text = (height - odroid_overlay_get_local_font_size()) / 2;
     char bottom[40], header[40];
 
-    const char *romPath = odroid_system_get_app()->romPath;
-
     snprintf(header, 40, "%s: %d.%d (%d.%d) / %s: %d.%d%%",
 	    s_FPS,
         (int) stats.totalFPS,    (int) fmod(stats.totalFPS * 10, 10),
         (int) stats.skippedFPS,  (int) fmod(stats.skippedFPS * 10, 10),
 		s_BUSY,
         (int) stats.busyPercent, (int) fmod(stats.busyPercent * 10, 10));
-    snprintf(bottom, 40, "%s", romPath ? (romPath + strlen(ODROID_BASE_PATH_ROMS)) : "N/A");
+    snprintf(bottom, 40, "%s", ACTIVE_FILE ? (ACTIVE_FILE->name) : "N/A");
 
     odroid_overlay_draw_fill_rect(0, 0, width, height, C_GW_RED);
     odroid_overlay_draw_fill_rect(0, ODROID_SCREEN_HEIGHT - height, width, height, C_GW_RED);
