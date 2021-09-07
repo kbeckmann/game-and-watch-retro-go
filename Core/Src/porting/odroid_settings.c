@@ -36,6 +36,7 @@ typedef struct persistent_config {
     uint8_t start_action;
     uint8_t volume;
     uint8_t font_size;
+    uint8_t theme;
     uint8_t startup_app;
     void *startup_file;
 
@@ -54,7 +55,8 @@ static const persistent_config_t persistent_config_default = {
     .backlight = ODROID_BACKLIGHT_LEVEL6,
     .start_action = ODROID_START_ACTION_RESUME,
     .volume = ODROID_AUDIO_VOLUME_MAX / 2, // Too high volume can cause brown out if the battery isn't connected.
-    .font_size = 0,  //use as theme index
+    .font_size = 0,  
+    .theme = 0, //use as theme index
     .startup_app = 0,
     .main_menu_timeout_s = 60 * 10, // Turn off after 10 minutes of idle time in the main menu
     .main_menu_selected_tab = 0,
@@ -135,12 +137,12 @@ void odroid_settings_int32_set(const char *key, int32_t value)
 #if COVERFLOW == 1
 int32_t odroid_settings_theme_get()
 {
-    int theme = persistent_config_ram.font_size;
+    int theme = persistent_config_ram.theme;
     if (theme < 0)
-        persistent_config_ram.font_size = 0;
+        persistent_config_ram.theme = 0;
     else if (theme > 2)
-        persistent_config_ram.font_size = 2;
-    return persistent_config_ram.font_size;
+        persistent_config_ram.theme = 2;
+    return persistent_config_ram.theme;
 }
 void odroid_settings_theme_set(int32_t theme)
 {
@@ -148,7 +150,7 @@ void odroid_settings_theme_set(int32_t theme)
         theme = 0;
     else if (theme > 2)
         theme = 2;
-    persistent_config_ram.font_size = theme;
+    persistent_config_ram.theme = theme;
 }
 #endif
 

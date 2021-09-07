@@ -542,22 +542,22 @@ static bool theme_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_
 {
     int8_t theme = odroid_settings_theme_get();
 
-    if (event == ODROID_DIALOG_PREV && theme > 0) {
-        odroid_settings_theme_set(--theme);
+    if (event == ODROID_DIALOG_PREV) {
+        if (theme > 0) 
+            odroid_settings_theme_set(--theme);
+        else {
+            theme = 2;
+            odroid_settings_theme_set(2);
+        }
     } 
-    //else {
-    //    odroid_settings_theme_get(2);
-    //    theme = 2;
-    //}
-
-    if (event == ODROID_DIALOG_NEXT && theme < 2) {
-        odroid_settings_theme_set(++theme);
+    else if (event == ODROID_DIALOG_NEXT) {
+        if (theme < 2) 
+            odroid_settings_theme_set(++theme);
+        else {
+            theme = 0;
+            odroid_settings_theme_set(0);
+        }
     }
-    // else {
-    //    odroid_settings_theme_get(0);
-    //    theme = 0;
-    //} 
-    printf("Theme:e%d v%d",event, theme);
     sprintf(option->value, "%s",  (char *) GW_Themes[theme]);
     return event == ODROID_DIALOG_ENTER;
 }
