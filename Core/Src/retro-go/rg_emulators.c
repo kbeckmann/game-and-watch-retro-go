@@ -39,7 +39,8 @@ static void event_handler(gui_event_t event, tab_t *tab)
     retro_emulator_t *emu = (retro_emulator_t *)tab->arg;
     listbox_item_t *item = gui_get_selected_item(tab);
     retro_emulator_file_t *file = (retro_emulator_file_t *)(item ? item->arg : NULL);
-    
+/*
+    //want to show time but can't auto refresh ?    
     if (GW_currentDate.WeekDay < 1)
         GW_currentDate.WeekDay = 1;
     fmt_Title_Date_Format(
@@ -51,14 +52,14 @@ static void event_handler(gui_event_t event, tab_t *tab)
         GW_currentTime.Hours, 
         GW_currentTime.Minutes,
         GW_currentTime.Seconds);
-
+*/
     if (event == TAB_INIT)
     {
         emulator_init(emu);
 
         if (emu->roms.count > 0)
         {
-            //sprintf(tab->status, "%s", emu->system_name);
+            sprintf(tab->status, "%s", emu->system_name);
             gui_resize_list(tab, emu->roms.count);
 
             for (int i = 0; i < emu->roms.count; i++)
