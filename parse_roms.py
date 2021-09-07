@@ -213,8 +213,10 @@ def compress_zopfli(data, level=None):
 @COMPRESSIONS
 def compress_lzma(data, level=None):
     if level == DONT_COMPRESS:
-        pass
-        # raise NotImplementedError
+        if args.compress_gb_speed:
+            raise NotImplementedError
+        # This currently assumes this will only be applied to GB Bank 0
+        return data
     import lzma
 
     compressed_data = lzma.compress(
