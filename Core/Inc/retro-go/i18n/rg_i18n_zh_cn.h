@@ -12,6 +12,8 @@
 #define s_Full                  0x07
 #define s_Fill                  0x08
 
+#define s_No_Cover              "无封面"
+
 #define s_Yes                   "○ 是"
 #define s_No                    "× 否"
 #define s_PlsChose              "请选择："

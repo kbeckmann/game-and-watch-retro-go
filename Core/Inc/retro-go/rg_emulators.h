@@ -22,7 +22,7 @@ typedef struct {
     // char folder[32];
     const uint8_t *address;
     size_t size;
-	#if COVERFLOW == 1
+	#if COVERFLOW != 0
     const uint8_t *img_address;
     size_t img_size;
 	#endif

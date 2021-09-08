@@ -12,6 +12,8 @@
 #define s_Full                  0x07
 #define s_Fill                  0x08
 
+#define s_No_Cover              "no Cover"
+
 #define s_Yes                   "Yes"
 #define s_No                    "No"
 #define s_PlsChose              "Please choose:"

@@ -23,7 +23,23 @@ int  odroid_overlay_get_local_font_width()
     return 8;
 }
 
-int odroid_overlay_draw_local_text_line(uint16_t x_pos, uint16_t y_pos, uint16_t width, const char* text, uint16_t color, uint16_t color_bg, uint16_t* outlength)
+void odroid_overlay_read_screen_rect(uint16_t x_pos, uint16_t y_pos, uint16_t width, uint16_t height)
+{
+    uint16_t *dst_img = lcd_get_active_buffer();
+    for (int x = 0; x < width; x++)
+        for (int y = 0; y < height; y++)
+            overlay_buffer[x + y * width] = dst_img [(y + y_pos) * ODROID_SCREEN_WIDTH + x_pos + x];
+}
+
+void do_point_data(uint16_t *data, char checked, char transparent, uint16_t color, uint16_t color_bg)
+{
+    if (checked)
+        *data = color;
+    else if (!transparent)
+        *data = color_bg;
+}
+
+int odroid_overlay_draw_local_text_line(uint16_t x_pos, uint16_t y_pos, uint16_t width, const char* text, uint16_t color, uint16_t color_bg, uint16_t* outlength, char transparent)
 {
     int font_height = odroid_overlay_get_local_font_size(); //odroid_overlay_get_font_size();
     int font_width = odroid_overlay_get_local_font_width(); //odroid_overlay_get_font_width();
@@ -31,6 +47,9 @@ int odroid_overlay_draw_local_text_line(uint16_t x_pos, uint16_t y_pos, uint16_t
     //float scale = 1; //(float)font_height / 8;
     int text_len = strlen(text);
     int max_len = width / font_width;
+
+    if (transparent) 
+        odroid_overlay_read_screen_rect(x_pos, y_pos, width, font_height);
 
     for (int i = 0; i < max_len; i++)
     {
@@ -42,7 +61,11 @@ int odroid_overlay_draw_local_text_line(uint16_t x_pos, uint16_t y_pos, uint16_t
             for (int x = 0; x < font_width; x++)
             {
                 //overlay_buffer[offset + 7 - x] = (glyph[y] & (1 << x)) ? color : color_bg;
-                overlay_buffer[offset + x] = (glyph[y] & (1 << x)) ? color : color_bg;
+                do_point_data(&overlay_buffer[offset + x], glyph[y] & (1 << x), transparent, color, color_bg);
+                //if (glyph[y] & (1 << x)) 
+                //    overlay_buffer[offset + x] = color;
+                //else if (! transparent)
+                //    overlay_buffer[offset + x] = color_bg;
             }
         }
         x_offset += font_width;
@@ -53,7 +76,7 @@ int odroid_overlay_draw_local_text_line(uint16_t x_pos, uint16_t y_pos, uint16_t
     return font_height;
 }
 
-int odroid_overlay_draw_local_text(uint16_t x_pos, uint16_t y_pos, uint16_t width, const char* text, uint16_t color, uint16_t color_bg)
+int odroid_overlay_draw_local_text(uint16_t x_pos, uint16_t y_pos, uint16_t width, const char* text, uint16_t color, uint16_t color_bg, char transparent)
 {
     int text_len = 1;
     int height = 0;
@@ -80,7 +103,7 @@ int odroid_overlay_draw_local_text(uint16_t x_pos, uint16_t y_pos, uint16_t widt
     {
         sprintf(buffer, "%.*s", line_len, text + pos);
         if (strchr(buffer, '\n')) *(strchr(buffer, '\n')) = 0;
-        height += odroid_overlay_draw_local_text_line(x_pos, y_pos + height, width, buffer, color, color_bg, &outlength);
+        height += odroid_overlay_draw_local_text_line(x_pos, y_pos + height, width, buffer, color, color_bg, &outlength, transparent);
         pos += outlength;
         if (*(text + pos) == 0 || *(text + pos) == '\n') pos++;
     }

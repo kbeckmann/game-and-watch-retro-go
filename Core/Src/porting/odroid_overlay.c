@@ -323,7 +323,7 @@ void odroid_overlay_draw_dialog(const char *header, odroid_dialog_choice_t *opti
     {
         odroid_overlay_draw_rect(box_x - 1, box_y - 1, box_width + 2, row_height + 8, 1, box_border_color);
         odroid_overlay_draw_fill_rect(box_x, box_y, box_width, row_height + 7, C_GW_RED);
-        odroid_overlay_draw_local_text_line(x , box_y + 5, inner_width, header, C_GW_YELLOW, C_GW_RED, NULL);
+        odroid_overlay_draw_local_text_line(x , box_y + 5, inner_width, header, C_GW_YELLOW, C_GW_RED, NULL, 0);
         odroid_overlay_draw_fill_rect(x + inner_width - 2, box_y + 5, 4, 4, C_GW_YELLOW);
         odroid_overlay_draw_fill_rect(x + inner_width, box_y + 11, 2, 4, C_GW_OPAQUE_YELLOW);
         y += row_height + 8;
@@ -346,7 +346,7 @@ void odroid_overlay_draw_dialog(const char *header, odroid_dialog_choice_t *opti
             odroid_overlay_draw_fill_rect(x + 6, y + row_height / 2 - row_margin, inner_width - 12, 1, box_border_color);
         }
         else {
-            row_height = odroid_overlay_draw_local_text(x, y + row_margin, inner_width, rows + i * 256, fg, bg);
+            row_height = odroid_overlay_draw_local_text(x, y + row_margin, inner_width, rows + i * 256, fg, bg, 0);
             row_height += row_margin * 2;
             odroid_overlay_draw_rect(x, y, inner_width, row_height, row_margin, bg);
         }
@@ -532,7 +532,7 @@ static bool volume_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event
     return event == ODROID_DIALOG_ENTER;
 }
 
-#if COVERFLOW == 1
+#if COVERFLOW != 0
 
 const char * GW_Themes[] = {s_Theme_sList, s_Theme_CoverH, s_Theme_CoverV};
 
@@ -669,7 +669,7 @@ int odroid_overlay_settings_menu(odroid_dialog_choice_t *extra_options)
     odroid_dialog_choice_t options[32] = {
         {0, s_Brightness, bright_value, 1, &brightness_update_cb},
         {1, s_Volume, volume_value, 1, &volume_update_cb},
-        #if COVERFLOW == 1
+        #if COVERFLOW != 0
         ODROID_DIALOG_CHOICE_SEPARATOR,
         {2, s_Theme_Title, theme_value, 1, &theme_update_cb},
         #endif
@@ -706,8 +706,8 @@ static void draw_game_status_bar(runtime_stats_t stats)
 
     odroid_overlay_draw_fill_rect(0, 0, width, height, C_GW_RED);
     odroid_overlay_draw_fill_rect(0, ODROID_SCREEN_HEIGHT - height, width, height, C_GW_RED);
-    odroid_overlay_draw_local_text(0, pad_text, width, header, C_GW_YELLOW, C_GW_RED);
-    odroid_overlay_draw_local_text(0, ODROID_SCREEN_HEIGHT - height + pad_text, width, bottom, C_GW_YELLOW, C_GW_RED);
+    odroid_overlay_draw_local_text(0, pad_text, width, header, C_GW_YELLOW, C_GW_RED, 0);
+    odroid_overlay_draw_local_text(0, ODROID_SCREEN_HEIGHT - height + pad_text, width, bottom, C_GW_YELLOW, C_GW_RED, 0);
     odroid_overlay_draw_battery(width - 26, 3);
 }
 

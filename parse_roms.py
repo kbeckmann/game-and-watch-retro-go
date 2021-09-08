@@ -25,7 +25,7 @@ ROM_ENTRY_TEMPLATE = """\t{{
 \t\t.ext = "{extension}",
 \t\t.address = {rom_entry},
 \t\t.size = {size},
-\t\t#if COVERFLOW == 1
+\t\t#if COVERFLOW != 0
 \t\t.img_address = {img_entry},
 \t\t.img_size = {img_size},
 \t\t#endif
@@ -218,23 +218,41 @@ def compress_zopfli(data, level=None):
     return compressed_data
 
 
-def write_rgb565(img, fn):
+def write_rgb565(srcfile, fn, v):
+    from PIL import Image, ImageOps
+    #print(srcfile)
+    img = Image.open(srcfile).convert(mode="RGB")
+    if (v == 1):
+        img = img.resize((128, 96), Image.ANTIALIAS)
+    else :
+        img = img.resize((96, 128), Image.ANTIALIAS)
     pixels = list(img.getdata())
     with open(fn, "wb") as f:
         # TODO: this header could probably be a bit shorter, didn't really investigate
-        f.write(
-            b"BMH`\x00\x00\x00\x00\x00\x00F\x00\x00\x008\x00\x00\x00"
-            b"\x80\x00\x00\x00\xa0\xff\xff\xff\x01\x00\x10\x00\x03\x00\x00"
-            b"\x00\x02`\x00\x00\x12\x0b\x00\x00\x12\x0b\x00\x00\x00\x00\x00"
-            b"\x00\x00\x00\x00\x00\x00\xf8\x00\x00\xe0\x07\x00\x00\x1f\x00\x00"
-            b"\x00\x00\x00\x00\x00"
-        )
+        if (v==1):
+            f.write(
+                b"BMH\x60\x00\x00\x00\x00\x00\x00\x46\x00\x00\x00\x38\x00"
+                b"\x00\x00\x80\x00\x00\x00\xa0\xff\xff\xff\x01\x00\x10\x00\x03\x00"
+                b"\x00\x00\x02\x60\x00\x00\x12\x0b\x00\x00\x12\x0b\x00\x00\x00\x00"
+                b"\x00\x00\x00\x00\x00\x00\x00\xf8\x00\x00\xe0\x07\x00\x00\x1f\x00"
+                b"\x00\x00\x00\x00\x00\x00"
+            )
+        elif (v==2):
+            f.write(
+                b"BMH\x60\x00\x00\x00\x00\x00\x00\x46\x00\x00\x00\x38\x00"
+                b"\x00\x00\x60\x00\x00\x00\x80\xff\xff\xff\x01\x00\x10\x00\x03\x00"
+                b"\x00\x00\x02\x60\x00\x00\x12\x0b\x00\x00\x12\x0b\x00\x00\x00\x00"
+                b"\x00\x00\x00\x00\x00\x00\x00\xf8\x00\x00\xe0\x07\x00\x00\x1f\x00"
+                b"\x00\x00\x00\x00\x00\x00"
+            )
+        else :
+            return 0
+
         for pix in pixels:
             r = (pix[0] >> 3) & 0x1F
             g = (pix[1] >> 2) & 0x3F
             b = (pix[2] >> 3) & 0x1F
             f.write(struct.pack("H", (r << 11) + (g << 5) + b))
-
 
 class NoArtworkError(Exception):
     """No artwork found for this ROM"""
@@ -402,26 +420,19 @@ class ROMParser:
 
         prefix = Path(prefix)
 
-        png_path = rom.img_path.with_suffix(".png")
-        # TODO: add jpg and other paths
-        if png_path.exists():
-            from PIL import Image, ImageOps
+        imgs = []
+        imgs.append(str(rom.img_path.with_suffix("")) + f"_{args.coverflow}.png")
+        imgs.append(str(rom.img_path.with_suffix("")) + f"_{args.coverflow}.jpg")
+        imgs.append(str(rom.img_path.with_suffix(".png")))
+        imgs.append(str(rom.img_path.with_suffix(".jpg")))
 
-            img = Image.open(png_path).convert(mode="RGB").resize((128, 96), Image.ANTIALIAS)
-            #img = ImageOps.resize(img, (128, 96))
-            write_rgb565(img, rom.img_path)
-        else:
-            jpg_path = rom.img_path.with_suffix(".jpg")
-            # TODO: add jpg and other paths
-            if jpg_path.exists():
-                from PIL import Image, ImageOps
+        for img in imgs:
+            if Path(img).exists():
+                write_rgb565(Path(img), rom.img_path, args.coverflow)
+                break
 
-                img = Image.open(jpg_path).convert(mode="RGB").resize((128, 96), Image.ANTIALIAS)
-                #img = ImageOps.resize(img, (128, 96))
-                write_rgb565(img, rom.img_path)
-            else:
-                if not rom.img_path.exists():
-                    raise NoArtworkError
+        if not rom.img_path.exists():
+            raise NoArtworkError
 
         subprocess.check_output(
             [
@@ -652,11 +663,11 @@ class ROMParser:
                     (save_size + aligned_size - 1) // (aligned_size)
                 ) * aligned_size
                 total_rom_size += rom.size
-                if (args.coverflow == 1) :
+                if (args.coverflow != 0) :
                     total_img_size += rom.img_size
 
                 f.write(self.generate_object_file(rom))
-                if (args.coverflow == 1) :
+                if (args.coverflow != 0) :
                     try:
                         f.write(self.generate_img_object_file(rom))
                     except NoArtworkError:
@@ -701,7 +712,6 @@ class ROMParser:
             with open(json_file,'r') as load_f:
                 try:
                     romdef = json.load(load_f)
-                    print("Rom Define file loaded")
                     load_f.close()
                 except: 
                     romdef = {}

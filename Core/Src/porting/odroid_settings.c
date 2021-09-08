@@ -134,7 +134,7 @@ void odroid_settings_int32_set(const char *key, int32_t value)
 {
 }
 
-#if COVERFLOW == 1
+#if COVERFLOW != 0
 int32_t odroid_settings_theme_get()
 {
     int theme = persistent_config_ram.theme;

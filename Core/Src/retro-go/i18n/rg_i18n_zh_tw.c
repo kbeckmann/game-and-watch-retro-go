@@ -25,7 +25,23 @@ int odroid_overlay_get_local_font_width()
     return 6;
 }
 
-int odroid_overlay_draw_local_text_line(uint16_t x_pos, uint16_t y_pos, uint16_t width, const char *text, uint16_t color, uint16_t color_bg, uint16_t* outlength)
+void odroid_overlay_read_screen_rect(uint16_t x_pos, uint16_t y_pos, uint16_t width, uint16_t height)
+{
+    uint16_t *dst_img = lcd_get_active_buffer();
+    for (int x = 0; x < width; x++)
+        for (int y = 0; y < height; y++)
+            overlay_buffer[x + y * width] = dst_img [(y + y_pos) * ODROID_SCREEN_WIDTH + x_pos + x];
+}
+
+void do_point_data(uint16_t *data, char checked, char transparent, uint16_t color, uint16_t color_bg)
+{
+    if (checked)
+        *data = color;
+    else if (!transparent)
+        *data = color_bg;
+}
+
+int odroid_overlay_draw_local_text_line(uint16_t x_pos, uint16_t y_pos, uint16_t width, const char *text, uint16_t color, uint16_t color_bg, uint16_t* outlength, char transparent)
 {
     int font_height = odroid_overlay_get_local_font_size();
     int font_width = odroid_overlay_get_local_font_width();
@@ -46,12 +62,12 @@ int odroid_overlay_draw_local_text_line(uint16_t x_pos, uint16_t y_pos, uint16_t
             for (int y = 0; y < font_height; y++) {  //height :12;
                 int offset = x_offset + (width * y);
                 cc = hzk_asc6x12[location + y];
-                overlay_buffer[offset + 5] = (cc & 0x04) ? color : color_bg;
-                overlay_buffer[offset + 4] = (cc & 0x08) ? color : color_bg;
-                overlay_buffer[offset + 3] = (cc & 0x10) ? color : color_bg;
-                overlay_buffer[offset + 2] = (cc & 0x20) ? color : color_bg;
-                overlay_buffer[offset + 1] = (cc & 0x40) ? color : color_bg;
-                overlay_buffer[offset + 0] = (cc & 0x80) ? color : color_bg;
+                do_point_data(&overlay_buffer[offset + 5], cc & 0x04, transparent, color, color_bg);
+                do_point_data(&overlay_buffer[offset + 4], cc & 0x08, transparent, color, color_bg);
+                do_point_data(&overlay_buffer[offset + 3], cc & 0x10, transparent, color, color_bg);
+                do_point_data(&overlay_buffer[offset + 2], cc & 0x20, transparent, color, color_bg);
+                do_point_data(&overlay_buffer[offset + 1], cc & 0x40, transparent, color, color_bg);
+                do_point_data(&overlay_buffer[offset + 0], cc & 0x80, transparent, color, color_bg);
             }
             x_offset += 6;
         }
@@ -72,19 +88,22 @@ int odroid_overlay_draw_local_text_line(uint16_t x_pos, uint16_t y_pos, uint16_t
                 for (int y = 0; y < font_height; y++) {  //height :12;
                     int offset = x_offset + (width * y);
                     cc = hzk12x12[location + y * 2];
-                    overlay_buffer[offset + 7] = (cc & 0x01) ? color : color_bg;
-                    overlay_buffer[offset + 6] = (cc & 0x02) ? color : color_bg;
-                    overlay_buffer[offset + 5] = (cc & 0x04) ? color : color_bg;
-                    overlay_buffer[offset + 4] = (cc & 0x08) ? color : color_bg;
-                    overlay_buffer[offset + 3] = (cc & 0x10) ? color : color_bg;
-                    overlay_buffer[offset + 2] = (cc & 0x20) ? color : color_bg;
-                    overlay_buffer[offset + 1] = (cc & 0x40) ? color : color_bg;
-                    overlay_buffer[offset + 0] = (cc & 0x80) ? color : color_bg;
+                    
+                    do_point_data(&overlay_buffer[offset + 7], cc & 0x01, transparent, color, color_bg);
+                    do_point_data(&overlay_buffer[offset + 6], cc & 0x02, transparent, color, color_bg);
+                    do_point_data(&overlay_buffer[offset + 5], cc & 0x04, transparent, color, color_bg);
+                    do_point_data(&overlay_buffer[offset + 4], cc & 0x08, transparent, color, color_bg);
+                    do_point_data(&overlay_buffer[offset + 3], cc & 0x10, transparent, color, color_bg);
+                    do_point_data(&overlay_buffer[offset + 2], cc & 0x20, transparent, color, color_bg);
+                    do_point_data(&overlay_buffer[offset + 1], cc & 0x40, transparent, color, color_bg);
+                    do_point_data(&overlay_buffer[offset + 0], cc & 0x80, transparent, color, color_bg);
+
                     cc = hzk12x12[location + y * 2 + 1];
-                    overlay_buffer[offset + 11] = (cc & 0x10) ? color : color_bg;
-                    overlay_buffer[offset + 10] = (cc & 0x20) ? color : color_bg;
-                    overlay_buffer[offset + 9] = (cc & 0x40) ? color : color_bg;
-                    overlay_buffer[offset + 8] = (cc & 0x80) ? color : color_bg;
+
+                    do_point_data(&overlay_buffer[offset + 11], cc & 0x10, transparent, color, color_bg);
+                    do_point_data(&overlay_buffer[offset + 10], cc & 0x20, transparent, color, color_bg);
+                    do_point_data(&overlay_buffer[offset +  9], cc & 0x40, transparent, color, color_bg);
+                    do_point_data(&overlay_buffer[offset +  8], cc & 0x80, transparent, color, color_bg);
                 }
                 x_offset += 12;
                 i++;
@@ -99,7 +118,7 @@ int odroid_overlay_draw_local_text_line(uint16_t x_pos, uint16_t y_pos, uint16_t
 }
 
 
-int odroid_overlay_draw_local_text(uint16_t x_pos, uint16_t y_pos, uint16_t width, const char *text, uint16_t color, uint16_t color_bg)
+int odroid_overlay_draw_local_text(uint16_t x_pos, uint16_t y_pos, uint16_t width, const char *text, uint16_t color, uint16_t color_bg, char transparent)
 {
     int text_len = 1;
     int height = 0;
@@ -123,7 +142,7 @@ int odroid_overlay_draw_local_text(uint16_t x_pos, uint16_t y_pos, uint16_t widt
         sprintf(buffer, "%.*s", line_len, text + pos);
         if (strchr(buffer, '\n')) *(strchr(buffer, '\n')) = 0;
         int outlength = line_len;
-        height += odroid_overlay_draw_local_text_line(x_pos, y_pos + height, width, buffer, color, color_bg, &outlength);
+        height += odroid_overlay_draw_local_text_line(x_pos, y_pos + height, width, buffer, color, color_bg, &outlength, transparent);
         pos += outlength; 
         if (*(text + pos) == 0 || *(text + pos) == '\n') pos++;
     }

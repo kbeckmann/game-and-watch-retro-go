@@ -321,7 +321,7 @@ void emulator_show_file_info(retro_emulator_file_t *file)
         {0, s_File, filename_value, 1, NULL},
         {0, s_Type, type_value, 1, NULL},
         {0, s_Size, size_value, 1, NULL},
-		#if COVERFLOW == 1
+		#if COVERFLOW != 0
         {0, s_ImgSize, img_size, 1, NULL},
 		#endif
         ODROID_DIALOG_CHOICE_SEPARATOR,
@@ -332,7 +332,7 @@ void emulator_show_file_info(retro_emulator_file_t *file)
     sprintf(choices[0].value, "%.127s", file->name);
     sprintf(choices[1].value, "%s", file->ext);
     sprintf(choices[2].value, "%d KB", file->size / 1024);
-    #if COVERFLOW == 1
+    #if COVERFLOW != 0
     sprintf(choices[3].value, "%d KB", file->img_size / 1024);
 	#endif
 
