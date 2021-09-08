@@ -16,7 +16,7 @@
 
 #define s_Yes                   "Yes"
 #define s_No                    "No"
-#define s_PlsChose              "Please choose:"
+#define s_PlsChose              "Question"
 #define s_OK                    "OK"
 #define s_Confirm               "Confirm"
 #define s_Brightness            "Brightness"
@@ -68,7 +68,7 @@
 #define s_Author                    "By     :"
 #define s_Author_                   "       :"
 #define s_UI_Mod                    "UI Mod :"
-#define s_Lang                      "English:"
+#define s_Lang                      "English"
 #define s_LangAuthor                "Default"
 #define s_Debug_menu                "Debug_menu"
 #define s_Reset_settings            "Reset settings"
