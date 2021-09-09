@@ -408,7 +408,7 @@ void gui_draw_item_postion_v(int posx, int starty, int endy, int cur, int size)
     for (int y = 0; y < len; y++)
         odroid_overlay_draw_text_line(
             posx - odroid_overlay_get_font_width() / 2,
-            33 + posy + y * odroid_overlay_get_font_size(), //top
+            starty + posy + y * odroid_overlay_get_font_size(), //top
             odroid_overlay_get_font_width(),
             &str_buffer[y],
             C_BLACK,
@@ -421,23 +421,22 @@ void gui_draw_simple_list(int posx, tab_t *tab)
     if (list->cursor >= 0 && list->cursor < list->length)
     {
         //draw currpostion
-        gui_draw_item_postion_v(ODROID_SCREEN_WIDTH - 5, 33, 192, list->cursor + 1, list->length);
+        gui_draw_item_postion_v(ODROID_SCREEN_WIDTH - 5, LIST_Y_OFFSET + 4, LIST_Y_OFFSET + LIST_HEIGHT - 4, list->cursor + 1, list->length);
 
         int w = (ODROID_SCREEN_WIDTH - posx - 10) / odroid_overlay_get_local_font_width();
         w = w * odroid_overlay_get_local_font_width();
         listbox_item_t *item = &list->items[list->cursor];
+        int h1 = LIST_Y_OFFSET + (LIST_HEIGHT - odroid_overlay_get_local_font_size()) / 2;
         if (item)
-            odroid_overlay_draw_local_text_line(posx, 107, w, list->items[list->cursor].text, C_GW_YELLOW, C_BLACK, NULL, 0);
+            odroid_overlay_draw_local_text_line(posx, h1, w, list->items[list->cursor].text, C_GW_YELLOW, C_BLACK, NULL, 0);
 
         int index_next = list->cursor + 1;
         int index_proior = list->cursor - 1;
-        //up & down
-        int h1 = 107;
-        int h2 = 107;
+        int h2 = h1;
         for (int i = 0; i < 5; i++)
         {
             listbox_item_t *next_item = gui_get_item_by_index(tab, &index_next);
-            h1 = h1 + 12 + 4 - i;
+            h1 = h1 + odroid_overlay_get_local_font_size() + 4 - i;
             if (next_item)
                 odroid_overlay_draw_local_text_line(
                     posx,
@@ -450,7 +449,7 @@ void gui_draw_simple_list(int posx, tab_t *tab)
                     0);
             index_next++;
             listbox_item_t *prior_item = gui_get_item_by_index(tab, &index_proior);
-            h2 = h2 - 12 - 4 + i;
+            h2 = h2 - odroid_overlay_get_local_font_size() - 4 + i;
             if (prior_item)
                 odroid_overlay_draw_local_text_line(
                     posx,
