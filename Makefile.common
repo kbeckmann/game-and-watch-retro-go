@@ -68,9 +68,9 @@ ifeq ($(CODEPAGE), 936)
 else ifeq ($(CODEPAGE), 950)
 	SCODEPAGE = "big5"
 else ifeq ($(CODEPAGE), 932)
-	SCODEPAGE = "shift_jis"
+	SCODEPAGE = "eucjp"
 else ifeq ($(CODEPAGE), 949)
-	SCODEPAGE = "cp949"
+	SCODEPAGE = "euckr"
 else
     SCODEPAGE = "utf-8"
 endif
@@ -98,9 +98,8 @@ Core/Src/retro-go/rg_rtc.c \
 Core/Src/retro-go/rg_emulators.c \
 Core/Src/retro-go/rom_manager.c \
 Core/Src/porting/odroid_settings.c \
-Core/Src/retro-go/i18n/rg_i18n_en_us.c \
-Core/Src/retro-go/i18n/rg_i18n_zh_cn.c \
-Core/Src/retro-go/i18n/rg_i18n_zh_tw.c \
+Core/Src/retro-go/i18n/rg_i18n_universal.c \
+Core/Src/retro-go/i18n/rg_i18n_cjk.c \
 Core/Src/retro-go/bitmaps/header_gb.c \
 Core/Src/retro-go/bitmaps/header_nes.c \
 Core/Src/retro-go/bitmaps/header_sms.c \
