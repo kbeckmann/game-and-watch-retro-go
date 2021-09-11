@@ -11,9 +11,9 @@
 #include "odroid_overlay.h"
 
 #if CODEPAGE==1252
-    #include "fonts/font_en.h"
+    #include "fonts/font_en_us.h"
 #else
-    #include "fonts/font_en.h"
+    #include "fonts/font_en_us.h"
 #endif
 
 static uint16_t overlay_buffer[ODROID_SCREEN_WIDTH * 12 * 2]  __attribute__ ((aligned (4)));
