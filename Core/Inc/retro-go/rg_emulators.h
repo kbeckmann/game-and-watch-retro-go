@@ -41,6 +41,10 @@ typedef struct {
     char ext[8];
     uint16_t crc_offset;
     uint16_t partition;
+	#if COVERFLOW != 0
+    size_t cover_width;
+    size_t cover_height;
+	#endif
     struct {
         const retro_emulator_file_t *files;
         int count;

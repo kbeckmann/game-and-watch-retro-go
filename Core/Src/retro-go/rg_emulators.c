@@ -148,6 +148,8 @@ void emulator_init(retro_emulator_t *emu)
         emu->system = system;
         emu->roms.files = system->roms;
         emu->roms.count = system->roms_count;
+        emu->cover_height = system->cover_height;
+        emu->cover_width = system->cover_width;
     } else {
         while(1) {
             lcd_backlight_on();
@@ -456,28 +458,29 @@ void emulators_init()
     add_emulator("Nintendo Entertainment System", "nes", "nes", "nofrendo-go", 16, logo_nes, header_nes);
 #endif
     
-#ifdef ENABLE_EMULATOR_SMS
-    add_emulator("Sega Master System", "sms", "sms", "smsplusgx-go", 0, logo_sms, header_sms);
-#endif
-
-#ifdef ENABLE_EMULATOR_GG
-    add_emulator("Sega Game Gear", "gg", "gg", "smsplusgx-go", 0, logo_gg, header_gg);
-#endif
-
-#ifdef ENABLE_EMULATOR_COL
-    add_emulator("Colecovision", "col", "col", "smsplusgx-go", 0, logo_col, header_col);
-#endif
-
-#ifdef ENABLE_EMULATOR_SG1000
-    add_emulator("Sega SG-1000", "sg", "sg", "smsplusgx-go", 0, logo_sg1000, header_sg1000);
+#ifdef ENABLE_EMULATOR_GW
+    add_emulator("Game & Watch", "gw", "gw", "LCD-Game-Emulator", 0, logo_gw, header_gw);
 #endif
 
 #ifdef ENABLE_EMULATOR_PCE
     add_emulator("PC Engine", "pce", "pce", "huexpress-go", 0, logo_nes, header_pce);
 #endif
 
-#ifdef ENABLE_EMULATOR_GW
-    add_emulator("Game & Watch", "gw", "gw", "LCD-Game-Emulator", 0, logo_gw, header_gw);
+#ifdef ENABLE_EMULATOR_GG
+    add_emulator("Sega Game Gear", "gg", "gg", "smsplusgx-go", 0, logo_gg, header_gg);
+#endif
+
+#ifdef ENABLE_EMULATOR_SMS
+    add_emulator("Sega Master System", "sms", "sms", "smsplusgx-go", 0, logo_sms, header_sms);
+#endif
+
+
+#ifdef ENABLE_EMULATOR_SG1000
+    add_emulator("Sega SG-1000", "sg", "sg", "smsplusgx-go", 0, logo_sg1000, header_sg1000);
+#endif
+
+#ifdef ENABLE_EMULATOR_COL
+    add_emulator("Colecovision", "col", "col", "smsplusgx-go", 0, logo_col, header_col);
 #endif
 
     // add_emulator("ColecoVision", "col", "col", "smsplusgx-go", 0, logo_col, header_col);

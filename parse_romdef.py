@@ -18,18 +18,21 @@ class ROMParser:
         roms_folder = script_path / "roms" / folder
 
         # find all files that end with extension (case-insensitive)
+        romdefs.setdefault("_cover_width", 128)
+        romdefs.setdefault("_cover_height", 96)
+        w = romdefs["_cover_width"]
+        h = romdefs["_cover_height"]
+        print(f"{folder}: Cover image size is defined :{[w]} x {[h]}")
         rom_files = list(roms_folder.iterdir())
         rom_files = [r for r in rom_files if r.name.lower().endswith(extension)]
         rom_files.sort()
         for rom_file in rom_files :
             file_name = rom_file.stem
-            print("Found " + folder + " rom:" + file_name)
             romdefs.setdefault(file_name, {})
             romdef = romdefs[file_name]
             romdef.setdefault("name", file_name)
             romdef.setdefault("publish", "1")
-            print("will display as name : " + romdef["name"])
-            print("pulish is: " + romdef["publish"])
+            print(folder + ":" + file_name + " >> " + romdef["name"] + ",P: " + romdef["publish"])
 
         return romdefs
 
@@ -47,9 +50,10 @@ class ROMParser:
             with open(json_file,'r') as load_f:
                 try:
                     romdef = json.load(load_f)
-                    print("Rom Define file loaded")
+                    print("Rom define file loaded")
                     load_f.close()
                 except: 
+                    print("Rom define file load failed")
                     romdef = {}
                     load_f.close()
         else :
@@ -74,7 +78,7 @@ class ROMParser:
         romdef["pce"] = self.generate_system(romdef["pce"], "pce",["pce"])
         romdef["gw"] = self.generate_system(romdef["gw"], "gw",["gw"])
         with open(json_file,'w', encoding ='utf-8') as dump_f:
-            json.dump(romdef, dump_f, ensure_ascii=False)
+            json.dump(romdef, dump_f, ensure_ascii=False, indent=4, sort_keys=True)
             print("Rom Define file saved ok!")
             dump_f.close()
 

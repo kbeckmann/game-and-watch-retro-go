@@ -47,6 +47,10 @@ const rom_system_t {name} = {{
 \t.system_name = "{system_name}",
 \t.roms = {variable_name},
 \t.extension = "{extension}",
+\t#if COVERFLOW != 0
+\t.cover_width = {cover_width},
+\t.cover_height = {cover_height},
+\t#endif 
 \t.roms_count = {roms_count},
 }};
 """
@@ -218,36 +222,14 @@ def compress_zopfli(data, level=None):
     return compressed_data
 
 
-def write_rgb565(srcfile, fn, v):
+def write_imgfile(srcfile, fn, w, h):
     from PIL import Image, ImageOps
     #print(srcfile)
     img = Image.open(srcfile).convert(mode="RGB")
-    if (v == 1):
-        img = img.resize((128, 96), Image.ANTIALIAS)
-    else :
-        img = img.resize((96, 128), Image.ANTIALIAS)
+    img = img.resize((w, h), Image.ANTIALIAS)
     pixels = list(img.getdata())
     with open(fn, "wb") as f:
-        # TODO: this header could probably be a bit shorter, didn't really investigate
-        if (v==1):
-            f.write(
-                b"BMH\x60\x00\x00\x00\x00\x00\x00\x46\x00\x00\x00\x38\x00"
-                b"\x00\x00\x80\x00\x00\x00\xa0\xff\xff\xff\x01\x00\x10\x00\x03\x00"
-                b"\x00\x00\x02\x60\x00\x00\x12\x0b\x00\x00\x12\x0b\x00\x00\x00\x00"
-                b"\x00\x00\x00\x00\x00\x00\x00\xf8\x00\x00\xe0\x07\x00\x00\x1f\x00"
-                b"\x00\x00\x00\x00\x00\x00"
-            )
-        elif (v==2):
-            f.write(
-                b"BMH\x60\x00\x00\x00\x00\x00\x00\x46\x00\x00\x00\x38\x00"
-                b"\x00\x00\x60\x00\x00\x00\x80\xff\xff\xff\x01\x00\x10\x00\x03\x00"
-                b"\x00\x00\x02\x60\x00\x00\x12\x0b\x00\x00\x12\x0b\x00\x00\x00\x00"
-                b"\x00\x00\x00\x00\x00\x00\x00\xf8\x00\x00\xe0\x07\x00\x00\x1f\x00"
-                b"\x00\x00\x00\x00\x00\x00"
-            )
-        else :
-            return 0
-
+        #no file header
         for pix in pixels:
             r = (pix[0] >> 3) & 0x1F
             g = (pix[1] >> 2) & 0x3F
@@ -286,7 +268,7 @@ class ROM:
             + "_start"
         )
 
-        self.img_path = self.path.parent / (self.filename + ".bmp")
+        self.img_path = self.path.parent / (self.filename + ".img")
         obj_name = "".join([i if i.isalnum() else "_" for i in self.img_path.name])
         symbol_path = str(self.path.parent) + "/" + obj_name
         self.obj_img = "build/roms/" + obj_name + "_" + extension + ".o"
@@ -412,7 +394,7 @@ class ROMParser:
         template = "extern const uint8_t {name}[];\n"
         return template.format(name=rom.symbol)
 
-    def generate_img_object_file(self, rom: ROM) -> str:
+    def generate_img_object_file(self, rom: ROM, w: int, h: int) -> str:
         # convert rom_img to an .o file and place the data in the .extflash_game_rom section
         prefix = ""
         if "GCC_PATH" in os.environ:
@@ -421,14 +403,13 @@ class ROMParser:
         prefix = Path(prefix)
 
         imgs = []
-        imgs.append(str(rom.img_path.with_suffix("")) + f"_{args.coverflow}.png")
-        imgs.append(str(rom.img_path.with_suffix("")) + f"_{args.coverflow}.jpg")
         imgs.append(str(rom.img_path.with_suffix(".png")))
         imgs.append(str(rom.img_path.with_suffix(".jpg")))
+        imgs.append(str(rom.img_path.with_suffix(".bmp")))
 
         for img in imgs:
             if Path(img).exists():
-                write_rgb565(Path(img), rom.img_path, args.coverflow)
+                write_imgfile(Path(img), rom.img_path, w, h)
                 break
 
         if not rom.img_path.exists():
@@ -647,6 +628,12 @@ class ROMParser:
                pubcount += 1
 
         save_size = SAVE_SIZES.get(folder, 0)
+        romdefs.setdefault("_cover_width", 128)
+        romdefs.setdefault("_cover_height", 96)
+        cover_width = romdefs["_cover_width"]
+        cover_height = romdefs["_cover_height"]
+        cover_width = 180 if cover_width > 180 else 64 if cover_width < 64 else cover_width
+        cover_height = 136 if cover_height > 136 else 64 if cover_height < 64 else cover_height
 
         with open(file, "w", encoding = args.codepage) as f:
             f.write(SYSTEM_PROTO_TEMPLATE.format(name=variable_name))
@@ -669,7 +656,7 @@ class ROMParser:
                 f.write(self.generate_object_file(rom))
                 if (args.coverflow != 0) :
                     try:
-                        f.write(self.generate_img_object_file(rom))
+                        f.write(self.generate_img_object_file(rom, cover_width, cover_height))
                     except NoArtworkError:
                         pass
                 f.write(self.generate_save_entry(save_prefix + str(i), save_size))
@@ -685,6 +672,8 @@ class ROMParser:
                     system_name=system_name,
                     variable_name=folder + "_roms",
                     extension=folder,
+                    cover_width=cover_width,
+                    cover_height=cover_height,
                     roms_count=pubcount,
                 )
             )
