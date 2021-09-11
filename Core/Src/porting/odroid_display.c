@@ -20,6 +20,8 @@ void odroid_display_write_rect(short left, short top, short width, short height,
     pixel_t *dest = lcd_get_active_buffer();
 
     for (short y = 0; y < height; y++) {
+        if ((y + top) >= GW_LCD_WIDTH) 
+            return;
         pixel_t *dest_row = &dest[(y + top) * GW_LCD_WIDTH + left];
         memcpy(dest_row, &buffer[y * stride], width * sizeof(pixel_t));
     }
