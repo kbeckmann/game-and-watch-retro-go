@@ -36,7 +36,7 @@ ROM_ENTRY_TEMPLATE = """\t{{
 \t}},"""
 
 SYSTEM_PROTO_TEMPLATE = """
-#if !defined  (COVERFLOW)
+#if !defined (COVERFLOW)
   #define COVERFLOW 0
 #endif /* COVERFLOW */
 extern const rom_system_t {name};
@@ -368,6 +368,7 @@ class ROMParser:
             prefix = os.environ["GCC_PATH"]
         prefix = Path(prefix)
 
+        print(f"INFO: Compiling {rom.name} ROM  > {rom.path} ...")
         subprocess.check_output(
             [
                 prefix / "arm-none-eabi-objcopy",
@@ -383,6 +384,7 @@ class ROMParser:
                 rom.obj_path,
             ]
         )
+        print(f"INFO: Packing   {rom.name} ROM  > {rom.path} ...")
         subprocess.check_output(
             [
                 prefix / "arm-none-eabi-ar",
@@ -402,19 +404,22 @@ class ROMParser:
 
         prefix = Path(prefix)
 
-        imgs = []
-        imgs.append(str(rom.img_path.with_suffix(".png")))
-        imgs.append(str(rom.img_path.with_suffix(".jpg")))
-        imgs.append(str(rom.img_path.with_suffix(".bmp")))
+        if not rom.img_path.exists():
 
-        for img in imgs:
-            if Path(img).exists():
-                write_imgfile(Path(img), rom.img_path, w, h)
-                break
+            imgs = []
+            imgs.append(str(rom.img_path.with_suffix(".png")))
+            imgs.append(str(rom.img_path.with_suffix(".jpg")))
+            imgs.append(str(rom.img_path.with_suffix(".bmp")))
+
+            for img in imgs:
+                if Path(img).exists():
+                    write_imgfile(Path(img), rom.img_path, w, h)
+                    break
 
         if not rom.img_path.exists():
             raise NoArtworkError
 
+        print(f"INFO: Compiling {rom.name} Cover> {rom.img_path} ...")
         subprocess.check_output(
             [
                 prefix / "arm-none-eabi-objcopy",
@@ -430,6 +435,7 @@ class ROMParser:
                 rom.obj_img,
             ]
         )
+        print(f"INFO: Packing   {rom.name} Cover> {rom.img_path} ...")
         subprocess.check_output(
             [
                 prefix / "arm-none-eabi-ar",
@@ -492,6 +498,9 @@ class ROMParser:
             compress = "." + compress
         output_file = Path(str(rom.path) + compress)
         compress = COMPRESSIONS[compress]
+        if output_file.exists():
+            print(f"INFO: {rom.name} Compressed file {output_file} exists, skip compression!")
+            return
 
         data = rom.read()
 
