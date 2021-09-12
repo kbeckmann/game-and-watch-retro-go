@@ -299,18 +299,30 @@ void gui_draw_status(tab_t *tab)
     odroid_overlay_draw_fill_rect(0, 4, ODROID_SCREEN_WIDTH, 2, C_BLACK);
     odroid_overlay_draw_fill_rect(0, 8, ODROID_SCREEN_WIDTH, 2, C_BLACK);
 
-    int max_len = (ODROID_SCREEN_WIDTH - 12) / odroid_overlay_get_local_font_width();
-
-    odroid_overlay_draw_local_text_line(
-        6,
-        16,
-        max_len * odroid_overlay_get_local_font_width(),
-        tab->status,
-        C_GW_YELLOW,
-        C_GW_RED,
-        NULL,
-        0);
-
+    if (tab->img_header)
+    {
+        int max_len = (ODROID_SCREEN_WIDTH - 12) / odroid_overlay_get_local_font_width();
+        odroid_overlay_draw_local_text_line(
+            6,
+            16,
+            max_len * odroid_overlay_get_local_font_width(),
+            tab->status,
+            C_GW_YELLOW,
+            C_GW_RED,
+            NULL,
+            0);
+    }
+    else
+    {
+        int max_len = (ODROID_SCREEN_WIDTH - 12) / odroid_overlay_get_font_width();
+        odroid_overlay_draw_text_line(
+            6,
+            16,
+            max_len * odroid_overlay_get_font_width(),
+            tab->status,
+            C_GW_YELLOW,
+            C_GW_RED);
+    }
     odroid_overlay_draw_battery(ODROID_SCREEN_WIDTH - 32, 17);
 }
 
@@ -565,7 +577,7 @@ void gui_draw_coverflow_h(tab_t *tab) //------------
                                           get_darken_pixel(C_GW_RED, 80),
                                           C_BLACK);
 
-            if (! draw_bot_title)
+            if (!draw_bot_title)
             {
                 sprintf(str_buffer, "%s", file->name);
                 size_t len = strlen(str_buffer);
@@ -620,21 +632,21 @@ void gui_draw_coverflow_h(tab_t *tab) //------------
                                           get_darken_pixel(C_GW_OPAQUE_YELLOW, 80),
                                           C_BLACK);
             if ((!draw_top_title) && (p_width > (odroid_overlay_get_local_font_width() * 4)))
-                {
-                    sprintf(str_buffer, "%s", file->name);
-                    size_t len = strlen(str_buffer);
-                    size_t width = len * odroid_overlay_get_local_font_width();
-                    width = width > p_width ? p_width : width;
-                    width = (width / odroid_overlay_get_local_font_width()) * odroid_overlay_get_local_font_width();
-                    odroid_overlay_draw_local_text(
-                        start_xpos + p_width + cover_width + 19,
-                        cover_top + 4,
-                        width,
-                        str_buffer,
-                        C_GW_OPAQUE_YELLOW,
-                        C_BLACK,
-                        0);
-                }
+            {
+                sprintf(str_buffer, "%s", file->name);
+                size_t len = strlen(str_buffer);
+                size_t width = len * odroid_overlay_get_local_font_width();
+                width = width > p_width ? p_width : width;
+                width = (width / odroid_overlay_get_local_font_width()) * odroid_overlay_get_local_font_width();
+                odroid_overlay_draw_local_text(
+                    start_xpos + p_width + cover_width + 19,
+                    cover_top + 4,
+                    width,
+                    str_buffer,
+                    C_GW_OPAQUE_YELLOW,
+                    C_BLACK,
+                    0);
+            }
         }
         else
         {
@@ -676,21 +688,21 @@ void gui_draw_coverflow_h(tab_t *tab) //------------
                                           get_darken_pixel(C_GW_OPAQUE_YELLOW, 80),
                                           C_BLACK);
             if ((!draw_top_title) && (p_width > odroid_overlay_get_local_font_width() * 4))
-                {
-                    sprintf(str_buffer, "%s", file->name);
-                    size_t len = strlen(str_buffer);
-                    size_t width = len * odroid_overlay_get_local_font_width();
-                    width = width > p_width ? p_width : width;
-                    width = (width / odroid_overlay_get_local_font_width()) * odroid_overlay_get_local_font_width();
-                    odroid_overlay_draw_local_text(
-                        start_xpos + 8,
-                        cover_top + 4,
-                        width,
-                        str_buffer,
-                        C_GW_OPAQUE_YELLOW,
-                        C_BLACK,
-                        0);
-                }
+            {
+                sprintf(str_buffer, "%s", file->name);
+                size_t len = strlen(str_buffer);
+                size_t width = len * odroid_overlay_get_local_font_width();
+                width = width > p_width ? p_width : width;
+                width = (width / odroid_overlay_get_local_font_width()) * odroid_overlay_get_local_font_width();
+                odroid_overlay_draw_local_text(
+                    start_xpos + 8,
+                    cover_top + 4,
+                    width,
+                    str_buffer,
+                    C_GW_OPAQUE_YELLOW,
+                    C_BLACK,
+                    0);
+            }
         }
         else
         {
