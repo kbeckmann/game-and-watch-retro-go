@@ -28,9 +28,9 @@ typedef struct {
 	#endif
     const uint8_t *save_address;
     uint32_t save_size;
-    size_t crc_offset;
-    uint32_t checksum;
-    bool missing_cover;
+    //size_t crc_offset;
+    //uint32_t checksum;
+    //bool missing_cover;
     rom_region_t region;
     const rom_system_t *system;
 } retro_emulator_file_t;
