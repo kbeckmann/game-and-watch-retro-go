@@ -13,7 +13,8 @@ if [[ ! -e $TMPFILE ]]; then
 	exit 1
 fi
 
-find ${@:2} -type f | sort > "${TMPFILE}" 2> /dev/null
+find ${@:2} -type f \( -iname \*.gb -o -iname \*.gbc -o -iname \*.nes -o -iname \*.gw -o -iname \*.sms -o -iname \*.gg -o -iname \*.sg -o -iname \*.col -o -iname \*.pce -o -iname \*.png -o -iname \*.jpg -o -iname \*.bmp \) | sort > "${TMPFILE}" 2> /dev/null
+#find ${@:2} -type f | sort > "${TMPFILE}" 2> /dev/null
 
 if ! diff -q ${TMPFILE} ${filelist} > /dev/null 2> /dev/null; then
     echo "Updating file list ${filelist}"
