@@ -368,7 +368,7 @@ class ROMParser:
             prefix = os.environ["GCC_PATH"]
         prefix = Path(prefix)
 
-        print(f"INFO: Compiling {rom.name} ROM  > {rom.path} ...")
+        print(f"INFO: Packing {rom.name} ROM  > {rom.path} ...")
         subprocess.check_output(
             [
                 prefix / "arm-none-eabi-objcopy",
@@ -384,7 +384,6 @@ class ROMParser:
                 rom.obj_path,
             ]
         )
-        print(f"INFO: Packing   {rom.name} ROM  > {rom.path} ...")
         subprocess.check_output(
             [
                 prefix / "arm-none-eabi-ar",
@@ -419,7 +418,7 @@ class ROMParser:
         if not rom.img_path.exists():
             raise NoArtworkError
 
-        print(f"INFO: Compiling {rom.name} Cover> {rom.img_path} ...")
+        print(f"INFO: Packing {rom.name} Cover> {rom.img_path} ...")
         subprocess.check_output(
             [
                 prefix / "arm-none-eabi-objcopy",
@@ -435,7 +434,6 @@ class ROMParser:
                 rom.obj_img,
             ]
         )
-        print(f"INFO: Packing   {rom.name} Cover> {rom.img_path} ...")
         subprocess.check_output(
             [
                 prefix / "arm-none-eabi-ar",
