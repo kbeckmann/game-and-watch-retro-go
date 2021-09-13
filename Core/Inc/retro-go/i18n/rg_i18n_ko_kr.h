@@ -1,6 +1,7 @@
 #pragma once
 //한국어
 //If you can translate, please feed back the translation results to me, thank you
+//translate by  Augen(히힛마스터): 
 
 //Core\Src\porting\gb\main_gb.c
 #define s_Palette               "팔레트"
@@ -64,13 +65,13 @@
 #define s_Confiem_del_save      "저장 데이터를 삭제하시겠습니까?"
 
 //Core\Src\retro-go\rg_main.c
-#define s_Second_Unit               "s"
+#define s_Second_Unit               "초"
 #define s_Version                   "Ver.   :"
 #define s_Author                    "By     :"
 #define s_Author_                   "       :"
 #define s_UI_Mod                    "UI Mod :"
 #define s_Lang                      "한국어"
-#define s_LangAuthor                "기본"
+#define s_LangAuthor                "Augen(히힛마스터)"
 #define s_Debug_menu                "디버그 매뉴"
 #define s_Reset_settings            "모든 설정 초기화"
 //#define s_Close                   "닫기"
