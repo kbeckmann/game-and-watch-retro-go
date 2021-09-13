@@ -76,10 +76,10 @@ static void event_handler(gui_event_t event, tab_t *tab)
             sprintf(tab->status, " No games");
             gui_resize_list(tab, 8);
             size_t len = 0;
-            tab->listbox.items[0].text = asnprintf(NULL, &len, "Place roms in folder: /roms/%s", emu->dirname);
+            //tab->listbox.items[0].text = asnprintf(NULL, &len, "Place roms in folder: /roms/%s", emu->dirname);
             len = 0;
-            tab->listbox.items[2].text = asnprintf(NULL, &len, "With file extension: .%s", emu->ext);
-            tab->listbox.items[4].text = "Use SELECT and START to navigate.";
+            //tab->listbox.items[2].text = asnprintf(NULL, &len, "With file extension: .%s", emu->ext);
+            //tab->listbox.items[4].text = "Use SELECT and START to navigate.";
             tab->listbox.cursor = 3;
             tab->is_empty = true;
         }
@@ -120,7 +120,7 @@ static void add_emulator(const char *system, const char *dirname, const char* ex
     assert(emulators_count <= MAX_EMULATORS);
     retro_emulator_t *p = &emulators[emulators_count++];
     strcpy(p->system_name, system);
-    strcpy(p->dirname, dirname);
+    //strcpy(p->dirname, dirname);
     strcpy(p->ext, ext);
     p->partition = 0;
     p->roms.count = 0;

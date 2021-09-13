@@ -21,10 +21,11 @@ typedef struct {
     const char *ext;
     // char folder[32];
     const uint8_t *address;
-    size_t size;
+    uint32_t size;
 	#if COVERFLOW != 0
     const uint8_t *img_address;
-    size_t img_size;
+    //max 64kb image file data
+    uint16_t img_size;
 	#endif
     const uint8_t *save_address;
     uint32_t save_size;
@@ -36,9 +37,9 @@ typedef struct {
 } retro_emulator_file_t;
 
 typedef struct {
-    char system_name[64];
-    char dirname[16];
-    char ext[8];
+    char system_name[32];
+    //char dirname[16];
+    char ext[4];
     uint16_t crc_offset;
     uint16_t partition;
 	#if COVERFLOW != 0
