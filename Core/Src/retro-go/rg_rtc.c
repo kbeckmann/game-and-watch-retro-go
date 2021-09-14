@@ -1,12 +1,13 @@
 #include "main.h"
 #include "rg_rtc.h"
+#include "rg_i18n.h"
 #include "stm32h7xx_hal.h"
 #include <time.h>
 
 
 RTC_TimeTypeDef GW_currentTime = {0};
 RTC_DateTypeDef GW_currentDate = {0};
-const char * GW_RTC_Weekday[] = {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
+const char * GW_RTC_Weekday[] = {s_Weekday_Mon, s_Weekday_Tue, s_Weekday_Wed, s_Weekday_Thu, s_Weekday_Fri, s_Weekday_Sat, s_Weekday_Sun};
 
 // Getters
 uint8_t GW_GetCurrentHour(void) {
@@ -184,7 +185,7 @@ bool hour_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event,
         GW_SetCurrentHour(++hour);
     }
 
-    sprintf(option->value, "%d", hour);
+    sprintf(option->value, "%02d", hour);
     return event == ODROID_DIALOG_ENTER;
     return false;
 
@@ -203,7 +204,7 @@ bool minute_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t even
         GW_SetCurrentMinute(++minute);
     }
 
-    sprintf(option->value, "%d", minute);
+    sprintf(option->value, "%02d", minute);
     return event == ODROID_DIALOG_ENTER;
     return false;
 
@@ -222,7 +223,7 @@ bool second_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t even
         GW_SetCurrentSecond(++second);
     }
 
-    sprintf(option->value, "%d", second);
+    sprintf(option->value, "%02d", second);
     return event == ODROID_DIALOG_ENTER;
     return false;
 
@@ -242,7 +243,7 @@ bool month_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event
         GW_SetCurrentMonth(++month);
     }
 
-    sprintf(option->value, "%d", month);
+    sprintf(option->value, "%02d", month);
     return event == ODROID_DIALOG_ENTER;
     return false;
     
@@ -261,7 +262,7 @@ bool day_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, 
         GW_SetCurrentDay(++day);
     }
 
-    sprintf(option->value, "%d", day);
+    sprintf(option->value, "%02d", day);
     return event == ODROID_DIALOG_ENTER;
     return false;
 
@@ -324,7 +325,7 @@ bool year_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event,
         GW_SetCurrentYear(++year);
     }
 
-    sprintf(option->value, "%d", year);
+    sprintf(option->value, "20%02d", year);
     return event == ODROID_DIALOG_ENTER;
     return false;
     
@@ -343,7 +344,7 @@ bool date_display_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event
     HAL_RTC_GetTime(&hrtc, &GW_currentTime, RTC_FORMAT_BIN);
     HAL_RTC_GetDate(&hrtc, &GW_currentDate, RTC_FORMAT_BIN);
     
-    sprintf(option->value, "%02d.%02d.20%02d %s", GW_currentDate.Date, GW_currentDate.Month, GW_currentDate.Year, (char *) GW_RTC_Weekday[GW_currentDate.WeekDay-1]);
+    fmtDate(option->value, s_Date_Format, GW_currentDate.Date, GW_currentDate.Month, GW_currentDate.Year, (char *) GW_RTC_Weekday[GW_currentDate.WeekDay-1]);
     return event == ODROID_DIALOG_ENTER;
     return false;
 }
