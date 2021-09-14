@@ -6,7 +6,6 @@
 #include "gw_linker.h"
 #include "rg_emulators.h"
 #include "rg_i18n.h"
-// #include "rg_favorites.h"
 #include "bitmaps.h"
 #include "gui.h"
 #include "rom_manager.h"
@@ -26,6 +25,9 @@
 #define MAX_EMULATORS 8
 static retro_emulator_t emulators[MAX_EMULATORS];
 static int emulators_count = 0;
+
+const uint32_t intflash_magic_sign = 0xABAB;
+const uint32_t extflash_magic_sign __attribute__((section(".extflash_emu_data"))) = intflash_magic_sign;
 
 retro_emulator_t *file_to_emu(retro_emulator_file_t *file) {
     for (int i = 0; i < MAX_EMULATORS; i++)

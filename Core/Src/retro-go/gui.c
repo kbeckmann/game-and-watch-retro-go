@@ -317,7 +317,7 @@ void gui_draw_status(tab_t *tab)
         int max_len = (ODROID_SCREEN_WIDTH - 12) / odroid_overlay_get_font_width();
         odroid_overlay_draw_text_line(
             6,
-            16,
+            18,
             max_len * odroid_overlay_get_font_width(),
             tab->status,
             C_GW_YELLOW,
@@ -376,9 +376,10 @@ listbox_item_t *gui_get_item_by_index(tab_t *tab, int *index)
 
 void gui_draw_item_postion_v(int posx, int starty, int endy, int cur, int size)
 {
-
-    sprintf(str_buffer, "%d/%d", cur, size);
+    sprintf(str_buffer, "%d", size);
     int len = strlen(str_buffer);
+    sprintf(str_buffer, "%0*d/%0*d", len, cur, len, size);
+    len = strlen(str_buffer);
     int height = len * odroid_overlay_get_font_size();
     uint16_t *dst_img = lcd_get_active_buffer();
     int posy = (cur * (endy - starty + 1 - height)) / (size + 1);
@@ -417,48 +418,52 @@ void gui_draw_simple_list(int posx, tab_t *tab)
     listbox_t *list = &tab->listbox;
     if (list->cursor >= 0 && list->cursor < list->length)
     {
-        //draw currpostion
-        gui_draw_item_postion_v(ODROID_SCREEN_WIDTH - 5, LIST_Y_OFFSET + 4, LIST_Y_OFFSET + LIST_HEIGHT - 4, list->cursor + 1, list->length);
-
+        int font_height = odroid_overlay_get_local_font_size();
         int w = (ODROID_SCREEN_WIDTH - posx - 10) / odroid_overlay_get_local_font_width();
         w = w * odroid_overlay_get_local_font_width();
         listbox_item_t *item = &list->items[list->cursor];
-        int h1 = LIST_Y_OFFSET + (LIST_HEIGHT - odroid_overlay_get_local_font_size()) / 2;
+        int h1 = LIST_Y_OFFSET + (LIST_HEIGHT - font_height) / 2;
         if (item)
             odroid_overlay_draw_local_text_line(posx, h1, w, list->items[list->cursor].text, C_GW_YELLOW, C_BLACK, NULL, 0);
 
         int index_next = list->cursor + 1;
         int index_proior = list->cursor - 1;
+        int max_line = (LIST_HEIGHT - font_height) / font_height / 2;
         int h2 = h1;
-        for (int i = 0; i < 5; i++)
+        h1++;
+        for (int i = 0; i < max_line; i++)
         {
             listbox_item_t *next_item = gui_get_item_by_index(tab, &index_next);
-            h1 = h1 + odroid_overlay_get_local_font_size() + 4 - i;
+            h1 = h1 + font_height + max_line - i;
+            h2 = h2 - font_height - max_line + i;
+            if (h2 < LIST_Y_OFFSET)   //out range;
+                break;
             if (next_item)
                 odroid_overlay_draw_local_text_line(
                     posx,
                     h1,
                     w,
                     list->items[index_next].text,
-                    get_darken_pixel(C_GW_YELLOW, 70 - i * 12),
+                    get_darken_pixel(C_GW_OPAQUE_YELLOW, (max_line - i) * 100 / max_line),
                     C_BLACK,
                     NULL,
                     0);
             index_next++;
             listbox_item_t *prior_item = gui_get_item_by_index(tab, &index_proior);
-            h2 = h2 - odroid_overlay_get_local_font_size() - 4 + i;
             if (prior_item)
                 odroid_overlay_draw_local_text_line(
                     posx,
                     h2,
                     w,
                     list->items[index_proior].text,
-                    get_darken_pixel(C_GW_YELLOW, 70 - i * 12),
+                    get_darken_pixel(C_GW_OPAQUE_YELLOW, (max_line - i) * 100 / max_line),
                     C_BLACK,
                     NULL,
                     0);
             index_proior--;
         }
+        //draw currpostion
+        gui_draw_item_postion_v(ODROID_SCREEN_WIDTH - 5, LIST_Y_OFFSET + 4, LIST_Y_OFFSET + LIST_HEIGHT - 4, list->cursor + 1, list->length);
     }
 }
 
@@ -483,8 +488,10 @@ static void draw_centered_local_text_line(uint16_t y_pos,
 
 void gui_draw_item_postion_h(int posy, int startx, int endx, int cur, int size)
 {
-    sprintf(str_buffer, "%d/%d", cur, size);
+    sprintf(str_buffer, "%d", size);
     int len = strlen(str_buffer);
+    sprintf(str_buffer, "%0*d/%0*d", len, cur, len, size);
+    len = strlen(str_buffer);
     int width = len * odroid_overlay_get_font_width();
     uint16_t *dst_img = lcd_get_active_buffer();
     int posx = (cur * (endx - startx + 1 - width)) / (size + 1);

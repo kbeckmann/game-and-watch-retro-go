@@ -15,7 +15,7 @@
 #include "gw_linker.h"
 #include "main.h"
 #include "rg_emulators.h"
-#include "rg_favorites.h"
+
 #include "utils.h"
 #include "sha256.h"
 

@@ -7,10 +7,10 @@
 #include <unistd.h>
 
 #include "rg_emulators.h"
-#include "rg_favorites.h"
 #include "gui.h"
 #include "githash.h"
 #include "main.h"
+#include "gw_lcd.h"
 #include "gw_buttons.h"
 #include "gw_flash.h"
 #include "rg_rtc.h"
@@ -454,10 +454,68 @@ void retro_loop()
 
 #define ODROID_APPID_LAUNCHER 0
 
+void app_check_data_loop()
+{
+    static const uint8_t img_error[] = {
+        0x0F, 0xFC, 0x12, 0x4A, 0x12, 0x4A, //
+        0x20, 0x02, 0x24, 0x22, 0x4E, 0x72, //
+        0x40, 0x02, 0x43, 0xC2, 0x47, 0xE2, //
+        0x4C, 0x32, 0x40, 0x02, 0x40, 0x02, //
+        0x40, 0x02, 0x3F, 0xFC,             //
+    };
+
+    char s[16];
+
+    printf("Flash Magic Check: %x at %p & %x at %p; \n", extflash_magic_sign, &extflash_magic_sign, intflash_magic_sign, &intflash_magic_sign);
+    if (extflash_magic_sign != intflash_magic_sign)
+    {
+        //flash is not compare read;
+        lcd_set_buffers(framebuffer1, framebuffer1);
+        int sleep_steps = 0;
+        while (true)
+        {
+            wdog_refresh();
+            sleep_steps++;
+            odroid_overlay_draw_fill_rect(0, 0, 320, 240, C_BLACK);
+            for (int y = 0; y < 14; y++)
+            {
+                uint8_t pt = img_error[2 * y];
+                for (int x = 0; x < 8; x++)
+                    if (pt & (0x80 >> x))
+                        odroid_overlay_draw_fill_rect((12 + x) * 8, (9 + y) * 8, 8, 8, C_GW_RED);
+                pt = img_error[2 * y + 1];
+                for (int x = 0; x < 8; x++)
+                    if (pt & (0x80 >> x))
+                        odroid_overlay_draw_fill_rect((20 + x) * 8, (9 + y) * 8, 8, 8, C_GW_RED);
+            }
+            //draw txt;
+            odroid_overlay_draw_text_line(16 * 8, 32, 8 * 8, "Retro Go", C_GW_YELLOW, C_BLACK);
+            odroid_overlay_draw_text_line(19 * 8, 42, 2 * 8, "ON", C_BLACK, C_GW_OPAQUE_YELLOW);
+            odroid_overlay_draw_text_line(14 * 8, 52, 12 * 8, "Game & Watch", C_GW_OPAQUE_YELLOW, C_BLACK);
+            odroid_overlay_draw_text_line(15 * 8, 20 * 8, 10 * 8, "DATA ERROR", C_RED, C_BLACK);
+            odroid_overlay_draw_text_line(9 * 8, 24 * 8 - 4, 23 * 8, "It's seemed you need to", C_GW_OPAQUE_YELLOW, C_BLACK);
+            odroid_overlay_draw_text_line(9 * 8, 25 * 8, 23 * 8, "programs external flash", C_GW_OPAQUE_YELLOW, C_BLACK);
+            odroid_overlay_draw_text_line(320 - strlen(GIT_HASH) * 8 - 4, 29 * 8 - 4, strlen(GIT_HASH) * 8, GIT_HASH, C_GW_YELLOW, C_BLACK);
+            sprintf(s, "%ds to sleep", 10 - sleep_steps / 10);
+            odroid_overlay_draw_text_line(4, 29 * 8 - 4, strlen(s) * 8, s, C_RED, C_BLACK);
+
+            lcd_sync();
+            lcd_swap();
+            lcd_wait_for_vblank();
+            HAL_Delay(100);
+            if (sleep_steps > 100)
+                GW_EnterDeepSleep();
+        }
+    }
+}
+
 void app_main(void)
 {
     odroid_system_init(ODROID_APPID_LAUNCHER, 32000);
     // odroid_display_clear(0);
+
+    //check data;
+    app_check_data_loop();
 
     emulators_init();
     // favorites_init();

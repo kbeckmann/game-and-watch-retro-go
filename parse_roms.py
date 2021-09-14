@@ -14,7 +14,7 @@ except ImportError:
     tqdm = None
 
 ROM_ENTRIES_TEMPLATE = """
-const retro_emulator_file_t {name}[] = {{
+const retro_emulator_file_t {name}[] __attribute__((section(".extflash_emu_data"))) = {{
 {body}
 }};
 const uint32_t {name}_count = {rom_count};
@@ -43,7 +43,7 @@ extern const rom_system_t {name};
 """
 
 SYSTEM_TEMPLATE = """
-const rom_system_t {name} = {{
+const rom_system_t {name} __attribute__((section(".extflash_emu_data"))) = {{
 \t.system_name = "{system_name}",
 \t.roms = {variable_name},
 \t.extension = "{extension}",
@@ -403,8 +403,7 @@ class ROMParser:
 
         prefix = Path(prefix)
 
-        if not rom.img_path.exists():
-
+        if (rom.img_path.exists() and (args.skip_image_covert==0)) or not rom.img_path.exists() :
             imgs = []
             imgs.append(str(rom.img_path.with_suffix(".png")))
             imgs.append(str(rom.img_path.with_suffix(".jpg")))
@@ -496,10 +495,6 @@ class ROMParser:
             compress = "." + compress
         output_file = Path(str(rom.path) + compress)
         compress = COMPRESSIONS[compress]
-        if output_file.exists():
-            print(f"INFO: {rom.name} Compressed file {output_file} exists, skip compression!")
-            return
-
         data = rom.read()
 
         if "nes_system" in variable_name:  # NES
@@ -885,6 +880,12 @@ if __name__ == "__main__":
         type=int,
         default=0,
         help="set coverflow image file pack",
+    )
+    parser.add_argument(
+        "--skip_image_covert",
+        type=int,
+        default=0,
+        help="skip convert image if destination file exist",
     )
     compression_choices = [t for t in COMPRESSIONS if not t[0] == "."]
     parser.add_argument(

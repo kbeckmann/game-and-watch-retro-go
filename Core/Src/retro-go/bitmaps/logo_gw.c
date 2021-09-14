@@ -1,2 +1,2 @@
-const unsigned char logo_gw[]  __attribute__((section(".extflash_data"))) = {
+const unsigned char logo_gw[] = {
   };
