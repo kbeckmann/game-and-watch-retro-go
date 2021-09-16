@@ -3,6 +3,9 @@
 #include <stdint.h>
 
 #include "rg_emulators.h"
+#if !defined(COVERFLOW)
+#define COVERFLOW 0
+#endif /* COVERFLOW */
 
 struct rom_system_t {
     char *system_name;
