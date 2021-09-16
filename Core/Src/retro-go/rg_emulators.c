@@ -150,8 +150,10 @@ void emulator_init(retro_emulator_t *emu)
         emu->system = system;
         emu->roms.files = system->roms;
         emu->roms.count = system->roms_count;
+#if COVERFLOW != 0        
         emu->cover_height = system->cover_height;
         emu->cover_width = system->cover_width;
+#endif
     } else {
         while(1) {
             lcd_backlight_on();
