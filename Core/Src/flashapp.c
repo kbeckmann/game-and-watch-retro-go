@@ -38,7 +38,7 @@ static const int font_width = 8; //odroid_overlay_get_font_width();
 #define LIST_LINE_COUNT  (LIST_HEIGHT / LIST_LINE_HEIGHT)
 
 #define PROGRESS_X_OFFSET (ODROID_SCREEN_WIDTH / 5 / 2)
-#define PROGRESS_Y_OFFSET (LIST_Y_OFFSET + 6 * LIST_LINE_HEIGHT)
+#define PROGRESS_Y_OFFSET (LIST_Y_OFFSET + 9 * LIST_LINE_HEIGHT)
 #define PROGRESS_WIDTH    (4 * (PROGRESS_X_OFFSET * 2))
 #define PROGRESS_HEIGHT   (2 * LIST_LINE_HEIGHT)
 
@@ -146,7 +146,10 @@ static void draw_progress(flashapp_t *flashapp)
     char progress_str[16];
 
     odroid_overlay_draw_fill_rect(0, LIST_Y_OFFSET, LIST_WIDTH, LIST_HEIGHT, C_BLACK);
-    draw_text_line_centered(LIST_Y_OFFSET + 2 * LIST_LINE_HEIGHT, flashapp->tab.name, C_GW_YELLOW, C_BLACK);
+
+    odroid_overlay_draw_text_line(8, LIST_Y_OFFSET + LIST_LINE_HEIGHT, strlen(flashapp->tab.status) * font_width, flashapp->tab.status, C_GW_YELLOW, C_BLACK);
+
+    draw_text_line_centered(LIST_Y_OFFSET + 5 * LIST_LINE_HEIGHT, flashapp->tab.name, C_GW_YELLOW, C_BLACK);
 
     if (flashapp->progress_max != 0) {
         int32_t progress_percent = (100 * (uint64_t)flashapp->progress_value) / flashapp->progress_max;
@@ -166,7 +169,7 @@ static void draw_progress(flashapp_t *flashapp)
                                       PROGRESS_HEIGHT,
                                       C_GW_YELLOW);
 
-        draw_text_line_centered(LIST_Y_OFFSET + 4 * LIST_LINE_HEIGHT, progress_str, C_GW_YELLOW, C_BLACK);
+        draw_text_line_centered(LIST_Y_OFFSET + 8 * LIST_LINE_HEIGHT, progress_str, C_GW_YELLOW, C_BLACK);
     }
 }
 
@@ -254,7 +257,7 @@ static void test_flash(flashapp_t *flashapp)
 
     const uint32_t rand_size = 512 * 1024;
 
-    sprintf(flashapp->tab.status, " Game and Watch Flash App TEST");
+    sprintf(flashapp->tab.status, "Game and Watch Flash App TEST");
     sprintf(flashapp->tab.name, "Erase and program..");
     lcd_swap();
     lcd_wait_for_vblank();
@@ -522,9 +525,9 @@ void flashapp_main(void)
 
     while (true) {
         if (program_chunk_count == 1) {
-            sprintf(flashapp.tab.status, " Game and Watch Flash App");
+            sprintf(flashapp.tab.status, "Game and Watch Flash App");
         } else {
-            sprintf(flashapp.tab.status, " Game and Watch Flash App (%ld/%ld)",
+            sprintf(flashapp.tab.status, "Game and Watch Flash App (%ld/%ld)",
                     program_chunk_idx, program_chunk_count);
         }
 

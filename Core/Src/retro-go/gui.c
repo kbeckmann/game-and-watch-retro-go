@@ -35,12 +35,6 @@
 #define COVER_MAX_HEIGHT (184)
 #define COVER_MAX_WIDTH (184)
 
-#if COVERFLOW != 0
-#define COVER_HEIGHT (96)
-#define COVER_WIDTH (128)
-#endif
-
-
 theme_t gui_themes[] = {
     {0, C_GRAY, C_WHITE, C_AQUA},
     {0, C_GRAY, C_GREEN, C_AQUA},
@@ -298,7 +292,10 @@ void gui_draw_status(tab_t *tab)
     odroid_overlay_draw_fill_rect(0, 1, ODROID_SCREEN_WIDTH, 2, C_BLACK);
     odroid_overlay_draw_fill_rect(0, 4, ODROID_SCREEN_WIDTH, 2, C_BLACK);
     odroid_overlay_draw_fill_rect(0, 8, ODROID_SCREEN_WIDTH, 2, C_BLACK);
+    
+    odroid_overlay_draw_logo(8, 16, C_GW_YELLOW);
 
+    /*
     if (tab->img_header)
     {
         int max_len = (ODROID_SCREEN_WIDTH - 12) / odroid_overlay_get_local_font_width();
@@ -323,6 +320,7 @@ void gui_draw_status(tab_t *tab)
             C_GW_YELLOW,
             C_GW_RED);
     }
+    */
     odroid_overlay_draw_battery(ODROID_SCREEN_WIDTH - 32, 17);
 }
 
@@ -518,9 +516,10 @@ void gui_draw_item_postion_h(int posy, int startx, int endx, int cur, int size)
 
 void gui_draw_coverflow_h(tab_t *tab) //------------
 {
+    retro_emulator_t *emu = (retro_emulator_t *)tab->arg;
     int font_height = odroid_overlay_get_local_font_size();
-    int cover_height = COVER_HEIGHT;
-    int cover_width = COVER_WIDTH;
+    int cover_height = emu->cover_height;
+    int cover_width = emu->cover_width;
     int space_width = 26;
     //left _|_|__|_(pl)__||_(main)_||__(pr)_|__|_|_ min 26 pixel space;
     int p_width = (ODROID_SCREEN_WIDTH - cover_width - space_width) / 2;
@@ -741,9 +740,10 @@ void gui_draw_coverflow_h(tab_t *tab) //------------
 
 void gui_draw_coverflow_v(tab_t *tab, int start_posx) // ||||||||
 {
+    retro_emulator_t *emu = (retro_emulator_t *)tab->arg;
     int font_height = odroid_overlay_get_local_font_size();
-    int cover_height = COVER_HEIGHT;
-    int cover_width = COVER_WIDTH;
+    int cover_height = emu->cover_height;
+    int cover_width = emu->cover_width;
     int space_height = 40;
     //top ____|_|__|_(pl)__||_(main)_||__(pr)_|__|_|____ min 40;
     int p_height = (LIST_HEIGHT - cover_height - space_height) / 2;

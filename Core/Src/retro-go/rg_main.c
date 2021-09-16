@@ -107,12 +107,13 @@ static bool main_menu_timeout_cb(odroid_dialog_choice_t *option, odroid_dialog_e
     const int threshold = 10;
     const int fast_step = 10;
 
-    if (repeat > threshold) {
+    if (repeat > threshold)
         step = fast_step;
-    }
 
-    if (event == ODROID_DIALOG_PREV) {
-        if (timeout - step < 10) {
+    if (event == ODROID_DIALOG_PREV)
+    {
+        if (timeout - step < 10)
+        {
             // Lower than 10 seconds doesn't make sense. set to 0 = disabled
             odroid_settings_MainMenuTimeoutS_set(0);
             return false;
@@ -121,19 +122,19 @@ static bool main_menu_timeout_cb(odroid_dialog_choice_t *option, odroid_dialog_e
         odroid_settings_MainMenuTimeoutS_set(timeout - step);
         gui_redraw();
     }
-    if (event == ODROID_DIALOG_NEXT) {
-        if (timeout == 0) {
+    if (event == ODROID_DIALOG_NEXT)
+    {
+        if (timeout == 0)
+        {
             odroid_settings_MainMenuTimeoutS_set(10);
             gui_redraw();
             return false;
         }
-        else if (timeout == 0xffff) {
+        else if (timeout == 0xffff)
             return false;
-        }
-        
-        if (timeout > (0xffff - step)) {
+
+        if (timeout > (0xffff - step))
             step = 0xffff - timeout;
-        }
 
         odroid_settings_MainMenuTimeoutS_set(timeout + step);
         gui_redraw();
@@ -168,10 +169,9 @@ void retro_loop()
     // Read the initial state as to not trigger on button held down during boot
     odroid_input_read_gamepad(&gui.joystick);
 
-    for (int i = 0; i < ODROID_INPUT_MAX; i++) {
-        if (gui.joystick.values[i]) 
-		    last_key = i;
-    }
+    for (int i = 0; i < ODROID_INPUT_MAX; i++)
+        if (gui.joystick.values[i])
+            last_key = i;
 
     gui.selected = odroid_settings_MainMenuSelectedTab_get();
     // gui.theme      = odroid_settings_int32_get(KEY_GUI_THEME, 0);
@@ -182,9 +182,8 @@ void retro_loop()
     {
         wdog_refresh();
 
-        if (gui.idle_start == 0) {
+        if (gui.idle_start == 0)
             gui.idle_start = uptime_get();
-        }
 
         idle_s = uptime_get() - gui.idle_start;
 
@@ -223,13 +222,15 @@ void retro_loop()
         {
             gui_event(TAB_IDLE, tab);
 
-            //if (idle_s % 10 == 0)
+            if (idle_s % 10 == 0)
                 gui_draw_status(tab);
         }
 
-        if ((last_key < 0) || ((repeat >= 30) && (repeat % 5 == 0))) {
+        if ((last_key < 0) || ((repeat >= 30) && (repeat % 5 == 0)))
+        {
             for (int i = 0; i < ODROID_INPUT_MAX; i++)
-                if (gui.joystick.values[i]) last_key = i;
+                if (gui.joystick.values[i])
+                    last_key = i;
 
             bool hori_view = false;
             int key_up = ODROID_INPUT_UP;
@@ -237,7 +238,7 @@ void retro_loop()
             int key_left = ODROID_INPUT_LEFT;
             int key_right = ODROID_INPUT_RIGHT;
 #if COVERFLOW != 0
-            hori_view = odroid_settings_theme_get()  == 2;
+            hori_view = odroid_settings_theme_get() == 2;
             if (hori_view)
             {
                 key_up = ODROID_INPUT_LEFT;
@@ -247,7 +248,8 @@ void retro_loop()
             }
 #endif
 
-            if (last_key == ODROID_INPUT_START) {
+            if (last_key == ODROID_INPUT_START)
+            {
                 odroid_dialog_choice_t choices[] = {
                     {9, s_Version, GIT_HASH, 1, NULL},
                     {9, s_Author, "ducalex", 1, NULL},
@@ -264,13 +266,17 @@ void retro_loop()
                     ODROID_DIALOG_CHOICE_LAST};
 
                 int sel = odroid_overlay_dialog(s_Retro_Go, choices, -1);
-                if (sel == 1) {
+                if (sel == 1)
+                {
                     // Reset settings
-                    if (odroid_overlay_confirm(s_Confirm_Reset_settings, false) == 1) {
+                    if (odroid_overlay_confirm(s_Confirm_Reset_settings, false) == 1)
+                    {
                         odroid_settings_reset();
                         odroid_system_switch_app(0); // reset
                     }
-                } else if (sel == 2) {
+                }
+                else if (sel == 2)
+                {
                     // Debug menu
                     uint8_t jedec_id[3];
                     char jedec_id_str[16];
@@ -311,7 +317,8 @@ void retro_loop()
                         ODROID_DIALOG_CHOICE_LAST};
 
                     int sel = odroid_overlay_dialog(s_Debug_Title, debuginfo, -1);
-                    switch (sel) {
+                    switch (sel)
+                    {
                     case 1:
                         // Enable debug clocks explicitly
                         SET_BIT(DBGMCU->CR,
@@ -338,7 +345,8 @@ void retro_loop()
 
                 gui_redraw();
             }
-            else if (last_key == ODROID_INPUT_VOLUME) {
+            else if (last_key == ODROID_INPUT_VOLUME)
+            {
                 char timeout_value[32];
                 odroid_dialog_choice_t choices[] = {
                     ODROID_DIALOG_CHOICE_SEPARATOR,
@@ -354,7 +362,8 @@ void retro_loop()
                 gui_redraw();
             }
             // TIME menu
-            else if (last_key == ODROID_INPUT_SELECT) {
+            else if (last_key == ODROID_INPUT_SELECT)
+            {
 
                 char time_str[14];
                 char date_str[24];
@@ -365,7 +374,8 @@ void retro_loop()
                     ODROID_DIALOG_CHOICE_LAST};
                 int sel = odroid_overlay_dialog(s_Time_Title, rtcinfo, 0);
 
-                if (sel == 0) {
+                if (sel == 0)
+                {
                     static char hour_value[8];
                     static char minute_value[8];
                     static char second_value[8];
@@ -378,7 +388,8 @@ void retro_loop()
                         ODROID_DIALOG_CHOICE_LAST};
                     sel = odroid_overlay_dialog(s_Time_setup, timeoptions, 0);
                 }
-                else if (sel == 1) {
+                else if (sel == 1)
+                {
 
                     static char day_value[8];
                     static char month_value[8];
@@ -398,42 +409,53 @@ void retro_loop()
                 (void)sel;
                 gui_redraw();
             }
-            else if (last_key == key_up) {
+            else if (last_key == key_up)
+            {
                 gui_scroll_list(tab, LINE_UP);
                 repeat++;
             }
-            else if (last_key == key_down) {
+            else if (last_key == key_down)
+            {
                 gui_scroll_list(tab, LINE_DOWN);
                 repeat++;
             }
-            else if (last_key == key_left) {
+            else if (last_key == key_left)
+            {
                 gui.selected--;
-                if (gui.selected < 0) {
+                if (gui.selected < 0)
+                {
                     gui.selected = gui.tabcount - 1;
                 }
                 repeat++;
             }
-            else if (last_key == key_right) {
+            else if (last_key == key_right)
+            {
                 gui.selected++;
-                if (gui.selected >= gui.tabcount) {
+                if (gui.selected >= gui.tabcount)
+                {
                     gui.selected = 0;
                 }
                 repeat++;
             }
-            else if (last_key == ODROID_INPUT_A) {
+            else if (last_key == ODROID_INPUT_A)
+            {
                 gui_event(KEY_PRESS_A, tab);
             }
-            else if (last_key == ODROID_INPUT_B) {
+            else if (last_key == ODROID_INPUT_B)
+            {
                 gui_event(KEY_PRESS_B, tab);
             }
-            else if (last_key == ODROID_INPUT_POWER) {
+            else if (last_key == ODROID_INPUT_POWER)
+            {
                 odroid_system_sleep();
             }
         }
         if (repeat > 0)
             repeat++;
-        if (last_key >= 0) {
-            if (!gui.joystick.values[last_key]) {
+        if (last_key >= 0)
+        {
+            if (!gui.joystick.values[last_key])
+            {
                 last_key = -1;
                 repeat = 0;
             }
@@ -442,9 +464,10 @@ void retro_loop()
 
         idle_s = uptime_get() - gui.idle_start;
         if (odroid_settings_MainMenuTimeoutS_get() != 0 &&
-            (idle_s > odroid_settings_MainMenuTimeoutS_get())) {
-          printf("Idle timeout expired\n");
-          odroid_system_sleep();
+            (idle_s > odroid_settings_MainMenuTimeoutS_get()))
+        {
+            printf("Idle timeout expired\n");
+            odroid_system_sleep();
         }
 
         gui_redraw();
@@ -465,68 +488,83 @@ void app_check_data_loop()
     };
 
     char s[16];
+    int idle_s = uptime_get();
+    //     - gui.idle_start;
 
     printf("Flash Magic Check: %x at %p & %x at %p; \n", extflash_magic_sign, &extflash_magic_sign, intflash_magic_sign, &intflash_magic_sign);
     if (extflash_magic_sign != intflash_magic_sign)
     {
         //flash is not compare read;
         lcd_set_buffers(framebuffer1, framebuffer1);
-        int sleep_steps = 0;
-        while (true)
+        odroid_overlay_draw_fill_rect(0, 0, 320, 240, C_BLACK);
+        for (int y = 0; y < 14; y++)
+        {
+            uint8_t pt = img_error[2 * y];
+            for (int x = 0; x < 8; x++)
+                if (pt & (0x80 >> x))
+                    odroid_overlay_draw_fill_rect((12 + x) * 8, (9 + y) * 8, 8, 8, C_GW_RED);
+            pt = img_error[2 * y + 1];
+            for (int x = 0; x < 8; x++)
+                if (pt & (0x80 >> x))
+                    odroid_overlay_draw_fill_rect((20 + x) * 8, (9 + y) * 8, 8, 8, C_GW_RED);
+        }
+        odroid_overlay_draw_logo(104, 42, C_GW_YELLOW);
+        odroid_overlay_draw_text_line(15 * 8, 20 * 8, 10 * 8, "DATA ERROR", C_RED, C_BLACK);
+        odroid_overlay_draw_text_line(9 * 8, 24 * 8 - 4, 23 * 8, "It's seemed you need to", C_GW_OPAQUE_YELLOW, C_BLACK);
+        odroid_overlay_draw_text_line(9 * 8, 25 * 8, 23 * 8, "programs external flash", C_GW_OPAQUE_YELLOW, C_BLACK);
+        odroid_overlay_draw_text_line(320 - strlen(GIT_HASH) * 8 - 4, 29 * 8 - 4, strlen(GIT_HASH) * 8, GIT_HASH, C_GW_YELLOW, C_BLACK);
+        odroid_gamepad_state_t joystick;
+        while (1)
         {
             wdog_refresh();
-            sleep_steps++;
-            odroid_overlay_draw_fill_rect(0, 0, 320, 240, C_BLACK);
-            for (int y = 0; y < 14; y++)
-            {
-                uint8_t pt = img_error[2 * y];
-                for (int x = 0; x < 8; x++)
-                    if (pt & (0x80 >> x))
-                        odroid_overlay_draw_fill_rect((12 + x) * 8, (9 + y) * 8, 8, 8, C_GW_RED);
-                pt = img_error[2 * y + 1];
-                for (int x = 0; x < 8; x++)
-                    if (pt & (0x80 >> x))
-                        odroid_overlay_draw_fill_rect((20 + x) * 8, (9 + y) * 8, 8, 8, C_GW_RED);
-            }
-            //draw txt;
-            odroid_overlay_draw_text_line(16 * 8, 32, 8 * 8, "Retro Go", C_GW_YELLOW, C_BLACK);
-            odroid_overlay_draw_text_line(19 * 8, 42, 2 * 8, "ON", C_BLACK, C_GW_OPAQUE_YELLOW);
-            odroid_overlay_draw_text_line(14 * 8, 52, 12 * 8, "Game & Watch", C_GW_OPAQUE_YELLOW, C_BLACK);
-            odroid_overlay_draw_text_line(15 * 8, 20 * 8, 10 * 8, "DATA ERROR", C_RED, C_BLACK);
-            odroid_overlay_draw_text_line(9 * 8, 24 * 8 - 4, 23 * 8, "It's seemed you need to", C_GW_OPAQUE_YELLOW, C_BLACK);
-            odroid_overlay_draw_text_line(9 * 8, 25 * 8, 23 * 8, "programs external flash", C_GW_OPAQUE_YELLOW, C_BLACK);
-            odroid_overlay_draw_text_line(320 - strlen(GIT_HASH) * 8 - 4, 29 * 8 - 4, strlen(GIT_HASH) * 8, GIT_HASH, C_GW_YELLOW, C_BLACK);
-            sprintf(s, "%ds to sleep", 10 - sleep_steps / 10);
+            int steps = uptime_get() - idle_s;
+            sprintf(s, "%ds to sleep", 600 - steps);
             odroid_overlay_draw_text_line(4, 29 * 8 - 4, strlen(s) * 8, s, C_RED, C_BLACK);
 
             lcd_sync();
             lcd_swap();
-            lcd_wait_for_vblank();
-            HAL_Delay(100);
-            if (sleep_steps > 100)
-                GW_EnterDeepSleep();
+            //lcd_wait_for_vblank();
+            HAL_Delay(10);
+            if (steps >= 600)
+                break;
+            odroid_input_read_gamepad(&joystick);
+            if (joystick.values[ODROID_INPUT_POWER])
+                break;
         }
+        for (int i=0; i<10; i++){
+            wdog_refresh();
+            HAL_Delay(10);
+        }
+        app_sleep_logo();
+        GW_EnterDeepSleep();
+        //odroid_system_sleep();
     }
 }
 
 void app_main(void)
 {
+
     odroid_system_init(ODROID_APPID_LAUNCHER, 32000);
     // odroid_display_clear(0);
 
     //check data;
     app_check_data_loop();
 
+    //app_start_logo();
+
     emulators_init();
     // favorites_init();
 
     // Start the previously running emulator directly if it's a valid pointer.
-    // If the user holds down the TIME button during startup,start the retro-go 
+    // If the user holds down the TIME button during startup,start the retro-go
     // gui instead of the last ROM as a fallback.
     retro_emulator_file_t *file = odroid_settings_StartupFile_get();
-    if (emulator_is_file_valid(file) && ((GW_GetBootButtons() & B_TIME) == 0)) {
+    if (emulator_is_file_valid(file) && ((GW_GetBootButtons() & B_TIME) == 0))
+    {
         emulator_start(file, true, true);
-    } else {
+    }
+    else
+    {
         retro_loop();
     }
 }
