@@ -33,3 +33,5 @@ venv
 
 **/*.pyc
 
+.vs/*
+.vscode/*

@@ -5,7 +5,7 @@
 #include "gw_lcd.h"
 
 static const uint8_t backlightLevels[] = {128, 130, 133, 139, 149, 162, 178, 198, 222, 255};
-static odroid_display_backlight_t backlightLevel = ODROID_BACKLIGHT_LEVEL3;
+static odroid_display_backlight_t backlightLevel = ODROID_BACKLIGHT_LEVEL6;
 static odroid_display_rotation_t rotationMode = ODROID_DISPLAY_ROTATION_OFF;
 static odroid_display_scaling_t scalingMode = ODROID_DISPLAY_SCALING_FILL;
 static odroid_display_filter_t filterMode = ODROID_DISPLAY_FILTER_OFF;
@@ -20,6 +20,8 @@ void odroid_display_write_rect(short left, short top, short width, short height,
     pixel_t *dest = lcd_get_active_buffer();
 
     for (short y = 0; y < height; y++) {
+        if ((y + top) >= GW_LCD_WIDTH) 
+            return;
         pixel_t *dest_row = &dest[(y + top) * GW_LCD_WIDTH + left];
         memcpy(dest_row, &buffer[y * stride], width * sizeof(pixel_t));
     }

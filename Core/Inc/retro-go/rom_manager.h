@@ -3,11 +3,18 @@
 #include <stdint.h>
 
 #include "rg_emulators.h"
+#if !defined(COVERFLOW)
+#define COVERFLOW 0
+#endif /* COVERFLOW */
 
 struct rom_system_t {
     char *system_name;
     const retro_emulator_file_t *roms;
     char *extension;
+	#if COVERFLOW != 0
+    size_t cover_width;
+    size_t cover_height;
+	#endif    
     uint32_t roms_count;
 };
 

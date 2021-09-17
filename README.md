@@ -35,6 +35,17 @@ Holding the `PAUSE/SET` button while pressing other buttons have the following a
 - `PAUSE/SET` + `A` = Save state.
 - `PAUSE/SET` + `POWER` = Poweroff WITHOUT save-stating.
 
+## NewUI Branch
+
+<img src="assets/gwui.jpg" width="800"/>
+
+
+### Prerequisites
+
+ - Need same name as rom's bitmap file, bmp file must 128x96 pixels and 16bit(RGB565) and save file format flip row order 
+ - Bmp image file must RGB565 (Photoshop -> save as -> BMP file (sel:win+16bit, checked 'flip row order' option) -> Advance mode -> R5 G6 B5)
+
+
 ## How to report issues
 
 :exclamation: Please read this before reporting issues.
