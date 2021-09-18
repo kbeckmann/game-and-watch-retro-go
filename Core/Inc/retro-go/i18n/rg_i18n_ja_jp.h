@@ -1,5 +1,5 @@
 #pragma once
-//ÆüËÜ¸ì
+//ï¿½ï¿½ï¿½Ü¸ï¿½
 //If you can translate, please feed back the translation results to me, thank you
 
 //Core\Src\porting\gb\main_gb.c
@@ -15,8 +15,8 @@
 
 #define s_No_Cover              "no Cover"
 
-#define s_Yes                   "¤Ï¤¤"
-#define s_No                    "¤Ê¤·"
+#define s_Yes                   "ï¿½Ï¤ï¿½"
+#define s_No                    "ï¿½Ê¤ï¿½"
 #define s_PlsChose              "Question"
 #define s_OK                    "OK"
 #define s_Confirm               "Confirm"
@@ -41,8 +41,10 @@
 
 #define s_Theme_Title           "UI Theme"
 #define s_Theme_sList           "Simple List"
-#define s_Theme_CoverH          "Coverflow V"
 #define s_Theme_CoverV          "Coverflow H"
+#define s_Theme_CoverH          "Coverflow V"
+#define s_Theme_CoverLight      "CoverLight "
+#define s_Theme_CoverLightV     "CoverLightV"
 
 //Core\Src\retro-go\rg_emulators.c
 
@@ -51,10 +53,10 @@
 
 
 #define s_File                  "File"
-#define s_Type                  "¼ïÎà"
+#define s_Type                  "ï¿½ï¿½ï¿½ï¿½"
 #define s_Size                  "Size"
 #define s_ImgSize               "ImgSize"
-#define s_Close                 "¥¯¥í¡¼¥º"
+#define s_Close                 "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½"
 #define s_GameProp              "Properties"
 #define s_Resume_game           "Resume game"
 #define s_New_game              "New game"
@@ -69,7 +71,7 @@
 #define s_Author                    "By     :"
 #define s_Author_                   "       :"
 #define s_UI_Mod                    "UI Mod :"
-#define s_Lang                      "ÆüËÜ¸ì"
+#define s_Lang                      "ï¿½ï¿½ï¿½Ü¸ï¿½"
 #define s_LangAuthor                "Default"
 #define s_Debug_menu                "Debug_menu"
 #define s_Reset_settings            "Reset settings"

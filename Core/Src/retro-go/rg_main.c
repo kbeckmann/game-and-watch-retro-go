@@ -232,14 +232,14 @@ void retro_loop()
                 if (gui.joystick.values[i])
                     last_key = i;
 
-            bool hori_view = false;
+            int hori_view = false;
             int key_up = ODROID_INPUT_UP;
             int key_down = ODROID_INPUT_DOWN;
             int key_left = ODROID_INPUT_LEFT;
             int key_right = ODROID_INPUT_RIGHT;
 #if COVERFLOW != 0
-            hori_view = odroid_settings_theme_get() == 2;
-            if (hori_view)
+            hori_view = odroid_settings_theme_get();
+            if ((hori_view== 2) | (hori_view==3))
             {
                 key_up = ODROID_INPUT_LEFT;
                 key_down = ODROID_INPUT_RIGHT;
