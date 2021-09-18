@@ -221,20 +221,53 @@ def compress_zopfli(data, level=None):
     compressed_data = c.compress(data) + c.flush()
     return compressed_data
 
-
-def write_imgfile(srcfile, fn, w, h):
+def write_covart(srcfile, fn, w,h):
     from PIL import Image, ImageOps
-    #print(srcfile)
+    print('Write Cover art:')
+    print(srcfile)
+    print(fn)
     img = Image.open(srcfile).convert(mode="RGB")
-    img = img.resize((w, h), Image.ANTIALIAS)
-    pixels = list(img.getdata())
-    with open(fn, "wb") as f:
-        #no file header
-        for pix in pixels:
-            r = (pix[0] >> 3) & 0x1F
-            g = (pix[1] >> 2) & 0x3F
-            b = (pix[2] >> 3) & 0x1F
-            f.write(struct.pack("H", (r << 11) + (g << 5) + b))
+
+    covart_width = w
+    covart_height= h
+
+    # resize to target keeping aspect ratio or full screen
+    if (img.width > covart_width) | (img.height > covart_height):
+        print('Rescale')
+        scale_x = float(img.width) / float(covart_width)
+        scale_y = float(img.height) / float(covart_height)
+
+    # select the factor and position x,y
+        if scale_x > scale_y:
+            xsize = covart_width
+            ysize = int(float(img.height) / scale_x )
+            mov_x = 0
+            mov_y = int((covart_height - ysize)/2)
+
+        else:
+            xsize = int(float(img.width) / scale_y)
+            ysize = covart_height
+            mov_y = 0
+            mov_x = int((covart_width - xsize)/2)
+
+        img = img.convert(mode="RGB").resize((xsize, ysize), Image.ANTIALIAS)    
+
+    if not Path(fn).exists():
+        img.save(fn,optimize=True,quality=90)
+
+# def write_rgb565(srcfile, fn, v):
+#     from PIL import Image, ImageOps
+#     #print(srcfile)
+#     img = Image.open(srcfile).convert(mode="RGB")
+#     img = img.resize((w, h), Image.ANTIALIAS)
+#     pixels = list(img.getdata())
+#     with open(fn, "wb") as f:
+#         #no file header
+#         for pix in pixels:
+#             r = (pix[0] >> 3) & 0x1F
+#             g = (pix[1] >> 2) & 0x3F
+#             b = (pix[2] >> 3) & 0x1F
+#             f.write(struct.pack("H", (r << 11) + (g << 5) + b))
 
 class NoArtworkError(Exception):
     """No artwork found for this ROM"""
@@ -268,7 +301,7 @@ class ROM:
             + "_start"
         )
 
-        self.img_path = self.path.parent / (self.filename + ".img")
+        self.img_path = self.path.parent / (self.filename + ".jpg")
         obj_name = "".join([i if i.isalnum() else "_" for i in self.img_path.name])
         symbol_path = str(self.path.parent) + "/" + obj_name
         self.obj_img = "build/roms/" + obj_name + "_" + extension + ".o"
@@ -368,7 +401,6 @@ class ROMParser:
             prefix = os.environ["GCC_PATH"]
         prefix = Path(prefix)
 
-        print(f"INFO: Packing {rom.name} ROM  > {rom.path} ...")
         subprocess.check_output(
             [
                 prefix / "arm-none-eabi-objcopy",
@@ -395,7 +427,7 @@ class ROMParser:
         template = "extern const uint8_t {name}[];\n"
         return template.format(name=rom.symbol)
 
-    def generate_img_object_file(self, rom: ROM, w: int, h: int) -> str:
+    def generate_img_object_file(self, rom: ROM, w, h) -> str:
         # convert rom_img to an .o file and place the data in the .extflash_game_rom section
         prefix = ""
         if "GCC_PATH" in os.environ:
@@ -411,7 +443,8 @@ class ROMParser:
 
             for img in imgs:
                 if Path(img).exists():
-                    write_imgfile(Path(img), rom.img_path, w, h)
+                    write_covart(Path(img), rom.img_path, w, h)
+
                     break
 
         if not rom.img_path.exists():
@@ -634,8 +667,6 @@ class ROMParser:
         romdefs.setdefault("_cover_height", 96)
         cover_width = romdefs["_cover_width"]
         cover_height = romdefs["_cover_height"]
-        cover_width = 180 if cover_width > 180 else 64 if cover_width < 64 else cover_width
-        cover_height = 136 if cover_height > 136 else 64 if cover_height < 64 else cover_height
 
         with open(file, "w", encoding = args.codepage) as f:
             f.write(SYSTEM_PROTO_TEMPLATE.format(name=variable_name))

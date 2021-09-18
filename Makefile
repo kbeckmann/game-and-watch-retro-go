@@ -24,6 +24,7 @@ Core/Src/sha256.c \
 Core/Src/flashapp.c \
 Core/Src/bq24072.c \
 Core/Src/porting/lib/lz4_depack.c \
+Core/Src/porting/lib/hw_jpeg_decoder.c \
 Core/Src/porting/common.c \
 Core/Src/porting/odroid_audio.c \
 Core/Src/porting/odroid_display.c \

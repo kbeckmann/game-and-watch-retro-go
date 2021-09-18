@@ -137,6 +137,7 @@ Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_dac_ex.c \
 Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_dac.c \
 Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_dma_ex.c \
 Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_dma.c \
+Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_dma2d.c \
 Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_exti.c \
 Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_flash_ex.c \
 Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_flash.c \
@@ -144,6 +145,7 @@ Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_gpio.c \
 Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_hsem.c \
 Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_i2c_ex.c \
 Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_i2c.c \
+Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_jpeg.c \
 Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_ltdc_ex.c \
 Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_ltdc.c \
 Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_mdma.c \
@@ -189,6 +191,7 @@ Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_dac.h \
 Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_def.h \
 Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_dma_ex.h \
 Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_dma.h \
+Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_dma2d.h \
 Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_exti.h \
 Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_flash_ex.h \
 Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_flash.h \
@@ -197,6 +200,7 @@ Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_gpio.h \
 Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_hsem.h \
 Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_i2c_ex.h \
 Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_i2c.h \
+Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_jpeg.h \
 Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_ltdc_ex.h \
 Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_ltdc.h \
 Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_mdma.h \
