@@ -585,7 +585,7 @@ help:
 	@echo "  LARGE_FLASH         - Sets the external flash size to 16MB  (deprecated)"
 	@echo "  EXTFLASH_OFFSET     - Places the data at an offset in the external flash (useful for dual boot)"
 	@echo "  INTFLASH_BANK       - Sets the internal flash bank. Valid values {1,2} (default=1)."
-	@echo "  COMPRESS            - Configures ROM compression, Valid values {0,lz4} (default=lz4)."
+	@echo "  COMPRESS            - Configures ROM compression, Valid values {0,lz4,zopfli,lzma} (default=lz4)."
 	@echo "  RESET_DBGMCU        - Configures if DBGMCU should be reset after flashing."
 	@echo "                        Set to 0 to disable power saving (default=1)"
 	@echo ""

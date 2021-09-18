@@ -188,7 +188,7 @@ static bool LoadState(char *pathName) {
     return true;
 }
 
-size_t 
+size_t
 pce_osd_getromdata(unsigned char **data)
 {
     /* src pointer to the ROM data in the external flash (raw or LZ4) */
@@ -230,6 +230,11 @@ pce_osd_getromdata(unsigned char **data)
         flags |= TINFL_FLAG_USING_NON_WRAPPING_OUTPUT_BUF;
         n_decomp_bytes = tinfl_decompress_mem_to_mem(dest, available_size, src, ROM_DATA_LENGTH, flags);
         assert(n_decomp_bytes != TINFL_DECOMPRESS_MEM_TO_MEM_FAILED);
+        *data = dest;
+        return n_decomp_bytes;
+    } else if(strcmp(ROM_EXT, "lzma") == 0){
+        size_t n_decomp_bytes;
+        n_decomp_bytes = lzma_inflate(dest, available_size, src, ROM_DATA_LENGTH);
         *data = dest;
         return n_decomp_bytes;
     } else {

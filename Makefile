@@ -24,6 +24,8 @@ Core/Src/sha256.c \
 Core/Src/flashapp.c \
 Core/Src/bq24072.c \
 Core/Src/porting/lib/lz4_depack.c \
+Core/Src/porting/lib/lzma/LzmaDec.c \
+Core/Src/porting/lib/lzma/lzma.c \
 Core/Src/porting/common.c \
 Core/Src/porting/odroid_audio.c \
 Core/Src/porting/odroid_display.c \
@@ -147,6 +149,7 @@ Core/Src/porting/gw/main_gw.c
 C_INCLUDES +=  \
 -ICore/Inc \
 -ICore/Src/porting/lib \
+-ICore/Src/porting/lib/lzma \
 -Iretro-go-stm32/nofrendo-go/components/nofrendo/cpu \
 -Iretro-go-stm32/nofrendo-go/components/nofrendo/mappers \
 -Iretro-go-stm32/nofrendo-go/components/nofrendo/nes \

@@ -50,7 +50,7 @@ SAVE_SIZES = {
     "col": 60 * 1024,
     "sg": 60 * 1024,
     "pce": 76 * 1024,
-    "gw":   4 * 1024
+    "gw": 4 * 1024,
 }
 
 
@@ -207,6 +207,32 @@ def compress_zopfli(data, level=None):
     c = zlib.compressobj(level=9, method=zlib.DEFLATED, wbits=-15, memLevel=9)
 
     compressed_data = c.compress(data) + c.flush()
+    return compressed_data
+
+
+@COMPRESSIONS
+def compress_lzma(data, level=None):
+    if level == DONT_COMPRESS:
+        if args.compress_gb_speed:
+            raise NotImplementedError
+        # This currently assumes this will only be applied to GB Bank 0
+        return data
+    import lzma
+
+    compressed_data = lzma.compress(
+        data,
+        format=lzma.FORMAT_ALONE,
+        filters=[
+            {
+                "id": lzma.FILTER_LZMA1,
+                "preset": 6,
+                "dict_size": 16 * 1024,
+            }
+        ],
+    )
+
+    compressed_data = compressed_data[13:]
+
     return compressed_data
 
 
