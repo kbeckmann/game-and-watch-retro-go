@@ -109,7 +109,7 @@ python3 -m pip install -r requirements.txt
 #       set the EXTFLASH_SIZE_MB to its size in megabytes (MB) (16MB used in the example):
 #           make -j8 EXTFLASH_SIZE_MB=16 flash
 #     * If you'd like to apply more advanced experimental ROM compression, add the
-#       field COMPRESS=zopfli to the make command.
+#       field COMPRESS=lzma to the make command.
 
 make -j8 flash
 ```
@@ -152,8 +152,8 @@ as upcoming features that need more testing. Give them a try!
 
 The current default compression method is `lz4`, which is incredibly fast to both
 compress and decompress. However, it's compression ratio pales in comparison
-compared to some other compression method. We recently added [zopfli](https://github.com/google/zopfli)
-as a compressor to generate data to be decompressed by miniz on-device. This
+compared to some other compression method. We recently added [zopfli](andhttps://github.com/google/zopfli) and lzma
+as selectable compressors to generate data to be decompressed on-device. This
 yields a higher compression ratio (see graph below), but at the cost of
 compression speed and (more importantly) decompression speed. Note that this
 benchmark was done on a desktop, not on-device. Decompression has to be fast
@@ -162,11 +162,11 @@ banks are dynamically decompressed on-demand.
 
 <img src="assets/decompression-benchmark-annotated.jpg" width="800"/>
 
-To use zopfli compression, make sure the python dependencies are installed
-and add `COMPRESS=zopfli` to the `make` command. For example:
+To use lzma compression, make sure the python dependencies are installed
+and add `COMPRESS=lzma` to the `make` command. For example:
 
 ```
-make -j8 EXTFLASH_SIZE_MB=16 COMPRESS=zopfli flash
+make -j8 EXTFLASH_SIZE_MB=16 COMPRESS=lzma flash
 ```
 
 ### Place external flash data at an offset
