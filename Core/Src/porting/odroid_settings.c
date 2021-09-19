@@ -46,7 +46,7 @@ typedef struct persistent_config {
 
 static const persistent_config_t persistent_config_default = {
     .magic = CONFIG_MAGIC,
-    .version = 1,
+    .version = 2,
 
     .backlight = ODROID_BACKLIGHT_LEVEL6,
     .start_action = ODROID_START_ACTION_RESUME,
@@ -80,6 +80,12 @@ void odroid_settings_init()
 
     if (persistent_config_ram.magic != CONFIG_MAGIC) {
         printf("Config: Magic mismatch. Expected 0x%08lx, got 0x%08lx\n", CONFIG_MAGIC, persistent_config_ram.magic);
+        odroid_settings_reset();
+        return;
+    }
+
+    if (persistent_config_ram.version != persistent_config_default.version) {
+        printf("Config: New config version, resetting settings.\n");
         odroid_settings_reset();
         return;
     }
