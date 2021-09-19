@@ -18,6 +18,7 @@
 #include "lz4_depack.h"
 #include <assert.h>
 #include  "miniz.h"
+#include "lzma.h"
 
 #define ODROID_APPID_NES 2
 
@@ -440,6 +441,7 @@ size_t osd_getromdata(unsigned char **data)
     unsigned char *dest = (unsigned char *)&_NES_ROM_UNPACK_BUFFER;
     uint32_t available_size = (uint32_t)&_NES_ROM_UNPACK_BUFFER_SIZE;
 
+    wdog_refresh();
     if (memcmp(&src[0], LZ4_MAGIC, LZ4_MAGIC_SIZE) == 0)
     {
 
@@ -476,6 +478,12 @@ size_t osd_getromdata(unsigned char **data)
         flags |= TINFL_FLAG_USING_NON_WRAPPING_OUTPUT_BUF;
         n_decomp_bytes = tinfl_decompress_mem_to_mem(dest, available_size, src, ROM_DATA_LENGTH, flags);
         assert(n_decomp_bytes != TINFL_DECOMPRESS_MEM_TO_MEM_FAILED);
+        *data = dest;
+        return n_decomp_bytes;
+    }
+    else if(strcmp(ROM_EXT, "lzma") == 0){
+        size_t n_decomp_bytes;
+        n_decomp_bytes = lzma_inflate(dest, available_size, src, ROM_DATA_LENGTH);
         *data = dest;
         return n_decomp_bytes;
     }

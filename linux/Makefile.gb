@@ -10,6 +10,8 @@ BUILD_DIR = build
 C_SOURCES =  \
 gb/main.c \
 ../Core/Src/porting/lib/lz4_depack.c \
+../Core/Src/porting/lib/lzma/LzmaDec.c \
+../Core/Src/porting/lib/lzma/lzma.c \
 odroid_input.c \
 odroid_netplay.c \
 odroid_overlay.c \
@@ -50,6 +52,7 @@ C_INCLUDES =  \
 -I. \
 -I./gb \
 -I../Core/Src/porting/lib \
+-I../Core/Src/porting/lib/lzma \
 -I../retro-go-stm32/gnuboy-go/components \
 -I../retro-go-stm32/components/odroid \
 -I../retro-go-stm32/components/lupng
