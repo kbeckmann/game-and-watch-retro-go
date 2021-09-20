@@ -48,13 +48,13 @@ static short font_size = 8;
 void odroid_overlay_init()
 {
     // overlay_buffer = (uint16_t *)rg_alloc(ODROID_SCREEN_WIDTH * 32 * 2, MEM_SLOW);
-    odroid_overlay_set_font_size(font_size);
+    odroid_overlay_set_font_size(odroid_settings_FontSize_get());
 }
 
 void odroid_overlay_set_font_size(int size)
 {
     font_size = MAX(8, MIN(32, size));
-    //odroid_settings_FontSize_set(font_size);
+    odroid_settings_FontSize_set(font_size);
 }
 
 int odroid_overlay_get_font_size()
@@ -639,7 +639,7 @@ static bool volume_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event
 
 #if COVERFLOW != 0
 
-const char *GW_Themes[] = {s_Theme_sList, s_Theme_CoverH, s_Theme_CoverV};
+const char * GW_Themes[] = {s_Theme_sList, s_Theme_CoverV, s_Theme_CoverH};
 
 static bool theme_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat)
 {
@@ -649,15 +649,13 @@ static bool theme_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_
     {
         if (theme > 0)
             odroid_settings_theme_set(--theme);
-        else
-        {
+        else {
             theme = 2;
-            odroid_settings_theme_set(2);
+            odroid_settings_theme_set(4);
         }
     }
-    else if (event == ODROID_DIALOG_NEXT)
-    {
-        if (theme < 2)
+    else if (event == ODROID_DIALOG_NEXT) {
+        if (theme < 2) 
             odroid_settings_theme_set(++theme);
         else
         {

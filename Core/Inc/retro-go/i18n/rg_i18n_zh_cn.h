@@ -1,3 +1,10 @@
+/*
+***********************************************************
+*                Warning!!!!!!!                           *
+*  This file must be saved with GBK(or GB2312) Encoding   *
+***********************************************************
+*/
+
 #pragma once
 //Stand 简体中文
 
@@ -40,8 +47,10 @@
 
 #define s_Theme_Title           "界面"
 #define s_Theme_sList           "简单列表"
-#define s_Theme_CoverH          "垂直滚动"
-#define s_Theme_CoverV          "水平滚动"
+#define s_Theme_CoverV          "垂直滚动"  //vertical
+#define s_Theme_CoverH          "水平滚动"  //horizontal
+#define s_Theme_CoverLightV     "垂直欢滚"
+#define s_Theme_CoverLightH     "水平欢滚"
 
 //Core\Src\retro-go\rg_emulators.c
 
@@ -67,7 +76,7 @@
 #define s_Author                    "特别贡献： "
 #define s_Author_                   "        ： "
 #define s_UI_Mod                    "界面美化： "
-#define s_Lang                      "简体中文"
+#define s_Lang                      "简体中文： "
 #define s_LangAuthor                "挠浆糊的"
 #define s_Debug_menu                "≈ 调试信息"
 #define s_Reset_settings            "≡ 重置设定"

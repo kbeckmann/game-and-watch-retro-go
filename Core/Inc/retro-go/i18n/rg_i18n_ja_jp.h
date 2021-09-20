@@ -1,6 +1,14 @@
+/*
+***************************************************
+*                Warning!!!!!!!                   *
+*  This file must be saved with EUC-JP Encoding   *
+***************************************************
+*/
+
 #pragma once
 //ÆüËÜ¸ì
 //If you can translate, please feed back the translation results to me, thank you
+
 
 //Core\Src\porting\gb\main_gb.c
 #define s_Palette               "Palette"
@@ -41,8 +49,10 @@
 
 #define s_Theme_Title           "UI Theme"
 #define s_Theme_sList           "Simple List"
-#define s_Theme_CoverH          "Coverflow V"
 #define s_Theme_CoverV          "Coverflow H"
+#define s_Theme_CoverH          "Coverflow V"
+#define s_Theme_CoverLightV     "CoverLight V"
+#define s_Theme_CoverLightH     "CoverLight H"
 
 //Core\Src\retro-go\rg_emulators.c
 

@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <assert.h>
 
 #include "lupng.h"
 #include "gui.h"
@@ -32,8 +33,30 @@
 #define LIST_X_OFFSET (0)
 #define LIST_Y_OFFSET (STATUS_HEIGHT)
 
-#define COVER_MAX_HEIGHT (184)
-#define COVER_MAX_WIDTH (184)
+#define COVER_MAX_HEIGHT (100)
+#define COVER_MAX_WIDTH (186)
+
+#ifdef COVERFLOW
+/* instances for JPEG decoder */
+#include "hw_jpeg_decoder.h"
+
+// reuse existing buffer from gw_lcd.h
+#define JPEG_BUFFER_SIZE ((uint32_t)sizeof(emulator_framebuffer) - 4)
+
+#define NOCOVER_HEIGHT ((uint32_t)(68))
+#define NOCOVER_WIDTH ((uint32_t)(68))
+#define COVER_420_SIZE ((uint32_t)(COVER_MAX_HEIGHT * COVER_MAX_WIDTH * 3 / 2))
+#define COVER_16BITS_SIZE ((uint32_t)(COVER_MAX_HEIGHT * COVER_MAX_WIDTH * 2))
+
+static uint8_t *pJPEG_Buffer = NULL;
+static uint16_t *pCover_Buffer = NULL;
+static uint32_t current_cover_width = NOCOVER_WIDTH;
+static uint32_t current_cover_height = NOCOVER_HEIGHT;
+const static uint32_t COVER_BORDER = 6;
+
+const uint8_t cover_light[5] = {60, 120, 255, 120, 60};
+const uint8_t cover_light3[3] = {255, 120, 60};
+#endif
 
 theme_t gui_themes[] = {
     {0, C_GRAY, C_WHITE, C_AQUA},
@@ -92,6 +115,16 @@ void gui_init_tab(tab_t *tab)
 
     tab->initialized = true;
     // tab->status[0] = 0;
+
+    /* setup JPEG decoder instance with 32bits aligned address */
+    // reuse emulator buffer for JPEG decoder & DMA2 buffering
+    // Direct access to DTCM is not allowed for DMA2D :(
+    pJPEG_Buffer = (uint8_t *)((uint32_t)&emulator_framebuffer + 4 - ((uint32_t)&emulator_framebuffer) % 4);
+    pCover_Buffer = (uint16_t *)(pJPEG_Buffer + COVER_420_SIZE + 4 - COVER_420_SIZE % 4);
+    assert(JPEG_DecodeToBufferInit((uint32_t)pJPEG_Buffer, JPEG_BUFFER_SIZE) == 0);
+    assert((COVER_420_SIZE + COVER_16BITS_SIZE + 12) <= sizeof(emulator_framebuffer));
+    //printf("JPEG init done\n");
+    /* -------------------------- */
 
     sprintf(str_buffer, "Sel.%.11s", tab->name);
     // tab->listbox.cursor = odroid_settings_int32_get(str_buffer, 0);
@@ -292,7 +325,7 @@ void gui_draw_status(tab_t *tab)
     odroid_overlay_draw_fill_rect(0, 1, ODROID_SCREEN_WIDTH, 2, C_BLACK);
     odroid_overlay_draw_fill_rect(0, 4, ODROID_SCREEN_WIDTH, 2, C_BLACK);
     odroid_overlay_draw_fill_rect(0, 8, ODROID_SCREEN_WIDTH, 2, C_BLACK);
-    
+
     odroid_overlay_draw_logo(8, 16, C_GW_YELLOW);
 
     /*
@@ -358,17 +391,16 @@ listbox_item_t *gui_get_item_by_index(tab_t *tab, int *index)
     int x = *index;
 
     if (x < 0)
-        x = list->length - 1;
+        x = (list->length + x) % (list->length);
 
     if (x >= list->length)
-        x = 0;
+        x = x % (list->length);
 
     if (x >= 0 && x < list->length)
     {
         *index = x;
         return &list->items[x];
     }
-
     return NULL;
 }
 
@@ -434,7 +466,7 @@ void gui_draw_simple_list(int posx, tab_t *tab)
             listbox_item_t *next_item = gui_get_item_by_index(tab, &index_next);
             h1 = h1 + font_height + max_line - i;
             h2 = h2 - font_height - max_line + i;
-            if (h2 < LIST_Y_OFFSET)   //out range;
+            if (h2 < LIST_Y_OFFSET) //out range;
                 break;
             if (next_item)
                 odroid_overlay_draw_local_text_line(
@@ -518,110 +550,97 @@ void gui_draw_coverflow_h(tab_t *tab) //------------
 {
     retro_emulator_t *emu = (retro_emulator_t *)tab->arg;
     int font_height = odroid_overlay_get_local_font_size();
+    int font_width = odroid_overlay_get_local_font_width();
     int cover_height = emu->cover_height;
     int cover_width = emu->cover_width;
-    int space_width = 26;
-    //left _|_|__|_(pl)__||_(main)_||__(pr)_|__|_|_ min 26 pixel space;
-    int p_width = (ODROID_SCREEN_WIDTH - cover_width - space_width) / 2;
+    int r_width1 = cover_width * 5 / 8;
+    int r_width2 = cover_width * 7 / 8;
+    uint32_t jpeg_cover_width = cover_width;
+    uint32_t jpeg_cover_height = cover_height;
+    //left _|_1_|_2__||_m_||__2_|_1_|_ min 22 pixels space
+    int space_width = 22;
+    int p_width2 = (ODROID_SCREEN_WIDTH - cover_width - space_width) / 3;
     //p_width must big than 1;
-    p_width = (p_width > cover_width) ? cover_width : p_width; //space width than real width, draw full size;
-    int start_xpos = (ODROID_SCREEN_WIDTH - ((p_width * 2) + cover_width + space_width)) / 2;
+    //space width than real width, draw full size;  7/8
+    p_width2 = (p_width2 > r_width2) ? r_width2 : p_width2;
+    int p_width1 = (ODROID_SCREEN_WIDTH - cover_width - space_width - p_width2 * 2) / 2;
+    //space width than real width, draw full size;  5/8
+    p_width1 = (p_width1 > r_width1) ? r_width1 : p_width1;
+    int start_xpos = (ODROID_SCREEN_WIDTH - ((p_width2 + p_width1) * 2 + cover_width + space_width)) / 2;
     //fisrt left point pos getted, get fisrt top point;
+    int p_height1 = cover_height * 5 / 8;
+    int p_height2 = cover_height * 7 / 8;
+
     int v_space = LIST_HEIGHT - (cover_height + 6);
-    uint8_t draw_bot_title = v_space > (font_height + 5 + 8) ? 1 : 0;  //(12 = 3 * 4)
-    uint8_t draw_top_title = v_space > (font_height * 2 + 12) ? 1 : 0; //(14 = 4 + 1 + 4 + 4)
+    uint8_t draw_bot_title = v_space > (font_height + 5 + 8) ? 1 : 0; //(12 = 3 * 4)
     int cover_top = 0;
     int top_tit_pos = 0;
     int bot_tit_pos = 0;
-    if (draw_top_title == 1)
+    if (draw_bot_title == 1)
     {
-        top_tit_pos = STATUS_HEIGHT + (v_space - (font_height * 2) - 5) / 2;
-        cover_top = top_tit_pos + font_height + 4;
-    }
-    else if (draw_bot_title == 1)
-    {
-        cover_top = STATUS_HEIGHT + (v_space - font_height - 5) / 3 + 8; // 8 = (tit pos)
+        cover_top = STATUS_HEIGHT + (v_space - font_height - 5) * 2 / 5 + 8;
+        top_tit_pos = cover_top + cover_height / 8 / 4 * 3 - font_height - 4;  
     }
     else
-    {
         cover_top = STATUS_HEIGHT + (v_space - 5) / 2 + 8; //
-    }
-    bot_tit_pos = cover_top + cover_height + 3 + ((v_space - font_height - 5) / 3 > 4 ? 4 : (v_space - font_height - 5) / 3); //(3+4)
+
+    bot_tit_pos = cover_top + cover_height + (v_space - font_height - 5) / 5 + 3;
     //let's start draw effect;
     uint16_t *dst_img = lcd_get_active_buffer();
-    odroid_overlay_draw_fill_rect(start_xpos + 1, cover_top + 2, 1, cover_height - 6, get_darken_pixel(C_GW_OPAQUE_YELLOW, 70));
-    odroid_overlay_draw_fill_rect(start_xpos + 3, cover_top, 1, cover_height - 1, get_darken_pixel(C_GW_OPAQUE_YELLOW, 80));
-    odroid_overlay_draw_rect(start_xpos + 6, cover_top - 2, p_width + 2, cover_height + 4, 1, get_darken_pixel(C_GW_OPAQUE_YELLOW, 80));
 
-    odroid_overlay_draw_rect(start_xpos + p_width + 10, cover_top - 3, cover_width + 6, cover_height + 6, 1, C_GW_YELLOW);
-    odroid_overlay_draw_rect(start_xpos + p_width + 11, cover_top - 2, cover_width + 4, cover_height + 4, 1, C_GW_OPAQUE_YELLOW);
+    //left1
+    odroid_overlay_draw_rect(start_xpos + 1, cover_top + (cover_height - p_height1) / 4 * 3 - 2, p_width1 + 2, p_height1 + 4, 1, get_darken_pixel(C_GW_YELLOW, 40));
+    odroid_overlay_draw_fill_rect(start_xpos + p_width1 + 2, cover_top + (cover_height - p_height1) / 4 * 3 - 1, 1, p_height1 + 2, C_BLACK);
+    odroid_overlay_draw_rect(start_xpos + p_width1 + 4, cover_top + (cover_height - p_height2) / 4 * 3 - 2, p_width2 + 2, p_height2 + 4, 1, get_darken_pixel(C_GW_YELLOW, 80));
+    odroid_overlay_draw_fill_rect(start_xpos + p_width1 + p_width2 + 5, cover_top + (cover_height - p_height2) / 4 * 3 - 1, 1, p_height2 + 2, C_BLACK);
 
-    odroid_overlay_draw_rect(start_xpos + p_width + cover_width + 19, cover_top - 2, p_width + 2, cover_height + 4, 1, get_darken_pixel(C_GW_OPAQUE_YELLOW, 80));
-    odroid_overlay_draw_fill_rect(start_xpos + p_width * 2 + cover_width + 23, cover_top, 1, cover_height - 1, get_darken_pixel(C_GW_OPAQUE_YELLOW, 80));
-    odroid_overlay_draw_fill_rect(start_xpos + p_width * 2 + cover_width + 25, cover_top + 2, 1, cover_height - 6, get_darken_pixel(C_GW_OPAQUE_YELLOW, 70));
+    odroid_overlay_draw_rect(start_xpos + p_width1 + p_width2 + 8, cover_top - 3, cover_width + 6, cover_height + 6, 1, C_GW_YELLOW);
+    odroid_overlay_draw_rect(start_xpos + p_width1 + p_width2 + 9, cover_top - 2, cover_width + 4, cover_height + 4, 1, C_GW_OPAQUE_YELLOW);
 
-    odroid_overlay_draw_fill_rect(start_xpos + p_width + 7, cover_top - 1, 1, cover_height + 2, C_BLACK);
-    odroid_overlay_draw_fill_rect(start_xpos + p_width + cover_width + 19, cover_top - 1, 1, cover_height + 2, C_BLACK);
+    odroid_overlay_draw_rect(start_xpos + p_width1 + p_width2 + cover_width + 16, cover_top + (cover_height - p_height2) / 4 * 3 - 2, p_width2 + 2, p_height2 + 4, 1, get_darken_pixel(C_GW_YELLOW, 80));
+    odroid_overlay_draw_fill_rect(start_xpos + p_width1 + p_width2 + cover_width + 16, cover_top + (cover_height - p_height2) / 4 * 3 - 1, 1, p_height2 + 2, C_BLACK);
+    odroid_overlay_draw_rect(start_xpos + p_width1 + p_width2 * 2 + cover_width + 20, cover_top + (cover_height - p_height1) / 4 * 3 - 2, p_width1 + 2, p_height1 + 4, 1, get_darken_pixel(C_GW_YELLOW, 40));
+    odroid_overlay_draw_fill_rect(start_xpos + p_width1 + p_width2 * 2 + cover_width + 20, cover_top + (cover_height - p_height1) / 4 * 3 - 1, 1, p_height1 + 2, C_BLACK);
 
     listbox_t *list = &tab->listbox;
     if (list->cursor >= 0 && list->cursor < list->length)
-        gui_draw_item_postion_h(cover_top - 1, start_xpos + p_width + 12, start_xpos + p_width + cover_width + 12, list->cursor + 1, list->length);
+        gui_draw_item_postion_h(cover_top - 1, start_xpos + p_width1 + p_width2 + 10, start_xpos + p_width1 + p_width2 + cover_width + 6, list->cursor + 1, list->length);
     else
         return;
+
     listbox_item_t *item = &list->items[list->cursor];
-    uint16_t *cover_buffer = NULL;
     retro_emulator_file_t *file = NULL;
     if (item) //current page
     {
         file = (retro_emulator_file_t *)item->arg;
         if (file->img_size == 0)
         {
-            draw_centered_local_text_line(cover_top + (cover_height - font_height) / 2,
-                                          s_No_Cover,
-                                          start_xpos + p_width + 13,
-                                          start_xpos + p_width + 13 + cover_width,
-                                          get_darken_pixel(C_GW_RED, 80),
-                                          C_BLACK);
-
+            draw_centered_local_text_line(cover_top + (cover_height - font_height) / 2, s_No_Cover, start_xpos + p_width1 + p_width2 + 10, start_xpos + p_width1 + p_width2 + 10 + cover_width, get_darken_pixel(C_GW_RED, 80), C_BLACK);
             if (!draw_bot_title)
             {
                 sprintf(str_buffer, "%s", file->name);
                 size_t len = strlen(str_buffer);
-                size_t width = len * odroid_overlay_get_local_font_width();
+                size_t width = len * font_width;
                 width = width > cover_width ? cover_width : width;
-                width = (width / odroid_overlay_get_local_font_width()) * odroid_overlay_get_local_font_width();
-                odroid_overlay_draw_local_text(
-                    start_xpos + p_width + 14,
-                    cover_top + 4,
-                    width,
-                    str_buffer,
-                    C_GW_YELLOW,
-                    C_BLACK,
-                    0);
+                width = (width / font_width) * font_width;
+                odroid_overlay_draw_local_text(start_xpos + p_width1 + p_width2 + 11, cover_top + 4, width, str_buffer, C_GW_YELLOW, C_BLACK, 0);
             }
         }
         else
         {
-            cover_buffer = (uint16_t *)(file->img_address);
-            odroid_display_write_rect(start_xpos + p_width + 13, cover_top, cover_width, cover_height, cover_width, cover_buffer);
+            //draw the cover cenver
+            JPEG_DecodeToBuffer((uint32_t)(file->img_address), (uint32_t)pCover_Buffer, &jpeg_cover_width, &jpeg_cover_height, 255);
+            odroid_display_write_rect(start_xpos + p_width1 + p_width2 + 11, cover_top, cover_width, cover_height, cover_width, pCover_Buffer);
         }
         if (draw_bot_title)
         {
             sprintf(str_buffer, "%s", file->name);
             size_t len = strlen(str_buffer);
-            size_t max_len = (ODROID_SCREEN_WIDTH - 24) / odroid_overlay_get_local_font_width();
+            size_t max_len = (ODROID_SCREEN_WIDTH - 24) / font_width;
             if (len > max_len)
                 len = max_len;
-            size_t width = len * odroid_overlay_get_local_font_width();
-            odroid_overlay_draw_local_text_line(
-                (ODROID_SCREEN_WIDTH - width) / 2,
-                bot_tit_pos,
-                width,
-                str_buffer,
-                C_GW_YELLOW,
-                C_BLACK,
-                NULL,
-                0);
+            size_t width = len * font_width;
+            odroid_overlay_draw_local_text_line((ODROID_SCREEN_WIDTH - width) / 2, bot_tit_pos, width, str_buffer, C_GW_YELLOW, C_BLACK, NULL, 0);
         }
     }
     int index = list->cursor + 1;
@@ -631,55 +650,38 @@ void gui_draw_coverflow_h(tab_t *tab) //------------
         file = (retro_emulator_file_t *)item->arg;
         if (file->img_size == 0)
         {
-            draw_centered_local_text_line(cover_top + (cover_height - font_height) / 2,
-                                          s_No_Cover,
-                                          start_xpos + p_width + cover_width + 19,
-                                          start_xpos + p_width + cover_width + 19 + p_width,
-                                          get_darken_pixel(C_GW_OPAQUE_YELLOW, 80),
-                                          C_BLACK);
-            if ((!draw_top_title) && (p_width > (odroid_overlay_get_local_font_width() * 4)))
+            draw_centered_local_text_line(cover_top + (cover_height - p_height2) / 4 * 3 + (p_height2 - font_height) / 2, s_No_Cover,
+                                          start_xpos + p_width1 + p_width2 + cover_width + 17,
+                                          start_xpos + p_width1 + p_width2 * 2 + cover_width + 17, get_darken_pixel(C_GW_OPAQUE_YELLOW, 80), C_BLACK);
+            if ((!draw_bot_title) && (p_width2 > (font_width * 4)))
             {
                 sprintf(str_buffer, "%s", file->name);
                 size_t len = strlen(str_buffer);
-                size_t width = len * odroid_overlay_get_local_font_width();
-                width = width > p_width ? p_width : width;
-                width = (width / odroid_overlay_get_local_font_width()) * odroid_overlay_get_local_font_width();
-                odroid_overlay_draw_local_text(
-                    start_xpos + p_width + cover_width + 19,
-                    cover_top + 4,
-                    width,
-                    str_buffer,
-                    C_GW_OPAQUE_YELLOW,
-                    C_BLACK,
-                    0);
+                size_t width = len * font_width;
+                width = width > p_width2 ? p_width2 : width;
+                width = width / font_width * font_width;
+                odroid_overlay_draw_local_text(start_xpos + p_width1 + p_width2 + cover_width + 17, cover_top + (cover_height - p_height2) / 4 * 3 + 4, width, str_buffer, C_GW_OPAQUE_YELLOW, C_BLACK, 0);
             }
         }
         else
         {
-            cover_buffer = (uint16_t *)(file->img_address);
-            for (int y = 0; y < cover_height; y++)
-                for (int x = 0; x < p_width; x++)
-                    dst_img[(y + cover_top) * ODROID_SCREEN_WIDTH + start_xpos + p_width + cover_width + 19 + x] =
-                        get_darken_pixel(cover_buffer[y * cover_width + (cover_width - p_width) + x], 20 + x * 60 / p_width);
+            JPEG_DecodeToBuffer((uint32_t)(file->img_address), (uint32_t)pCover_Buffer, &jpeg_cover_width, &jpeg_cover_height, 255);
+            for (int y = 0; y < p_height2; y++)
+                for (int x = 0; x < p_width2; x++)
+                    dst_img[(y + cover_top + (cover_height - p_height2) / 4 * 3) * ODROID_SCREEN_WIDTH + start_xpos + p_width1 + p_width2 + cover_width + 16 + x] =
+                        get_darken_pixel(pCover_Buffer[(y + y / 8) * cover_width + ((r_width2 - p_width2) + x) * 8 / 7], 40 + x * 30 / p_width2);
         };
-        if (draw_top_title)
+        if (draw_bot_title)
         {
             sprintf(str_buffer, "%s", file->name);
-            size_t max_len = (p_width + 4) / odroid_overlay_get_local_font_width();
-            size_t width = strlen(str_buffer) * odroid_overlay_get_local_font_width();
-            if (width > (p_width + 4))
-                width = max_len * odroid_overlay_get_local_font_width();
-            odroid_overlay_draw_local_text_line(
-                start_xpos + p_width * 2 + cover_width + 23 - width, //232,
-                top_tit_pos,                                         //top
-                width,                                               //width
-                str_buffer,
-                C_GW_OPAQUE_YELLOW,
-                C_BLACK,
-                NULL,
-                0);
+            size_t max_len = (p_width2 + p_width1 + 4) / font_width;
+            size_t width = strlen(str_buffer) * font_width;
+            if (width > (p_width2 + p_width1 + 4))
+                width = max_len * font_width;
+            odroid_overlay_draw_local_text_line(start_xpos + p_width1 + p_width2 + cover_width + 17, top_tit_pos, width, str_buffer, C_GW_OPAQUE_YELLOW, C_BLACK, NULL, 0);
         };
     };
+
     index = list->cursor - 1;
     item = gui_get_item_by_index(tab, &index);
     if (item)
@@ -687,53 +689,68 @@ void gui_draw_coverflow_h(tab_t *tab) //------------
         file = (retro_emulator_file_t *)item->arg;
         if (file->img_size == 0)
         {
-            draw_centered_local_text_line(cover_top + (cover_height - font_height) / 2,
-                                          s_No_Cover,
-                                          start_xpos + 8,
-                                          start_xpos + 8 + p_width,
-                                          get_darken_pixel(C_GW_OPAQUE_YELLOW, 80),
-                                          C_BLACK);
-            if ((!draw_top_title) && (p_width > odroid_overlay_get_local_font_width() * 4))
+            draw_centered_local_text_line(cover_top + (cover_height - p_height2) / 4 * 3 + (p_height2 - font_height) / 2, s_No_Cover,
+                                          start_xpos + p_width1 + 5,
+                                          start_xpos + p_width1 + p_width2 + 5, get_darken_pixel(C_GW_OPAQUE_YELLOW, 80), C_BLACK);
+            if ((!draw_bot_title) && (p_width2 > odroid_overlay_get_local_font_width() * 4))
             {
                 sprintf(str_buffer, "%s", file->name);
                 size_t len = strlen(str_buffer);
-                size_t width = len * odroid_overlay_get_local_font_width();
-                width = width > p_width ? p_width : width;
-                width = (width / odroid_overlay_get_local_font_width()) * odroid_overlay_get_local_font_width();
-                odroid_overlay_draw_local_text(
-                    start_xpos + 8,
-                    cover_top + 4,
-                    width,
-                    str_buffer,
-                    C_GW_OPAQUE_YELLOW,
-                    C_BLACK,
-                    0);
+                size_t width = len * font_width;
+                width = width > p_width2 ? p_width2 : width;
+                width = width / font_width * font_width;
+                odroid_overlay_draw_local_text(start_xpos + p_width1 + 5, cover_top + (cover_height - p_height2) / 4 * 3 + 4, width, str_buffer, C_GW_OPAQUE_YELLOW, C_BLACK, 0);
             }
         }
         else
         {
-            cover_buffer = (uint16_t *)(file->img_address);
-            for (int y = 0; y < cover_height; y++)
-                for (int x = 0; x < p_width; x++)
-                    dst_img[(y + cover_top) * ODROID_SCREEN_WIDTH + start_xpos + 8 + x] =
-                        get_darken_pixel(cover_buffer[y * cover_width + x], 80 - x * 60 / p_width);
+
+            JPEG_DecodeToBuffer((uint32_t)(file->img_address), (uint32_t)pCover_Buffer, &jpeg_cover_width, &jpeg_cover_height, 255);
+            for (int y = 0; y < p_height2; y++)
+                for (int x = 0; x < p_width2; x++)
+                    dst_img[(y + cover_top + (cover_height - p_height2) / 4 * 3) * ODROID_SCREEN_WIDTH + start_xpos + p_width1 + 6 + x] =
+                        get_darken_pixel(pCover_Buffer[(y + y / 8) * cover_width + x * 8 / 7], 70 - x * 30 / p_width2);
         };
-        if (draw_top_title)
+        if (draw_bot_title)
         {
             sprintf(str_buffer, "%s", file->name);
-            size_t max_len = (p_width + 4) / odroid_overlay_get_local_font_width();
-            size_t width = strlen(str_buffer) * odroid_overlay_get_local_font_width();
-            if (width > (p_width + 4))
-                width = max_len * odroid_overlay_get_local_font_width();
-            odroid_overlay_draw_local_text_line(
-                start_xpos + 8,
-                top_tit_pos, //top
-                width,       //width
-                str_buffer,
-                C_GW_OPAQUE_YELLOW,
-                C_BLACK,
-                NULL,
-                0);
+            size_t max_len = (p_width2 + p_width1 + 4) / font_width;
+            size_t width = strlen(str_buffer) * font_width;
+            if (width > (p_width2 + p_width1 + 4))
+                width = max_len * font_width;
+            odroid_overlay_draw_local_text_line(start_xpos + p_width1 + p_width2 + 4 - width, top_tit_pos, width, str_buffer, C_GW_OPAQUE_YELLOW, C_BLACK, NULL, 0);
+        };
+    };
+
+    index = list->cursor + 2;
+    item = gui_get_item_by_index(tab, &index);
+    if (item)
+    {
+        file = (retro_emulator_file_t *)item->arg;
+        if (file->img_size != 0)
+        {
+            JPEG_DecodeToBuffer((uint32_t)(file->img_address), (uint32_t)pCover_Buffer, &jpeg_cover_width, &jpeg_cover_height, 255);
+            for (int y = 0; y < p_height1; y++)
+                for (int x = 0; x < p_width1; x++)
+                    dst_img[(y + cover_top + (cover_height - p_height1) / 4 * 3) * ODROID_SCREEN_WIDTH +
+                            start_xpos + p_width1 + p_width2 * 2 + cover_width + 20 + x] =
+                        get_darken_pixel(pCover_Buffer[(y + y * 3 / 8) * cover_width + ((r_width2 - p_width2) + x) * 8 / 5], 30 + x * 30 / p_width2);
+        };
+    };
+
+    index = list->cursor - 2;
+    item = gui_get_item_by_index(tab, &index);
+    if (item)
+    {
+        file = (retro_emulator_file_t *)item->arg;
+        if (file->img_size != 0)
+        {
+            JPEG_DecodeToBuffer((uint32_t)(file->img_address), (uint32_t)pCover_Buffer, &jpeg_cover_width, &jpeg_cover_height, 255);
+            for (int y = 0; y < p_height1; y++)
+                for (int x = 0; x < p_width1; x++)
+                    dst_img[(y + cover_top + (cover_height - p_height1) / 4 * 3) * ODROID_SCREEN_WIDTH +
+                            start_xpos + 3 + x] =
+                        get_darken_pixel(pCover_Buffer[(y + y * 3 / 8) * cover_width + x * 8 / 5], 60 - x * 30 / p_width2);
         };
     };
 };
@@ -745,6 +762,8 @@ void gui_draw_coverflow_v(tab_t *tab, int start_posx) // ||||||||
     int cover_height = emu->cover_height;
     int cover_width = emu->cover_width;
     int space_height = 40;
+    uint32_t jpeg_cover_width = cover_width;
+    uint32_t jpeg_cover_height = cover_height;
     //top ____|_|__|_(pl)__||_(main)_||__(pr)_|__|_|____ min 40;
     int p_height = (LIST_HEIGHT - cover_height - space_height) / 2;
     p_height = (p_height > cover_height) ? cover_height : p_height; //space width than real width, draw full size;
@@ -753,46 +772,44 @@ void gui_draw_coverflow_v(tab_t *tab, int start_posx) // ||||||||
     int start_ypos = STATUS_HEIGHT + (LIST_HEIGHT - ((p_height * 2) + cover_height + space_height)) / 2 + 4;
     //fisrt top point pos getted;
     start_ypos = start_ypos < 0 ? 0 : start_ypos;
+    int p_width1 = cover_width * 7 / 8;
+    int p_width2 = cover_width * 5 / 8;
+    int r_height = cover_height * 7 / 8;
 
     uint16_t *dst_img = lcd_get_active_buffer();
 
-    odroid_overlay_draw_fill_rect(start_posx + 5, start_ypos + 4, cover_width - 6, 1, get_darken_pixel(C_GW_OPAQUE_YELLOW, 70));
-    odroid_overlay_draw_fill_rect(start_posx + 3, start_ypos + 6, cover_width, 1, get_darken_pixel(C_GW_OPAQUE_YELLOW, 80));
+    odroid_overlay_draw_fill_rect(start_posx + (cover_width - p_width2) * 3 / 4 + 7, start_ypos + 4, p_width2 - 6, 1, get_darken_pixel(C_GW_OPAQUE_YELLOW, 70));
+    odroid_overlay_draw_fill_rect(start_posx + (cover_width - p_width2) * 3 / 4 + 3, start_ypos + 6, p_width2, 1, get_darken_pixel(C_GW_OPAQUE_YELLOW, 80));
 
-    odroid_overlay_draw_rect(start_posx + 1, start_ypos + 9, cover_width + 4, p_height + 2, 1, get_darken_pixel(C_GW_OPAQUE_YELLOW, 80));
+    odroid_overlay_draw_rect(start_posx + (cover_width - p_width1) * 3 / 4 + 1, start_ypos + 9, p_width1 + 4, p_height + 2, 1, get_darken_pixel(C_GW_OPAQUE_YELLOW, 80));
 
     odroid_overlay_draw_rect(start_posx, start_ypos + 13 + p_height, cover_width + 6, cover_height + 6, 1, C_GW_YELLOW);
     odroid_overlay_draw_rect(start_posx + 1, start_ypos + 14 + p_height, cover_width + 4, cover_height + 4, 1, C_GW_OPAQUE_YELLOW);
 
-    odroid_overlay_draw_rect(start_posx + 1, start_ypos + p_height + cover_height + 21, cover_width + 4, p_height + 2, 1, get_darken_pixel(C_GW_OPAQUE_YELLOW, 80));
+    odroid_overlay_draw_rect(start_posx + (cover_width - p_width1) * 3 / 4 + 1, start_ypos + p_height + cover_height + 21, p_width1 + 4, p_height + 2, 1, get_darken_pixel(C_GW_OPAQUE_YELLOW, 80));
 
-    odroid_overlay_draw_fill_rect(start_posx + 3, start_ypos + 2 * p_height + cover_height + 25, cover_width, 1, get_darken_pixel(C_GW_OPAQUE_YELLOW, 80));
-    odroid_overlay_draw_fill_rect(start_posx + 5, start_ypos + 2 * p_height + cover_height + 27, cover_width - 6, 1, get_darken_pixel(C_GW_OPAQUE_YELLOW, 70));
+    odroid_overlay_draw_fill_rect(start_posx + (cover_width - p_width2) * 3 / 4 + 3, start_ypos + 2 * p_height + cover_height + 25, p_width2, 1, get_darken_pixel(C_GW_OPAQUE_YELLOW, 80));
+    odroid_overlay_draw_fill_rect(start_posx + (cover_width - p_width2) * 3 / 4 + 7, start_ypos + 2 * p_height + cover_height + 27, p_width2 - 6, 1, get_darken_pixel(C_GW_OPAQUE_YELLOW, 70));
 
     if (p_height)
     {
-        odroid_overlay_draw_fill_rect(start_posx + 2, start_ypos + p_height + 10, cover_width + 2, 1, C_BLACK);
-        odroid_overlay_draw_fill_rect(start_posx + 2, start_ypos + p_height + cover_height + 21, cover_width + 2, 1, C_BLACK);
+        odroid_overlay_draw_fill_rect(start_posx + (cover_width - p_width1) * 3 / 4 + 2, start_ypos + p_height + 10, p_width1 + 2, 1, C_BLACK);
+        odroid_overlay_draw_fill_rect(start_posx + (cover_width - p_width1) * 3 / 4 + 2, start_ypos + p_height + cover_height + 21, p_width1 + 2, 1, C_BLACK);
     }
 
     listbox_t *list = &tab->listbox;
     listbox_item_t *item = &list->items[list->cursor];
-    uint16_t *cover_buffer = NULL;
+
     retro_emulator_file_t *file = NULL;
     if (item) //current page
     {
         file = (retro_emulator_file_t *)item->arg;
         if (file->img_size == 0)
-            draw_centered_local_text_line(start_ypos + p_height + 16 + (cover_height - font_height) / 2,
-                                          s_No_Cover,
-                                          start_posx + 3,
-                                          start_posx + 3 + cover_width,
-                                          get_darken_pixel(C_GW_RED, 80),
-                                          C_BLACK);
+            draw_centered_local_text_line(start_ypos + p_height + 16 + (cover_height - font_height) / 2, s_No_Cover, start_posx + 3, start_posx + 3 + cover_width, get_darken_pixel(C_GW_RED, 80), C_BLACK);
         else
         {
-            cover_buffer = (uint16_t *)(file->img_address);
-            odroid_display_write_rect(start_posx + 3, start_ypos + p_height + 16, cover_width, cover_height, cover_width, cover_buffer);
+            JPEG_DecodeToBuffer((uint32_t)(file->img_address), (uint32_t)pCover_Buffer, &jpeg_cover_width, &jpeg_cover_height, 255);
+            odroid_display_write_rect(start_posx + 3 + (cover_width - jpeg_cover_width) / 2, start_ypos + p_height + 16 + (cover_height - jpeg_cover_height) / 2, jpeg_cover_width, jpeg_cover_height, jpeg_cover_width, pCover_Buffer);
         };
     }
     if (p_height)
@@ -805,44 +822,42 @@ void gui_draw_coverflow_v(tab_t *tab, int start_posx) // ||||||||
             if (file->img_size == 0)
             {
                 if (p_height > font_height)
-                    draw_centered_local_text_line(start_ypos + p_height + cover_height + 21 + (p_height - font_height) / 2,
-                                                  s_No_Cover,
-                                                  start_posx + 3,
-                                                  start_posx + 3 + cover_width,
-                                                  get_darken_pixel(C_GW_OPAQUE_YELLOW, 80),
-                                                  C_BLACK);
+                    draw_centered_local_text_line(start_ypos + p_height + cover_height + 21 + (p_height - font_height) / 2, s_No_Cover, start_posx + 3, start_posx + 3 + cover_width, get_darken_pixel(C_GW_OPAQUE_YELLOW, 80), C_BLACK);
             }
             else
             {
-                cover_buffer = (uint16_t *)(file->img_address);
+                //draw the cover
+                JPEG_DecodeToBuffer((uint32_t)(file->img_address), (uint32_t)pCover_Buffer, &jpeg_cover_width, &jpeg_cover_height, 255);
                 for (int y = 0; y < p_height; y++)
-                    for (int x = 0; x < cover_width; x++)
-                        dst_img[(start_ypos + p_height + cover_height + 21 + y) * ODROID_SCREEN_WIDTH + start_posx + 3 + x] =
-                            get_darken_pixel(cover_buffer[(cover_height - p_height + y) * cover_width + x], 40 + y * 40 / p_height);
+                    for (int x = 0; x < p_width1; x++)
+                        dst_img[(start_ypos + p_height + cover_height + 21 + y) * ODROID_SCREEN_WIDTH + start_posx + (cover_width - p_width1) * 3 / 4 + 3 + x] =
+                            get_darken_pixel(pCover_Buffer[((r_height - p_height + y) * 8 / 7) * cover_width + x + x / 8], 40 + y * 20 / p_height);
             }
-        }
-        index = list->cursor - 1;
-        item = gui_get_item_by_index(tab, &index);
-        if (item)
-        {
-            file = (retro_emulator_file_t *)item->arg;
-            if (file->img_size == 0)
+            index = list->cursor - 1;
+            item = gui_get_item_by_index(tab, &index);
+            if (item)
             {
-                if (p_height > font_height)
-                    draw_centered_local_text_line(start_ypos + 11 + (p_height - font_height) / 2,
-                                                  s_No_Cover,
-                                                  start_posx + 3,
-                                                  start_posx + 3 + cover_width,
-                                                  get_darken_pixel(C_GW_OPAQUE_YELLOW, 80),
-                                                  C_BLACK);
-            }
-            else
-            {
-                cover_buffer = (uint16_t *)(file->img_address);
-                for (int y = 0; y < p_height; y++)
-                    for (int x = 0; x < cover_width; x++)
-                        dst_img[(start_ypos + 11 + y) * ODROID_SCREEN_WIDTH + start_posx + 3 + x] =
-                            get_darken_pixel(cover_buffer[y * cover_width + x], 80 - y * 40 / p_height);
+                file = (retro_emulator_file_t *)item->arg;
+                if (file->img_size == 0)
+                {
+                    if (p_height > font_height)
+                        draw_centered_local_text_line(start_ypos + 11 + (p_height - font_height) / 2,
+                                                      s_No_Cover,
+                                                      start_posx + 3,
+                                                      start_posx + 3 + cover_width,
+                                                      get_darken_pixel(C_GW_OPAQUE_YELLOW, 80),
+                                                      C_BLACK);
+                }
+                else
+                {
+                    //draw the cover
+                    JPEG_DecodeToBuffer((uint32_t)(file->img_address), (uint32_t)pCover_Buffer, &jpeg_cover_width, &jpeg_cover_height, 255);
+
+                    for (int y = 0; y < p_height; y++)
+                        for (int x = 0; x < p_width1; x++)
+                            dst_img[(start_ypos + 11 + y) * ODROID_SCREEN_WIDTH + start_posx + (cover_width - p_width1) * 3 / 4 + 3 + x] =
+                                get_darken_pixel(pCover_Buffer[(y + y / 8) * cover_width + x + x / 8], 60 - y * 20 / p_height);
+                }
             }
         }
     }
@@ -857,7 +872,7 @@ void gui_draw_list(tab_t *tab)
 
 #if COVERFLOW != 0
     int theme_index = odroid_settings_theme_get();
-    //theme_index = 0;
+
     switch (theme_index)
     {
     case 2:
@@ -874,6 +889,7 @@ void gui_draw_list(tab_t *tab)
     gui_draw_simple_list(10, tab);
 #endif
 }
+//const char * GW_Themes[] = {s_Theme_sList, s_Theme_CoverV, s_Theme_CoverH,s_Theme_CoverLightV,s_Theme_CoverLight};
 
 void gui_draw_cover(retro_emulator_file_t *file)
 {

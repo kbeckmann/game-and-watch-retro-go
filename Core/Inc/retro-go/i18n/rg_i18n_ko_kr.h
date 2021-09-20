@@ -1,3 +1,10 @@
+/*
+***************************************************
+*                Warning!!!!!!!                   *
+*  This file must be saved with EUC-KR Encoding   *
+***************************************************
+*/
+
 #pragma once
 //한국어
 //If you can translate, please feed back the translation results to me, thank you
@@ -42,8 +49,10 @@
 
 #define s_Theme_Title           "UI 태마"
 #define s_Theme_sList           "심플 리스트"
-#define s_Theme_CoverH          "커버플로우 가로"
 #define s_Theme_CoverV          "커버플로우 세로"
+#define s_Theme_CoverH          "커버플로우 가로"
+#define s_Theme_CoverLightV     "커버플로우 V"
+#define s_Theme_CoverLightH     "커버플로우"
 
 //Core\Src\retro-go\rg_emulators.c
 

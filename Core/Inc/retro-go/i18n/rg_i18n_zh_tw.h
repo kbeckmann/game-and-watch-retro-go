@@ -1,3 +1,10 @@
+/*
+***************************************************************
+*                Warning!!!!!!!                               *
+*  This file must be saved with BIG(or Big5-HKCSC) Encoding   *
+***************************************************************
+*/
+
 #pragma once
 //Stand 繁体中文
 
@@ -40,8 +47,11 @@
 
 #define s_Theme_Title           "介面"
 #define s_Theme_sList           "簡單列表"
-#define s_Theme_CoverH          "垂直捲動"
-#define s_Theme_CoverV          "水準滾動"
+#define s_Theme_CoverV          "垂直捲動"
+#define s_Theme_CoverH          "水平滾動"
+#define s_Theme_CoverLightV     "垂直歡滾"
+#define s_Theme_CoverLightH     "水平歡滾"
+
 
 //Core\Src\retro-go\rg_emulators.c
 

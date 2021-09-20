@@ -69,6 +69,9 @@ void HAL_MspInit(void)
 
   __HAL_RCC_SYSCFG_CLK_ENABLE();
 
+  __HAL_RCC_JPGDECEN_CLK_ENABLE();
+  __HAL_RCC_DMA2D_CLK_ENABLE();
+
   /* System interrupt init*/
 
   /* USER CODE BEGIN MspInit 1 */

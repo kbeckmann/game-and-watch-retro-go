@@ -56,7 +56,7 @@ static const persistent_config_t persistent_config_default = {
     .backlight = ODROID_BACKLIGHT_LEVEL6,
     .start_action = ODROID_START_ACTION_RESUME,
     .volume = ODROID_AUDIO_VOLUME_MAX / 2, // Too high volume can cause brown out if the battery isn't connected.
-    .font_size = 0,  
+    .font_size = 8,
     .theme = 0, //use as theme index
     .startup_app = 0,
     .main_menu_timeout_s = 60 * 10, // Turn off after 10 minutes of idle time in the main menu
@@ -147,16 +147,16 @@ int32_t odroid_settings_theme_get()
     int theme = persistent_config_ram.theme;
     if (theme < 0)
         persistent_config_ram.theme = 0;
-    else if (theme > 2)
-        persistent_config_ram.theme = 2;
+    else if (theme > 4)
+        persistent_config_ram.theme = 4;
     return persistent_config_ram.theme;
 }
 void odroid_settings_theme_set(int32_t theme)
 {
     if (theme < 0)
         theme = 0;
-    else if (theme > 2)
-        theme = 2;
+    else if (theme > 4)
+        theme = 4;
     persistent_config_ram.theme = theme;
 }
 #endif
@@ -180,7 +180,7 @@ int32_t odroid_settings_FontSize_get()
 }
 void odroid_settings_FontSize_set(int32_t value)
 {
-    //persistent_config_ram.font_size = value;
+    persistent_config_ram.font_size = value;
 }
 
 

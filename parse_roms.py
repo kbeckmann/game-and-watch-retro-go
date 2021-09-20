@@ -14,7 +14,7 @@ except ImportError:
     tqdm = None
 
 ROM_ENTRIES_TEMPLATE = """
-const retro_emulator_file_t {name}[] __attribute__((section(".extflash_emu_data"))) = {{
+const retro_emulator_file_t {name}[] __attribute__((section(".extflash_emu_data")))  = {{
 {body}
 }};
 const uint32_t {name}_count = {rom_count};
@@ -248,19 +248,24 @@ def compress_lzma(data, level=None):
     return compressed_data
 
 
-def write_imgfile(srcfile, fn, w, h):
+def write_covart(srcfile, fn, w, h, jpg_quality):
     from PIL import Image, ImageOps
-    #print(srcfile)
-    img = Image.open(srcfile).convert(mode="RGB")
-    img = img.resize((w, h), Image.ANTIALIAS)
-    pixels = list(img.getdata())
-    with open(fn, "wb") as f:
-        #no file header
-        for pix in pixels:
-            r = (pix[0] >> 3) & 0x1F
-            g = (pix[1] >> 2) & 0x3F
-            b = (pix[2] >> 3) & 0x1F
-            f.write(struct.pack("H", (r << 11) + (g << 5) + b))
+    img = Image.open(srcfile).convert(mode="RGB").resize((w, h), Image.ANTIALIAS)
+    img.save(fn,format="JPEG",optimize=True,quality=jpg_quality)
+
+# def write_rgb565(srcfile, fn, v):
+#     from PIL import Image, ImageOps
+#     #print(srcfile)
+#     img = Image.open(srcfile).convert(mode="RGB")
+#     img = img.resize((w, h), Image.ANTIALIAS)
+#     pixels = list(img.getdata())
+#     with open(fn, "wb") as f:
+#         #no file header
+#         for pix in pixels:
+#             r = (pix[0] >> 3) & 0x1F
+#             g = (pix[1] >> 2) & 0x3F
+#             b = (pix[2] >> 3) & 0x1F
+#             f.write(struct.pack("H", (r << 11) + (g << 5) + b))
 
 class NoArtworkError(Exception):
     """No artwork found for this ROM"""
@@ -394,7 +399,6 @@ class ROMParser:
             prefix = os.environ["GCC_PATH"]
         prefix = Path(prefix)
 
-        print(f"INFO: Packing {rom.name} ROM  > {rom.path} ...")
         subprocess.check_output(
             [
                 prefix / "arm-none-eabi-objcopy",
@@ -421,7 +425,7 @@ class ROMParser:
         template = "extern const uint8_t {name}[];\n"
         return template.format(name=rom.symbol)
 
-    def generate_img_object_file(self, rom: ROM, w: int, h: int) -> str:
+    def generate_img_object_file(self, rom: ROM, w, h) -> str:
         # convert rom_img to an .o file and place the data in the .extflash_game_rom section
         prefix = ""
         if "GCC_PATH" in os.environ:
@@ -429,16 +433,15 @@ class ROMParser:
 
         prefix = Path(prefix)
 
-        if (rom.img_path.exists() and (args.skip_image_covert==0)) or not rom.img_path.exists() :
-            imgs = []
-            imgs.append(str(rom.img_path.with_suffix(".png")))
-            imgs.append(str(rom.img_path.with_suffix(".jpg")))
-            imgs.append(str(rom.img_path.with_suffix(".bmp")))
+        imgs = []
+        imgs.append(str(rom.img_path.with_suffix(".png")))
+        imgs.append(str(rom.img_path.with_suffix(".jpg")))
+        imgs.append(str(rom.img_path.with_suffix(".bmp")))
 
-            for img in imgs:
-                if Path(img).exists():
-                    write_imgfile(Path(img), rom.img_path, w, h)
-                    break
+        for img in imgs:
+            if Path(img).exists():
+                write_covart(Path(img), rom.img_path, w, h, args.jpg_quality)
+                break
 
         if not rom.img_path.exists():
             raise NoArtworkError
@@ -662,6 +665,12 @@ class ROMParser:
         cover_height = romdefs["_cover_height"]
         cover_width = 180 if cover_width > 180 else 64 if cover_width < 64 else cover_width
         cover_height = 136 if cover_height > 136 else 64 if cover_height < 64 else cover_height
+
+        img_max = cover_width * cover_height
+
+        if img_max > 18600:
+            print(f"Error: {system_name} Cover art image [width:{cover_width} height: {cover_height}] will overflow!")
+            exit(-1)        
 
         with open(file, "w", encoding = args.codepage) as f:
             f.write(SYSTEM_PROTO_TEMPLATE.format(name=variable_name))
@@ -908,10 +917,10 @@ if __name__ == "__main__":
         help="set coverflow image file pack",
     )
     parser.add_argument(
-        "--skip_image_covert",
+        "--jpg_quality",
         type=int,
-        default=0,
-        help="skip convert image if destination file exist",
+        default=90,
+        help="skip convert cover art image jpg quality",
     )
     compression_choices = [t for t in COMPRESSIONS if not t[0] == "."]
     parser.add_argument(

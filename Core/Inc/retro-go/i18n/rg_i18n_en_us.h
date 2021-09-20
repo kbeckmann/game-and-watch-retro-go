@@ -40,8 +40,10 @@
 
 #define s_Theme_Title           "UI Theme"
 #define s_Theme_sList           "Simple List"
-#define s_Theme_CoverH          "Coverflow V"
-#define s_Theme_CoverV          "Coverflow H"
+#define s_Theme_CoverV          "Coverflow V"
+#define s_Theme_CoverH          "Coverflow H"
+#define s_Theme_CoverLightV     "CoverLight V"
+#define s_Theme_CoverLightH     "CoverLight H"
 
 //Core\Src\retro-go\rg_emulators.c
 
