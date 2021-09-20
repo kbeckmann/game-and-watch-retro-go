@@ -638,8 +638,7 @@ static bool volume_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event
 }
 
 #if COVERFLOW != 0
-
-const char * GW_Themes[] = {s_Theme_sList, s_Theme_CoverV, s_Theme_CoverH};
+const char * GW_Themes[] = {s_Theme_sList, s_Theme_CoverH, s_Theme_CoverV,s_Theme_CoverLightH,s_Theme_CoverLightV};
 
 static bool theme_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat)
 {
@@ -650,12 +649,12 @@ static bool theme_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_
         if (theme > 0)
             odroid_settings_theme_set(--theme);
         else {
-            theme = 2;
+            theme = 4;
             odroid_settings_theme_set(4);
         }
     }
     else if (event == ODROID_DIALOG_NEXT) {
-        if (theme < 2) 
+        if (theme < 4) 
             odroid_settings_theme_set(++theme);
         else
         {
