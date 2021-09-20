@@ -36,8 +36,6 @@
 #define COVER_MAX_HEIGHT (96)
 #define COVER_MAX_WIDTH (128)
 
-#define COVERFLOW 1
-
 #ifdef COVERFLOW
 /* instances for JPEG decoder */
 #include "hw_jpeg_decoder.h"
