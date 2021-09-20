@@ -1,6 +1,14 @@
+/*
+***************************************************
+*                Warning!!!!!!!                   *
+*  This file must be saved with EUC-JP Encoding   *
+***************************************************
+*/
+
 #pragma once
-//Êó•Êú¨Ë™û
+//∆¸À‹∏Ï
 //If you can translate, please feed back the translation results to me, thank you
+
 
 //Core\Src\porting\gb\main_gb.c
 #define s_Palette               "Palette"
@@ -15,8 +23,8 @@
 
 #define s_No_Cover              "no Cover"
 
-#define s_Yes                   "„ÅØ„ÅÑ"
-#define s_No                    "„Å™„Åó"
+#define s_Yes                   "§œ§§"
+#define s_No                    "§ §∑"
 #define s_PlsChose              "Question"
 #define s_OK                    "OK"
 #define s_Confirm               "Confirm"
@@ -53,10 +61,10 @@
 
 
 #define s_File                  "File"
-#define s_Type                  "Á®ÆÈ°û"
+#define s_Type                  "ºÔŒ‡"
 #define s_Size                  "Size"
 #define s_ImgSize               "ImgSize"
-#define s_Close                 "„ÇØ„É≠„Éº„Ç∫"
+#define s_Close                 "•Ø•Ì°º•∫"
 #define s_GameProp              "Properties"
 #define s_Resume_game           "Resume game"
 #define s_New_game              "New game"
@@ -71,7 +79,7 @@
 #define s_Author                    "By     :"
 #define s_Author_                   "       :"
 #define s_UI_Mod                    "UI Mod :"
-#define s_Lang                      "Êó•Êú¨Ë™û"
+#define s_Lang                      "∆¸À‹∏Ï"
 #define s_LangAuthor                "Default"
 #define s_Debug_menu                "Debug_menu"
 #define s_Reset_settings            "Reset settings"

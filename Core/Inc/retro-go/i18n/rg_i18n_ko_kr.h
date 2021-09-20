@@ -1,52 +1,59 @@
+/*
+***************************************************
+*                Warning!!!!!!!                   *
+*  This file must be saved with EUC-KR Encoding   *
+***************************************************
+*/
+
 #pragma once
-//í•œêµ­ì–´
+//ÇÑ±¹¾î
 //If you can translate, please feed back the translation results to me, thank you
-//translate by  Augen(íˆí›ë§ˆìŠ¤í„°): 
+//translate by  Augen(È÷Èı¸¶½ºÅÍ): 
 
 //Core\Src\porting\gb\main_gb.c
-#define s_Palette               "íŒ”ë ˆíŠ¸"
+#define s_Palette               "ÆÈ·¹Æ®"
 
 //Core\Src\porting\nes\main_nes.c
 //#define s_Palette "Palette" dul
-#define s_Default               "ê¸°ë³¸"
+#define s_Default               "±âº»"
 
 //Core\Src\porting\odroid_overlay.c
 #define s_Full                  0x07
 #define s_Fill                  0x08
 
-#define s_No_Cover              "ì»¤ë²„ ì—†ìŒ"
+#define s_No_Cover              "Ä¿¹ö ¾øÀ½"
 
-#define s_Yes                   "ë„¤"
-#define s_No                    "ì•„ë‹ˆì˜¤"
-#define s_PlsChose              "ì„ íƒí•´ ì£¼ì„¸ìš” : "
-#define s_OK                    "í™•ì¸"
-#define s_Confirm               "ì ìš©"
-#define s_Brightness            "ë°ê¸°"
-#define s_Volume                "ì†Œë¦¬í¬ê¸°"
-#define s_OptionsTit            "í™˜ê²½ ì„¤ì •"
+#define s_Yes                   "³×"
+#define s_No                    "¾Æ´Ï¿À"
+#define s_PlsChose              "¼±ÅÃÇØ ÁÖ¼¼¿ä : "
+#define s_OK                    "È®ÀÎ"
+#define s_Confirm               "Àû¿ë"
+#define s_Brightness            "¹à±â"
+#define s_Volume                "¼Ò¸®Å©±â"
+#define s_OptionsTit            "È¯°æ ¼³Á¤"
 #define s_FPS                   "FPS"
-#define s_BUSY                  "í´ëŸ­(CPU) "
-#define s_Scaling               "ìŠ¤ì¼€ì¼"
-#define s_SCalingFull           "ì „ì²´í™”ë©´"
-#define s_Filtering             "í•„í„°ë§"
-#define s_FilteringNone         "í•„í„°ë§ ì—†ìŒ"
-#define s_Speed                 "ì†ë„(ë°°ì†)"
+#define s_BUSY                  "Å¬·°(CPU) "
+#define s_Scaling               "½ºÄÉÀÏ"
+#define s_SCalingFull           "ÀüÃ¼È­¸é"
+#define s_Filtering             "ÇÊÅÍ¸µ"
+#define s_FilteringNone         "ÇÊÅÍ¸µ ¾øÀ½"
+#define s_Speed                 "¼Óµµ(¹è¼Ó)"
 #define s_Speed_Unit            "x"
-#define s_Save_Cont             "ì €ì¥ ë° ê³„ì† í•˜ê¸°"
-#define s_Save_Quit             "ì €ì¥ ë° ì¢…ë£Œ í•˜ê¸°"
-#define s_Reload                "ë‹¤ì‹œ ë¶ˆëŸ¬ì˜¤ê¸°"
-#define s_Options               "ì„¤ì •"
-#define s_Power_off             "ì „ì› ì¢…ë£Œ"
-#define s_Quit_to_menu          "ë§¤ë‰´ë¡œ ë‚˜ê°€ê¸°"
+#define s_Save_Cont             "ÀúÀå ¹× °è¼Ó ÇÏ±â"
+#define s_Save_Quit             "ÀúÀå ¹× Á¾·á ÇÏ±â"
+#define s_Reload                "´Ù½Ã ºÒ·¯¿À±â"
+#define s_Options               "¼³Á¤"
+#define s_Power_off             "Àü¿ø Á¾·á"
+#define s_Quit_to_menu          "¸Å´º·Î ³ª°¡±â"
 #define s_Retro_Go_options      "Retro-Go"
 
-#define s_Theme_Title           "UI íƒœë§ˆ"
-#define s_Theme_sList           "ì‹¬í”Œ ë¦¬ìŠ¤íŠ¸"
-#define s_Theme_CoverH          "ì»¤ë²„í”Œë¡œìš° ê°€ë¡œ"
-#define s_Theme_CoverV          "ì»¤ë²„í”Œë¡œìš° ì„¸ë¡œ"
-#define s_Theme_CoverH          "ì»¤å ì™ì˜™å ì‹œë¡œìš¸ì˜™ å ì™ì˜™å ì™ì˜™"
-#define s_Theme_CoverLight      "ì»¤å ì™ì˜™å ì‹œë¡œìš¸ì˜™ å ì™ì˜™å ì™ì˜™"
-#define s_Theme_CoverLightV     "ì»¤å ì™ì˜™å ì‹œë¡œìš¸ì˜™ å ì™ì˜™å ì™ì˜™"
+#define s_Theme_Title           "UI ÅÂ¸¶"
+#define s_Theme_sList           "½ÉÇÃ ¸®½ºÆ®"
+#define s_Theme_CoverH          "Ä¿¹öÇÃ·Î¿ì °¡·Î"
+#define s_Theme_CoverV          "Ä¿¹öÇÃ·Î¿ì ¼¼·Î"
+#define s_Theme_CoverH          "Ä¿ï¿½ï¿½ï¿½Ã·Î¿ï¿½ ï¿½ï¿½ï¿½ï¿½"
+#define s_Theme_CoverLight      "Ä¿ï¿½ï¿½ï¿½Ã·Î¿ï¿½ ï¿½ï¿½ï¿½ï¿½"
+#define s_Theme_CoverLightV     "Ä¿ï¿½ï¿½ï¿½Ã·Î¿ï¿½ ï¿½ï¿½ï¿½ï¿½"
 
 //Core\Src\retro-go\rg_emulators.c
 
@@ -54,66 +61,66 @@
 #define fmt_Title_Date_Format(outstr,datefmt,day,month,weekday,hour,minutes,seconds) sprintf(outstr,datefmt,day,month,weekday,hour,minutes,seconds) 
 
 
-#define s_File                  "íŒŒì¼"
-#define s_Type                  "í˜•ì‹"
-#define s_Size                  "í¬ê¸°"
-#define s_ImgSize               "ì´ë¯¸ì§€ í¬ê¸°"
-#define s_Close                 "ë‹«ê¸°"
-#define s_GameProp              "ì†ì„±"
-#define s_Resume_game           "ê³„ì† ê²Œì„ í•˜ê¸°"
-#define s_New_game              "ìƒˆë¡œ ê²Œì„ ì‹œì‘ í•˜ê¸°"
-#define s_Del_favorite          "ì¦ê²¨ì°¾ê¸° ì‚­ì œ"
-#define s_Add_favorite          "ì¦ê²¨ì°¾ê¸° ì¶”ê°€"
-#define s_Delete_save           "ì €ì¥ë°ì´í„° ì‚­ì œ"
-#define s_Confiem_del_save      "ì €ì¥ ë°ì´í„°ë¥¼ ì‚­ì œí•˜ì‹œê² ìŠµë‹ˆê¹Œ?"
+#define s_File                  "ÆÄÀÏ"
+#define s_Type                  "Çü½Ä"
+#define s_Size                  "Å©±â"
+#define s_ImgSize               "ÀÌ¹ÌÁö Å©±â"
+#define s_Close                 "´İ±â"
+#define s_GameProp              "¼Ó¼º"
+#define s_Resume_game           "°è¼Ó °ÔÀÓ ÇÏ±â"
+#define s_New_game              "»õ·Î °ÔÀÓ ½ÃÀÛ ÇÏ±â"
+#define s_Del_favorite          "Áñ°ÜÃ£±â »èÁ¦"
+#define s_Add_favorite          "Áñ°ÜÃ£±â Ãß°¡"
+#define s_Delete_save           "ÀúÀåµ¥ÀÌÅÍ »èÁ¦"
+#define s_Confiem_del_save      "ÀúÀå µ¥ÀÌÅÍ¸¦ »èÁ¦ÇÏ½Ã°Ú½À´Ï±î?"
 
 //Core\Src\retro-go\rg_main.c
-#define s_Second_Unit               "ì´ˆ"
+#define s_Second_Unit               "ÃÊ"
 #define s_Version                   "Ver.   :"
 #define s_Author                    "By     :"
 #define s_Author_                   "       :"
-#define s_UI_Mod                    "ì¸í„°í˜ì´ìŠ¤ ëª¨ë“œ :"
-#define s_Lang                      "í•œêµ­ì–´"
-#define s_LangAuthor                "Augen(íˆí›ë§ˆìŠ¤í„°)"
-#define s_Debug_menu                "ë””ë²„ê·¸ ë§¤ë‰´"
-#define s_Reset_settings            "ëª¨ë“  ì„¤ì • ì´ˆê¸°í™”"
-//#define s_Close                   "ë‹«ê¸°"
-#define s_Retro_Go                  "Retro-Go ì •ë³´ "
-#define s_Confirm_Reset_settings    "ëª¨ë“  ì„¤ì •ì„ ì¬ì„¤ì • í•˜ì‹œê² ìŠµë‹ˆê¹Œ?"
+#define s_UI_Mod                    "ÀÎÅÍÆäÀÌ½º ¸ğµå :"
+#define s_Lang                      "ÇÑ±¹¾î"
+#define s_LangAuthor                "Augen(È÷Èı¸¶½ºÅÍ)"
+#define s_Debug_menu                "µğ¹ö±× ¸Å´º"
+#define s_Reset_settings            "¸ğµç ¼³Á¤ ÃÊ±âÈ­"
+//#define s_Close                   "´İ±â"
+#define s_Retro_Go                  "Retro-Go Á¤º¸ "
+#define s_Confirm_Reset_settings    "¸ğµç ¼³Á¤À» Àç¼³Á¤ ÇÏ½Ã°Ú½À´Ï±î?"
 
-#define s_Flash_JEDEC_ID            "í”Œë˜ì‹œ JEDEC ID"
-#define s_Flash_Name                "í”Œë˜ì‹œ ì´ë¦„"
-#define s_Flash_SR                  "í”Œë˜ì‹œ SR"
-#define s_Flash_CR                  "í”Œë˜ì‹œ CR"
-#define s_Smallest_erase            "Smallest ì§€ìš°ê¸°"
+#define s_Flash_JEDEC_ID            "ÇÃ·¡½Ã JEDEC ID"
+#define s_Flash_Name                "ÇÃ·¡½Ã ÀÌ¸§"
+#define s_Flash_SR                  "ÇÃ·¡½Ã SR"
+#define s_Flash_CR                  "ÇÃ·¡½Ã CR"
+#define s_Smallest_erase            "Smallest Áö¿ì±â"
 #define s_DBGMCU_IDCODE             "DBGMCU IDCODE"
-#define s_Enable_DBGMCU_CK          "DBGMCU CK í™œì„±í™”"
-#define s_Disable_DBGMCU_CK         "DBGMCU CK ë¹„í™œì„±í™”"
-//#define s_Close                   "ë‹«ê¸°"
-#define s_Debug_Title               "ë””ë²„ê·¸"
-#define s_Idle_power_off            "ëª¨ë“  ì „ì› ì¢…ë£Œ"
+#define s_Enable_DBGMCU_CK          "DBGMCU CK È°¼ºÈ­"
+#define s_Disable_DBGMCU_CK         "DBGMCU CK ºñÈ°¼ºÈ­"
+//#define s_Close                   "´İ±â"
+#define s_Debug_Title               "µğ¹ö±×"
+#define s_Idle_power_off            "¸ğµç Àü¿ø Á¾·á"
 
-#define s_Time                      "ì‹œê°„"
-#define s_Date                      "ë‚ ì‹¸"
-#define s_Time_Title                "ì‹œê°„"
-#define s_Hour                      "ì‹œ"
-#define s_Minute                    "ë¶„"
-#define s_Second                    "ì´ˆ"
-#define s_Time_setup                "ì‹œê°„ ì„¤ì •"
+#define s_Time                      "½Ã°£"
+#define s_Date                      "³¯½Î"
+#define s_Time_Title                "½Ã°£"
+#define s_Hour                      "½Ã"
+#define s_Minute                    "ºĞ"
+#define s_Second                    "ÃÊ"
+#define s_Time_setup                "½Ã°£ ¼³Á¤"
 
-#define s_Day                       "ì¼"
-#define s_Month                     "ì›”"
-#define s_Year                      "ë…„"
-#define s_Weekday                   "ì£¼"
-#define s_Date_setup                "ë‚ ì§œ ì„¤ì •"
+#define s_Day                       "ÀÏ"
+#define s_Month                     "¿ù"
+#define s_Year                      "³â"
+#define s_Weekday                   "ÁÖ"
+#define s_Date_setup                "³¯Â¥ ¼³Á¤"
 
-#define s_Weekday_Mon                "ì›”"
-#define s_Weekday_Tue                "í™”"
-#define s_Weekday_Wed                "ìˆ˜"
-#define s_Weekday_Thu                "ëª©"
-#define s_Weekday_Fri                "ê¸ˆ"
-#define s_Weekday_Sat                "í† "
-#define s_Weekday_Sun                "ì¼"
+#define s_Weekday_Mon                "¿ù"
+#define s_Weekday_Tue                "È­"
+#define s_Weekday_Wed                "¼ö"
+#define s_Weekday_Thu                "¸ñ"
+#define s_Weekday_Fri                "±İ"
+#define s_Weekday_Sat                "Åä"
+#define s_Weekday_Sun                "ÀÏ"
 
 #define s_Date_Format               "%02d.%02d.20%02d %s"
 #define fmtDate(outstr,datefmt,day,month,year,weekday) sprintf(outstr,datefmt,day,month,year,weekday) 
