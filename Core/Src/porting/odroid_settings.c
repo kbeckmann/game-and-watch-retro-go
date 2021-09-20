@@ -147,16 +147,16 @@ int32_t odroid_settings_theme_get()
     int theme = persistent_config_ram.theme;
     if (theme < 0)
         persistent_config_ram.theme = 0;
-    else if (theme > 2)
-        persistent_config_ram.theme = 2;
+    else if (theme > 4)
+        persistent_config_ram.theme = 4;
     return persistent_config_ram.theme;
 }
 void odroid_settings_theme_set(int32_t theme)
 {
     if (theme < 0)
         theme = 0;
-    else if (theme > 2)
-        theme = 2;
+    else if (theme > 4)
+        theme = 4;
     persistent_config_ram.theme = theme;
 }
 #endif
