@@ -49,11 +49,10 @@
 
 #define s_Theme_Title           "UI ÅÂ¸¶"
 #define s_Theme_sList           "½ÉÇÃ ¸®½ºÆ®"
-#define s_Theme_CoverH          "Ä¿¹öÇÃ·Î¿ì °¡·Î"
 #define s_Theme_CoverV          "Ä¿¹öÇÃ·Î¿ì ¼¼·Î"
-#define s_Theme_CoverH          "Ä¿ï¿½ï¿½ï¿½Ã·Î¿ï¿½ ï¿½ï¿½ï¿½ï¿½"
-#define s_Theme_CoverLight      "Ä¿ï¿½ï¿½ï¿½Ã·Î¿ï¿½ ï¿½ï¿½ï¿½ï¿½"
-#define s_Theme_CoverLightV     "Ä¿ï¿½ï¿½ï¿½Ã·Î¿ï¿½ ï¿½ï¿½ï¿½ï¿½"
+#define s_Theme_CoverH          "Ä¿¹öÇÃ·Î¿ì °¡·Î"
+#define s_Theme_CoverLightV     "Ä¿¹öÇÃ·Î¿ì V"
+#define s_Theme_CoverLightH     "Ä¿¹öÇÃ·Î¿ì"
 
 //Core\Src\retro-go\rg_emulators.c
 

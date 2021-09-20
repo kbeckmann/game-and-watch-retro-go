@@ -88,8 +88,8 @@ ifdef COVERFLOW
 	COVERFLOW_PARAM := --coverflow=$(COVERFLOW)
 endif
 
-SKIP_IMGC ?= 0
-SKIP_IMGC_PARAM := --skip_image_covert=$(SKIP_IMGC)
+JPG_QUALITY ?= 90
+JPG_QUALITY_PARAM := --jpg_quality=$(JPG_QUALITY)
 
 # Common C sources
 C_SOURCES +=  \
@@ -382,7 +382,7 @@ $(BUILD_DIR)/rom_files.txt: FORCE | $(BUILD_DIR)
 
 $(BUILD_DIR)/roms.a: $(BUILD_DIR)/rom_files.txt parse_roms.py
 	$(V)$(ECHO) [ PYTHON3 ] $(notdir $<)
-	$(V)$(PYTHON3) parse_roms.py --flash-size $(EXTFLASH_SIZE) $(COMPRESS_PARAM) $(CODEPAGE_PARAM) $(COVERFLOW_PARAM) $(SKIP_IMGC_PARAM)
+	$(V)$(PYTHON3) parse_roms.py --flash-size $(EXTFLASH_SIZE) $(COMPRESS_PARAM) $(CODEPAGE_PARAM) $(COVERFLOW_PARAM) $(JPG_QUALITY_PARAM)
 
 $(BUILD_DIR)/config.h $(BUILD_DIR)/saveflash.ld &: $(BUILD_DIR)/roms.a
 	$(V)/bin/sh -c true
@@ -628,7 +628,7 @@ help:
 	@echo "  CODEPAGE            - Sets codepage to configures display langrage.(default=1252)"
 	@echo "                        set 932 as Japanese; 936 as simple Chinese; 950 as traditional Chinese..."
 	@echo "  COVERFLOW           - Set to 1 include cover art with rom (default=0)"
-	@echo "  SKIP_IMGC           - Set to 1 skip convert image if destination file exist"
+	@echo "  JPG_QUALITY         - Set convert cover art image jpg quality (default = 90)"
 	@echo ""
 	@echo "Current configuration:"
 	@echo "  EXTFLASH_FORCE_SPI=$(EXTFLASH_FORCE_SPI)"

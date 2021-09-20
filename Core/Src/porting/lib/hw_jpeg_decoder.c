@@ -132,19 +132,19 @@ void HAL_JPEG_InfoReadyCallback(JPEG_HandleTypeDef *hJPEG, JPEG_ConfTypeDef *pIn
     if (JPEG_info.ChromaSubsampling == JPEG_420_SUBSAMPLING)
     {
         ImgSize = ImgSize * 3 / 2;
-        printf("JPEG %lux%lu 4:2:0\n", JPEG_info.ImageWidth, JPEG_info.ImageHeight);
+        //printf("JPEG %lux%lu 4:2:0\n", JPEG_info.ImageWidth, JPEG_info.ImageHeight);
     }
 
     if (JPEG_info.ChromaSubsampling == JPEG_422_SUBSAMPLING)
     {
         ImgSize = ImgSize * 2;
-        printf("JPEG %lux%lu 4:2:2\n", JPEG_info.ImageWidth, JPEG_info.ImageHeight);
+        //printf("JPEG %lux%lu 4:2:2\n", JPEG_info.ImageWidth, JPEG_info.ImageHeight);
     }
 
     if (JPEG_info.ChromaSubsampling == JPEG_444_SUBSAMPLING)
     {
         ImgSize = ImgSize * 3;
-        printf("JPEG %lux%lu 4:4:4\n", JPEG_info.ImageWidth, JPEG_info.ImageHeight);
+        //printf("JPEG %lux%lu 4:4:4\n", JPEG_info.ImageWidth, JPEG_info.ImageHeight);
     }
     
     if (ImgSize > JPEGBufferSize)

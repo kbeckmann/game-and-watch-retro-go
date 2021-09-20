@@ -14,7 +14,7 @@ except ImportError:
     tqdm = None
 
 ROM_ENTRIES_TEMPLATE = """
-const retro_emulator_file_t {name}[] __attribute__((section(".extflash_emu_data"))) = {{
+const retro_emulator_file_t {name}[] __attribute__((section(".extflash_emu_data")))  = {{
 {body}
 }};
 const uint32_t {name}_count = {rom_count};
@@ -248,39 +248,10 @@ def compress_lzma(data, level=None):
     return compressed_data
 
 
-def write_covart(srcfile, fn, w,h):
+def write_covart(srcfile, fn, w, h, jpg_quality):
     from PIL import Image, ImageOps
-    print('Write Cover art:')
-    print(srcfile)
-    print(fn)
-    img = Image.open(srcfile).convert(mode="RGB")
-
-    covart_width = w
-    covart_height= h
-
-    # resize to target keeping aspect ratio or full screen
-    if (img.width > covart_width) | (img.height > covart_height):
-        print('Rescale')
-        scale_x = float(img.width) / float(covart_width)
-        scale_y = float(img.height) / float(covart_height)
-
-    # select the factor and position x,y
-        if scale_x > scale_y:
-            xsize = covart_width
-            ysize = int(float(img.height) / scale_x )
-            mov_x = 0
-            mov_y = int((covart_height - ysize)/2)
-
-        else:
-            xsize = int(float(img.width) / scale_y)
-            ysize = covart_height
-            mov_y = 0
-            mov_x = int((covart_width - xsize)/2)
-
-        img = img.convert(mode="RGB").resize((xsize, ysize), Image.ANTIALIAS)    
-
-    if not Path(fn).exists():
-        img.save(fn,optimize=True,quality=90)
+    img = Image.open(srcfile).convert(mode="RGB").resize((w, h), Image.ANTIALIAS)
+    img.save(fn,format="JPEG",optimize=True,quality=jpg_quality)
 
 # def write_rgb565(srcfile, fn, v):
 #     from PIL import Image, ImageOps
@@ -328,7 +299,7 @@ class ROM:
             + "_start"
         )
 
-        self.img_path = self.path.parent / (self.filename + ".jpg")
+        self.img_path = self.path.parent / (self.filename + ".img")
         obj_name = "".join([i if i.isalnum() else "_" for i in self.img_path.name])
         symbol_path = str(self.path.parent) + "/" + obj_name
         self.obj_img = "build/roms/" + obj_name + "_" + extension + ".o"
@@ -462,17 +433,15 @@ class ROMParser:
 
         prefix = Path(prefix)
 
-        if (rom.img_path.exists() and (args.skip_image_covert==0)) or not rom.img_path.exists() :
-            imgs = []
-            imgs.append(str(rom.img_path.with_suffix(".png")))
-            imgs.append(str(rom.img_path.with_suffix(".jpg")))
-            imgs.append(str(rom.img_path.with_suffix(".bmp")))
+        imgs = []
+        imgs.append(str(rom.img_path.with_suffix(".png")))
+        imgs.append(str(rom.img_path.with_suffix(".jpg")))
+        imgs.append(str(rom.img_path.with_suffix(".bmp")))
 
-            for img in imgs:
-                if Path(img).exists():
-                    write_covart(Path(img), rom.img_path, w, h)
-
-                    break
+        for img in imgs:
+            if Path(img).exists():
+                write_covart(Path(img), rom.img_path, w, h, args.jpg_quality)
+                break
 
         if not rom.img_path.exists():
             raise NoArtworkError
@@ -694,6 +663,14 @@ class ROMParser:
         romdefs.setdefault("_cover_height", 96)
         cover_width = romdefs["_cover_width"]
         cover_height = romdefs["_cover_height"]
+        cover_width = 180 if cover_width > 180 else 64 if cover_width < 64 else cover_width
+        cover_height = 136 if cover_height > 136 else 64 if cover_height < 64 else cover_height
+
+        img_max = cover_width * cover_height
+
+        if img_max > 18600:
+            print(f"Error: {system_name} Cover art image [width:{cover_width} height: {cover_height}] will overflow!")
+            exit(-1)        
 
         with open(file, "w", encoding = args.codepage) as f:
             f.write(SYSTEM_PROTO_TEMPLATE.format(name=variable_name))
@@ -940,10 +917,10 @@ if __name__ == "__main__":
         help="set coverflow image file pack",
     )
     parser.add_argument(
-        "--skip_image_covert",
+        "--jpg_quality",
         type=int,
-        default=0,
-        help="skip convert image if destination file exist",
+        default=90,
+        help="skip convert cover art image jpg quality",
     )
     compression_choices = [t for t in COMPRESSIONS if not t[0] == "."]
     parser.add_argument(

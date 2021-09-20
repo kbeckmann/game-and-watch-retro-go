@@ -47,10 +47,10 @@
 
 #define s_Theme_Title           "界面"
 #define s_Theme_sList           "简单列表"
-#define s_Theme_CoverH          "垂直滚动"
-#define s_Theme_CoverV          "水平滚动"
-#define s_Theme_CoverLight      "垂飘"
-#define s_Theme_CoverLightV     "横飞"
+#define s_Theme_CoverV          "垂直滚动"  //vertical
+#define s_Theme_CoverH          "水平滚动"  //horizontal
+#define s_Theme_CoverLightV     "垂直欢滚"
+#define s_Theme_CoverLightH     "水平欢滚"
 
 //Core\Src\retro-go\rg_emulators.c
 
