@@ -1,5 +1,6 @@
 
 #include <stdlib.h>
+#include <string.h>
 
 #include "lz4_depack.h"
 
@@ -223,4 +224,57 @@ lz4_get_original_size(const void *src)
 	}
 
 	return original_size;
+}
+
+unsigned int
+lz4_get_file_size(const void *src)
+{
+
+	const unsigned char *in = (unsigned char *)src;
+
+	unsigned int compressed_size = 0;
+	unsigned int original_size = 0;
+	unsigned int content_offset = 0;
+	unsigned int compressed_size_offset = 0;
+	unsigned char flags;
+	unsigned int file_size = 0;
+
+	/* check if it's LZ4  format */
+	if (memcmp(&in[0], LZ4_MAGIC, LZ4_MAGIC_SIZE) == 0)
+	{
+
+		/* Parse the header to determine :
+		- the compressed size
+		- the content offset 
+		- the original size (if present) */
+
+		/* get the header flags */
+		memcpy(&flags, &in[LZ4_FLG_OFFSET], sizeof(flags));
+
+		/* Content size field in header ? */
+		if ((flags & LZ4_FLG_MASK_C_SIZE) != 0)
+		{
+			memcpy(&original_size, &in[LZ4_CONTENT_SIZE_OFFSET], sizeof(original_size));
+			compressed_size_offset += LZ4_CONTENT_SIZE;
+		}
+
+		/* optional Dict. field in header ? */
+		if ((flags & LZ4_FLG_MASK_DICTID) != 0)
+		{
+			compressed_size_offset += LZ4_DICTID_SIZE;
+		}
+
+		/* Add the minimum header size  */
+		compressed_size_offset += LZ4_MAGIC_SIZE + LZ4_FLG_SIZE + LZ4_BD_SIZE + LZ4_HC_SIZE;
+		content_offset += compressed_size_offset + LZ4_FRAME_SIZE;
+
+		/* get the compressed size */
+		memcpy(&compressed_size, &in[compressed_size_offset], sizeof(compressed_size));
+
+		file_size = compressed_size + content_offset + LZ4_ENDMARK_SIZE;
+
+		if ((flags & LZ4_FLG_MASK_C_CHECKSUM) != 0) file_size = file_size +  LZ4_CHECKSUM_SIZE;
+	}
+	
+	return file_size;
 }

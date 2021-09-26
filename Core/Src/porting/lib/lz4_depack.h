@@ -25,7 +25,7 @@ FieldName	Version	B.Indep	B.Checksum	C.Size	C.Checksum	Reserved	DictID
 */
 
 /* header fields size  */
-#define LZ4_MAGIC_SIZE 4
+#define LZ4_MAGIC_SIZE (size_t)(4)
 #define LZ4_FLG_SIZE 1
 #define LZ4_BD_SIZE 1
 #define LZ4_CONTENT_SIZE 8
@@ -71,5 +71,7 @@ return the size of the original (uncompressed) content
 return 0 if it's not a LZ4 file format by checking LZ4_MAGIC NUMBER. 
  */
 unsigned long lz4_depack(const void *src, void *dst, unsigned long packed_size);
+
+unsigned int lz4_get_file_size(const void *src);
 
 #endif /* DEF_LZ4DEPACK */
