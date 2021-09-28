@@ -1,3 +1,6 @@
+# Retro / Game & Watch™
+<img src="assets/gnw.gif"/>
+
 # Emulator collection for Nintendo® Game & Watch™
 
 This is a port of the [retro-go](https://github.com/ducalex/retro-go) emulator collection that is intended to run on the Nintendo® Game & Watch™: Super Mario Bros. 2020 edition.
@@ -34,11 +37,6 @@ Holding the `PAUSE/SET` button while pressing other buttons have the following a
 - `PAUSE/SET` + `B` = Load state.
 - `PAUSE/SET` + `A` = Save state.
 - `PAUSE/SET` + `POWER` = Poweroff WITHOUT save-stating.
-
-## NewUI Branch
-
-<img src="assets/gwui.jpg" width="800"/>
-
 
 ### Prerequisites
 
