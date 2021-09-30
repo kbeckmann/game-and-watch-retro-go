@@ -1,6 +1,6 @@
 # Emulator collection for Nintendo® Game & Watch™
 
-This is a port of the [retro-go](https://github.com/ducalex/retro-go) emulator collection that is intended to run on the Nintendo® Game & Watch™: Super Mario Bros. 2020 edition.
+This is a port of the [retro-go](https://github.com/ducalex/retro-go) emulator collection that runs on the Nintendo® Game & Watch™: Super Mario Bros. system.
 
 Supported emulators:
 
@@ -12,6 +12,24 @@ Supported emulators:
 - Sega Game Gear (gg)
 - Sega Master System (sms)
 - Sega SG-1000 (sg)
+
+## Table of Contents
+- [Emulator collection for Nintendo® Game & Watch™](#emulator-collection-for-nintendo-game--watch)
+  - [Table of Contents](#table-of-contents)
+  - [Controls](#controls)
+    - [Macros](#macros)
+  - [Troubleshooting / FAQ](#troubleshooting--faq)
+  - [How to build](#how-to-build)
+    - [Prerequisites](#prerequisites)
+    - [Building](#building)
+    - [Information for developers](#information-for-developers)
+  - [Build and flash using Docker](#build-and-flash-using-docker)
+  - [Backing up and restoring save state files](#backing-up-and-restoring-save-state-files)
+  - [Upgrading the flash](#upgrading-the-flash)
+  - [Advanced Flash Examples](#advanced-flash-examples)
+    - [Custom Firmware (CFW)](#custom-firmware-cfw)
+  - [Discord, support and discussion](#discord-support-and-discussion)
+  - [LICENSE](#license)
 
 ## Controls
 
@@ -26,33 +44,24 @@ the previous save-state for the current game.
 
 Holding the `PAUSE/SET` button while pressing other buttons have the following actions:
 
-- `PAUSE/SET` + `TIME` = Toggle speedup between 1x and the last non-1x speed. Defaults to 1.5x.
-- `PAUSE/SET` + `UP` = Brightness up.
-- `PAUSE/SET` + `DOWN` = Brightness down.
-- `PAUSE/SET` + `RIGHT` = Volume up.
-- `PAUSE/SET` + `LEFT` = Volume down.
-- `PAUSE/SET` + `B` = Load state.
-- `PAUSE/SET` + `A` = Save state.
-- `PAUSE/SET` + `POWER` = Poweroff WITHOUT save-stating.
+| Button combination    | Action                                                                 |
+| --------------------- | ---------------------------------------------------------------------- |
+| `PAUSE/SET` + `TIME`  | Toggle speedup between 1x and the last non-1x speed. Defaults to 1.5x. |
+| `PAUSE/SET` + `UP`    | Brightness up.                                                         |
+| `PAUSE/SET` + `DOWN`  | Brightness down.                                                       |
+| `PAUSE/SET` + `RIGHT` | Volume up.                                                             |
+| `PAUSE/SET` + `LEFT`  | Volume down.                                                           |
+| `PAUSE/SET` + `B`     | Load state.                                                            |
+| `PAUSE/SET` + `A`     | Save state.                                                            |
+| `PAUSE/SET` + `POWER` | Poweroff WITHOUT save-stating.                                         |
 
-## How to report issues
-
-:exclamation: Please read this before reporting issues.
-
-Please include the following:
-
-- Name of the emulator (nes, gb, etc.)
-- The full name of the ROM you are running, e.g. "Super_Tilt_Bro_(E).nes"
-- The git hash of this repo and the submodule. Please run the following and include the output in the report: `git describe --all --long --dirty=-dirty; cd retro-go-stm32; git describe --all --long --dirty=-dirty`
-
-With this information, please head over to the [Discord](https://discord.gg/vVcwrrHTNJ) and post in the #support channel. If you don't want to use discord for some reason, please create an issue.
-
-### Troubleshooting
+## Troubleshooting / FAQ
 
 - Do you have any changed files, even if you didn't intentionally change them? Please run `git reset --hard` to ensure an unchanged state.
-- Did you pull but forgot to update the submodule? Run `git submodule update --init --recursive` to ensure that the submodules are in sync.
+- Did you run `git pull` but forgot to update the submodule? Run `git submodule update --init --recursive` to ensure that the submodules are in sync or run `git pull --recurse-submodules` instead.
 - Run `make clean` and then build again. The makefile should handle incremental builds, but please try this first before reporting issues.
 - If you have limited resources on your computer, remove the `-j$(nproc)` flag from the `make` command, i.e. run `make flash`.
+- If you have changed the external flash and are having problems, run `make flash_test` to test it. This will erase the flash, write, read and verify the data.
 - It is still not working? Try the classic trouble shooting methods: Disconnect power to your debugger and G&W and connect again. Try programming the [Base](https://github.com/ghidraninja/game-and-watch-base) project first to ensure you can actually program your device.
 - Still not working? Ok, head over to #support on the discord and let's see what's going on.
 
@@ -100,15 +109,15 @@ python3 -m pip install -r requirements.txt
 make -j8 flash
 ```
 
-### If you are a developer
+### Information for developers
 
-- If you need to change the project settings and generate c-code from stm32cubemx, make sure to not have a dirty working copy as the tool will overwrite files that will need to be perhaps partially reverted. Also update Makefile.common in case new drivers are used.
+If you need to change the project settings and generate c-code from stm32cubemx, make sure to not have a dirty working copy as the tool will overwrite files that will need to be perhaps partially reverted. Also update Makefile.common in case new drivers are used.
 
 ## Build and flash using Docker
 
-To reduce the number of potential pitfalls in installation of various software, a Dockerfile is provided containing everything needed to compile and flash retro-go to your Nintendo® Game & Watch™. Note that Linux is required as a host OS in order to flash the target.
+To reduce the number of potential pitfalls in installation of various software, a Dockerfile is provided containing everything needed to compile and flash retro-go to your Nintendo® Game & Watch™: Super Mario Bros. system. This Dockerfile is written tageting an x86-64 machine running Linux.
 
-Steps to build and flash from a docker container (on Linux, e.g. Archlinux or Ubuntu):
+Steps to build and flash from a docker container (running on Linux, e.g. Archlinux or Ubuntu):
 
 ```bash
 # Clone this repo
@@ -117,24 +126,17 @@ git clone --recursive https://github.com/kbeckmann/game-and-watch-retro-go
 # cd into it
 cd game-and-watch-retro-go
 
-# Place roms in ./roms/gb and ./roms/nes accordingly
+# Place roms in the appropriate directory inside ./roms/
 
 # Build the docker image (takes a while)
 docker build -f Dockerfile --tag kbeckmann/retro-go-builder .
 
-# Run it with usb passthrough. Set your ADAPTER and LARGE_FLASH appropriately.
+# Run it with usb passthrough. Set ADAPTER and EXTFLASH_SIZE_MB appropriately.
 docker run --rm -it --privileged -v /dev/bus/usb:/dev/bus/usb kbeckmann/retro-go-builder make ADAPTER=stlink EXTFLASH_SIZE_MB=1 -j$(nproc) flash
 
 # In case you get access errors when flashing, you may run sudo inside the docker container. The proper way is to fix the udev rules, but at least this is a way forward in case you are stuck.
 # docker run --rm -it --privileged -v /dev/bus/usb:/dev/bus/usb kbeckmann/retro-go-builder sudo -E make ADAPTER=stlink EXTFLASH_SIZE_MB=1 -j$(nproc) flash
 ```
-
-## Experimental
-
-Features mentioned in this section are disabled by default and should be considered
-as upcoming features that need more testing. Give them a try!
-
-No current experimental features.
 
 ## Backing up and restoring save state files
 
@@ -172,13 +174,13 @@ make clean
 make -j8 EXTFLASH_SIZE_MB=64 INTFLASH_BANK=2 flash
 ```
 
-3. To flash the custom firmware, [follow the CFW README](https://github.com/BrianPugh/game-and-watch-patch#retro-go). But basically, after you install the dependencies and place the correct files in the directory, run:
+To flash the custom firmware, [follow the CFW README](https://github.com/BrianPugh/game-and-watch-patch#retro-go). But basically, after you install the dependencies and place the correct files in the directory, run:
 ```
 # In the game-and-watch-patch folder
 make PATCH_PARAMS="--internal-only" flash_patched_int
 ```
 
-## Contact, discussion
+## Discord, support and discussion
 
 Please join the [Discord](https://discord.gg/vVcwrrHTNJ).
 
