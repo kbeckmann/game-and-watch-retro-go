@@ -61,7 +61,6 @@ With this information, please head over to the [Discord](https://discord.gg/vVcw
 ### Prerequisites
 
 - You will need version 10 or later of [arm-gcc-none-eabi toolchain](https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-rm/downloads). **10.2.0 and later are known to work well**. Please make sure it's installed either in your PATH, or set the environment variable `GCC_PATH` to the `bin` directory inside the extracted directory (e.g. `/opt/gcc-arm-none-eabi-10-2020-q4-major/bin`, `/Applications/ARM/bin` for macOS).
-- `lz4` needs to be installed in order to compress ROMs.
 - In order to run this on a Nintendo® Game & Watch™ [you need to first unlock it](https://github.com/ghidraninja/game-and-watch-backup/).
 
 ### Building
@@ -97,8 +96,6 @@ python3 -m pip install -r requirements.txt
 #     * If you are using a modified unit with a larger external flash,
 #       set the EXTFLASH_SIZE_MB to its size in megabytes (MB) (16MB used in the example):
 #           make -j8 EXTFLASH_SIZE_MB=16 flash
-#     * If you'd like to apply more advanced experimental ROM compression, add the
-#       field COMPRESS=lzma to the make command.
 
 make -j8 flash
 ```
@@ -137,30 +134,7 @@ docker run --rm -it --privileged -v /dev/bus/usb:/dev/bus/usb kbeckmann/retro-go
 Features mentioned in this section are disabled by default and should be considered
 as upcoming features that need more testing. Give them a try!
 
-### Advanced ROM Compression
-
-The current default compression method is `lz4`, which is incredibly fast to both
-compress and decompress. However, it's compression ratio pales in comparison
-compared to some other compression method. We recently added [zopfli](andhttps://github.com/google/zopfli) and lzma
-as selectable compressors to generate data to be decompressed on-device. This
-yields a higher compression ratio (see graph below), but at the cost of
-compression speed and (more importantly) decompression speed. Note that this
-benchmark was done on a desktop, not on-device. Decompression has to be fast
-enough to not be noticeable to the user, especially for gameboy games where memory
-banks are dynamically decompressed on-demand.
-
-<img src="assets/decompression-benchmark-annotated.jpg" width="800"/>
-
-To use lzma compression, make sure the python dependencies are installed
-and add `COMPRESS=lzma` to the `make` command. For example:
-
-```
-make -j8 EXTFLASH_SIZE_MB=16 COMPRESS=lzma flash
-```
-
-### Place external flash data at an offset
-
-By specifying EXTFLASH_OFFSET you may place the external flash data at an offset to allow for multi booting.
+No current experimental features.
 
 ## Backing up and restoring save state files
 
@@ -188,34 +162,20 @@ The recommended flash to upgrade to is MX25U12835FM2I-10G. It's 16MB, the comman
 
 ## Advanced Flash Examples
 
-### Tim's patched firmware
-In this example, we'll be compiling retro-go to be used with a 64MB (512Mb) `MX25U51245GZ4I00` flash
-chip and [tim's patched firmware](https://www.schuerewegen.tk/gnw/#win_stock_firmware_patcher).
-The internal patched stock firmware is located at `0x08000000`, which corresponds to `INTFLASH_BANK=1`.
-The internal retro-go firmware will be flashed to `0x08100000`, which corresponds to `INTFLASH_BANK=2`.
-The stock extflash firmware is `1048576` bytes long at address `0x90000000`.
-The stock extflash is taking up the first 1MB of the 64MB external flash chip, so we will set
-`EXTFLASH_SIZE_MB=63`. Since we have to flash it after the end of the stock extflash,
-we will set `EXTFLASH_OFFSET=1048576`. We can now build the firmware with the
-following command:
+### Custom Firmware (CFW)
+In order to install both the CFW (modified stock rom) and retro-go at the same time, a [patched version of openocd](https://github.com/kbeckmann/ubuntu-openocd-git-builder) needs to be installed and used.
+
+In this example, we'll be compiling retro-go to be used with a 64MB (512Mb) `MX25U51245GZ4I00` flash chip and [custom firmware](https://github.com/BrianPugh/game-and-watch-patch). The internal custom firmware will be located at `0x08000000`, which corresponds to `INTFLASH_BANK=1`. The internal retro-go firmware will be flashed to `0x08100000`, which corresponds to `INTFLASH_BANK=2`. The configuration of custom firmware described below won't use any extflash, so no `EXTFLASH_OFFSET` is specified. We can now build and flash the firmware with the following command:
 
 ```
 make clean
-make -j8 EXTFLASH_SIZE_MB=63 EXTFLASH_OFFSET=1048576 INTFLASH_BANK=2
+make -j8 EXTFLASH_SIZE_MB=64 INTFLASH_BANK=2 flash
 ```
 
-To flash the produced binaries to your device, you have two options:
-1. Using a windows computer with [these SPI flash external loaders](https://www.schuerewegen.tk/download/STM32CubeProgrammer%20External%20Loaders%20%282021-05-02%29.zip):
-
+3. To flash the custom firmware, [follow the CFW README](https://github.com/BrianPugh/game-and-watch-patch#retro-go). But basically, after you install the dependencies and place the correct files in the directory, run:
 ```
-STM32_Programmer_CLI.exe -c port=SWD -w gw_retro_go_intflash.bin 0x08100000
-STM32_Programmer_CLI.exe -c port=SWD reset=HWrst -w gw_retro_go_extflash.bin 0x90100000 -el "PATH_TO_THE_STLDR_FILE\MX25U51245G_GAME-AND-WATCH.stldr" -rst
-```
-
-2. Use a [patched version of openocd](https://github.com/kbeckmann/ubuntu-openocd-git-builder) that allows access to the undocumented flash regions of the microcontroller. For mac users, you can use [this homebrew formula](https://github.com/northskysl/homebrew-core/blob/master/Formula/open-ocd.rb):
-
-```
-make -j8 EXTFLASH_SIZE_MB=63 EXTFLASH_OFFSET=1048576 INTFLASH_BANK=2 flash
+# In the game-and-watch-patch folder
+make PATCH_PARAMS="--internal-only" flash_patched_int
 ```
 
 ## Contact, discussion
