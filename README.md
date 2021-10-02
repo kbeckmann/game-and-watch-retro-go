@@ -1,6 +1,6 @@
 # Emulator collection for Nintendo® Game & Watch™
 
-This is a port of the [retro-go](https://github.com/ducalex/retro-go) emulator collection that is intended to run on the Nintendo® Game & Watch™: Super Mario Bros. 2020 edition.
+This is a port of the [retro-go](https://github.com/ducalex/retro-go) emulator collection that runs on the Nintendo® Game & Watch™: Super Mario Bros. system.
 
 Supported emulators:
 
@@ -12,6 +12,24 @@ Supported emulators:
 - Sega Game Gear (gg)
 - Sega Master System (sms)
 - Sega SG-1000 (sg)
+
+## Table of Contents
+- [Emulator collection for Nintendo® Game & Watch™](#emulator-collection-for-nintendo-game--watch)
+  - [Table of Contents](#table-of-contents)
+  - [Controls](#controls)
+    - [Macros](#macros)
+  - [Troubleshooting / FAQ](#troubleshooting--faq)
+  - [How to build](#how-to-build)
+    - [Prerequisites](#prerequisites)
+    - [Building](#building)
+    - [Information for developers](#information-for-developers)
+  - [Build and flash using Docker](#build-and-flash-using-docker)
+  - [Backing up and restoring save state files](#backing-up-and-restoring-save-state-files)
+  - [Upgrading the flash](#upgrading-the-flash)
+  - [Advanced Flash Examples](#advanced-flash-examples)
+    - [Custom Firmware (CFW)](#custom-firmware-cfw)
+  - [Discord, support and discussion](#discord-support-and-discussion)
+  - [LICENSE](#license)
 
 ## Controls
 
@@ -26,33 +44,24 @@ the previous save-state for the current game.
 
 Holding the `PAUSE/SET` button while pressing other buttons have the following actions:
 
-- `PAUSE/SET` + `TIME` = Toggle speedup between 1x and the last non-1x speed. Defaults to 1.5x.
-- `PAUSE/SET` + `UP` = Brightness up.
-- `PAUSE/SET` + `DOWN` = Brightness down.
-- `PAUSE/SET` + `RIGHT` = Volume up.
-- `PAUSE/SET` + `LEFT` = Volume down.
-- `PAUSE/SET` + `B` = Load state.
-- `PAUSE/SET` + `A` = Save state.
-- `PAUSE/SET` + `POWER` = Poweroff WITHOUT save-stating.
+| Button combination    | Action                                                                 |
+| --------------------- | ---------------------------------------------------------------------- |
+| `PAUSE/SET` + `TIME`  | Toggle speedup between 1x and the last non-1x speed. Defaults to 1.5x. |
+| `PAUSE/SET` + `UP`    | Brightness up.                                                         |
+| `PAUSE/SET` + `DOWN`  | Brightness down.                                                       |
+| `PAUSE/SET` + `RIGHT` | Volume up.                                                             |
+| `PAUSE/SET` + `LEFT`  | Volume down.                                                           |
+| `PAUSE/SET` + `B`     | Load state.                                                            |
+| `PAUSE/SET` + `A`     | Save state.                                                            |
+| `PAUSE/SET` + `POWER` | Poweroff WITHOUT save-stating.                                         |
 
-## How to report issues
-
-:exclamation: Please read this before reporting issues.
-
-Please include the following:
-
-- Name of the emulator (nes, gb, etc.)
-- The full name of the ROM you are running, e.g. "Super_Tilt_Bro_(E).nes"
-- The git hash of this repo and the submodule. Please run the following and include the output in the report: `git describe --all --long --dirty=-dirty; cd retro-go-stm32; git describe --all --long --dirty=-dirty`
-
-With this information, please head over to the [Discord](https://discord.gg/vVcwrrHTNJ) and post in the #support channel. If you don't want to use discord for some reason, please create an issue.
-
-### Troubleshooting
+## Troubleshooting / FAQ
 
 - Do you have any changed files, even if you didn't intentionally change them? Please run `git reset --hard` to ensure an unchanged state.
-- Did you pull but forgot to update the submodule? Run `git submodule update --init --recursive` to ensure that the submodules are in sync.
+- Did you run `git pull` but forgot to update the submodule? Run `git submodule update --init --recursive` to ensure that the submodules are in sync or run `git pull --recurse-submodules` instead.
 - Run `make clean` and then build again. The makefile should handle incremental builds, but please try this first before reporting issues.
 - If you have limited resources on your computer, remove the `-j$(nproc)` flag from the `make` command, i.e. run `make flash`.
+- If you have changed the external flash and are having problems, run `make flash_test` to test it. This will erase the flash, write, read and verify the data.
 - It is still not working? Try the classic trouble shooting methods: Disconnect power to your debugger and G&W and connect again. Try programming the [Base](https://github.com/ghidraninja/game-and-watch-base) project first to ensure you can actually program your device.
 - Still not working? Ok, head over to #support on the discord and let's see what's going on.
 
@@ -61,7 +70,6 @@ With this information, please head over to the [Discord](https://discord.gg/vVcw
 ### Prerequisites
 
 - You will need version 10 or later of [arm-gcc-none-eabi toolchain](https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-rm/downloads). **10.2.0 and later are known to work well**. Please make sure it's installed either in your PATH, or set the environment variable `GCC_PATH` to the `bin` directory inside the extracted directory (e.g. `/opt/gcc-arm-none-eabi-10-2020-q4-major/bin`, `/Applications/ARM/bin` for macOS).
-- `lz4` needs to be installed in order to compress ROMs.
 - In order to run this on a Nintendo® Game & Watch™ [you need to first unlock it](https://github.com/ghidraninja/game-and-watch-backup/).
 
 ### Building
@@ -97,21 +105,19 @@ python3 -m pip install -r requirements.txt
 #     * If you are using a modified unit with a larger external flash,
 #       set the EXTFLASH_SIZE_MB to its size in megabytes (MB) (16MB used in the example):
 #           make -j8 EXTFLASH_SIZE_MB=16 flash
-#     * If you'd like to apply more advanced experimental ROM compression, add the
-#       field COMPRESS=lzma to the make command.
 
 make -j8 flash
 ```
 
-### If you are a developer
+### Information for developers
 
-- If you need to change the project settings and generate c-code from stm32cubemx, make sure to not have a dirty working copy as the tool will overwrite files that will need to be perhaps partially reverted. Also update Makefile.common in case new drivers are used.
+If you need to change the project settings and generate c-code from stm32cubemx, make sure to not have a dirty working copy as the tool will overwrite files that will need to be perhaps partially reverted. Also update Makefile.common in case new drivers are used.
 
 ## Build and flash using Docker
 
-To reduce the number of potential pitfalls in installation of various software, a Dockerfile is provided containing everything needed to compile and flash retro-go to your Nintendo® Game & Watch™. Note that Linux is required as a host OS in order to flash the target.
+To reduce the number of potential pitfalls in installation of various software, a Dockerfile is provided containing everything needed to compile and flash retro-go to your Nintendo® Game & Watch™: Super Mario Bros. system. This Dockerfile is written tageting an x86-64 machine running Linux.
 
-Steps to build and flash from a docker container (on Linux, e.g. Archlinux or Ubuntu):
+Steps to build and flash from a docker container (running on Linux, e.g. Archlinux or Ubuntu):
 
 ```bash
 # Clone this repo
@@ -120,47 +126,17 @@ git clone --recursive https://github.com/kbeckmann/game-and-watch-retro-go
 # cd into it
 cd game-and-watch-retro-go
 
-# Place roms in ./roms/gb and ./roms/nes accordingly
+# Place roms in the appropriate directory inside ./roms/
 
 # Build the docker image (takes a while)
 docker build -f Dockerfile --tag kbeckmann/retro-go-builder .
 
-# Run it with usb passthrough. Set your ADAPTER and LARGE_FLASH appropriately.
+# Run it with usb passthrough. Set ADAPTER and EXTFLASH_SIZE_MB appropriately.
 docker run --rm -it --privileged -v /dev/bus/usb:/dev/bus/usb kbeckmann/retro-go-builder make ADAPTER=stlink EXTFLASH_SIZE_MB=1 -j$(nproc) flash
 
 # In case you get access errors when flashing, you may run sudo inside the docker container. The proper way is to fix the udev rules, but at least this is a way forward in case you are stuck.
 # docker run --rm -it --privileged -v /dev/bus/usb:/dev/bus/usb kbeckmann/retro-go-builder sudo -E make ADAPTER=stlink EXTFLASH_SIZE_MB=1 -j$(nproc) flash
 ```
-
-## Experimental
-
-Features mentioned in this section are disabled by default and should be considered
-as upcoming features that need more testing. Give them a try!
-
-### Advanced ROM Compression
-
-The current default compression method is `lz4`, which is incredibly fast to both
-compress and decompress. However, it's compression ratio pales in comparison
-compared to some other compression method. We recently added [zopfli](andhttps://github.com/google/zopfli) and lzma
-as selectable compressors to generate data to be decompressed on-device. This
-yields a higher compression ratio (see graph below), but at the cost of
-compression speed and (more importantly) decompression speed. Note that this
-benchmark was done on a desktop, not on-device. Decompression has to be fast
-enough to not be noticeable to the user, especially for gameboy games where memory
-banks are dynamically decompressed on-demand.
-
-<img src="assets/decompression-benchmark-annotated.jpg" width="800"/>
-
-To use lzma compression, make sure the python dependencies are installed
-and add `COMPRESS=lzma` to the `make` command. For example:
-
-```
-make -j8 EXTFLASH_SIZE_MB=16 COMPRESS=lzma flash
-```
-
-### Place external flash data at an offset
-
-By specifying EXTFLASH_OFFSET you may place the external flash data at an offset to allow for multi booting.
 
 ## Backing up and restoring save state files
 
@@ -188,37 +164,23 @@ The recommended flash to upgrade to is MX25U12835FM2I-10G. It's 16MB, the comman
 
 ## Advanced Flash Examples
 
-### Tim's patched firmware
-In this example, we'll be compiling retro-go to be used with a 64MB (512Mb) `MX25U51245GZ4I00` flash
-chip and [tim's patched firmware](https://www.schuerewegen.tk/gnw/#win_stock_firmware_patcher).
-The internal patched stock firmware is located at `0x08000000`, which corresponds to `INTFLASH_BANK=1`.
-The internal retro-go firmware will be flashed to `0x08100000`, which corresponds to `INTFLASH_BANK=2`.
-The stock extflash firmware is `1048576` bytes long at address `0x90000000`.
-The stock extflash is taking up the first 1MB of the 64MB external flash chip, so we will set
-`EXTFLASH_SIZE_MB=63`. Since we have to flash it after the end of the stock extflash,
-we will set `EXTFLASH_OFFSET=1048576`. We can now build the firmware with the
-following command:
+### Custom Firmware (CFW)
+In order to install both the CFW (modified stock rom) and retro-go at the same time, a [patched version of openocd](https://github.com/kbeckmann/ubuntu-openocd-git-builder) needs to be installed and used.
 
-```
+In this example, we'll be compiling retro-go to be used with a 64MB (512Mb) `MX25U51245GZ4I00` flash chip and [custom firmware](https://github.com/BrianPugh/game-and-watch-patch). The internal custom firmware will be located at `0x08000000`, which corresponds to `INTFLASH_BANK=1`. The internal retro-go firmware will be flashed to `0x08100000`, which corresponds to `INTFLASH_BANK=2`. The configuration of custom firmware described below won't use any extflash, so no `EXTFLASH_OFFSET` is specified. We can now build and flash the firmware with the following command:
+
+```bash
 make clean
-make -j8 EXTFLASH_SIZE_MB=63 EXTFLASH_OFFSET=1048576 INTFLASH_BANK=2
+make -j8 EXTFLASH_SIZE_MB=64 INTFLASH_BANK=2 flash
 ```
 
-To flash the produced binaries to your device, you have two options:
-1. Using a windows computer with [these SPI flash external loaders](https://www.schuerewegen.tk/download/STM32CubeProgrammer%20External%20Loaders%20%282021-05-02%29.zip):
-
-```
-STM32_Programmer_CLI.exe -c port=SWD -w gw_retro_go_intflash.bin 0x08100000
-STM32_Programmer_CLI.exe -c port=SWD reset=HWrst -w gw_retro_go_extflash.bin 0x90100000 -el "PATH_TO_THE_STLDR_FILE\MX25U51245G_GAME-AND-WATCH.stldr" -rst
+To flash the custom firmware, [follow the CFW README](https://github.com/BrianPugh/game-and-watch-patch#retro-go). But basically, after you install the dependencies and place the correct files in the directory, run:
+```bash
+# In the game-and-watch-patch folder
+make PATCH_PARAMS="--internal-only" flash_patched_int
 ```
 
-2. Use a [patched version of openocd](https://github.com/kbeckmann/ubuntu-openocd-git-builder) that allows access to the undocumented flash regions of the microcontroller. For mac users, you can use [this homebrew formula](https://github.com/northskysl/homebrew-core/blob/master/Formula/open-ocd.rb):
-
-```
-make -j8 EXTFLASH_SIZE_MB=63 EXTFLASH_OFFSET=1048576 INTFLASH_BANK=2 flash
-```
-
-## Contact, discussion
+## Discord, support and discussion
 
 Please join the [Discord](https://discord.gg/vVcwrrHTNJ).
 
