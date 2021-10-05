@@ -61,7 +61,9 @@ Holding the `PAUSE/SET` button while pressing other buttons have the following a
 - Did you run `git pull` but forgot to update the submodule? Run `git submodule update --init --recursive` to ensure that the submodules are in sync or run `git pull --recurse-submodules` instead.
 - Run `make clean` and then build again. The makefile should handle incremental builds, but please try this first before reporting issues.
 - If you have limited resources on your computer, remove the `-j$(nproc)` flag from the `make` command, i.e. run `make flash`.
-- If you have changed the external flash and are having problems, run `make flash_test` to test it. This will erase the flash, write, read and verify the data.
+- If you have changed the external flash and are having problems:
+  - Run `make flash_test` to test it. This will erase the flash, write, read and verify the data.
+  - If your chip was bought from e.g. ebay, aliexpress or similar places, you might have gotten a fake or bad clone chip. You can set `EXTFLASH_FORCE_SPI=1` to disable quad mode which seems to help for some chips.
 - It is still not working? Try the classic trouble shooting methods: Disconnect power to your debugger and G&W and connect again. Try programming the [Base](https://github.com/ghidraninja/game-and-watch-base) project first to ensure you can actually program your device.
 - Still not working? Ok, head over to #support on the discord and let's see what's going on.
 
