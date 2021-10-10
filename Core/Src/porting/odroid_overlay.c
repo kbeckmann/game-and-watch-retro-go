@@ -643,9 +643,11 @@ int odroid_overlay_game_menu(odroid_dialog_choice_t *extra_options)
 {
     odroid_dialog_choice_t choices[] = {
         // {0, "Continue", "",  1, NULL},
+#if STATE_SAVING == 1
         {10, "Save & Continue", "",  1, NULL},
         {20, "Save & Quit", "", 1, NULL},
         {30, "Reload", "", 1, NULL},
+#endif
         {40, "Options", "", 1, NULL},
         // {50, "Tools", "", 1, NULL},
         {90, "Power off", "", 1, NULL},

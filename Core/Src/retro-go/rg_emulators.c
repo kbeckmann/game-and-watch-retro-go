@@ -341,11 +341,15 @@ void emulator_show_file_menu(retro_emulator_file_t *file)
     bool is_fav = 0;
 
     odroid_dialog_choice_t choices[] = {
+#if STATE_SAVING == 1
         {0, "Resume game ", "", has_save, NULL},
+#endif
         {1, "New game    ", "", 1, NULL},
         {0, "------------", "", -1, NULL},
         {3, is_fav ? "Del favorite" : "Add favorite", "", 1, NULL},
+#if STATE_SAVING == 1
         {2, "Delete save ", "", has_save || has_sram, NULL},
+#endif
         ODROID_DIALOG_CHOICE_LAST
     };
     int sel = odroid_overlay_dialog(NULL, choices, has_save ? 0 : 1);
