@@ -529,7 +529,7 @@ class ROMParser:
         roms_compressed = find_compressed_roms()
 
         roms_raw = [r for r in roms_raw if not contains_rom_by_name(r, roms_compressed)]
-        if roms_raw:
+        if roms_raw and compress != None:
             pbar = tqdm(roms_raw) if tqdm else roms_raw
             for r in pbar:
                 if tqdm:
@@ -744,7 +744,7 @@ if __name__ == "__main__":
         "--compress",
         choices=compression_choices,
         type=str,
-        default="",
+        default=None,
         help="Compression method. Defaults to no compression.",
     )
     parser.add_argument(

@@ -44,7 +44,9 @@ endif
 
 # Compress supported ROMs by default. Set to 0 to disable.
 COMPRESS ?= lzma
-ifdef COMPRESS
+ifeq ($(COMPRESS),0)
+	COMPRESS_PARAM :=
+else
 	COMPRESS_PARAM := --compress=$(COMPRESS)
 endif
 
