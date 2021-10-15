@@ -30,6 +30,15 @@ ROM_ENTRY_TEMPLATE = """\t{{
 \t\t.region = {region},
 \t}},"""
 
+ROM_ENTRY_TEMPLATE_NO_SAVE = """\t{{
+\t\t.name = "{name}",
+\t\t.ext = "{extension}",
+\t\t.address = {rom_entry},
+\t\t.size = {size},
+\t\t.system = &{system},
+\t\t.region = {region},
+\t}},"""
+
 SYSTEM_PROTO_TEMPLATE = """
 extern const rom_system_t {name};
 """
@@ -310,15 +319,26 @@ class ROMParser:
                 ]
             )
             region = "REGION_PAL" if is_pal else "REGION_NTSC"
-            body += ROM_ENTRY_TEMPLATE.format(
-                name=rom.name,
-                size=rom.size,
-                rom_entry=rom.symbol,
-                save_entry=save_prefix + str(i),
-                region=region,
-                extension=rom.ext,
-                system=system,
-            )
+            if args.save:
+                body += ROM_ENTRY_TEMPLATE.format(
+                    name=rom.name,
+                    size=rom.size,
+                    rom_entry=rom.symbol,
+                    save_entry=save_prefix + str(i),
+                    region=region,
+                    extension=rom.ext,
+                    system=system,
+                )
+            else:
+                body += ROM_ENTRY_TEMPLATE_NO_SAVE.format(
+                    name=rom.name,
+                    size=rom.size,
+                    rom_entry=rom.symbol,
+                    save_entry=save_prefix + str(i),
+                    region=region,
+                    extension=rom.ext,
+                    system=system,
+                )
             body += "\n"
 
         return ROM_ENTRIES_TEMPLATE.format(name=name, body=body, rom_count=len(roms))
@@ -509,7 +529,7 @@ class ROMParser:
         roms_compressed = find_compressed_roms()
 
         roms_raw = [r for r in roms_raw if not contains_rom_by_name(r, roms_compressed)]
-        if roms_raw:
+        if roms_raw and compress != None:
             pbar = tqdm(roms_raw) if tqdm else roms_raw
             for r in pbar:
                 if tqdm:
@@ -550,7 +570,8 @@ class ROMParser:
                 total_rom_size += rom.size
 
                 f.write(self.generate_object_file(rom))
-                f.write(self.generate_save_entry(save_prefix + str(i), save_size))
+                if args.save:
+                    f.write(self.generate_save_entry(save_prefix + str(i), save_size))
 
             rom_entries = self.generate_rom_entries(
                 folder + "_roms", roms, save_prefix, variable_name
@@ -567,7 +588,10 @@ class ROMParser:
                 )
             )
 
-        return total_save_size, total_rom_size
+        if args.save:
+            return total_save_size, total_rom_size
+        else:
+            return 0, total_rom_size
 
     def write_if_changed(self, path: str, data: str):
         path = Path(path)
@@ -720,7 +744,7 @@ if __name__ == "__main__":
         "--compress",
         choices=compression_choices,
         type=str,
-        default="",
+        default=None,
         help="Compression method. Defaults to no compression.",
     )
     parser.add_argument(
@@ -734,6 +758,9 @@ if __name__ == "__main__":
         "--no-compress_gb_speed", dest="compress_gb_speed", action="store_false"
     )
     parser.set_defaults(compress_gb_speed=False)
+    parser.add_argument(
+        "--no-save", dest="save", action="store_false"
+    )
     args = parser.parse_args()
 
     if args.compress and "." + args.compress not in COMPRESSIONS:
