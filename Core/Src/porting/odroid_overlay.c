@@ -473,46 +473,44 @@ static bool brightness_update_cb(odroid_dialog_choice_t *option, odroid_dialog_e
 
 static bool filter_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat)
 {
-    // int8_t max = ODROID_DISPLAY_FILTER_COUNT - 1;
-    // int8_t mode = odroid_display_get_filter_mode();
-    // int8_t prev = mode;
+    int8_t max = ODROID_DISPLAY_FILTER_COUNT - 1;
+    int8_t mode = odroid_display_get_filter_mode();
+    int8_t prev = mode;
 
-    // if (event == ODROID_DIALOG_PREV && --mode < 0) mode = max; // 0;
-    // if (event == ODROID_DIALOG_NEXT && ++mode > max) mode = 0; // max;
+    if (event == ODROID_DIALOG_PREV && --mode < 0) mode = max; // 0;
+    if (event == ODROID_DIALOG_NEXT && ++mode > max) mode = 0; // max;
 
-    // if (mode != prev)
-    // {
-    //     odroid_display_set_filter_mode(mode);
-    // }
+    if (mode != prev)
+    {
+        odroid_display_set_filter_mode(mode);
+    }
 
-    // if (mode == ODROID_DISPLAY_FILTER_OFF)      strcpy(option->value, "Off  ");
-    // if (mode == ODROID_DISPLAY_FILTER_LINEAR_X) strcpy(option->value, "Horiz");
-    // if (mode == ODROID_DISPLAY_FILTER_LINEAR_Y) strcpy(option->value, "Vert ");
-    // if (mode == ODROID_DISPLAY_FILTER_BILINEAR) strcpy(option->value, "Both ");
+    if (mode == ODROID_DISPLAY_FILTER_OFF)   strcpy(option->value, "Off");
+    if (mode == ODROID_DISPLAY_FILTER_SHARP) strcpy(option->value, "Sharp");
+    if (mode == ODROID_DISPLAY_FILTER_SOFT)  strcpy(option->value, "Soft");
 
-    // return event == ODROID_DIALOG_ENTER;
-    return false;
+    return event == ODROID_DIALOG_ENTER;
 }
 
 static bool scaling_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat)
 {
-    // int8_t max = ODROID_DISPLAY_SCALING_COUNT - 1;
-    // int8_t mode = odroid_display_get_scaling_mode();
-    // int8_t prev = mode;
+    int8_t max = ODROID_DISPLAY_SCALING_COUNT - 1;
+    int8_t mode = odroid_display_get_scaling_mode();
+    int8_t prev = mode;
 
-    // if (event == ODROID_DIALOG_PREV && --mode < 0) mode =  max; // 0;
-    // if (event == ODROID_DIALOG_NEXT && ++mode > max) mode = 0;  // max;
+    if (event == ODROID_DIALOG_PREV && --mode < 0) mode =  max; // 0;
+    if (event == ODROID_DIALOG_NEXT && ++mode > max) mode = 0;  // max;
 
-    // if (mode != prev) {
-    //     odroid_display_set_scaling_mode(mode);
-    // }
+    if (mode != prev) {
+        odroid_display_set_scaling_mode(mode);
+    }
 
-    // if (mode == ODROID_DISPLAY_SCALING_OFF)  strcpy(option->value, "Off  ");
-    // if (mode == ODROID_DISPLAY_SCALING_FIT)  strcpy(option->value, "Fit ");
-    // if (mode == ODROID_DISPLAY_SCALING_FILL) strcpy(option->value, "Full ");
+    if (mode == ODROID_DISPLAY_SCALING_OFF)     strcpy(option->value, "Off");
+    if (mode == ODROID_DISPLAY_SCALING_FIT)     strcpy(option->value, "Fit");
+    if (mode == ODROID_DISPLAY_SCALING_FULL)    strcpy(option->value, "Full");
+    if (mode == ODROID_DISPLAY_SCALING_CUSTOM)  strcpy(option->value, "Custom");
 
-    // return event == ODROID_DIALOG_ENTER;
-    return false;
+    return event == ODROID_DIALOG_ENTER;
 }
 
 bool speedup_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat)
@@ -596,10 +594,12 @@ static void draw_game_status_bar(runtime_stats_t stats)
 int odroid_overlay_game_settings_menu(odroid_dialog_choice_t *extra_options)
 {
     char speedup_value[8];
+    char scaling_value[8];
+    char filtering_value[8];
 
     odroid_dialog_choice_t options[32] = {
-        {200, "Scaling", "Full", 1, &scaling_update_cb},
-        {210, "Filtering", "None", 1, &filter_update_cb}, // Interpolation
+        {200, "Scaling", scaling_value, 1, &scaling_update_cb},
+        {210, "Filtering", filtering_value, 1, &filter_update_cb}, // Interpolation
         {220, "Speed", speedup_value, 1, &speedup_update_cb},
 
         ODROID_DIALOG_CHOICE_LAST
