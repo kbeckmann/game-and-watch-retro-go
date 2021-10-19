@@ -80,7 +80,7 @@ else ifeq ($(CODEPAGE), 932)
 else ifeq ($(CODEPAGE), 949)
 	SCODEPAGE = "euckr"
 else
-    SCODEPAGE = "utf-8"
+    SCODEPAGE = "iso-8859-1"
 endif
 
 ifdef CODEPAGE
@@ -279,6 +279,7 @@ AS_DEFS +=
 C_DEFS +=  \
 -DINTFLASH_BANK=$(INTFLASH_BANK) \
 -DCODEPAGE=$(CODEPAGE) \
+-DLANG=$(LANG) \
 -DCOVERFLOW=$(COVERFLOW) \
 -DEXTFLASH_FORCE_SPI=$(EXTFLASH_FORCE_SPI) \
 -DUSE_HAL_DRIVER \
@@ -638,7 +639,8 @@ help:
 	@echo "  RESET_DBGMCU        - Configures if DBGMCU should be reset after flashing."
 	@echo "                        Set to 0 to disable power saving (default=1)"
 	@echo "  CODEPAGE            - Sets codepage to configures display langrage.(default=1252)"
-	@echo "                        set 932 as Japanese; 936 as simple Chinese; 950 as traditional Chinese..."
+	@echo "                        set 932 as Japanese; 936 as simple Chinese; 950 as traditional Chinese"
+	@echo "                        949 as Korean; 12521 as Spanish; "
 	@echo "  COVERFLOW           - Set to 1 include cover art with rom (default=0)"
 	@echo "  JPG_QUALITY         - Set convert cover art image jpg quality (default = 90)"
 	@echo ""
