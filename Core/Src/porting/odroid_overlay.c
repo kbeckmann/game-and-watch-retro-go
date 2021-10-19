@@ -718,9 +718,9 @@ static bool filter_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event
         odroid_display_set_filter_mode(mode);
     }
 
-    if (mode == ODROID_DISPLAY_FILTER_OFF)   strcpy(option->value, "Off");
-    if (mode == ODROID_DISPLAY_FILTER_SHARP) strcpy(option->value, "Sharp");
-    if (mode == ODROID_DISPLAY_FILTER_SOFT)  strcpy(option->value, "Soft");
+    if (mode == ODROID_DISPLAY_FILTER_OFF)   strcpy(option->value, s_FilteringOff);
+    if (mode == ODROID_DISPLAY_FILTER_SHARP) strcpy(option->value, s_FilteringSharp);
+    if (mode == ODROID_DISPLAY_FILTER_SOFT)  strcpy(option->value, s_FilteringSoft);
 
     return event == ODROID_DIALOG_ENTER;
 }
@@ -738,10 +738,10 @@ static bool scaling_update_cb(odroid_dialog_choice_t *option, odroid_dialog_even
         odroid_display_set_scaling_mode(mode);
     }
 
-    if (mode == ODROID_DISPLAY_SCALING_OFF)     strcpy(option->value, "Off");
-    if (mode == ODROID_DISPLAY_SCALING_FIT)     strcpy(option->value, "Fit");
-    if (mode == ODROID_DISPLAY_SCALING_FULL)    strcpy(option->value, "Full");
-    if (mode == ODROID_DISPLAY_SCALING_CUSTOM)  strcpy(option->value, "Custom");
+    if (mode == ODROID_DISPLAY_SCALING_OFF)     strcpy(option->value, s_SCalingOff);
+    if (mode == ODROID_DISPLAY_SCALING_FIT)     strcpy(option->value, s_SCalingFit);
+    if (mode == ODROID_DISPLAY_SCALING_FULL)    strcpy(option->value, s_SCalingFull);
+    if (mode == ODROID_DISPLAY_SCALING_CUSTOM)  strcpy(option->value, s_SCalingCustom);
 
     return event == ODROID_DIALOG_ENTER;
 }
@@ -836,9 +836,9 @@ static void draw_game_status_bar(runtime_stats_t stats)
 
 int odroid_overlay_game_settings_menu(odroid_dialog_choice_t *extra_options)
 {
-    char speedup_value[8];
-    char scaling_value[8];
-    char filtering_value[8];
+    char speedup_value[12];
+    char scaling_value[12];
+    char filtering_value[12];
 
     odroid_dialog_choice_t options[32] = {
         ODROID_DIALOG_CHOICE_SEPARATOR,
