@@ -655,7 +655,7 @@ static bool volume_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event
 }
 
 #if COVERFLOW != 0
-const char * GW_Themes[] = {s_Theme_sList, s_Theme_CoverH, s_Theme_CoverV,s_Theme_CoverLightH,s_Theme_CoverLightV};
+const char * GW_Themes[] = {s_Theme_sList, s_Theme_CoverV, s_Theme_CoverH,s_Theme_CoverLightH,s_Theme_CoverLightV};
 
 static bool theme_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat)
 {
