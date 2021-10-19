@@ -897,7 +897,7 @@ void gui_draw_coverflow_h(tab_t *tab) //------------
             for (int y = 0; y < p_height2; y++)
                 for (int x = 0; x < p_width2; x++)
                     dst_img[(y + cover_top + (cover_height - p_height2) / 4 * 3) * ODROID_SCREEN_WIDTH + start_xpos + p_width1 + p_width2 + cover_width + 16 + x] =
-                        get_darken_pixel(pCover_Buffer[(y + y / 8) * cover_width + ((r_width2 - p_width2) + x) * 8 / 7], 20 + x * 50 / p_width2);
+                        get_darken_pixel(pCover_Buffer[(y + y / 8) * cover_width + ((r_width2 - p_width2) + x) * 8 / 7], 40 + x * 40 / p_width2);
         };
         if (draw_bot_title)
         {
@@ -937,7 +937,7 @@ void gui_draw_coverflow_h(tab_t *tab) //------------
             for (int y = 0; y < p_height2; y++)
                 for (int x = 0; x < p_width2; x++)
                     dst_img[(y + cover_top + (cover_height - p_height2) / 4 * 3) * ODROID_SCREEN_WIDTH + start_xpos + p_width1 + 6 + x] =
-                        get_darken_pixel(pCover_Buffer[(y + y / 8) * cover_width + x * 8 / 7], 70 - x * 50 / p_width2);
+                        get_darken_pixel(pCover_Buffer[(y + y / 8) * cover_width + x * 8 / 7], 80 - x * 40 / p_width2);
         };
         if (draw_bot_title)
         {
@@ -962,7 +962,7 @@ void gui_draw_coverflow_h(tab_t *tab) //------------
                 for (int x = 0; x < p_width1; x++)
                     dst_img[(y + cover_top + (cover_height - p_height1) / 4 * 3) * ODROID_SCREEN_WIDTH +
                             start_xpos + p_width1 + p_width2 * 2 + cover_width + 20 + x] =
-                        get_darken_pixel(pCover_Buffer[(y + y * 3 / 8) * cover_width + ((r_width2 - p_width2) + x) * 8 / 5], 10 + x * 30 / p_width2);
+                        get_darken_pixel(pCover_Buffer[(y + y * 3 / 8) * cover_width + ((r_width2 - p_width2) + x) * 8 / 5], 30 + x * 30 / p_width2);
         };
     };
 
@@ -978,7 +978,7 @@ void gui_draw_coverflow_h(tab_t *tab) //------------
                 for (int x = 0; x < p_width1; x++)
                     dst_img[(y + cover_top + (cover_height - p_height1) / 4 * 3) * ODROID_SCREEN_WIDTH +
                             start_xpos + 3 + x] =
-                        get_darken_pixel(pCover_Buffer[(y + y * 3 / 8) * cover_width + x * 8 / 5], 40 - x * 30 / p_width2);
+                        get_darken_pixel(pCover_Buffer[(y + y * 3 / 8) * cover_width + x * 8 / 5], 60 - x * 30 / p_width2);
         };
     };
 };
