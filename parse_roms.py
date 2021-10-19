@@ -35,6 +35,15 @@ ROM_ENTRY_TEMPLATE = """\t{{
 \t\t.region = {region},
 \t}},"""
 
+ROM_ENTRY_TEMPLATE_NO_SAVE = """\t{{
+\t\t.name = "{name}",
+\t\t.ext = "{extension}",
+\t\t.address = {rom_entry},
+\t\t.size = {size},
+\t\t.system = &{system},
+\t\t.region = {region},
+\t}},"""
+
 SYSTEM_PROTO_TEMPLATE = """
 #if !defined (COVERFLOW)
   #define COVERFLOW 0
@@ -376,17 +385,30 @@ class ROMParser:
                 ]
             )
             region = "REGION_PAL" if is_pal else "REGION_NTSC"
-            body += ROM_ENTRY_TEMPLATE.format(
-                name=str(rom.name),
-                size=rom.size,
-                rom_entry=rom.symbol,
-                img_size=rom.img_size,
-                img_entry=rom.img_symbol if rom.img_size else "NULL",
-                save_entry=save_prefix + str(i),
-                region=region,
-                extension=rom.ext,
-                system=system,
-            )
+            if args.save:
+                body += ROM_ENTRY_TEMPLATE.format(
+                    name=str(rom.name),
+                    size=rom.size,
+                    rom_entry=rom.symbol,
+                    img_size=rom.img_size,
+                    img_entry=rom.img_symbol if rom.img_size else "NULL",
+                    save_entry=save_prefix + str(i),
+                    region=region,
+                    extension=rom.ext,
+                    system=system,
+                )
+            else:
+                body += ROM_ENTRY_TEMPLATE_NO_SAVE.format(
+                    name=str(rom.name),
+                    size=rom.size,
+                    rom_entry=rom.symbol,
+                    img_size=rom.img_size,
+                    img_entry=rom.img_symbol if rom.img_size else "NULL",
+                    save_entry=save_prefix + str(i),
+                    region=region,
+                    extension=rom.ext,
+                    system=system,
+                )
             body += "\n"
             pubcount += 1
 
@@ -627,7 +649,7 @@ class ROMParser:
         roms_compressed = find_compressed_roms()
 
         roms_raw = [r for r in roms_raw if not contains_rom_by_name(r, roms_compressed)]
-        if roms_raw:
+        if roms_raw and compress != None:
             pbar = tqdm(roms_raw) if tqdm else roms_raw
             for r in pbar:
                 if tqdm:
@@ -696,7 +718,8 @@ class ROMParser:
                         f.write(self.generate_img_object_file(rom, cover_width, cover_height))
                     except NoArtworkError:
                         pass
-                f.write(self.generate_save_entry(save_prefix + str(i), save_size))
+                if args.save:
+                    f.write(self.generate_save_entry(save_prefix + str(i), save_size))
 
             rom_entries = self.generate_rom_entries(
                 folder + "_roms", roms, save_prefix, variable_name
@@ -715,7 +738,10 @@ class ROMParser:
                 )
             )
 
-        return total_save_size, total_rom_size, total_img_size
+        if args.save:
+            return total_save_size, total_rom_size, total_img_size
+        else:
+            return 0, total_rom_size, total_img_size
 
     def write_if_changed(self, path: str, data: str):
         path = Path(path)
@@ -927,7 +953,7 @@ if __name__ == "__main__":
         "--compress",
         choices=compression_choices,
         type=str,
-        default="",
+        default=None,
         help="Compression method. Defaults to no compression.",
     )
     parser.add_argument(
@@ -941,6 +967,9 @@ if __name__ == "__main__":
         "--no-compress_gb_speed", dest="compress_gb_speed", action="store_false"
     )
     parser.set_defaults(compress_gb_speed=False)
+    parser.add_argument(
+        "--no-save", dest="save", action="store_false"
+    )
     args = parser.parse_args()
     
     if args.compress and "." + args.compress not in COMPRESSIONS:

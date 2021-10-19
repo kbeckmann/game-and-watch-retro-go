@@ -60,6 +60,8 @@ Holding the `PAUSE/SET` button while pressing other buttons have the following a
 
 ## Troubleshooting / FAQ
 
+- Run `make help` to get a list of options to configure the build, and targets to perform various actions.
+- Add `STATE_SAVING=0` as a parameter to `make` to disable save state support if more space is required.
 - Do you have any changed files, even if you didn't intentionally change them? Please run `git reset --hard` to ensure an unchanged state.
 - Did you run `git pull` but forgot to update the submodule? Run `git submodule update --init --recursive` to ensure that the submodules are in sync or run `git pull --recurse-submodules` instead.
 - Run `make clean` and then build again. The makefile should handle incremental builds, but please try this first before reporting issues.

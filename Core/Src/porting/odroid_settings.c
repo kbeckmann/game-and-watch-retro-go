@@ -51,7 +51,7 @@ typedef struct persistent_config {
 
 static const persistent_config_t persistent_config_default = {
     .magic = CONFIG_MAGIC,
-    .version = 2,
+    .version = 3,
 
     .backlight = ODROID_BACKLIGHT_LEVEL6,
     .start_action = ODROID_START_ACTION_RESUME,
@@ -67,12 +67,15 @@ static const persistent_config_t persistent_config_default = {
         {
             .region = 0,
             .palette = 2,
-            .disp_scaling = 0,
-            .disp_filter = 0,
+            .disp_scaling = ODROID_DISPLAY_SCALING_FULL,
+            .disp_filter = ODROID_DISPLAY_FILTER_SHARP,
             .disp_overscan = 0,
             .sprite_limit = 0,
         }, // GB
-        {0}, // NES
+        {
+            .disp_scaling = ODROID_DISPLAY_SCALING_CUSTOM,
+            .disp_filter = ODROID_DISPLAY_FILTER_SHARP,
+        }, // NES
         {0}, // SMS
     },
 };

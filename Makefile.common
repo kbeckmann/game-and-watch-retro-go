@@ -36,9 +36,17 @@ EXTFLASH_SIZE ?= $(shell echo "$$(( $(EXTFLASH_SIZE_MB) * 1024 * 1024 ))")
 
 EXTFLASH_FORCE_SPI ?= 0
 
+# Set to 0 to remove state saving support (uses less space)
+STATE_SAVING ?= 1
+ifeq ($(STATE_SAVING),0)
+	SAVE_PARAM := --no-save
+endif
+
 # Compress supported ROMs by default. Set to 0 to disable.
 COMPRESS ?= lzma
-ifdef COMPRESS
+ifeq ($(COMPRESS),0)
+	COMPRESS_PARAM :=
+else
 	COMPRESS_PARAM := --compress=$(COMPRESS)
 endif
 
@@ -278,7 +286,8 @@ C_DEFS +=  \
 -DVECT_TAB_ITCM \
 -DIS_LITTLE_ENDIAN \
 -DDEBUG_RG_ALLOC \
--DMINIZ_NO_TIME
+-DMINIZ_NO_TIME \
+-DSTATE_SAVING=$(STATE_SAVING)
 
 # AS includes
 AS_INCLUDES +=
@@ -382,7 +391,7 @@ $(BUILD_DIR)/rom_files.txt: FORCE | $(BUILD_DIR)
 
 $(BUILD_DIR)/roms.a: $(BUILD_DIR)/rom_files.txt parse_roms.py
 	$(V)$(ECHO) [ PYTHON3 ] $(notdir $<)
-	$(V)$(PYTHON3) parse_roms.py --flash-size $(EXTFLASH_SIZE) $(COMPRESS_PARAM) $(CODEPAGE_PARAM) $(COVERFLOW_PARAM) $(JPG_QUALITY_PARAM)
+	$(V)$(PYTHON3) parse_roms.py --flash-size $(EXTFLASH_SIZE) $(SAVE_PARAM) $(COMPRESS_PARAM) $(CODEPAGE_PARAM) $(COVERFLOW_PARAM) $(JPG_QUALITY_PARAM)
 
 $(BUILD_DIR)/config.h $(BUILD_DIR)/saveflash.ld &: $(BUILD_DIR)/roms.a
 	$(V)/bin/sh -c true
@@ -437,6 +446,8 @@ CheckTools:
 			echo -e "\n\n\nobjdump does not suport armv7e-m.\nPlease install a toolchain that supports elf32-littlearm and armv7e-m.\n\n\n" && \
 			exit 1 \
 		)
+
+	$(V)$(PYTHON3) scripts/python_version_check.py
 
 else
 CheckTools:
@@ -623,6 +634,7 @@ help:
 	@echo "  EXTFLASH_OFFSET     - Places the data at an offset in the external flash (useful for dual boot)"
 	@echo "  INTFLASH_BANK       - Sets the internal flash bank. Valid values {1,2} (default=1)."
 	@echo "  COMPRESS            - Configures ROM compression, Valid values {0,lz4,zopfli,lzma} (default=lzma)."
+	@echo "  STATE_SAVING        - Set to 0 to disable state saving (default=1)"
 	@echo "  RESET_DBGMCU        - Configures if DBGMCU should be reset after flashing."
 	@echo "                        Set to 0 to disable power saving (default=1)"
 	@echo "  CODEPAGE            - Sets codepage to configures display langrage.(default=1252)"
@@ -638,6 +650,7 @@ help:
 	@echo "  EXTFLASH_OFFSET=$(EXTFLASH_OFFSET)"
 	@echo "  INTFLASH_BANK=$(INTFLASH_BANK)"
 	@echo "  COMPRESS=$(COMPRESS)"
+	@echo "  STATE_SAVING=$(STATE_SAVING)"
 	@echo "  RESET_DBGMCU=$(RESET_DBGMCU)"
 	@echo "  GCC_PATH=$(GCC_PATH)"
 	@echo "  PREFIX=$(PREFIX)"

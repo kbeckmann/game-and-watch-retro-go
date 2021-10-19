@@ -7,6 +7,11 @@ assignees: ''
 
 ---
 
+Please don't attach or link to game ROMs and similar files unless the license explicitly allows this.
+
+
+
+
 Please include the following:
 
 - Which console (NES, GB, ...)

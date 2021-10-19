@@ -7,8 +7,8 @@
 static const uint8_t backlightLevels[] = {128, 130, 133, 139, 149, 162, 178, 198, 222, 255};
 static odroid_display_backlight_t backlightLevel = ODROID_BACKLIGHT_LEVEL6;
 static odroid_display_rotation_t rotationMode = ODROID_DISPLAY_ROTATION_OFF;
-static odroid_display_scaling_t scalingMode = ODROID_DISPLAY_SCALING_FILL;
-static odroid_display_filter_t filterMode = ODROID_DISPLAY_FILTER_OFF;
+static odroid_display_scaling_t scalingMode = ODROID_DISPLAY_SCALING_FULL;
+static odroid_display_filter_t filterMode = ODROID_DISPLAY_FILTER_SHARP;
 
 short odroid_display_queue_update(odroid_video_frame_t *frame, odroid_video_frame_t *previousFrame)
 {
@@ -52,6 +52,27 @@ void odroid_display_set_backlight(odroid_display_backlight_t level)
     odroid_settings_Backlight_set(level);
 }
 
+odroid_display_scaling_t odroid_display_get_scaling_mode(void)
+{
+    return scalingMode;
+}
+
+void odroid_display_set_scaling_mode(odroid_display_scaling_t mode)
+{
+    odroid_settings_DisplayScaling_set(mode);
+    scalingMode = mode;
+}
+
+odroid_display_filter_t odroid_display_get_filter_mode(void)
+{
+    return filterMode;
+}
+
+void odroid_display_set_filter_mode(odroid_display_filter_t mode)
+{
+    odroid_settings_DisplayFilter_set(mode);
+    filterMode = mode;
+}
 
 void odroid_display_init()
 {

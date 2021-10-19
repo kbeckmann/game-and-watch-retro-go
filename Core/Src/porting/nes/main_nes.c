@@ -22,15 +22,6 @@
 
 #define ODROID_APPID_NES 2
 
-// #define blit blit_nearest
-// #define blit blit_normal
-// #define blit blit_4to5
-// #define blit blit_5to6
-
-#ifndef blit
-#define blit blit_5to6
-#endif
-
 static uint samplesPerFrame;
 static uint32_t vsync_wait_ms = 0;
 
@@ -217,6 +208,7 @@ static inline void blit_nearest(bitmap_t *bmp, uint8_t *framebuffer) {
 }
 #else
 
+// No scaling
 __attribute__((optimize("unroll-loops")))
 static inline void blit_normal(bitmap_t *bmp, uint16_t *framebuffer) {
     const int w1 = bmp->width;
@@ -234,21 +226,23 @@ static inline void blit_normal(bitmap_t *bmp, uint16_t *framebuffer) {
 }
 
 __attribute__((optimize("unroll-loops")))
-static inline void blit_nearest(bitmap_t *bmp, uint16_t *framebuffer) {
+static inline void blit_nearest(bitmap_t *bmp, uint16_t *framebuffer, bool full_width)
+{
     int w1 = bmp->width;
     int w2 = WIDTH;
     int h2 = 240;
+    int hpad;
+    int scale_ctr;
 
-// #define SCALE_TO_320
-#define SCALE_TO_307
-
-#ifdef SCALE_TO_307
-    const int hpad = (WIDTH - 307) / 2;
-#   define SCALE_CTR 4
-#else
-    const int hpad = 0;
-#   define SCALE_CTR 3
-#endif
+    if (full_width) {
+        // scale to 320
+        hpad = 0;
+        scale_ctr = 3;
+    } else {
+        // scale to 307
+        hpad = (WIDTH - 307) / 2;
+        scale_ctr = 4;
+    }
 
     // 1767 us
     PROFILING_INIT(t_blit);
@@ -262,7 +256,7 @@ static inline void blit_nearest(bitmap_t *bmp, uint16_t *framebuffer) {
         for (int x = 0; x < w1; x++) {
             uint16_t b2 = palette565[src_row[x]];
             dest_row[x2++] = b2;
-            if (ctr++ == SCALE_CTR) {
+            if (ctr++ == scale_ctr) {
                 ctr = 0;
                 dest_row[x2++] = b2;
             }
@@ -338,6 +332,37 @@ static void blit_5to6(bitmap_t *bmp, uint16_t *framebuffer) {
     }
 }
 #endif
+
+static void blit(bitmap_t *bmp, uint16_t *framebuffer)
+{
+    odroid_display_scaling_t scaling = odroid_display_get_scaling_mode();
+    odroid_display_filter_t filtering = odroid_display_get_filter_mode();
+
+    switch (scaling) {
+    case ODROID_DISPLAY_SCALING_OFF:
+        /* fall-through */
+    case ODROID_DISPLAY_SCALING_FIT:
+        // Full height, borders on the side
+        blit_normal(bmp, framebuffer);
+        break;
+    case ODROID_DISPLAY_SCALING_FULL:
+        // full height, full width
+        if (filtering == ODROID_DISPLAY_FILTER_OFF) {
+            blit_nearest(bmp, framebuffer, true);
+        } else {
+            blit_4to5(bmp, framebuffer);
+        }
+        break;
+    case ODROID_DISPLAY_SCALING_CUSTOM:
+        // full height, almost full width
+        blit_5to6(bmp, framebuffer);
+        break;
+    default:
+        printf("Unknown scaling mode %d\n", scaling);
+        assert(!"Unknown scaling mode");
+        break;
+    }
+}
 
 
 void osd_blitscreen(bitmap_t *bmp)
