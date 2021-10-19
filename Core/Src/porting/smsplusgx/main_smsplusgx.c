@@ -130,7 +130,7 @@ blit_gg(bitmap_t *bmp, uint16_t *framebuffer) {	/* 160 x 144 -> 320 x 240 */
 
 static void
 blit_sms(bitmap_t *bmp, uint16_t *framebuffer) {	/* 256 x 192 -> 320 x 230 */
-    const int hpad = (WIDTH - 307) / 2;
+    const int hpad = (WIDTH - 320) / 2;
     const int vpad = (HEIGHT - 230) / 2;
 
     uint32_t block[6 * 5]; /* workspace: 5 rows, 6 pixels wide */
