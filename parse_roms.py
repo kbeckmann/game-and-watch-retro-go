@@ -40,6 +40,10 @@ ROM_ENTRY_TEMPLATE_NO_SAVE = """\t{{
 \t\t.ext = "{extension}",
 \t\t.address = {rom_entry},
 \t\t.size = {size},
+\t\t#if COVERFLOW != 0
+\t\t.img_address = {img_entry},
+\t\t.img_size = {img_size},
+\t\t#endif
 \t\t.system = &{system},
 \t\t.region = {region},
 \t}},"""
