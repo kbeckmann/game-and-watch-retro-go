@@ -1,5 +1,6 @@
 #include <odroid_system.h>
 #include <string.h>
+#include <assert.h>
 
 #include "main.h"
 #include "bilinear.h"
@@ -25,16 +26,6 @@
 // Use 60Hz for GB
 #define AUDIO_BUFFER_LENGTH_GB (AUDIO_SAMPLE_RATE / 60)
 #define AUDIO_BUFFER_LENGTH_DMA_GB ((2 * AUDIO_SAMPLE_RATE) / 60)
-
-// #define blit screen_blit
-// #define blit screen_blit_bilinear
-// #define blit screen_blit_jth
-// #define blit screen_blit_v3to5
-
-#ifndef blit
-#define blit screen_blit_v3to5
-#endif
-
 
 static odroid_video_frame_t update1 = {GB_WIDTH, GB_HEIGHT, GB_WIDTH * 2, 2, 0xFF, -1, NULL, NULL, 0, {}};
 static odroid_video_frame_t update2 = {GB_WIDTH, GB_HEIGHT, GB_WIDTH * 2, 2, 0xFF, -1, NULL, NULL, 0, {}};
@@ -127,7 +118,7 @@ static void screen_blit_bilinear(void) {
     int h1 = currentUpdate->height;
 
     int w2 = 320;
-    int h2 = 216;
+    int h2 = 240;
 
     int hpad = 0;
     uint16_t *dest = lcd_get_active_buffer();
@@ -310,36 +301,46 @@ static inline void screen_blit_jth(void) {
     lcd_swap();
 }
 
-// __attribute__((optimize("unroll-loops")))
-// static inline void screen_blit(void)
-// {
-//     // printf("%d x %d\n", bmp->width, bmp->height);
-//     for (int y = 0; y < currentUpdate->height; y++) {
-//         // uint8_t *row = bmp->line[line];
-//         for (int x = 0; x < currentUpdate->width; x++) {
-//             uint16_t* screen_buf = (uint16_t*)currentUpdate->buffer;
-//             uint16_t b1 = screen_buf[(currentUpdate->width * y + x)];
-//             // uint16_t b2 = screen_buf[(WIDTH * y + x)*2 + 1];
-//             // for (int line = 0; line < bmp->height; line++) {
-//             //     uint8_t *row = bmp->line[line];
-//             //     for (int x = 0; x < bmp->width; x++) {
-//             //         framebuffer1[WIDTH * line + x + hpad] = myPalette[row[x] & 0b111111];
-//             //     }
-//             // }
-//             // framebuffer1[WIDTH * y + x] = currentUpdate->palette[b1];
-//             framebuffer1[WIDTH * (y+48) + x + 80] = b1;
-//         }
-//     }
-//     /*
-//     odroid_video_frame_t *previousUpdate = (currentUpdate == &update1) ? &update2 : &update1;
 
-//     fullFrame = odroid_display_queue_update(currentUpdate, previousUpdate) == SCREEN_UPDATE_FULL;
+static void blit(void)
+{
+    odroid_display_scaling_t scaling = odroid_display_get_scaling_mode();
+    odroid_display_filter_t filtering = odroid_display_get_filter_mode();
 
-//     // swap buffers
-//     currentUpdate = previousUpdate;
-//     fb.ptr = currentUpdate->buffer;
-//     */
-// }
+    switch (scaling) {
+    case ODROID_DISPLAY_SCALING_OFF:
+        /* fall-through */
+    case ODROID_DISPLAY_SCALING_FIT:
+        // Full height, borders on the side
+        screen_blit();
+        break;
+    case ODROID_DISPLAY_SCALING_FULL:
+        // full height, full width
+        switch (filtering) {
+        case ODROID_DISPLAY_FILTER_OFF:
+            // TODO: Add nearest-neighbor scaling?
+            /* fall-through */
+        case ODROID_DISPLAY_FILTER_SHARP:
+            screen_blit_v3to5();
+            break;
+        case ODROID_DISPLAY_FILTER_SOFT:
+            screen_blit_bilinear();
+            break;
+        default:
+            printf("Unknown filtering mode %d\n", filtering);
+            assert(!"Unknown filtering mode");
+        }
+        break;
+    case ODROID_DISPLAY_SCALING_CUSTOM:
+        // compressed top and bottom sections, full width
+        screen_blit_jth();
+        break;
+    default:
+        printf("Unknown scaling mode %d\n", scaling);
+        assert(!"Unknown scaling mode");
+        break;
+    }
+}
 
 #define STATE_SAVE_BUFFER_LENGTH 1024 * 192
 
