@@ -48,7 +48,8 @@ static void netplay_callback(netplay_event_t event, void *arg)
 
 
 __attribute__((optimize("unroll-loops")))
-static inline void screen_blit(void) {
+static inline void screen_blit_nn(int32_t dest_width)
+{
     static uint32_t lastFPSTime = 0;
     static uint32_t frames = 0;
     uint32_t currentTime = HAL_GetTick();
@@ -66,15 +67,16 @@ static inline void screen_blit(void) {
 
     int w1 = currentUpdate->width;
     int h1 = currentUpdate->height;
-    int w2 = 266;
+    int w2 = dest_width;
     int h2 = 240;
 
     int x_ratio = (int)((w1<<16)/w2) +1;
     int y_ratio = (int)((h1<<16)/h2) +1;
-    int hpad = 27;
-    //int x_ratio = (int)((w1<<16)/w2) ;
-    //int y_ratio = (int)((h1<<16)/h2) ;
-    int x2, y2 ;
+    int hpad = (320 - dest_width) / 2;
+
+    int x2;
+    int y2;
+
     uint16_t* screen_buf = (uint16_t*)currentUpdate->buffer;
     uint16_t *dest = lcd_get_active_buffer();
 
@@ -99,7 +101,8 @@ static inline void screen_blit(void) {
     lcd_swap();
 }
 
-static void screen_blit_bilinear(void) {
+static void screen_blit_bilinear(int32_t dest_width)
+{
     static uint32_t lastFPSTime = 0;
     static uint32_t frames = 0;
     uint32_t currentTime = HAL_GetTick();
@@ -118,19 +121,22 @@ static void screen_blit_bilinear(void) {
     int w1 = currentUpdate->width;
     int h1 = currentUpdate->height;
 
-    int w2 = 320;
+    int w2 = dest_width;
     int h2 = 240;
+    int stride = 320;
+    int hpad = (320 - dest_width) / 2;
 
-    int hpad = 0;
     uint16_t *dest = lcd_get_active_buffer();
 
-
     image_t dst_img;
-    dst_img.w = 320;
+    dst_img.w = dest_width;
     dst_img.h = 240;
     dst_img.bpp = 2;
-    dst_img.pixels = (uint8_t *) dest;
+    dst_img.pixels = ((uint8_t *) dest) + hpad * 2;
 
+    if (hpad > 0) {
+        memset(dest, 0x00, hpad * 2);
+    }
 
     image_t src_img;
     src_img.w = currentUpdate->width;
@@ -146,7 +152,7 @@ static void screen_blit_bilinear(void) {
     PROFILING_INIT(t_blit);
     PROFILING_START(t_blit);
 
-    imlib_draw_image(&dst_img, &src_img, hpad, 0, x_scale, y_scale, NULL, -1, 255, NULL,
+    imlib_draw_image(&dst_img, &src_img, 0, 0, stride, x_scale, y_scale, NULL, -1, 255, NULL,
                      NULL, IMAGE_HINT_BILINEAR, NULL, NULL);
 
     PROFILING_END(t_blit);
@@ -313,19 +319,37 @@ static void blit(void)
         /* fall-through */
     case ODROID_DISPLAY_SCALING_FIT:
         // Full height, borders on the side
-        screen_blit();
+        switch (filtering) {
+        case ODROID_DISPLAY_FILTER_OFF:
+            /* fall-through */
+        case ODROID_DISPLAY_FILTER_SHARP:
+            // crisp nearest neighbor scaling
+            screen_blit_nn(266);
+            break;
+        case ODROID_DISPLAY_FILTER_SOFT:
+            // soft bilinear scaling
+            screen_blit_bilinear(266);
+            break;
+        default:
+            printf("Unknown filtering mode %d\n", filtering);
+            assert(!"Unknown filtering mode");
+        }
+        break;
         break;
     case ODROID_DISPLAY_SCALING_FULL:
         // full height, full width
         switch (filtering) {
         case ODROID_DISPLAY_FILTER_OFF:
-            // TODO: Add nearest-neighbor scaling?
-            /* fall-through */
+            // crisp nearest neighbor scaling
+            screen_blit_nn(320);
+            break;
         case ODROID_DISPLAY_FILTER_SHARP:
+            // sharp bilinear-ish scaling
             screen_blit_v3to5();
             break;
         case ODROID_DISPLAY_FILTER_SOFT:
-            screen_blit_bilinear();
+            // soft bilinear scaling
+            screen_blit_bilinear(320);
             break;
         default:
             printf("Unknown filtering mode %d\n", filtering);

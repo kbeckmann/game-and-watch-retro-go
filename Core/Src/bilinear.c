@@ -144,7 +144,7 @@ void *imlib_draw_row_get_row_buffer(imlib_draw_row_data_t *data)
     return result;
 }
 
-void imlib_draw_image(image_t *dst_img, image_t *src_img, int dst_x_start, int dst_y_start, float x_scale, float y_scale, rectangle_t *roi,
+void imlib_draw_image(image_t *dst_img, image_t *src_img, int dst_x_start, int dst_y_start, int dst_stride, float x_scale, float y_scale, rectangle_t *roi,
                       int rgb_channel, int alpha, const uint16_t *color_palette, const uint8_t *alpha_palette, image_hint_t hint,
                       imlib_draw_row_callback_t callback, void *dst_row_override)
 {
@@ -274,22 +274,6 @@ void imlib_draw_image(image_t *dst_img, image_t *src_img, int dst_x_start, int d
         src_y_accum_reset -= 0x8000;
     }
 
-    // rgb_channel extracted / color_palette applied image
-    image_t new_src_img;
-
-    if (((hint & IMAGE_HINT_EXTRACT_RGB_CHANNEL_FIRST) && (src_img->bpp == IMAGE_BPP_RGB565) && (rgb_channel != -1))
-    || ((hint & IMAGE_HINT_APPLY_COLOR_PALETTE_FIRST) && color_palette)) {
-        new_src_img.w = src_img_w; // same width as source image
-        new_src_img.h = src_img_h; // same height as source image
-        new_src_img.bpp = color_palette ? IMAGE_BPP_RGB565 : IMAGE_BPP_GRAYSCALE;
-        // new_src_img.data = fb_alloc(image_size(&new_src_img), FB_ALLOC_NO_HINT);
-        // TODO
-        imlib_draw_image(&new_src_img, src_img, 0, 0, 1.f, 1.f, NULL, rgb_channel, 256, color_palette, NULL, 0, NULL, NULL);
-        src_img = &new_src_img;
-        rgb_channel = -1;
-        color_palette = NULL;
-    }
-
     imlib_draw_row_data_t imlib_draw_row_data;
     imlib_draw_row_data.dst_img = dst_img;
     imlib_draw_row_data.src_img_bpp = src_img->bpp;
@@ -397,7 +381,7 @@ void imlib_draw_image(image_t *dst_img, image_t *src_img, int dst_x_start, int d
             } // while x
 
             // imlib_draw_row(dst_x_start, dst_x_end, dst_y, &imlib_draw_row_data);
-            memcpy(dst_img->pixels + dst_x_start * 2 + dst_y * 320 * 2, imlib_draw_row_data.row_buffer[0], (dst_x_end - dst_x_start) * 2);
+            memcpy(dst_img->pixels + dst_x_start * 2 + dst_y * dst_stride * 2, imlib_draw_row_data.row_buffer[0], (dst_x_end - dst_x_start) * 2);
 
             // Increment offsets
             dst_y += dst_delta_y;
