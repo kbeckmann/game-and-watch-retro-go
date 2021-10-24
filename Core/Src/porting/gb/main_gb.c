@@ -47,7 +47,7 @@ static void netplay_callback(netplay_event_t event, void *arg)
 
 
 __attribute__((optimize("unroll-loops")))
-static inline void screen_blit_nn(int32_t dest_width)
+static inline void screen_blit_nn(int32_t dest_width, int32_t dest_height)
 {
     static uint32_t lastFPSTime = 0;
     static uint32_t frames = 0;
@@ -67,11 +67,12 @@ static inline void screen_blit_nn(int32_t dest_width)
     int w1 = currentUpdate->width;
     int h1 = currentUpdate->height;
     int w2 = dest_width;
-    int h2 = 240;
+    int h2 = dest_height;
 
     int x_ratio = (int)((w1<<16)/w2) +1;
     int y_ratio = (int)((h1<<16)/h2) +1;
     int hpad = (320 - dest_width) / 2;
+    int wpad = (240 - dest_height) / 2;
 
     int x2;
     int y2;
@@ -87,7 +88,7 @@ static inline void screen_blit_nn(int32_t dest_width)
             x2 = ((j*x_ratio)>>16) ;
             y2 = ((i*y_ratio)>>16) ;
             uint16_t b2 = screen_buf[(y2*w1)+x2];
-            dest[(i*WIDTH)+j+hpad] = b2;
+            dest[((i+wpad)*WIDTH)+j+hpad] = b2;
         }
     }
 
@@ -315,7 +316,9 @@ static void blit(void)
 
     switch (scaling) {
     case ODROID_DISPLAY_SCALING_OFF:
-        /* fall-through */
+        // Original Resolution
+        screen_blit_nn(160, 144);
+        break;
     case ODROID_DISPLAY_SCALING_FIT:
         // Full height, borders on the side
         switch (filtering) {
@@ -323,7 +326,7 @@ static void blit(void)
             /* fall-through */
         case ODROID_DISPLAY_FILTER_SHARP:
             // crisp nearest neighbor scaling
-            screen_blit_nn(266);
+            screen_blit_nn(266, 240);
             break;
         case ODROID_DISPLAY_FILTER_SOFT:
             // soft bilinear scaling
@@ -340,7 +343,7 @@ static void blit(void)
         switch (filtering) {
         case ODROID_DISPLAY_FILTER_OFF:
             // crisp nearest neighbor scaling
-            screen_blit_nn(320);
+            screen_blit_nn(320, 240);
             break;
         case ODROID_DISPLAY_FILTER_SHARP:
             // sharp bilinear-ish scaling
