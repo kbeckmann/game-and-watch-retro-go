@@ -706,7 +706,9 @@ void OSPI_Init(OSPI_HandleTypeDef *hospi)
     OSPI_ReadBytes(CMD(RDID), 0, &flash.jedec_id.u8[0], 3);
     DBG("JEDEC_ID: %02X %02X %02X\n", flash.jedec_id.u8[0], flash.jedec_id.u8[1], flash.jedec_id.u8[2]);
 
-    if ((flash.jedec_id.u32 & 0xffffff) == 0xffffff) {
+    // Check for known bad IDs
+    if (((flash.jedec_id.u32 & 0xffffff) == 0xffffff) ||
+        ((flash.jedec_id.u32 & 0xffffff) == 0x000000)) {
         assert(!"Can't communicate with the external flash! Please check the soldering.");
     }
 
