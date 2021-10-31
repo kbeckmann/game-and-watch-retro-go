@@ -34,9 +34,9 @@ def get_screenshot(args):
     for y in range(0, args.height):
         for x in range(0, args.width):
             color, = struct.unpack('<H', data[index:index+2])
-            red =   int(((color & 0xF800) >> 11) /  31.0 * 255.0)
-            green = int(((color & 0x07E0) >>  4) / 127.0 * 255.0)
-            blue =  int(((color & 0x001F)      ) /  31.0 * 255.0)
+            red =   int(((color & 0b1111100000000000) >> 11) / 31.0 * 255.0)
+            green = int(((color & 0b0000011111100000) >>  5) / 63.0 * 255.0)
+            blue =  int(((color & 0b0000000000011111)      ) / 31.0 * 255.0)
             pixels[x, y] = (red, green, blue)
             index += 2
 
