@@ -25,6 +25,7 @@ Supported emulators:
     - [Information for developers](#information-for-developers)
   - [Build and flash using Docker](#build-and-flash-using-docker)
   - [Backing up and restoring save state files](#backing-up-and-restoring-save-state-files)
+  - [Screenshots](#screenshots)
   - [Upgrading the flash](#upgrading-the-flash)
   - [Advanced Flash Examples](#advanced-flash-examples)
     - [Custom Firmware (CFW)](#custom-firmware-cfw)
@@ -46,6 +47,7 @@ Holding the `PAUSE/SET` button while pressing other buttons have the following a
 
 | Button combination    | Action                                                                 |
 | --------------------- | ---------------------------------------------------------------------- |
+| `PAUSE/SET` + `GAME`  | Store a screenshot. (Disabled by default on 1MB flash builds)          |
 | `PAUSE/SET` + `TIME`  | Toggle speedup between 1x and the last non-1x speed. Defaults to 1.5x. |
 | `PAUSE/SET` + `UP`    | Brightness up.                                                         |
 | `PAUSE/SET` + `DOWN`  | Brightness down.                                                       |
@@ -155,6 +157,12 @@ Save states can then be programmed to the device using a newer elf file with new
 `saves_restore.sh` will upload all save state files that you have backed up that are also included in the elf file. E.g Let's say you back up saves for rom A, B and C. Later on, you add a new rom D but remove A, then build and flash. When running the script, the save states for B and C will be programmed and nothing else.
 
 You can also erase all of the save slots by running `make flash_saves_erase`.
+
+## Screenshots
+
+Screenshots can be captured by pressing `PAUSE/SET` + `GAME`. This feature is disabled by default if the external flash is 1MB (stock units), because it takes up 150kB in the external flash.
+
+Screenshots can be downloaded by running `make dump_screenshot`, and will be saved as a 24-bit RGB PNG.
 
 ## Upgrading the flash
 

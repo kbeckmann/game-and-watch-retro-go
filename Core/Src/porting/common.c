@@ -14,6 +14,9 @@
 #include "gw_lcd.h"
 #include "gw_linker.h"
 
+#if ENABLE_SCREENSHOT
+uint16_t framebuffer_capture[GW_LCD_WIDTH * GW_LCD_HEIGHT]  __attribute__((section (".fbflash"))) __attribute__((aligned(4096)));
+#endif
 
 static void set_ingame_overlay(ingame_overlay_t type);
 
@@ -157,7 +160,13 @@ void common_emu_input_loop(odroid_gamepad_state_t *joystick, odroid_dialog_choic
                 odroid_system_sleep();
             }
             else if(joystick->values[ODROID_INPUT_START]){ // GAME button
-                // Reserved for future use
+#if ENABLE_SCREENSHOT
+                printf("Capturing screenshot...\n");
+                store_save(framebuffer_capture, lcd_get_inactive_buffer(), sizeof(framebuffer_capture));
+                printf("Screenshot captured\n");
+#else
+                printf("Screenshot support is disabled\n");
+#endif
                 last_key = ODROID_INPUT_START;
             }
             else if(joystick->values[ODROID_INPUT_SELECT]){ // TIME button

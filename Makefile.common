@@ -42,6 +42,13 @@ ifeq ($(STATE_SAVING),0)
 	SAVE_PARAM := --no-save
 endif
 
+# Screenshot support allocates 150kB of external flash. Disabled by default for 1MB flash.
+ifeq ($(EXTFLASH_SIZE), 1048576)
+	ENABLE_SCREENSHOT ?= 0
+else
+	ENABLE_SCREENSHOT ?= 1
+endif
+
 # Compress supported ROMs by default. Set to 0 to disable.
 COMPRESS ?= lzma
 ifeq ($(COMPRESS),0)
@@ -250,7 +257,8 @@ C_DEFS +=  \
 -DIS_LITTLE_ENDIAN \
 -DDEBUG_RG_ALLOC \
 -DMINIZ_NO_TIME \
--DSTATE_SAVING=$(STATE_SAVING)
+-DSTATE_SAVING=$(STATE_SAVING) \
+-DENABLE_SCREENSHOT=$(ENABLE_SCREENSHOT)
 
 # AS includes
 AS_INCLUDES +=
@@ -291,6 +299,7 @@ CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)"
 
 LDFLAGS += -Wl,--defsym=__EXTFLASH_OFFSET__=$(EXTFLASH_OFFSET)
 LDFLAGS += -Wl,--defsym=__EXTFLASH_TOTAL_LENGTH__=$(EXTFLASH_SIZE)
+LDFLAGS += -Wl,--defsym=ENABLE_SCREENSHOT=$(ENABLE_SCREENSHOT)
 
 ifeq ($(INTFLASH_BANK), 1)
 	INTFLASH_ADDRESS = 0x08000000
@@ -586,6 +595,10 @@ dump_logs: $(BUILD_DIR)/$(TARGET).elf
 	$(V)./scripts/dump_logs.sh
 .PHONY: dump_logs
 
+dump_screenshot: $(BUILD_DIR)/$(TARGET).elf
+	$(V)./tools/screenshot.py
+.PHONY: dump_screenshot
+
 help:
 	@echo "Game and Watch Retro Go"
 	@echo ""
@@ -600,6 +613,7 @@ help:
 	@echo "  STATE_SAVING        - Set to 0 to disable state saving (default=1)"
 	@echo "  RESET_DBGMCU        - Configures if DBGMCU should be reset after flashing."
 	@echo "                        Set to 0 to disable power saving (default=1)"
+	@echo "  ENABLE_SCREENSHOT   - Set to 1 to enable screenshot support (default disabled if extflash is 1MB)"
 	@echo ""
 	@echo "Current configuration:"
 	@echo "  EXTFLASH_FORCE_SPI=$(EXTFLASH_FORCE_SPI)"
@@ -611,6 +625,7 @@ help:
 	@echo "  COMPRESS=$(COMPRESS)"
 	@echo "  STATE_SAVING=$(STATE_SAVING)"
 	@echo "  RESET_DBGMCU=$(RESET_DBGMCU)"
+	@echo "  ENABLE_SCREENSHOT=$(ENABLE_SCREENSHOT)"
 	@echo "  GCC_PATH=$(GCC_PATH)"
 	@echo "  PREFIX=$(PREFIX)"
 	@echo ""
@@ -625,6 +640,7 @@ help:
 	@echo "  reset_dbgmcu      - Resets the unit and turns off DBGMCU (lowers battery drain)"
 	@echo "  reset_mcu         - Resets the unit"
 	@echo "  dump_logs         - Dumps the callstack and logbuf. Starts openocd and gdb under the hood."
+	@echo "  dump_screenshot   - Downloads the stored screenshot."
 	@echo ""
 .PHONY: help
 
