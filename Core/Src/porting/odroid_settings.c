@@ -4,6 +4,7 @@
 #include "odroid_system.h"
 #include "odroid_settings.h"
 #include "main.h"
+#include "appid.h"
 
 #define CONFIG_MAGIC 0xcafef00d
 #define ODROID_APPID_COUNT 4
@@ -39,14 +40,14 @@ typedef struct persistent_config {
     uint16_t main_menu_selected_tab;
     uint16_t main_menu_cursor;
 
-    app_config_t app[ODROID_APPID_COUNT];
+    app_config_t app[APPID_COUNT];
 
     uint32_t crc32;
 } persistent_config_t;
 
 static const persistent_config_t persistent_config_default = {
     .magic = CONFIG_MAGIC,
-    .version = 3,
+    .version = 4,
 
     .backlight = ODROID_BACKLIGHT_LEVEL6,
     .start_action = ODROID_START_ACTION_RESUME,
@@ -71,6 +72,8 @@ static const persistent_config_t persistent_config_default = {
             .disp_filter = ODROID_DISPLAY_FILTER_SHARP,
         }, // NES
         {0}, // SMS
+        {0}, // PCE
+        {0}, // GW
     },
 };
 
