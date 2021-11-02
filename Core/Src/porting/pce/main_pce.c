@@ -15,8 +15,7 @@
 #include "rom_manager.h"
 #include "common.h"
 #include "sound_pce.h"
-
-#define APP_ID 4
+#include "appid.h"
 
 //#define PCE_SHOW_DEBUG
 //#define XBUF_WIDTH 	(480 + 32)
@@ -488,7 +487,7 @@ int app_main_pce(uint8_t load_state, uint8_t start_paused) {
         common_emu_state.pause_after_frames = 0;
     }
 
-    odroid_system_init(APP_ID, PCE_SAMPLE_RATE);
+    odroid_system_init(APPID_PCE, PCE_SAMPLE_RATE);
     odroid_system_emu_init(&LoadState, &SaveState, &netplay_callback);
     pce_log[0]=0;
 

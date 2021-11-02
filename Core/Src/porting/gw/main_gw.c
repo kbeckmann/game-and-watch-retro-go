@@ -6,6 +6,7 @@
 #include "gw_lcd.h"
 #include "gw_linker.h"
 #include "gw_buttons.h"
+#include "appid.h"
 
 /* TO move elsewhere */
 #include "stm32h7xx_hal.h"
@@ -205,7 +206,7 @@ static void gw_debug_bar()
 int app_main_gw(uint8_t load_state)
 {
 
-    odroid_system_init(ODROID_APPID_GW, GW_AUDIO_FREQ);
+    odroid_system_init(APPID_GW, GW_AUDIO_FREQ);
     odroid_system_emu_init(&gw_system_LoadState, &gw_system_SaveState, NULL);
     rg_app_desc_t *app = odroid_system_get_app();
 

@@ -18,8 +18,7 @@
 #include "gnuboy/defs.h"
 #include "common.h"
 #include "rom_manager.h"
-
-#define ODROID_APPID_GB 1
+#include "appid.h"
 
 #define NVS_KEY_SAVE_SRAM "sram"
 
@@ -509,7 +508,7 @@ void pcm_submit() {
 
 rg_app_desc_t * init(uint8_t load_state)
 {
-    odroid_system_init(ODROID_APPID_GB, AUDIO_SAMPLE_RATE);
+    odroid_system_init(APPID_GB, AUDIO_SAMPLE_RATE);
     odroid_system_emu_init(&LoadState, &SaveState, &netplay_callback);
 
     // bzhxx : fix LCD glitch at the start by cleaning up the buffer emulator
