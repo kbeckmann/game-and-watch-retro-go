@@ -595,7 +595,7 @@ dump_logs: $(BUILD_DIR)/$(TARGET).elf
 	$(V)./scripts/dump_logs.sh
 .PHONY: dump_logs
 
-dump_screenshot: $(BUILD_DIR)/$(TARGET).elf
+dump_screenshot:
 	$(V)./tools/screenshot.py
 .PHONY: dump_screenshot
 
