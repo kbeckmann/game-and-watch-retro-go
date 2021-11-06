@@ -599,6 +599,14 @@ dump_screenshot:
 	$(V)./tools/screenshot.py
 .PHONY: dump_screenshot
 
+docker_build:
+	$(V)docker build -f Dockerfile --tag kbeckmann/retro-go-builder .
+.PHONY: docker_build
+
+docker:
+	$(V)docker run --rm -it --privileged --user $(shell id -u):$(shell id -g) -v $(PWD):/opt/workdir -v /dev/bus/usb:/dev/bus/usb kbeckmann/retro-go-builder
+.PHONY: docker
+
 help:
 	@echo "Game and Watch Retro Go"
 	@echo ""
@@ -641,6 +649,8 @@ help:
 	@echo "  reset_mcu         - Resets the unit"
 	@echo "  dump_logs         - Dumps the callstack and logbuf. Starts openocd and gdb under the hood."
 	@echo "  dump_screenshot   - Downloads the stored screenshot."
+	@echo "  docker_build      - Builds a docker image"
+	@echo "  docker            - Runs a docker container using the image created by docker_build"
 	@echo ""
 .PHONY: help
 

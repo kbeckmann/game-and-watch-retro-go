@@ -135,13 +135,16 @@ cd game-and-watch-retro-go
 # Place roms in the appropriate directory inside ./roms/
 
 # Build the docker image (takes a while)
-docker build -f Dockerfile --tag kbeckmann/retro-go-builder .
+make docker_build
 
-# Run it with usb passthrough. Set ADAPTER and EXTFLASH_SIZE_MB appropriately.
-docker run --rm -it --privileged -v /dev/bus/usb:/dev/bus/usb kbeckmann/retro-go-builder make ADAPTER=stlink EXTFLASH_SIZE_MB=1 -j$(nproc) flash
+# Run the container.
+# The current directory will be mounted into the container and the current user/group will be used.
+# In order to be able to flash the device, the container is started with --priviliged and also mounts
+# in /dev/bus/usb. See Makefile.common for the exact command line that is executed if curious.
+make docker
 
-# In case you get access errors when flashing, you may run sudo inside the docker container. The proper way is to fix the udev rules, but at least this is a way forward in case you are stuck.
-# docker run --rm -it --privileged -v /dev/bus/usb:/dev/bus/usb kbeckmann/retro-go-builder sudo -E make ADAPTER=stlink EXTFLASH_SIZE_MB=1 -j$(nproc) flash
+# Build and flash from inside the container:
+docker@76f83f2fc562:/opt/workdir$ make ADAPTER=stlink EXTFLASH_SIZE_MB=1 -j$(nproc) flash
 ```
 
 ## Backing up and restoring save state files
