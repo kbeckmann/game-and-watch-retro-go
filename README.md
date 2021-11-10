@@ -121,31 +121,38 @@ If you need to change the project settings and generate c-code from stm32cubemx,
 
 ## Build and flash using Docker
 
-To reduce the number of potential pitfalls in installation of various software, a Dockerfile is provided containing everything needed to compile and flash retro-go to your Nintendo® Game & Watch™: Super Mario Bros. system. This Dockerfile is written tageting an x86-64 machine running Linux.
+<details>
+  <summary>
+    If you are familiar with Docker and prefer a solution where you don't have to manually install toolchains and so on, expand this section and read on.
+  </summary>
 
-Steps to build and flash from a docker container (running on Linux, e.g. Archlinux or Ubuntu):
+  To reduce the number of potential pitfalls in installation of various software, a Dockerfile is provided containing everything needed to compile and flash retro-go to your Nintendo® Game & Watch™: Super Mario Bros. system. This Dockerfile is written tageting an x86-64 machine running Linux.
 
-```bash
-# Clone this repo
-git clone --recursive https://github.com/kbeckmann/game-and-watch-retro-go
+  Steps to build and flash from a docker container (running on Linux, e.g. Archlinux or Ubuntu):
 
-# cd into it
-cd game-and-watch-retro-go
+  ```bash
+  # Clone this repo
+  git clone --recursive https://github.com/kbeckmann/game-and-watch-retro-go
 
-# Place roms in the appropriate directory inside ./roms/
+  # cd into it
+  cd game-and-watch-retro-go
 
-# Build the docker image (takes a while)
-make docker_build
+  # Place roms in the appropriate directory inside ./roms/
 
-# Run the container.
-# The current directory will be mounted into the container and the current user/group will be used.
-# In order to be able to flash the device, the container is started with --priviliged and also mounts
-# in /dev/bus/usb. See Makefile.common for the exact command line that is executed if curious.
-make docker
+  # Build the docker image (takes a while)
+  make docker_build
 
-# Build and flash from inside the container:
-docker@76f83f2fc562:/opt/workdir$ make ADAPTER=stlink EXTFLASH_SIZE_MB=1 -j$(nproc) flash
-```
+  # Run the container.
+  # The current directory will be mounted into the container and the current user/group will be used.
+  # In order to be able to flash the device, the container is started with --priviliged and also mounts
+  # in /dev/bus/usb. See Makefile.common for the exact command line that is executed if curious.
+  make docker
+
+  # Build and flash from inside the container:
+  docker@76f83f2fc562:/opt/workdir$ make ADAPTER=stlink EXTFLASH_SIZE_MB=1 -j$(nproc) flash
+  ```
+
+</details>
 
 ## Backing up and restoring save state files
 
