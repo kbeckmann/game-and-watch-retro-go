@@ -434,8 +434,7 @@ $(BUILD_DIR)/%.o: %.s Makefile.common Makefile $(BUILD_DIR)/config.h | $(BUILD_D
 $(BUILD_DIR)/$(TARGET).elf: $(OBJECTS) $(NES_OBJECTS) $(GNUBOY_OBJECTS) $(SMSPLUSGX_OBJECTS) $(PCE_OBJECTS) $(GW_OBJECTS) Makefile.common Makefile $(LDSCRIPT)
 	$(V)$(ECHO) [ LD ] $(notdir $@)
 	$(V)$(CC) $(OBJECTS) $(NES_OBJECTS) $(GNUBOY_OBJECTS) $(SMSPLUSGX_OBJECTS) $(PCE_OBJECTS) $(GW_OBJECTS) $(LDFLAGS) -o $@
-	$(V)$(SZ) $@
-	$(V)./scripts/size.sh $@
+	$(V)./scripts/extflash_size.sh $@
 
 $(BUILD_DIR)/core/%.o: %.c Makefile Makefile.common $(SDK_HEADERS) $(BUILD_DIR)/config.h | $(BUILD_DIR)
 	$(V)$(ECHO) [ CC core ] $(notdir $<)
@@ -575,6 +574,10 @@ flash_saves_erase: $(BUILD_DIR)/$(TARGET).elf
 	$(V)./scripts/saves_erase.sh $<
 .PHONY: flash_saves_erase
 
+size: $(BUILD_DIR)/$(TARGET).elf
+	$(V)./scripts/size.sh $<
+.PHONY: size
+
 reset_dbgmcu:
 	# Reset the DBGMCU configuration register (DBGMCU_CR)
 	$(V)$(OPENOCD) -f scripts/interface_$(ADAPTER).cfg -c "init; reset halt; mww 0x5C001004 0x00000000; resume; exit;"
@@ -639,6 +642,10 @@ help:
 	@echo "  PREFIX=$(PREFIX)"
 	@echo ""
 	@echo "Targets:"
+	@echo "  docker            - Runs a docker container using the image created by docker_build"
+	@echo "  docker_build      - Builds a docker image"
+	@echo "  dump_logs         - Dumps the callstack and logbuf. Starts openocd and gdb under the hood."
+	@echo "  dump_screenshot   - Downloads the stored screenshot."
 	@echo "  flash             - Programs the internal and external flash"
 	@echo "  flash_all         - Alias for 'flash' (deprecated)"
 	@echo "  flash_extflash    - Only programs the external flash"
@@ -650,10 +657,7 @@ help:
 	@echo "  openocd           - Starts openocd with appropriate config"
 	@echo "  reset_dbgmcu      - Resets the unit and turns off DBGMCU (lowers battery drain)"
 	@echo "  reset_mcu         - Resets the unit"
-	@echo "  dump_logs         - Dumps the callstack and logbuf. Starts openocd and gdb under the hood."
-	@echo "  dump_screenshot   - Downloads the stored screenshot."
-	@echo "  docker_build      - Builds a docker image"
-	@echo "  docker            - Runs a docker container using the image created by docker_build"
+	@echo "  size              - Prints size information for all sections"
 	@echo ""
 .PHONY: help
 
