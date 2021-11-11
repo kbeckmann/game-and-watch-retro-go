@@ -321,7 +321,7 @@ LIBDIR +=
 LDFLAGS += $(MCU) -specs=nano.specs -T$(LDSCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--gc-sections
 
 # default action: build all
-all: $(BUILD_DIR) $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET)_extflash.bin $(BUILD_DIR)/$(TARGET)_intflash.bin
+all: CheckTools CheckDirtySubmodules $(BUILD_DIR) $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET)_extflash.bin $(BUILD_DIR)/$(TARGET)_intflash.bin
 
 #######################################
 # build the application
@@ -356,6 +356,10 @@ FORCE:
 Core/Inc/githash.h: FORCE | $(BUILD_DIR)
 	$(V)./scripts/update_githash.sh $@
 
+$(BUILD_DIR)/core/main.o: Core/Inc/githash.h
+$(BUILD_DIR)/core/flashapp.o: Core/Inc/githash.h
+$(BUILD_DIR)/core/rg_main.o: Core/Inc/githash.h
+
 # Run parse_roms.py to generate information about the roms
 $(BUILD_DIR)/rom_files.txt: FORCE | $(BUILD_DIR)
 	$(V)$(ECHO) [ BASH ] Checking for updated roms
@@ -371,9 +375,6 @@ STM32H7B0VBTx_FLASH.ld: $(BUILD_DIR)/saveflash.ld
 
 # rom_manager.c depends on the different *_roms.c files but they only change when roms.a changes
 $(BUILD_DIR)/core/rom_manager.o: Core/Src/retro-go/rom_manager.c $(BUILD_DIR)/roms.a
-
-Core/Src/main.c: Core/Inc/githash.h
-Core/Src/retro-go/rg_main.c: Core/Inc/githash.h
 
 ifeq (${CHECK_DIRTY_SUBMODULE},1)
 CheckDirtySubmodules:
@@ -426,37 +427,37 @@ CheckTools:
 endif
 .PHONY: CheckTools
 
-$(BUILD_DIR)/%.o: %.s Makefile.common Makefile $(BUILD_DIR)/config.h | $(BUILD_DIR) CheckDirtySubmodules
+$(BUILD_DIR)/%.o: %.s Makefile.common Makefile $(BUILD_DIR)/config.h | $(BUILD_DIR)
 	$(V)$(ECHO) [ AS ] $(notdir $<)
 	$(V)$(AS) -c $(CFLAGS) $< -o $@
 
-$(BUILD_DIR)/$(TARGET).elf: CheckTools $(OBJECTS) $(NES_OBJECTS) $(GNUBOY_OBJECTS) $(SMSPLUSGX_OBJECTS) $(PCE_OBJECTS) $(GW_OBJECTS) Makefile.common Makefile $(LDSCRIPT)
+$(BUILD_DIR)/$(TARGET).elf: $(OBJECTS) $(NES_OBJECTS) $(GNUBOY_OBJECTS) $(SMSPLUSGX_OBJECTS) $(PCE_OBJECTS) $(GW_OBJECTS) Makefile.common Makefile $(LDSCRIPT)
 	$(V)$(ECHO) [ LD ] $(notdir $@)
 	$(V)$(CC) $(OBJECTS) $(NES_OBJECTS) $(GNUBOY_OBJECTS) $(SMSPLUSGX_OBJECTS) $(PCE_OBJECTS) $(GW_OBJECTS) $(LDFLAGS) -o $@
 	$(V)$(SZ) $@
 	$(V)./scripts/size.sh $@
 
-$(BUILD_DIR)/core/%.o: %.c Makefile Makefile.common $(SDK_HEADERS) $(BUILD_DIR)/config.h | $(BUILD_DIR) CheckDirtySubmodules
+$(BUILD_DIR)/core/%.o: %.c Makefile Makefile.common $(SDK_HEADERS) $(BUILD_DIR)/config.h | $(BUILD_DIR)
 	$(V)$(ECHO) [ CC core ] $(notdir $<)
 	$(V)$(CC) -c $(CFLAGS) -Wa,-a,-ad,-alms=$(BUILD_DIR)/core/$(notdir $(<:.c=.lst)) $< -o $@
 
-$(BUILD_DIR)/nes/%.o: %.c Makefile Makefile.common $(SDK_HEADERS) $(BUILD_DIR)/config.h | $(BUILD_DIR) CheckDirtySubmodules
+$(BUILD_DIR)/nes/%.o: %.c Makefile Makefile.common $(SDK_HEADERS) $(BUILD_DIR)/config.h | $(BUILD_DIR)
 	$(V)$(ECHO) [ CC nes ] $(notdir $<)
 	$(V)$(CC) -c $(CFLAGS) -Wa,-a,-ad,-alms=$(BUILD_DIR)/nes/$(notdir $(<:.c=.lst)) $< -o $@
 
-$(BUILD_DIR)/gnuboy/%.o: %.c Makefile Makefile.common $(SDK_HEADERS) $(BUILD_DIR)/config.h | $(BUILD_DIR) CheckDirtySubmodules
+$(BUILD_DIR)/gnuboy/%.o: %.c Makefile Makefile.common $(SDK_HEADERS) $(BUILD_DIR)/config.h | $(BUILD_DIR)
 	$(V)$(ECHO) [ CC gb ] $(notdir $<)
 	$(V)$(CC) -c $(CFLAGS) -Wa,-a,-ad,-alms=$(BUILD_DIR)/gnuboy/$(notdir $(<:.c=.lst)) $< -o $@
 
-$(BUILD_DIR)/smsplusgx/%.o: %.c Makefile Makefile.common $(SDK_HEADERS) $(BUILD_DIR)/config.h | $(BUILD_DIR) CheckDirtySubmodules
+$(BUILD_DIR)/smsplusgx/%.o: %.c Makefile Makefile.common $(SDK_HEADERS) $(BUILD_DIR)/config.h | $(BUILD_DIR)
 	$(V)$(ECHO) [ CC sms ] $(notdir $<)
 	$(V)$(CC) -c $(CFLAGS) -Wa,-a,-ad,-alms=$(BUILD_DIR)/smsplusgx/$(notdir $(<:.c=.lst)) $< -o $@
 
-$(BUILD_DIR)/pce/%.o: %.c Makefile Makefile.common $(SDK_HEADERS) $(BUILD_DIR)/config.h | $(BUILD_DIR) CheckDirtySubmodules
+$(BUILD_DIR)/pce/%.o: %.c Makefile Makefile.common $(SDK_HEADERS) $(BUILD_DIR)/config.h | $(BUILD_DIR)
 	$(V)$(ECHO) [ CC pce ] $(notdir $<)
 	$(V)$(CC) -c $(CFLAGS) -Wa,-a,-ad,-alms=$(BUILD_DIR)/pce/$(notdir $(<:.c=.lst)) $< -o $@
 
-$(BUILD_DIR)/gw/%.o: %.c Makefile Makefile.common $(SDK_HEADERS) $(BUILD_DIR)/config.h | $(BUILD_DIR) CheckDirtySubmodules
+$(BUILD_DIR)/gw/%.o: %.c Makefile Makefile.common $(SDK_HEADERS) $(BUILD_DIR)/config.h | $(BUILD_DIR)
 	$(V)$(ECHO) [ CC gw ] $(notdir $<)
 	$(V)$(CC) -c $(CFLAGS) -Wa,-a,-ad,-alms=$(BUILD_DIR)/gw/$(notdir $(<:.c=.lst)) $< -o $@
 
@@ -542,7 +543,7 @@ flash_test: flash_intflash
 .PHONY: flash_test
 
 # Programs both the external and internal flash.
-flash:
+flash: CheckTools CheckDirtySubmodules
 	$(V)$(MAKE) flash_intflash
 	$(V)$(MAKE) flash_extflash
 	$(V)$(RESET_DBGMCU_CMD)
