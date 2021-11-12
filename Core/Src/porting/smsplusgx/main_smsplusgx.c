@@ -10,8 +10,7 @@
 #include "rom_manager.h"
 #include "common.h"
 #include "main_smsplusgx.h"
-
-#define APP_ID 3
+#include "appid.h"
 
 #define SMS_WIDTH 256
 #define SMS_HEIGHT 192
@@ -325,7 +324,7 @@ app_main_smsplusgx(uint8_t load_state, uint8_t start_paused, uint8_t is_coleco)
         common_emu_state.pause_after_frames = 0;
     }
 
-    odroid_system_init(APP_ID, AUDIO_SAMPLE_RATE);
+    odroid_system_init(APPID_SMS, AUDIO_SAMPLE_RATE);
     odroid_system_emu_init(&LoadState, &SaveState, &netplay_callback);
 
     system_reset_config();

@@ -19,8 +19,7 @@
 #include <assert.h>
 #include  "miniz.h"
 #include "lzma.h"
-
-#define ODROID_APPID_NES 2
+#include "appid.h"
 
 static uint samplesPerFrame;
 static uint32_t vsync_wait_ms = 0;
@@ -540,7 +539,7 @@ int app_main_nes(uint8_t load_state, uint8_t start_paused)
 
     memset(framebuffer1, 0x0, sizeof(framebuffer1));
     memset(framebuffer2, 0x0, sizeof(framebuffer2));
-    odroid_system_init(ODROID_APPID_NES, AUDIO_SAMPLE_RATE);
+    odroid_system_init(APPID_NES, AUDIO_SAMPLE_RATE);
     odroid_system_emu_init(&LoadState, &SaveState, NULL);
 
     if (start_paused) {

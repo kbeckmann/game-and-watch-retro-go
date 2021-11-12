@@ -3,3 +3,4 @@ pillow
 tqdm
 xxhash
 zopflipy
+pyelftools

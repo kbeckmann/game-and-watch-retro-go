@@ -28,6 +28,7 @@ Supported emulators:
     - [Information for developers](#information-for-developers)
   - [Build and flash using Docker](#build-and-flash-using-docker)
   - [Backing up and restoring save state files](#backing-up-and-restoring-save-state-files)
+  - [Screenshots](#screenshots)
   - [Upgrading the flash](#upgrading-the-flash)
   - [Advanced Flash Examples](#advanced-flash-examples)
     - [Custom Firmware (CFW)](#custom-firmware-cfw)
@@ -49,6 +50,7 @@ Holding the `PAUSE/SET` button while pressing other buttons have the following a
 
 | Button combination    | Action                                                                 |
 | --------------------- | ---------------------------------------------------------------------- |
+| `PAUSE/SET` + `GAME`  | Store a screenshot. (Disabled by default on 1MB flash builds)          |
 | `PAUSE/SET` + `TIME`  | Toggle speedup between 1x and the last non-1x speed. Defaults to 1.5x. |
 | `PAUSE/SET` + `UP`    | Brightness up.                                                         |
 | `PAUSE/SET` + `DOWN`  | Brightness down.                                                       |
@@ -122,28 +124,38 @@ If you need to change the project settings and generate c-code from stm32cubemx,
 
 ## Build and flash using Docker
 
-To reduce the number of potential pitfalls in installation of various software, a Dockerfile is provided containing everything needed to compile and flash retro-go to your Nintendo® Game & Watch™: Super Mario Bros. system. This Dockerfile is written tageting an x86-64 machine running Linux.
+<details>
+  <summary>
+    If you are familiar with Docker and prefer a solution where you don't have to manually install toolchains and so on, expand this section and read on.
+  </summary>
 
-Steps to build and flash from a docker container (running on Linux, e.g. Archlinux or Ubuntu):
+  To reduce the number of potential pitfalls in installation of various software, a Dockerfile is provided containing everything needed to compile and flash retro-go to your Nintendo® Game & Watch™: Super Mario Bros. system. This Dockerfile is written tageting an x86-64 machine running Linux.
 
-```bash
-# Clone this repo
-git clone --recursive https://github.com/kbeckmann/game-and-watch-retro-go
+  Steps to build and flash from a docker container (running on Linux, e.g. Archlinux or Ubuntu):
 
-# cd into it
-cd game-and-watch-retro-go
+  ```bash
+  # Clone this repo
+  git clone --recursive https://github.com/kbeckmann/game-and-watch-retro-go
 
-# Place roms in the appropriate directory inside ./roms/
+  # cd into it
+  cd game-and-watch-retro-go
 
-# Build the docker image (takes a while)
-docker build -f Dockerfile --tag kbeckmann/retro-go-builder .
+  # Place roms in the appropriate directory inside ./roms/
 
-# Run it with usb passthrough. Set ADAPTER and EXTFLASH_SIZE_MB appropriately.
-docker run --rm -it --privileged -v /dev/bus/usb:/dev/bus/usb kbeckmann/retro-go-builder make ADAPTER=stlink EXTFLASH_SIZE_MB=1 -j$(nproc) flash
+  # Build the docker image (takes a while)
+  make docker_build
 
-# In case you get access errors when flashing, you may run sudo inside the docker container. The proper way is to fix the udev rules, but at least this is a way forward in case you are stuck.
-# docker run --rm -it --privileged -v /dev/bus/usb:/dev/bus/usb kbeckmann/retro-go-builder sudo -E make ADAPTER=stlink EXTFLASH_SIZE_MB=1 -j$(nproc) flash
-```
+  # Run the container.
+  # The current directory will be mounted into the container and the current user/group will be used.
+  # In order to be able to flash the device, the container is started with --priviliged and also mounts
+  # in /dev/bus/usb. See Makefile.common for the exact command line that is executed if curious.
+  make docker
+
+  # Build and flash from inside the container:
+  docker@76f83f2fc562:/opt/workdir$ make ADAPTER=stlink EXTFLASH_SIZE_MB=1 -j$(nproc) flash
+  ```
+
+</details>
 
 ## Backing up and restoring save state files
 
@@ -158,6 +170,12 @@ Save states can then be programmed to the device using a newer elf file with new
 `saves_restore.sh` will upload all save state files that you have backed up that are also included in the elf file. E.g Let's say you back up saves for rom A, B and C. Later on, you add a new rom D but remove A, then build and flash. When running the script, the save states for B and C will be programmed and nothing else.
 
 You can also erase all of the save slots by running `make flash_saves_erase`.
+
+## Screenshots
+
+Screenshots can be captured by pressing `PAUSE/SET` + `GAME`. This feature is disabled by default if the external flash is 1MB (stock units), because it takes up 150kB in the external flash.
+
+Screenshots can be downloaded by running `make dump_screenshot`, and will be saved as a 24-bit RGB PNG.
 
 ## Upgrading the flash
 

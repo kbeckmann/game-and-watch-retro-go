@@ -6,6 +6,7 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "appid.h"
 #include "rg_emulators.h"
 #include "gui.h"
 #include "githash.h"

@@ -86,9 +86,8 @@ __RAM_EMU_END__     = __RAM_EMU_START__ + __RAM_EMU_LENGTH__;
 
 /* saveflash.ld sets __SAVEFLASH_LENGTH__ */
 INCLUDE build/saveflash.ld
-
-/* saveflash.ld sets __SAVEFLASH_LENGTH__ */
 __CONFIGFLASH_LENGTH__ = 4096;
+__FBFLASH_LENGTH__ = ENABLE_SCREENSHOT ? ((320 * 240 * 2 + 4095) / 4096) * 4096 : 0;
 
 /****
  * External Flash Layout
@@ -113,13 +112,20 @@ __CONFIGFLASH_LENGTH__ = 4096;
  *            |      retro-go configurations     |
  *            |                                  |
  *            +----------------------------------+  __CONFIGFLASH_END__
+ *            |                                  |
+ *            | Framebuffer / Screenshot storage |
+ *            |                                  |
+ *            +----------------------------------+  __FBFLASH_END__
  */
-__EXTFLASH_LENGTH__ = __EXTFLASH_TOTAL_LENGTH__ - (__CONFIGFLASH_LENGTH__ + __SAVEFLASH_LENGTH__);
+__EXTFLASH_LENGTH__ = __EXTFLASH_TOTAL_LENGTH__ - (__SAVEFLASH_LENGTH__ + __CONFIGFLASH_LENGTH__ + __FBFLASH_LENGTH__);
 __EXTFLASH_END__ = __EXTFLASH_START__ + __EXTFLASH_LENGTH__;
 __SAVEFLASH_START__ = __EXTFLASH_END__;
 __SAVEFLASH_END__   = __SAVEFLASH_START__ + __SAVEFLASH_LENGTH__;
 __CONFIGFLASH_START__ = __SAVEFLASH_END__;
 __CONFIGFLASH_END__   = __CONFIGFLASH_START__ + __CONFIGFLASH_LENGTH__;
+__FBFLASH_START__ = __CONFIGFLASH_END__;
+__FBFLASH_END__   = __FBFLASH_START__ + __FBFLASH_LENGTH__;
+
 
 __INTFLASH__ = DEFINED(__INTFLASH__) ? __INTFLASH__ : 0x08000000;
 
@@ -140,6 +146,7 @@ MEMORY
   EXTFLASH (xr ) : ORIGIN = __EXTFLASH_START__,  LENGTH = __EXTFLASH_LENGTH__
   SAVEFLASH(xr ) : ORIGIN = __SAVEFLASH_START__, LENGTH = __SAVEFLASH_LENGTH__
   CONFIGFLASH(xr ) : ORIGIN = __CONFIGFLASH_START__, LENGTH = __CONFIGFLASH_LENGTH__
+  FBFLASH(xr ) : ORIGIN = __FBFLASH_START__, LENGTH = __FBFLASH_LENGTH__
 }
 
 
@@ -376,6 +383,14 @@ SECTIONS
     *(.configflash)
     __configflash_end__ = .;
   } > CONFIGFLASH
+
+  ._fbflash (NOLOAD):
+  {
+    . = ALIGN(4K);
+    __fbflash_start__ = .;
+    *(.fbflash)
+    __fbflash_end__ = .;
+  } > FBFLASH
 
   ._ram (NOLOAD) :
   {

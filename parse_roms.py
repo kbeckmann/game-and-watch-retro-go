@@ -443,7 +443,7 @@ class ROMParser:
         subprocess.check_output(
             [
                 prefix / "arm-none-eabi-ar",
-                "-cru",
+                "-cr",
                 "build/roms.a",
                 rom.obj_path,
             ]

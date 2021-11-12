@@ -42,6 +42,13 @@ ifeq ($(STATE_SAVING),0)
 	SAVE_PARAM := --no-save
 endif
 
+# Screenshot support allocates 150kB of external flash. Disabled by default for 1MB flash.
+ifeq ($(EXTFLASH_SIZE), 1048576)
+	ENABLE_SCREENSHOT ?= 0
+else
+	ENABLE_SCREENSHOT ?= 1
+endif
+
 # Compress supported ROMs by default. Set to 0 to disable.
 COMPRESS ?= lzma
 ifeq ($(COMPRESS),0)
@@ -288,7 +295,8 @@ C_DEFS +=  \
 -DIS_LITTLE_ENDIAN \
 -DDEBUG_RG_ALLOC \
 -DMINIZ_NO_TIME \
--DSTATE_SAVING=$(STATE_SAVING)
+-DSTATE_SAVING=$(STATE_SAVING) \
+-DENABLE_SCREENSHOT=$(ENABLE_SCREENSHOT)
 
 # AS includes
 AS_INCLUDES +=
@@ -329,6 +337,7 @@ CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)"
 
 LDFLAGS += -Wl,--defsym=__EXTFLASH_OFFSET__=$(EXTFLASH_OFFSET)
 LDFLAGS += -Wl,--defsym=__EXTFLASH_TOTAL_LENGTH__=$(EXTFLASH_SIZE)
+LDFLAGS += -Wl,--defsym=ENABLE_SCREENSHOT=$(ENABLE_SCREENSHOT)
 
 ifeq ($(INTFLASH_BANK), 1)
 	INTFLASH_ADDRESS = 0x08000000
@@ -350,7 +359,7 @@ LIBDIR +=
 LDFLAGS += $(MCU) -specs=nano.specs -T$(LDSCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--gc-sections
 
 # default action: build all
-all: $(BUILD_DIR) $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET)_extflash.bin $(BUILD_DIR)/$(TARGET)_intflash.bin
+all: CheckTools CheckDirtySubmodules $(BUILD_DIR) $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET)_extflash.bin $(BUILD_DIR)/$(TARGET)_intflash.bin
 
 #######################################
 # build the application
@@ -385,6 +394,10 @@ FORCE:
 Core/Inc/githash.h: FORCE | $(BUILD_DIR)
 	$(V)./scripts/update_githash.sh $@
 
+$(BUILD_DIR)/core/main.o: Core/Inc/githash.h
+$(BUILD_DIR)/core/flashapp.o: Core/Inc/githash.h
+$(BUILD_DIR)/core/rg_main.o: Core/Inc/githash.h
+
 # Run parse_roms.py to generate information about the roms
 $(BUILD_DIR)/rom_files.txt: FORCE | $(BUILD_DIR)
 	$(V)$(ECHO) [ BASH ] Checking for updated roms
@@ -400,9 +413,6 @@ STM32H7B0VBTx_FLASH.ld: $(BUILD_DIR)/saveflash.ld
 
 # rom_manager.c depends on the different *_roms.c files but they only change when roms.a changes
 $(BUILD_DIR)/core/rom_manager.o: Core/Src/retro-go/rom_manager.c $(BUILD_DIR)/roms.a
-
-Core/Src/main.c: Core/Inc/githash.h
-Core/Src/retro-go/rg_main.c: Core/Inc/githash.h
 
 ifeq (${CHECK_DIRTY_SUBMODULE},1)
 CheckDirtySubmodules:
@@ -455,37 +465,36 @@ CheckTools:
 endif
 .PHONY: CheckTools
 
-$(BUILD_DIR)/%.o: %.s Makefile.common Makefile $(BUILD_DIR)/config.h | $(BUILD_DIR) CheckDirtySubmodules
+$(BUILD_DIR)/%.o: %.s Makefile.common Makefile $(BUILD_DIR)/config.h | $(BUILD_DIR)
 	$(V)$(ECHO) [ AS ] $(notdir $<)
 	$(V)$(AS) -c $(CFLAGS) $< -o $@
 
-$(BUILD_DIR)/$(TARGET).elf: CheckTools $(OBJECTS) $(NES_OBJECTS) $(GNUBOY_OBJECTS) $(SMSPLUSGX_OBJECTS) $(PCE_OBJECTS) $(GW_OBJECTS) Makefile.common Makefile $(LDSCRIPT)
+$(BUILD_DIR)/$(TARGET).elf: $(OBJECTS) $(NES_OBJECTS) $(GNUBOY_OBJECTS) $(SMSPLUSGX_OBJECTS) $(PCE_OBJECTS) $(GW_OBJECTS) Makefile.common Makefile $(LDSCRIPT)
 	$(V)$(ECHO) [ LD ] $(notdir $@)
 	$(V)$(CC) $(OBJECTS) $(NES_OBJECTS) $(GNUBOY_OBJECTS) $(SMSPLUSGX_OBJECTS) $(PCE_OBJECTS) $(GW_OBJECTS) $(LDFLAGS) -o $@
-	$(V)$(SZ) $@
-	$(V)./scripts/size.sh $@
+	$(V)./scripts/extflash_size.sh $@
 
-$(BUILD_DIR)/core/%.o: %.c Makefile Makefile.common $(SDK_HEADERS) $(BUILD_DIR)/config.h | $(BUILD_DIR) CheckDirtySubmodules
+$(BUILD_DIR)/core/%.o: %.c Makefile Makefile.common $(SDK_HEADERS) $(BUILD_DIR)/config.h | $(BUILD_DIR)
 	$(V)$(ECHO) [ CC core ] $(notdir $<)
 	$(V)$(CC) -c $(CFLAGS) -Wa,-a,-ad,-alms=$(BUILD_DIR)/core/$(notdir $(<:.c=.lst)) $< -o $@
 
-$(BUILD_DIR)/nes/%.o: %.c Makefile Makefile.common $(SDK_HEADERS) $(BUILD_DIR)/config.h | $(BUILD_DIR) CheckDirtySubmodules
+$(BUILD_DIR)/nes/%.o: %.c Makefile Makefile.common $(SDK_HEADERS) $(BUILD_DIR)/config.h | $(BUILD_DIR)
 	$(V)$(ECHO) [ CC nes ] $(notdir $<)
 	$(V)$(CC) -c $(CFLAGS) -Wa,-a,-ad,-alms=$(BUILD_DIR)/nes/$(notdir $(<:.c=.lst)) $< -o $@
 
-$(BUILD_DIR)/gnuboy/%.o: %.c Makefile Makefile.common $(SDK_HEADERS) $(BUILD_DIR)/config.h | $(BUILD_DIR) CheckDirtySubmodules
+$(BUILD_DIR)/gnuboy/%.o: %.c Makefile Makefile.common $(SDK_HEADERS) $(BUILD_DIR)/config.h | $(BUILD_DIR)
 	$(V)$(ECHO) [ CC gb ] $(notdir $<)
 	$(V)$(CC) -c $(CFLAGS) -Wa,-a,-ad,-alms=$(BUILD_DIR)/gnuboy/$(notdir $(<:.c=.lst)) $< -o $@
 
-$(BUILD_DIR)/smsplusgx/%.o: %.c Makefile Makefile.common $(SDK_HEADERS) $(BUILD_DIR)/config.h | $(BUILD_DIR) CheckDirtySubmodules
+$(BUILD_DIR)/smsplusgx/%.o: %.c Makefile Makefile.common $(SDK_HEADERS) $(BUILD_DIR)/config.h | $(BUILD_DIR)
 	$(V)$(ECHO) [ CC sms ] $(notdir $<)
 	$(V)$(CC) -c $(CFLAGS) -Wa,-a,-ad,-alms=$(BUILD_DIR)/smsplusgx/$(notdir $(<:.c=.lst)) $< -o $@
 
-$(BUILD_DIR)/pce/%.o: %.c Makefile Makefile.common $(SDK_HEADERS) $(BUILD_DIR)/config.h | $(BUILD_DIR) CheckDirtySubmodules
+$(BUILD_DIR)/pce/%.o: %.c Makefile Makefile.common $(SDK_HEADERS) $(BUILD_DIR)/config.h | $(BUILD_DIR)
 	$(V)$(ECHO) [ CC pce ] $(notdir $<)
 	$(V)$(CC) -c $(CFLAGS) -Wa,-a,-ad,-alms=$(BUILD_DIR)/pce/$(notdir $(<:.c=.lst)) $< -o $@
 
-$(BUILD_DIR)/gw/%.o: %.c Makefile Makefile.common $(SDK_HEADERS) $(BUILD_DIR)/config.h | $(BUILD_DIR) CheckDirtySubmodules
+$(BUILD_DIR)/gw/%.o: %.c Makefile Makefile.common $(SDK_HEADERS) $(BUILD_DIR)/config.h | $(BUILD_DIR)
 	$(V)$(ECHO) [ CC gw ] $(notdir $<)
 	$(V)$(CC) -c $(CFLAGS) -Wa,-a,-ad,-alms=$(BUILD_DIR)/gw/$(notdir $(<:.c=.lst)) $< -o $@
 
@@ -571,7 +580,7 @@ flash_test: flash_intflash
 .PHONY: flash_test
 
 # Programs both the external and internal flash.
-flash:
+flash: CheckTools CheckDirtySubmodules
 	$(V)$(MAKE) flash_intflash
 	$(V)$(MAKE) flash_extflash
 	$(V)$(RESET_DBGMCU_CMD)
@@ -603,6 +612,10 @@ flash_saves_erase: $(BUILD_DIR)/$(TARGET).elf
 	$(V)./scripts/saves_erase.sh $<
 .PHONY: flash_saves_erase
 
+size: $(BUILD_DIR)/$(TARGET).elf
+	$(V)./scripts/size.sh $<
+.PHONY: size
+
 reset_dbgmcu:
 	# Reset the DBGMCU configuration register (DBGMCU_CR)
 	$(V)$(OPENOCD) -f scripts/interface_$(ADAPTER).cfg -c "init; reset halt; mww 0x5C001004 0x00000000; resume; exit;"
@@ -624,13 +637,25 @@ dump_logs: $(BUILD_DIR)/$(TARGET).elf
 	$(V)./scripts/dump_logs.sh
 .PHONY: dump_logs
 
+dump_screenshot:
+	$(V)./tools/screenshot.py
+.PHONY: dump_screenshot
+
+docker_build:
+	$(V)docker build -f Dockerfile --tag kbeckmann/retro-go-builder .
+.PHONY: docker_build
+
+docker:
+	$(V)docker run --rm -it --privileged --user $(shell id -u):$(shell id -g) -v $(PWD):/opt/workdir -v /dev/bus/usb:/dev/bus/usb kbeckmann/retro-go-builder
+.PHONY: docker
+
 help:
 	@echo "Game and Watch Retro Go"
 	@echo ""
 	@echo "Configuration variables:"
 	@echo "  EXTFLASH_FORCE_SPI  - Forces the use of legacy SPI mode for the external flash driver"
-	@echo "  EXTFLASH_SIZE_MB    - Sets the external flash size in MB"
-	@echo "  EXTFLASH_SIZE       - Sets the external flash size in bytes (deprecated)"
+	@echo "  EXTFLASH_SIZE_MB    - Sets the external flash size in megabytes"
+	@echo "  EXTFLASH_SIZE       - Sets the external flash size in bytes (has precedence over EXTFLASH_SIZE_MB)"
 	@echo "  LARGE_FLASH         - Sets the external flash size to 16MB  (deprecated)"
 	@echo "  EXTFLASH_OFFSET     - Places the data at an offset in the external flash (useful for dual boot)"
 	@echo "  INTFLASH_BANK       - Sets the internal flash bank. Valid values {1,2} (default=1)."
@@ -643,6 +668,7 @@ help:
 	@echo "                        949 as Korean; 12521 as Spanish; "
 	@echo "  COVERFLOW           - Set to 1 include cover art with rom (default=0)"
 	@echo "  JPG_QUALITY         - Set convert cover art image jpg quality (default = 90)"
+	@echo "  ENABLE_SCREENSHOT   - Set to 1 to enable screenshot support (default disabled if extflash is 1MB)"
 	@echo ""
 	@echo "Current configuration:"
 	@echo "  EXTFLASH_FORCE_SPI=$(EXTFLASH_FORCE_SPI)"
@@ -654,12 +680,19 @@ help:
 	@echo "  COMPRESS=$(COMPRESS)"
 	@echo "  STATE_SAVING=$(STATE_SAVING)"
 	@echo "  RESET_DBGMCU=$(RESET_DBGMCU)"
+	@echo "  ENABLE_SCREENSHOT=$(ENABLE_SCREENSHOT)"
 	@echo "  GCC_PATH=$(GCC_PATH)"
 	@echo "  PREFIX=$(PREFIX)"
 	@echo "  CODEPAGE=$(CODEPAGE)"
 	@echo "  COVERFLOW=$(COVERFLOW)"
 	@echo ""
 	@echo "Targets:"
+	@echo "  docker            - Runs a docker container using the image created by docker_build"
+	@echo "  docker_build      - Builds a docker image"
+	@echo "  dump_logs         - Dumps the callstack and logbuf. Starts openocd and gdb under the hood."
+	@echo "  dump_screenshot   - Downloads the stored screenshot."
+	@echo "  flash             - Programs the internal and external flash"
+	@echo "  flash_all         - Alias for 'flash' (deprecated)"
 	@echo "  flash_extflash    - Only programs the external flash"
 	@echo "  flash_intflash    - Only programs the internal flash"
 	@echo "  flash_intflash_nc - Only programs the internal flash and uses an existing openocd server"
@@ -669,9 +702,9 @@ help:
 	@echo "  openocd           - Starts openocd with appropriate config"
 	@echo "  reset_dbgmcu      - Resets the unit and turns off DBGMCU (lowers battery drain)"
 	@echo "  reset_mcu         - Resets the unit"
-	@echo "  dump_logs         - Dumps the callstack and logbuf. Starts openocd and gdb under the hood."
 	@echo "  romdef            - Dumps all rom info to roms.json in roms directory to custom display name and"
 	@echo "                      publish property under edit that file before make flash "
+	@echo "  size              - Prints size information for all sections"
 	@echo ""
 .PHONY: help
 
