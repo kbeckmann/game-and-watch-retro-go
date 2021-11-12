@@ -597,14 +597,14 @@ void gui_draw_coverlight_h(retro_emulator_file_t *file, int cover_position)
     switch (cover_position)
     {
     // TOP LEFT Cover
-    case 2:
+    case -2:
     {
         cover_x = 0;
         cover_y += -20;
     }
     break;
     // MIDDLE LEFT Cover
-    case 1:
+    case -1:
     {
         cover_x = (GW_LCD_WIDTH - current_cover_width) / 2 - COVER_BORDER - (cover_width + 2 * COVER_BORDER) + 16;
         if (cover_x < 12)
@@ -620,7 +620,7 @@ void gui_draw_coverlight_h(retro_emulator_file_t *file, int cover_position)
     }
     break;
     // MIDDLE RIGHT Cover
-    case -1:
+    case 1:
     {
         cover_x = (GW_LCD_WIDTH + current_cover_width) / 2 + COVER_BORDER - 16;
         if ((cover_x + cover_width + 12) > GW_LCD_WIDTH)
@@ -629,7 +629,7 @@ void gui_draw_coverlight_h(retro_emulator_file_t *file, int cover_position)
     }
     break;
     // TOP RIGHT cover
-    case -2:
+    case 2:
     {
         cover_x = GW_LCD_WIDTH - cover_width - 2 * COVER_BORDER;
         cover_y += -20;
@@ -1182,7 +1182,7 @@ void gui_draw_list(tab_t *tab)
             for (int i = 0; i < 5; i++)
             {
                 listbox_item_t *next_item = gui_get_item_by_index(tab, &index_next);
-                h1 = h1 - 12 - 4 + i;
+                h2 = h2 + 12 + 4 - i;
                 if (next_item)
                     odroid_overlay_draw_local_text_line(
                         pos_list+4,
@@ -1196,7 +1196,7 @@ void gui_draw_list(tab_t *tab)
                 index_next++;
 
                 listbox_item_t *prior_item = gui_get_item_by_index(tab, &index_proior);
-                h2 = h2 + 12 + 4 - i;
+                h1 = h1 - 12 - 4 + i;
                 if (prior_item)
                     odroid_overlay_draw_local_text_line(
                         pos_list+4,
