@@ -42,12 +42,8 @@ ifeq ($(STATE_SAVING),0)
 	SAVE_PARAM := --no-save
 endif
 
-# Screenshot support allocates 150kB of external flash. Disabled by default for 1MB flash.
-ifeq ($(EXTFLASH_SIZE), 1048576)
-	ENABLE_SCREENSHOT ?= 0
-else
-	ENABLE_SCREENSHOT ?= 1
-endif
+# Screenshot support allocates 150kB of external flash. Disabled by default.
+ENABLE_SCREENSHOT ?= 0
 
 # Compress supported ROMs by default. Set to 0 to disable.
 COMPRESS ?= lzma
