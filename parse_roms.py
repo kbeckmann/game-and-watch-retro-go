@@ -631,6 +631,19 @@ class ROMParser:
         compress: str = None,
         compress_gb_speed: bool = False,
     ) -> int:
+        import json;
+        script_path = Path(__file__).parent
+        json_file = script_path / "roms" / str(folder + ".json")
+        print(json_file)
+        if Path(json_file).exists():
+            with open(json_file,'r') as load_f:
+                try:
+                    romdef = json.load(load_f)
+                    load_f.close()
+                    romdefs = romdef
+                except: 
+                    load_f.close()
+ 
         roms_raw = []
         for e in extensions:
             roms_raw += self.find_roms(system_name, folder, e, romdefs)

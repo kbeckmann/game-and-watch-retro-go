@@ -42,15 +42,13 @@ class ROMParser:
             roms_raw += self.find_roms(romdef, folder, e)
         return romdef
 
-    def parse(self):
+    def parse_one(self, filename: str, folder: str,extensions: List[str]):
         import json;
-        script_path = Path(__file__).parent
-        json_file = script_path / "roms" / "roms.json"
-        if Path(json_file).exists():
-            with open(json_file,'r') as load_f:
+        if Path(filename).exists():
+            with open(filename,'r') as load_f:
                 try:
                     romdef = json.load(load_f)
-                    print("Rom define file loaded")
+                    #print("Rom define file loaded")
                     load_f.close()
                 except: 
                     print("Rom define file load failed")
@@ -59,28 +57,38 @@ class ROMParser:
         else :
             romdef = {};
 
-        romdef.setdefault('gb', {})
-        romdef.setdefault('nes', {})
-        romdef.setdefault('sms', {})
-        romdef.setdefault('gg', {})
-        romdef.setdefault('col', {})
-        romdef.setdefault('sg', {})
-        romdef.setdefault('pce', {})
-        romdef.setdefault('gw', {})
-
-            
-        romdef["gb"] = self.generate_system(romdef["gb"],"gb",["gb", "gbc"])
-        romdef["nes"] = self.generate_system(romdef["nes"], "nes",["nes"])
-        romdef["sms"] = self.generate_system(romdef["sms"], "sms",["sms"])
-        romdef["gg"] = self.generate_system(romdef["gg"], "gg",["gg"])
-        romdef["col"] = self.generate_system(romdef["col"], "col",["col"])
-        romdef["sg"] = self.generate_system(romdef["sg"], "sg",["sg"])
-        romdef["pce"] = self.generate_system(romdef["pce"], "pce",["pce"])
-        romdef["gw"] = self.generate_system(romdef["gw"], "gw",["gw"])
-        with open(json_file,'w', encoding ='utf-8') as dump_f:
+        romdef = self.generate_system(romdef, folder, extensions);
+        with open(filename,'w', encoding ='utf-8') as dump_f:
             json.dump(romdef, dump_f, ensure_ascii=False, indent=4, sort_keys=True)
-            print("Rom Define file saved ok!")
+            #print("Rom Define file saved ok!")
             dump_f.close()
+
+    def parse(self):
+        script_path = Path(__file__).parent
+
+        json_file = script_path / "roms" / "gb.json"
+        self.parse_one(json_file,"gb",["gb", "gbc"])
+
+        json_file = script_path / "roms" / "nes.json"
+        self.parse_one(json_file, "nes",["nes"])
+
+        json_file = script_path / "roms" / "sms.json"
+        self.parse_one(json_file, "sms",["sms"])
+
+        json_file = script_path / "roms" / "gg.json"
+        self.parse_one(json_file, "gg",["gg"])
+
+        json_file = script_path / "roms" / "col.json"
+        self.parse_one(json_file, "col",["col"])
+
+        json_file = script_path / "roms" / "sg.json"
+        self.parse_one(json_file, "sg",["sg"])
+
+        json_file = script_path / "roms" / "pce.json"
+        self.parse_one(json_file, "pce",["pce"])
+
+        json_file = script_path / "roms" / "gw.json"
+        self.parse_one(json_file, "gw",["gw"])
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Define ROMs name & pulish to the build environment")
