@@ -1,7 +1,7 @@
 # Retro / Game & Watch™
 <img src="assets/gnw.gif"/>
 
-## ImgUI howto
+## NewUI howto
 Please run `make help` to see more information.
 
 ### i18n support
