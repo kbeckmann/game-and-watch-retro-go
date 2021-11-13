@@ -1,7 +1,8 @@
 # Retro / Game & Watch™
 <details> 
 <summary>
- **See more of NewUI features**
+See more of **NewUI features**
+<img src="assets/gnw.gif"/>
 </summary>
 
 ## NewUI howto
@@ -25,10 +26,6 @@ Before you run `make flash`, please run `make romdef` then you can get some romd
 At that file, you also can custom that emu system cover image height and width size.
 
 </details>
-
-<img src="assets/gnw.gif"/>
-
-==========
 
 # Emulator collection for Nintendo® Game & Watch™
 
