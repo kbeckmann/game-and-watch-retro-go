@@ -1,6 +1,26 @@
 # Retro / Game & Watch™
 <img src="assets/gnw.gif"/>
 
+## ImgUI howto
+Please run `make help` to see more information.
+
+### i18n support
+`make CODEPAGE=lang` Sets codepage to configures display langrage.(default=1252 as English);
+- 936 : 简体中文
+- 950 : 正體中文
+- 949  : 한국어
+- 12521 : Español
+- 932 : 日本語(Wait for translate support)
+- other : Wait your support to translate
+
+### Coverflow support
+`make COVERFLOW=1 JPG_QUALITY=(90)`  set `COVERFLOW=1` to support show cover art. support `.png` `.bmp` `.jpg` file which filename same as rom's filename and same floder. CFW where pack jpg file into firmware and can custom set quality use `JPG_QUALITY` to set.
+
+### Custom game display title and cover size support
+Before you run `make flash`, please run `make romdef` then you can get some romdef file in folder as `gb.json` `nes.json` ..etc. you can edit that file to set every game rom's display title (title's charset be must your custom lang supported). 
+
+At that file, you also can custom that emu system cover image height and width size.
+
 # Emulator collection for Nintendo® Game & Watch™
 
 This is a port of the [retro-go](https://github.com/ducalex/retro-go) emulator collection that runs on the Nintendo® Game & Watch™: Super Mario Bros. system.

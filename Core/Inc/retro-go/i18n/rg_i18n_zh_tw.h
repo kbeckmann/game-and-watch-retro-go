@@ -83,7 +83,7 @@
 #define s_Author                    "特別貢獻： "
 #define s_Author_                   "        ： "
 #define s_UI_Mod                    "介面美化： "
-#define s_Lang                      "繁體中文㊣ "
+#define s_Lang                      "正體中文㊣ "
 #define s_LangAuthor                "中秋快樂"
 #define s_Debug_menu                "∞ 調試信息"
 #define s_Reset_settings            "≡ 重置設定"
