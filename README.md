@@ -1,5 +1,8 @@
 # Retro / Game & Watch™
-<img src="assets/gnw.gif"/>
+<details> 
+<summary>
+**See more details of NewUI features**
+</summary>
 
 ## NewUI howto
 Please run `make help` to see more information.
@@ -17,11 +20,16 @@ Please run `make help` to see more information.
 `make COVERFLOW=1 JPG_QUALITY=(90)`  set `COVERFLOW=1` to support show cover art. support `.png` `.bmp` `.jpg` file which filename same as rom's filename and same floder. CFW where pack jpg file into firmware and can custom set quality use `JPG_QUALITY` to set.
 
 ### Custom game display title and cover size support
-Before you run `make flash`, please run `make romdef` then you can get some romdef file in `roms` folder as `gb.json` `nes.json` ..etc. you can edit that file to set every game rom's display title (title's charset be must your custom lang supported). 
+Before you run `make flash`, please run `make romdef` then you can get some romdef file in `roms` folder as `gb.json` `nes.json` ..etc. you can edit that file to set every game rom's display title (**Title's charset be must your custom lang supported**). 
 
 At that file, you also can custom that emu system cover image height and width size.
 
-#
+</details>
+
+<img src="assets/gnw.gif"/>
+
+==========
+
 # Emulator collection for Nintendo® Game & Watch™
 
 This is a port of the [retro-go](https://github.com/ducalex/retro-go) emulator collection that runs on the Nintendo® Game & Watch™: Super Mario Bros. system.
