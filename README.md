@@ -1,8 +1,8 @@
-# Retro / Game & Watch™
+![Retro / Game & Watch™](assets/retro_gw.png)
 
-<img src="assets/gnw.gif"/>
+![](assets/gnw.gif)
 
-## NewUI howto
+# NewUI howto
 Please run `make help` to see more information.
 
 ### i18n support
