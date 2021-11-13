@@ -1,7 +1,7 @@
 # Retro / Game & Watch™
 <details> 
 <summary>
-**See more details of NewUI features**
+ **See more of NewUI features**
 </summary>
 
 ## NewUI howto
