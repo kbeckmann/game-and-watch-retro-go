@@ -22,7 +22,6 @@ Before you run `make flash`, please run `make romdef` then you can get some romd
 At that file, you also can custom that emu system cover image height and width size.
 
 #
-
 # Emulator collection for Nintendo® Game & Watch™
 
 This is a port of the [retro-go](https://github.com/ducalex/retro-go) emulator collection that runs on the Nintendo® Game & Watch™: Super Mario Bros. system.
