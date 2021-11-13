@@ -1,9 +1,6 @@
 # Retro / Game & Watch™
-<details> 
-<summary>
-See more of **NewUI features**
+
 <img src="assets/gnw.gif"/>
-</summary>
 
 ## NewUI howto
 Please run `make help` to see more information.
@@ -25,8 +22,7 @@ Before you run `make flash`, please run `make romdef` then you can get some romd
 
 At that file, you also can custom that emu system cover image height and width size.
 
-</details>
-
+***********
 # Emulator collection for Nintendo® Game & Watch™
 
 This is a port of the [retro-go](https://github.com/ducalex/retro-go) emulator collection that runs on the Nintendo® Game & Watch™: Super Mario Bros. system.
