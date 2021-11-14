@@ -20,6 +20,8 @@ Please run `make help` to see more information.
 ### Custom game display title and cover size support
 Before you run `make flash`, please run `make romdef` then you can get some romdef file in `roms` folder as `gb.json` `nes.json` ..etc. you can edit that file to set every game rom's display title (**Title's charset be must your custom lang supported**). 
 
+`make romdef` is run patched mode for `*emu*.json` if the file already exist, each time only append new rom's information when command execute.
+
 At that file, you also can custom that emu system cover image height and width size.
 
 ***********
