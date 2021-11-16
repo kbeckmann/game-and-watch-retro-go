@@ -167,7 +167,7 @@ void odroid_overlay_draw_battery(int x_pos, int y_pos)
     odroid_battery_charge_state_t battery_state = odroid_input_read_battery().state;
     uint16_t color_fill = C_GW_YELLOW;
     uint16_t color_border = C_GW_YELLOW;
-    uint16_t color_empty = C_GW_RED;
+    uint16_t color_empty = C_GW_MAIN_COLOR;
     uint16_t color_battery = C_BLACK;
     uint16_t width_fill = 20.f / 100 * percentage;
     uint16_t width_empty = 20 - width_fill;
@@ -225,7 +225,7 @@ void odroid_overlay_draw_dialog(const char *header, odroid_dialog_choice_t *opti
     int box_width = 64;
     int box_height = 64;
     int box_padding = 6;
-    int box_color = C_GW_RED;
+    int box_color = C_GW_MAIN_COLOR;
     int box_border_color = C_GW_YELLOW;
     int box_text_color = C_GW_YELLOW;
 
@@ -584,10 +584,10 @@ static void draw_game_status_bar(runtime_stats_t stats)
         (int) stats.busyPercent, (int) fmod(stats.busyPercent * 10, 10));
     snprintf(bottom, 40, "%s", romPath ? (romPath + strlen(ODROID_BASE_PATH_ROMS)) : "N/A");
 
-    odroid_overlay_draw_fill_rect(0, 0, width, height, C_GW_RED);
-    odroid_overlay_draw_fill_rect(0, ODROID_SCREEN_HEIGHT - height, width, height, C_GW_RED);
-    odroid_overlay_draw_text(0, pad_text, width, header, C_GW_YELLOW, C_GW_RED);
-    odroid_overlay_draw_text(0, ODROID_SCREEN_HEIGHT - height + pad_text, width, bottom, C_GW_YELLOW, C_GW_RED);
+    odroid_overlay_draw_fill_rect(0, 0, width, height, C_GW_MAIN_COLOR);
+    odroid_overlay_draw_fill_rect(0, ODROID_SCREEN_HEIGHT - height, width, height, C_GW_MAIN_COLOR);
+    odroid_overlay_draw_text(0, pad_text, width, header, C_GW_YELLOW, C_GW_MAIN_COLOR);
+    odroid_overlay_draw_text(0, ODROID_SCREEN_HEIGHT - height + pad_text, width, bottom, C_GW_YELLOW, C_GW_MAIN_COLOR);
     odroid_overlay_draw_battery(width - 26, 3);
 }
 
