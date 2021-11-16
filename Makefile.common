@@ -19,13 +19,31 @@ LARGE_FLASH ?= 0
 # setting EXTFLASH_OFFSET. Useful if the first 1MB are to be preserved.
 EXTFLASH_OFFSET ?= 0
 
+# Configure Game & Watch target device mario|zelda
+GNW_TARGET ?= mario
+
+# Set the preprocessor options
+ifeq ($(GNW_TARGET),mario)
+	GNW_TARGET_ZELDA = 0
+	GNW_TARGET_MARIO = 1
+else ifeq ($(GNW_TARGET),zelda)
+	GNW_TARGET_ZELDA = 1
+	GNW_TARGET_MARIO = 0
+else
+$(error Invalid GNW_TARGET. Valid values {mario|zelda})
+endif
+
 # Configure external flash size by setting EXTFLASH_SIZE
 ifeq ($(LARGE_FLASH),1)
 	# 16MB
 	EXTFLASH_SIZE_MB ?= 16
 else
-	# 1MB
-	EXTFLASH_SIZE_MB ?= 1
+	# 4MB for Zelda otherwise 1MB 
+	ifeq ($(GNW_TARGET),zelda)
+		EXTFLASH_SIZE_MB ?= 4
+	else
+		EXTFLASH_SIZE_MB ?= 1
+	endif
 endif
 
 # Configure external flash size in MB (Megabytes)
@@ -258,7 +276,9 @@ C_DEFS +=  \
 -DDEBUG_RG_ALLOC \
 -DMINIZ_NO_TIME \
 -DSTATE_SAVING=$(STATE_SAVING) \
--DENABLE_SCREENSHOT=$(ENABLE_SCREENSHOT)
+-DENABLE_SCREENSHOT=$(ENABLE_SCREENSHOT) \
+-DGNW_TARGET_MARIO=$(GNW_TARGET_MARIO) \
+-DGNW_TARGET_ZELDA=$(GNW_TARGET_ZELDA)
 
 # AS includes
 AS_INCLUDES +=
@@ -626,6 +646,7 @@ help:
 	@echo "  RESET_DBGMCU        - Configures if DBGMCU should be reset after flashing."
 	@echo "                        Set to 0 to disable power saving (default=1)"
 	@echo "  ENABLE_SCREENSHOT   - Set to 1 to enable screenshot support (default disabled if extflash is 1MB)"
+	@echo "  GNW_TARGET          - Game & Watch target, Valid values {mario,zelda} (default=mario)"
 	@echo ""
 	@echo "Current configuration:"
 	@echo "  EXTFLASH_FORCE_SPI=$(EXTFLASH_FORCE_SPI)"
@@ -638,6 +659,7 @@ help:
 	@echo "  STATE_SAVING=$(STATE_SAVING)"
 	@echo "  RESET_DBGMCU=$(RESET_DBGMCU)"
 	@echo "  ENABLE_SCREENSHOT=$(ENABLE_SCREENSHOT)"
+	@echo "  GNW_TARGET=$(GNW_TARGET)"
 	@echo "  GCC_PATH=$(GCC_PATH)"
 	@echo "  PREFIX=$(PREFIX)"
 	@echo ""
