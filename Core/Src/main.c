@@ -1196,6 +1196,12 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
+  /*Configure GPIO pins : BTN_START_Pin BTN_SELECT_Pin */
+  GPIO_InitStruct.Pin = BTN_START_Pin|BTN_SELECT_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
   /*Configure GPIO pin : BTN_PWR_Pin */
   GPIO_InitStruct.Pin = BTN_PWR_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
