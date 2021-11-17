@@ -460,13 +460,13 @@ static void gw_display_ram_overlay(){
   //  char *p;
    // p = (char *)&draw_line_content[0];
     sprintf(draw_line_content, "   0 1 2 3 4 5 6 7 8 9 A B C D E F");
-    odroid_overlay_draw_text(10, 72, 300, draw_line_content, C_GW_YELLOW, C_GW_RED);
+    odroid_overlay_draw_text(10, 72, 300, draw_line_content, C_GW_YELLOW, C_GW_MAIN_COLOR);
 
     for (unsigned char i=0;i<8;i++) {
         sprintf(draw_line_content, "%2u%2x%2x%2x%2x%2x%2x%2x%2x%2x%2x%2x%2x%2x%2x%2x%2x",i, \
         gw_ram[i*16], gw_ram[(i*16)+1], gw_ram[(i*16)+2],gw_ram[(i*16)+3],gw_ram[(i*16)+4],gw_ram[(i*16)+5],gw_ram[(i*16)+6],gw_ram[(i*16)+7], \
         gw_ram[(i*16)+8], gw_ram[(i*16)+9], gw_ram[(i*16)+10],gw_ram[(i*16)+11],gw_ram[(i*16)+12],gw_ram[(i*16)+13],gw_ram[(i*16)+14],gw_ram[(i*16)+15]);
-    odroid_overlay_draw_text(10, 80+8*i, 300, draw_line_content, C_GW_YELLOW, C_GW_RED);
+    odroid_overlay_draw_text(10, 80+8*i, 300, draw_line_content, C_GW_YELLOW, C_GW_MAIN_COLOR);
     }
 }
 

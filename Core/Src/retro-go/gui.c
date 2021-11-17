@@ -304,7 +304,7 @@ void gui_draw_header(tab_t *tab)
         odroid_display_write(0, ODROID_SCREEN_HEIGHT - IMAGE_BANNER_HEIGHT - 15, IMAGE_BANNER_WIDTH, IMAGE_BANNER_HEIGHT, tab->img_header);
 
     odroid_overlay_draw_fill_rect(0, ODROID_SCREEN_HEIGHT - 15, ODROID_SCREEN_WIDTH, 1, C_GW_YELLOW);
-    odroid_overlay_draw_fill_rect(0, ODROID_SCREEN_HEIGHT - 13, ODROID_SCREEN_WIDTH, 4, C_GW_RED);
+    odroid_overlay_draw_fill_rect(0, ODROID_SCREEN_HEIGHT - 13, ODROID_SCREEN_WIDTH, 4, C_GW_MAIN_COLOR);
     odroid_overlay_draw_fill_rect(0, ODROID_SCREEN_HEIGHT - 10, ODROID_SCREEN_WIDTH, 2, C_BLACK);
     odroid_overlay_draw_fill_rect(0, ODROID_SCREEN_HEIGHT - 8, ODROID_SCREEN_WIDTH, 2, C_GW_MAIN_COLOR);
     odroid_overlay_draw_fill_rect(0, ODROID_SCREEN_HEIGHT - 6, ODROID_SCREEN_WIDTH, 2, C_BLACK);
@@ -338,7 +338,7 @@ void gui_draw_status(tab_t *tab)
             max_len * odroid_overlay_get_local_font_width(),
             tab->status,
             C_GW_YELLOW,
-            C_GW_RED,
+            C_GW_MAIN_COLOR,
             NULL,
             0);
     }
@@ -351,7 +351,7 @@ void gui_draw_status(tab_t *tab)
             max_len * odroid_overlay_get_font_width(),
             tab->status,
             C_GW_YELLOW,
-            C_GW_RED);
+            C_GW_MAIN_COLOR);
     }
     */
     odroid_overlay_draw_battery(ODROID_SCREEN_WIDTH - 32, 17);
@@ -846,7 +846,7 @@ void gui_draw_coverflow_h(tab_t *tab) //------------
         file = (retro_emulator_file_t *)item->arg;
         if (file->img_size == 0)
         {
-            draw_centered_local_text_line(cover_top + (cover_height - font_height) / 2, s_No_Cover, start_xpos + p_width1 + p_width2 + 10, start_xpos + p_width1 + p_width2 + 10 + cover_width, get_darken_pixel(C_GW_RED, 80), C_BLACK);
+            draw_centered_local_text_line(cover_top + (cover_height - font_height) / 2, s_No_Cover, start_xpos + p_width1 + p_width2 + 10, start_xpos + p_width1 + p_width2 + 10 + cover_width, get_darken_pixel(C_GW_MAIN_COLOR, 80), C_BLACK);
         }
         else
         {
@@ -1017,7 +1017,7 @@ void gui_draw_coverflow_v(tab_t *tab, int start_posx) // ||||||||
     {
         file = (retro_emulator_file_t *)item->arg;
         if (file->img_size == 0)
-            draw_centered_local_text_line(start_ypos + p_height + 16 + (cover_height - font_height) / 2, s_No_Cover, start_posx + 3, start_posx + 3 + cover_width, get_darken_pixel(C_GW_RED, 80), C_BLACK);
+            draw_centered_local_text_line(start_ypos + p_height + 16 + (cover_height - font_height) / 2, s_No_Cover, start_posx + 3, start_posx + 3 + cover_width, get_darken_pixel(C_GW_MAIN_COLOR, 80), C_BLACK);
         else
         {
             JPEG_DecodeToBuffer((uint32_t)(file->img_address), (uint32_t)pCover_Buffer, &jpeg_cover_width, &jpeg_cover_height, 255);

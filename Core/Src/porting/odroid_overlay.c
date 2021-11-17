@@ -426,8 +426,8 @@ void odroid_overlay_draw_dialog(const char *header, odroid_dialog_choice_t *opti
     if (header)
     {
         odroid_overlay_draw_rect(box_x - 1, box_y - 1, box_width + 2, row_height + 8, 1, box_border_color);
-        odroid_overlay_draw_fill_rect(box_x, box_y, box_width, row_height + 7, C_GW_RED);
-        odroid_overlay_draw_local_text_line(x, box_y + 5, inner_width, header, C_GW_YELLOW, C_GW_RED, NULL, 0);
+        odroid_overlay_draw_fill_rect(box_x, box_y, box_width, row_height + 7, C_GW_MAIN_COLOR);
+        odroid_overlay_draw_local_text_line(x, box_y + 5, inner_width, header, C_GW_YELLOW, C_GW_MAIN_COLOR, NULL, 0);
         odroid_overlay_draw_fill_rect(x + inner_width - 2, box_y + 5, 4, 4, C_GW_YELLOW);
         odroid_overlay_draw_fill_rect(x + inner_width, box_y + 11, 2, 4, C_GW_OPAQUE_YELLOW);
         y += row_height + 8;
@@ -827,10 +827,10 @@ static void draw_game_status_bar(runtime_stats_t stats)
              (int)stats.busyPercent, (int)fmod(stats.busyPercent * 10, 10));
     snprintf(bottom, 40, "%s", ACTIVE_FILE ? (ACTIVE_FILE->name) : "N/A");
 
-    odroid_overlay_draw_fill_rect(0, 0, width, height, C_GW_RED);
-    odroid_overlay_draw_fill_rect(0, ODROID_SCREEN_HEIGHT - height, width, height, C_GW_RED);
-    odroid_overlay_draw_local_text(0, pad_text, width, header, C_GW_YELLOW, C_GW_RED, 0);
-    odroid_overlay_draw_local_text(0, ODROID_SCREEN_HEIGHT - height + pad_text, width, bottom, C_GW_YELLOW, C_GW_RED, 0);
+    odroid_overlay_draw_fill_rect(0, 0, width, height, C_GW_MAIN_COLOR);
+    odroid_overlay_draw_fill_rect(0, ODROID_SCREEN_HEIGHT - height, width, height, C_GW_MAIN_COLOR);
+    odroid_overlay_draw_local_text(0, pad_text, width, header, C_GW_YELLOW, C_GW_MAIN_COLOR, 0);
+    odroid_overlay_draw_local_text(0, ODROID_SCREEN_HEIGHT - height + pad_text, width, bottom, C_GW_YELLOW, C_GW_MAIN_COLOR, 0);
     odroid_overlay_draw_battery(width - 26, 3);
 }
 

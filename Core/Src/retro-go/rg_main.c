@@ -503,11 +503,11 @@ void app_check_data_loop()
             uint8_t pt = img_error[2 * y];
             for (int x = 0; x < 8; x++)
                 if (pt & (0x80 >> x))
-                    odroid_overlay_draw_fill_rect((12 + x) * 8, (9 + y) * 8, 8, 8, C_GW_RED);
+                    odroid_overlay_draw_fill_rect((12 + x) * 8, (9 + y) * 8, 8, 8, C_GW_MAIN_COLOR);
             pt = img_error[2 * y + 1];
             for (int x = 0; x < 8; x++)
                 if (pt & (0x80 >> x))
-                    odroid_overlay_draw_fill_rect((20 + x) * 8, (9 + y) * 8, 8, 8, C_GW_RED);
+                    odroid_overlay_draw_fill_rect((20 + x) * 8, (9 + y) * 8, 8, 8, C_GW_MAIN_COLOR);
         }
         odroid_overlay_draw_logo(96, 42, C_GW_YELLOW);
         odroid_overlay_draw_text_line(15 * 8, 20 * 8, 10 * 8, "DATA ERROR", C_RED, C_BLACK);
