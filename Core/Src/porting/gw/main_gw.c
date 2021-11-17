@@ -253,7 +253,7 @@ static void gw_debug_bar()
     else
         sprintf(debugMsg, "%04dus EMU:%04dus FX:%04dus %d%%+%d", loop_duration_us, proc_duration_us, blit_duration_us, busy_percent, overflow_count);
 
-    odroid_overlay_draw_text(0, 0, GW_SCREEN_WIDTH, debugMsg, C_GW_YELLOW, C_GW_RED);
+    odroid_overlay_draw_text(0, 0, GW_SCREEN_WIDTH, debugMsg, C_GW_YELLOW, C_GW_MAIN_COLOR);
 
 #endif
 }

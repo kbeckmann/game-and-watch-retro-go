@@ -161,7 +161,7 @@ static void draw_progress(flashapp_t *flashapp)
                                       PROGRESS_Y_OFFSET,
                                       PROGRESS_WIDTH,
                                       PROGRESS_HEIGHT,
-                                      C_RED);
+                                      C_GW_MAIN_COLOR);
 
         odroid_overlay_draw_fill_rect(PROGRESS_X_OFFSET,
                                       PROGRESS_Y_OFFSET,
@@ -181,7 +181,7 @@ static void redraw(flashapp_t *flashapp)
 
     // Empty logo
     odroid_overlay_draw_fill_rect(0, ODROID_SCREEN_HEIGHT - IMAGE_BANNER_HEIGHT - 15,
-                                  IMAGE_BANNER_WIDTH, IMAGE_BANNER_HEIGHT, C_GW_RED);
+                                  IMAGE_BANNER_WIDTH, IMAGE_BANNER_HEIGHT, C_GW_MAIN_COLOR);
 
     draw_progress(flashapp);
     lcd_swap();

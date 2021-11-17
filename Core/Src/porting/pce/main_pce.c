@@ -451,7 +451,7 @@ void pce_osd_gfx_blit(bool drawFrame) {
 #ifdef PCE_SHOW_DEBUG
     char debugMsg[100];
     sprintf(debugMsg,"FPS:%d.%d,W:%d,H:%d,L:%s", framePerSecond / 10,framePerSecond % 10,current_width,current_height,pce_log);
-    odroid_overlay_draw_text(0,0, GW_LCD_WIDTH, debugMsg,  C_GW_YELLOW, C_GW_RED);
+    odroid_overlay_draw_text(0,0, GW_LCD_WIDTH, debugMsg,  C_GW_YELLOW, C_GW_MAIN_COLOR);
 #endif
 
     common_ingame_overlay();

@@ -46,7 +46,7 @@ typedef enum {
   BSOD_USAGEFAULT,
   BSOD_WATCHDOG,
   BSOD_OTHER,
-  
+
   BSOD_COUNT,
 } BSOD_t;
 
@@ -141,6 +141,13 @@ void wdog_refresh(void);
 #define BTN_Up_GPIO_Port GPIOD
 #define BTN_B_Pin GPIO_PIN_5
 #define BTN_B_GPIO_Port GPIOD
+
+// Zelda only buttons; they are not connected on mario.
+#define BTN_START_Pin GPIO_PIN_11
+#define BTN_START_GPIO_Port GPIOC
+#define BTN_SELECT_Pin GPIO_PIN_12
+#define BTN_SELECT_GPIO_Port GPIOC
+
 /* USER CODE BEGIN Private defines */
 
 #define BOOT_MAGIC_STANDBY  0xfedebeda

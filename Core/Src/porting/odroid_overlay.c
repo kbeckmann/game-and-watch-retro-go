@@ -231,7 +231,7 @@ void odroid_overlay_draw_battery(int x_pos, int y_pos)
     odroid_battery_charge_state_t battery_state = odroid_input_read_battery().state;
     uint16_t color_fill = C_GW_YELLOW;
     uint16_t color_border = C_GW_YELLOW;
-    uint16_t color_empty = C_GW_RED;
+    uint16_t color_empty = C_GW_MAIN_COLOR;
     uint16_t color_battery = C_BLACK;
     uint16_t width_fill = 20.f / 100 * percentage;
     uint16_t width_empty = 20 - width_fill;

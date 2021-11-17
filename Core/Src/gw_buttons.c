@@ -17,6 +17,9 @@ uint32_t buttons_get() {
     bool pause = HAL_GPIO_ReadPin(BTN_PAUSE_GPIO_Port, BTN_PAUSE_Pin) == GPIO_PIN_RESET;
     bool power = HAL_GPIO_ReadPin(BTN_PWR_GPIO_Port, BTN_PWR_Pin) == GPIO_PIN_RESET;
 
+    game |= HAL_GPIO_ReadPin(BTN_START_GPIO_Port, BTN_START_Pin) == GPIO_PIN_RESET;
+    time |= HAL_GPIO_ReadPin(BTN_SELECT_GPIO_Port, BTN_SELECT_Pin) == GPIO_PIN_RESET;
+
     return (
         left | (up << 1) | (right << 2) | (down << 3) | (a << 4) | (b << 5) |
         (time << 6) | (game << 7) | (pause << 8) | (power << 9)
