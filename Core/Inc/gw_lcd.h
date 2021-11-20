@@ -38,6 +38,7 @@ void* lcd_get_active_buffer(void);
 void* lcd_get_inactive_buffer(void);
 void lcd_set_buffers(uint16_t *buf1, uint16_t *buf2);
 void lcd_wait_for_vblank(void);
+uint32_t is_lcd_swap_pending(void);
 
 // To be used by fault handlers
 void lcd_reset_active_buffer(void);
