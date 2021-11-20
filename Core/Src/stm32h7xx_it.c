@@ -19,6 +19,8 @@
 /* USER CODE END Header */
 
 /* Includes ------------------------------------------------------------------*/
+#include <stdbool.h>
+
 #include "main.h"
 #include "stm32h7xx_it.h"
 /* Private includes ----------------------------------------------------------*/
@@ -53,6 +55,42 @@
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
+///////////////////////////////////////////////////////////////////////////////
+// Inspired by
+// Source: https://github.com/memfault/interrupt/blob/master/example/cortex-m-fault-debug/startup.c
+// License: Content released under CC-by-SA license
+// Copyright (c) 2019 Memfault, Inc.
+
+typedef struct __attribute__((packed)) ContextStateFrame {
+  uint32_t r0;
+  uint32_t r1;
+  uint32_t r2;
+  uint32_t r3;
+  uint32_t r12;
+  uint32_t lr;
+  uint32_t return_address;
+  uint32_t xpsr;
+} sContextStateFrame;
+
+__attribute__((optimize("O0")))
+void common_fault_handler_c(sContextStateFrame *frame, int type)
+{
+  BSOD(type, frame->return_address, frame->lr);
+}
+
+#define HARDFAULT_HANDLING_ASM(_x)               \
+  __asm volatile(                                \
+      "tst lr, #4 \n"                            \
+      "ite eq \n"                                \
+      "mrseq r0, msp \n"                         \
+      "mrsne r0, psp \n"                         \
+      "movs r1, %0 \n"                           \
+      "b common_fault_handler_c \n"              \
+      : : "r" (_x)                               )
+
+///////////////////////////////////////////////////////////////////////////////
+
 
 /* USER CODE END 0 */
 
@@ -89,18 +127,7 @@ void NMI_Handler(void)
   */
 void HardFault_Handler(void)
 {
-  /* USER CODE BEGIN HardFault_IRQn 0 */
-  uint32_t stack;
-  uint32_t *pStack = &stack;
-
-  BSOD(BSOD_HARDFAULT, pStack[9], pStack[8]);
-
-  /* USER CODE END HardFault_IRQn 0 */
-  while (1)
-  {
-    /* USER CODE BEGIN W1_HardFault_IRQn 0 */
-    /* USER CODE END W1_HardFault_IRQn 0 */
-  }
+  HARDFAULT_HANDLING_ASM(BSOD_HARDFAULT);
 }
 
 /**
@@ -108,18 +135,7 @@ void HardFault_Handler(void)
   */
 void MemManage_Handler(void)
 {
-  /* USER CODE BEGIN MemoryManagement_IRQn 0 */
-  uint32_t stack;
-  uint32_t *pStack = &stack;
-
-  BSOD(BSOD_MEMFAULT, pStack[9], pStack[8]);
-
-  /* USER CODE END MemoryManagement_IRQn 0 */
-  while (1)
-  {
-    /* USER CODE BEGIN W1_MemoryManagement_IRQn 0 */
-    /* USER CODE END W1_MemoryManagement_IRQn 0 */
-  }
+  HARDFAULT_HANDLING_ASM(BSOD_MEMFAULT);
 }
 
 /**
@@ -127,19 +143,7 @@ void MemManage_Handler(void)
   */
 void BusFault_Handler(void)
 {
-  /* USER CODE BEGIN BusFault_IRQn 0 */
-
-  uint32_t stack;
-  uint32_t *pStack = &stack;
-
-  BSOD(BSOD_BUSFAULT, pStack[9], pStack[8]);
-
-  /* USER CODE END BusFault_IRQn 0 */
-  while (1)
-  {
-    /* USER CODE BEGIN W1_BusFault_IRQn 0 */
-    /* USER CODE END W1_BusFault_IRQn 0 */
-  }
+  HARDFAULT_HANDLING_ASM(BSOD_BUSFAULT);
 }
 
 /**
@@ -147,19 +151,7 @@ void BusFault_Handler(void)
   */
 void UsageFault_Handler(void)
 {
-  /* USER CODE BEGIN UsageFault_IRQn 0 */
-
-  uint32_t stack;
-  uint32_t *pStack = &stack;
-
-  BSOD(BSOD_USAGEFAULT, pStack[9], pStack[8]);
-
-  /* USER CODE END UsageFault_IRQn 0 */
-  while (1)
-  {
-    /* USER CODE BEGIN W1_UsageFault_IRQn 0 */
-    /* USER CODE END W1_UsageFault_IRQn 0 */
-  }
+  HARDFAULT_HANDLING_ASM(BSOD_USAGEFAULT);
 }
 
 /**

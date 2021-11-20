@@ -175,9 +175,9 @@ void HAL_LTDC_ReloadEventCallback (LTDC_HandleTypeDef *hltdc) {
   }
 }
 
-uint32_t is_lcd_swap_pending()
+uint32_t is_lcd_swap_pending(void)
 {
-  return (uint32_t)(hltdc.Instance->SRCR) & ( LTDC_SRCR_VBR | LTDC_SRCR_IMR);
+  return (uint32_t) ((hltdc.Instance->SRCR) & (LTDC_SRCR_VBR | LTDC_SRCR_IMR));
 }
 
 void lcd_swap(void)

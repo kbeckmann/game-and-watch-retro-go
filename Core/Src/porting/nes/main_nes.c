@@ -410,18 +410,14 @@ static bool palette_update_cb(odroid_dialog_choice_t *option, odroid_dialog_even
       odroid_settings_Palette_set(pal);
       ppu_setopt(PPU_PALETTE_RGB, pal);
    }
-
-   char* pal_name = ppu_getpalette(pal)->name;
-   char* pal_short = strchr( pal_name, ' ');
-   if (pal_short) pal_name = pal_short + 1;
-
-   sprintf(option->value, "%10s", pal_name);
+   sprintf(option->value, "%10s", ppu_getpalette(pal)->name);
    return event == ODROID_DIALOG_ENTER;
 }
 
 void osd_getinput(void)
 {
     uint16 pad0 = 0;
+    char pal_name[16];
 
     wdog_refresh();
 

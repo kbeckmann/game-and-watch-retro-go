@@ -102,7 +102,7 @@ extern RTC_HandleTypeDef hrtc;
 /* Exported functions prototypes ---------------------------------------------*/
 
 void Error_Handler(void);
-void BSOD(BSOD_t fault, void *pc, void *lr) __attribute__((noreturn));
+void BSOD(BSOD_t fault, uint32_t pc, uint32_t lr) __attribute__((noreturn));
 
 void store_erase(const uint8_t *flash_ptr, uint32_t size);
 void store_save(const uint8_t *flash_ptr, const uint8_t *data, size_t size);

@@ -1,5 +1,12 @@
 #include <odroid_system.h>
 #include <string.h>
+#include "shared.h"
+
+// shared.h includes sms.h which defined CYCLES_PER_LINE.
+// hard_pce.h defines it to the desired value.
+// It's a hack, but it'll do.
+#undef CYCLES_PER_LINE
+
 #include <hard_pce.h>
 #include <romdb_pce.h>
 #include "lz4_depack.h"
@@ -11,11 +18,11 @@
 #include "gw_lcd.h"
 #include "gw_linker.h"
 #include "gw_buttons.h"
-#include "shared.h"
 #include "rom_manager.h"
 #include "common.h"
 #include "sound_pce.h"
 #include "appid.h"
+#include "lzma.h"
 
 //#define PCE_SHOW_DEBUG
 //#define XBUF_WIDTH 	(480 + 32)
