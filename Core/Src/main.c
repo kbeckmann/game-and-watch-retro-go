@@ -128,7 +128,7 @@ const char *fault_list[] = {
   [BSOD_OTHER] = "Other",
 };
 
-__attribute__((optimize("-O0"))) void BSOD(BSOD_t fault, void *pc, void *lr)
+__attribute__((optimize("-O0"))) void BSOD(BSOD_t fault, uint32_t pc, uint32_t lr)
 {
   char msg[256];
   size_t i = 0;
@@ -139,7 +139,7 @@ __attribute__((optimize("-O0"))) void BSOD(BSOD_t fault, void *pc, void *lr)
 
   __disable_irq();
 
-  snprintf(msg, sizeof(msg), "FATAL EXCEPTION: %s %s\nPC=%p LR=%p\n", fault_list[fault], GIT_HASH, pc, lr);
+  snprintf(msg, sizeof(msg), "FATAL EXCEPTION: %s %s\nPC=0x%08lx LR=0x%08lx\n", fault_list[fault], GIT_HASH, pc, lr);
 
   lcd_sync();
   lcd_reset_active_buffer();
@@ -1368,11 +1368,11 @@ __attribute__((optimize("-O0"))) void Error_Handler(void)
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
 
-  // Hacky way to get the return address
-  uint32_t stack;
-  uint32_t *pStack = &stack;
-
-  BSOD(BSOD_OTHER, (void *) pStack[3], 0);
+  uint32_t lr;
+  __ASM volatile(                                \
+      "mov %0, lr \n"                            \
+      : "=r" (lr)                                );
+  BSOD(BSOD_OTHER, 0, lr);
 
   /* USER CODE END Error_Handler_Debug */
 }
