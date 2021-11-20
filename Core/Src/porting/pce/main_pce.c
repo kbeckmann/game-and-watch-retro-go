@@ -1,5 +1,12 @@
 #include <odroid_system.h>
 #include <string.h>
+#include "shared.h"
+
+// shared.h includes sms.h which defined CYCLES_PER_LINE.
+// hard_pce.h defines it to the desired value.
+// It's a hack, but it'll do.
+#undef CYCLES_PER_LINE
+
 #include <hard_pce.h>
 #include <romdb_pce.h>
 #include "lz4_depack.h"
@@ -11,17 +18,11 @@
 #include "gw_lcd.h"
 #include "gw_linker.h"
 #include "gw_buttons.h"
-#include "shared.h"
 #include "rom_manager.h"
 #include "common.h"
 #include "sound_pce.h"
 #include "appid.h"
 #include "lzma.h"
-
-// TODO: #167
-//       Included from Core/Src/porting/pce/main_pce.c, CYCLES_PER_LINE is defined to 455 in retro-go-stm32/huexpress-go/components/huexpress/engine/hard_pce.h.
-//       But because of a later include, shared.h -> smsplus/sms.h defines it to 228.
-//       455 seems like the correct value, but I have no clue what this changes.
 
 //#define PCE_SHOW_DEBUG
 //#define XBUF_WIDTH 	(480 + 32)
