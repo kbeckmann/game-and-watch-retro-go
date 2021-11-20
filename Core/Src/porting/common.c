@@ -163,7 +163,7 @@ void common_emu_input_loop(odroid_gamepad_state_t *joystick, odroid_dialog_choic
 #if ENABLE_SCREENSHOT
                 printf("Capturing screenshot...\n");
                 odroid_audio_mute(true);
-                store_save(framebuffer_capture, lcd_get_inactive_buffer(), sizeof(framebuffer_capture));
+                store_save((uint8_t *) framebuffer_capture, lcd_get_inactive_buffer(), sizeof(framebuffer_capture));
                 odroid_audio_mute(false);
                 printf("Screenshot captured\n");
 #else

@@ -85,7 +85,7 @@ void odroid_settings_init()
     memcpy(&persistent_config_ram, &persistent_config_flash, sizeof(persistent_config_t));
 
     if (persistent_config_ram.magic != CONFIG_MAGIC) {
-        printf("Config: Magic mismatch. Expected 0x%08lx, got 0x%08lx\n", CONFIG_MAGIC, persistent_config_ram.magic);
+        printf("Config: Magic mismatch. Expected 0x%08x, got 0x%08lx\n", CONFIG_MAGIC, persistent_config_ram.magic);
         odroid_settings_reset();
         return;
     }
@@ -98,7 +98,7 @@ void odroid_settings_init()
 
     // Calculate crc32 of the whole struct with the crc32 value set to 0
     persistent_config_ram.crc32 = 0;
-    persistent_config_ram.crc32 = crc32_le(0, &persistent_config_ram, sizeof(persistent_config_t));
+    persistent_config_ram.crc32 = crc32_le(0, (unsigned char *) &persistent_config_ram, sizeof(persistent_config_t));
 
     if (persistent_config_ram.crc32 != persistent_config_flash.crc32) {
         printf("Config: CRC32 mismatch. Expected 0x%08lx, got 0x%08lx\n", persistent_config_ram.crc32, persistent_config_flash.crc32);
@@ -111,7 +111,7 @@ void odroid_settings_commit()
 {
     // Calculate crc32 of the whole struct with the crc32 value set to 0
     persistent_config_ram.crc32 = 0;
-    persistent_config_ram.crc32 = crc32_le(0, &persistent_config_ram, sizeof(persistent_config_t));
+    persistent_config_ram.crc32 = crc32_le(0, (unsigned char *) &persistent_config_ram, sizeof(persistent_config_t));
 
     store_save((const uint8_t *) &persistent_config_flash, (const uint8_t *) &persistent_config_ram, sizeof(persistent_config_t));
 }

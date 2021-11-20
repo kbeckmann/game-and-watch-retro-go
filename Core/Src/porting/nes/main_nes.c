@@ -411,17 +411,15 @@ static bool palette_update_cb(odroid_dialog_choice_t *option, odroid_dialog_even
       ppu_setopt(PPU_PALETTE_RGB, pal);
    }
 
-   char* pal_name = ppu_getpalette(pal)->name;
-   char* pal_short = strchr( pal_name, ' ');
-   if (pal_short) pal_name = pal_short + 1;
+   strcpy(option->value, ppu_getpalette(pal)->name);
 
-   sprintf(option->value, "% -9s", pal_name);
    return event == ODROID_DIALOG_ENTER;
 }
 
 void osd_getinput(void)
 {
     uint16 pad0 = 0;
+    char pal_name[16];
 
     wdog_refresh();
 
@@ -429,7 +427,7 @@ void osd_getinput(void)
     odroid_input_read_gamepad(&joystick);
 
     odroid_dialog_choice_t options[] = {
-            {100, "Palette", "Default", 1, &palette_update_cb},
+            {100, "Palette", pal_name, 1, &palette_update_cb},
             // {101, "More...", "", 1, &advanced_settings_cb},
             ODROID_DIALOG_CHOICE_LAST
     };

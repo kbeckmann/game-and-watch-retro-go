@@ -129,10 +129,7 @@ void gui_save_current_tab()
 {
     tab_t *tab = gui_get_current_tab();
 
-    sprintf(str_buffer, "Sel.%.11s", tab->name);
-    // odroid_settings_int32_set(str_buffer, tab->listbox.cursor);
     odroid_settings_MainMenuCursor_set(tab->listbox.cursor);
-    // odroid_settings_int32_set("SelectedTab", gui.selected);
     odroid_settings_MainMenuSelectedTab_set(gui.selected);
     odroid_settings_commit();
 }

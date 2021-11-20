@@ -3,8 +3,8 @@
 #include "odroid_system.h"
 #include "rom_manager.h"
 #include "gw_linker.h"
-
-static panic_trace_t *panicTrace = (void *)0x0;
+#include "gui.h"
+#include "main.h"
 
 static rg_app_desc_t currentApp;
 static runtime_stats_t statistics;
@@ -14,16 +14,7 @@ static uint skip;
 void odroid_system_panic(const char *reason, const char *function, const char *file)
 {
     printf("*** PANIC: %s\n  *** FUNCTION: %s\n  *** FILE: %s\n", reason, function, file);
-
-    strcpy(panicTrace->message, reason);
-    strcpy(panicTrace->file, file);
-    strcpy(panicTrace->function, function);
-
-    panicTrace->magicWord = PANIC_TRACE_MAGIC;
-
-    while(1) {
-        ;
-    }
+    assert(0);
 }
 
 void odroid_system_init(int appId, int sampleRate)
@@ -115,7 +106,7 @@ void odroid_system_switch_app(int app)
          * harmless.
          */
         *((uint32_t *)0x2001FFF8) = 0x544F4F42; // "BOOT"
-        *((uint32_t *)0x2001FFFC) = &__INTFLASH__; // vector table
+        *((uint32_t *)0x2001FFFC) = (uint32_t) &__INTFLASH__; // vector table
 
         NVIC_SystemReset();
         break;

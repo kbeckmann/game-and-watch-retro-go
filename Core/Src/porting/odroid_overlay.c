@@ -110,7 +110,7 @@ int odroid_overlay_draw_text(uint16_t x_pos, uint16_t y_pos, uint16_t width, con
     }
 
     int line_len = width / odroid_overlay_get_font_width();
-    char buffer[line_len + 1];
+    char buffer[ODROID_SCREEN_WIDTH / 8 + 1];
 
     for (int pos = 0; pos < text_len;)
     {

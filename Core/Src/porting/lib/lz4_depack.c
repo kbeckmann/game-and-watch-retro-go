@@ -1,8 +1,8 @@
 
 #include <stdlib.h>
+#include <string.h>
 
 #include "lz4_depack.h"
-
 /*  original source code of lz4_depack() came from:
 https://github.com/jibsen/blz4/blob/master/lz4_depack.c
 please read the joined notice. This source is not altered.
