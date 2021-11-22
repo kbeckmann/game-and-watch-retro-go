@@ -10,14 +10,27 @@
 //If you can translate, please feed back the translation results to me, thank you
 //translate by  Augen(히힛마스터): 
 
-//Core\Src\porting\gb\main_gb.c
+//Core\Src\porting\gb\main_gb.c =======================================
 #define s_Palette               "팔레트"
+//=====================================================================
 
-//Core\Src\porting\nes\main_nes.c
+//Core\Src\porting\nes\main_nes.c =====================================
 //#define s_Palette "Palette" dul
 #define s_Default               "기본"
+//=====================================================================
 
-//Core\Src\porting\odroid_overlay.c
+//Core\Src\porting\gw\main_gw.c =======================================
+#define s_copy_RTC_to_GW_time   "copy RTC to G&W time"
+#define s_copy_GW_time_to_RTC   "copy G&W time to RTC"
+#define s_LCD_filter            "LCD filter"
+#define s_Display_RAM           "Display RAM"
+#define s_Press_ACL             "Press ACL" 
+#define s_filter_0_none         "0-none"
+#define s_filter_1_medium       "1-medium"
+#define s_filter_2_high         "2-high"
+//=====================================================================
+
+//Core\Src\porting\odroid_overlay.c ===================================
 #define s_Full                  0x07
 #define s_Fill                  0x08
 
@@ -60,7 +73,9 @@
 #define s_Theme_CoverLightV     "커버플로우 V"
 #define s_Theme_CoverLightH     "커버플로우"
 
-//Core\Src\retro-go\rg_emulators.c
+//=====================================================================
+
+//Core\Src\retro-go\rg_emulators.c ====================================
 
 #define s_Title_Date_Format               "%02d-%02d %s %02d:%02d:%02d"
 #define fmt_Title_Date_Format(outstr,datefmt,day,month,weekday,hour,minutes,seconds) sprintf(outstr,datefmt,day,month,weekday,hour,minutes,seconds) 
@@ -78,8 +93,9 @@
 #define s_Add_favorite          "즐겨찾기 추가"
 #define s_Delete_save           "저장데이터 삭제"
 #define s_Confiem_del_save      "저장 데이터를 삭제하시겠습니까?"
+//=====================================================================
 
-//Core\Src\retro-go\rg_main.c
+//Core\Src\retro-go\rg_main.c =========================================
 #define s_Second_Unit               "초"
 #define s_Version                   "Ver.   :"
 #define s_Author                    "By     :"
@@ -129,4 +145,5 @@
 
 #define s_Date_Format               "%02d.%02d.20%02d %s"
 #define fmtDate(outstr,datefmt,day,month,year,weekday) sprintf(outstr,datefmt,day,month,year,weekday) 
+//=====================================================================
 

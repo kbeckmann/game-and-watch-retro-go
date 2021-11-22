@@ -8,14 +8,27 @@
 #pragma once
 //Stand 繁体中文
 
-//Core\Src\porting\gb\main_gb.c
+//Core\Src\porting\gb\main_gb.c =======================================
 #define s_Palette               "調色板"
+//=====================================================================
 
-//Core\Src\porting\nes\main_nes.c
+//Core\Src\porting\nes\main_nes.c =====================================
 //#define s_Palette "調色板" dul
 #define s_Default               "默認"
+//=====================================================================
 
-//Core\Src\porting\odroid_overlay.c
+//Core\Src\porting\gw\main_gw.c =======================================
+#define s_copy_RTC_to_GW_time   "從系統時間同步"
+#define s_copy_GW_time_to_RTC   "同步時間到系統"
+#define s_LCD_filter            "螢幕抗鋸齒"
+#define s_Display_RAM           "顯示記憶體資訊"
+#define s_Press_ACL             "重置遊戲" 
+#define s_filter_0_none         "關"
+#define s_filter_1_medium       "中"
+#define s_filter_2_high         "高"
+//=====================================================================
+
+//Core\Src\porting\odroid_overlay.c ===================================
 #define s_Full                  0x07
 #define s_Fill                  0x08
 
@@ -57,9 +70,10 @@
 #define s_Theme_CoverH          "水平滾動"
 #define s_Theme_CoverLightV     "垂直歡滾"
 #define s_Theme_CoverLightH     "水平歡滾"
+//=====================================================================
 
 
-//Core\Src\retro-go\rg_emulators.c
+//Core\Src\retro-go\rg_emulators.c ====================================
 
 #define s_Title_Date_Format               "%02d-%02d 周%s %02d:%02d:%02d"
 #define fmt_Title_Date_Format(outstr,datefmt,day,month,weekday,hour,minutes,seconds) sprintf(outstr,datefmt,month,day,weekday,hour,minutes,seconds) 
@@ -76,15 +90,16 @@
 #define s_Add_favorite          "★ 添加收藏"
 #define s_Delete_save           "□ 刪除進度"
 #define s_Confiem_del_save      "您確認要刪除已保存的遊戲進度？"
+//=====================================================================
 
-//Core\Src\retro-go\rg_main.c
+//Core\Src\retro-go\rg_main.c =========================================
 #define s_Second_Unit               "秒"
 #define s_Version                   "版    本： "
 #define s_Author                    "特別貢獻： "
 #define s_Author_                   "        ： "
 #define s_UI_Mod                    "介面美化： "
 #define s_Lang                      "正體中文㊣ "
-#define s_LangAuthor                "中秋快樂"
+#define s_LangAuthor                "撓漿糊的"
 #define s_Debug_menu                "∞ 調試信息"
 #define s_Reset_settings            "≡ 重置設定"
 //#define s_Close                   "Close"
@@ -127,3 +142,4 @@
 
 #define s_Date_Format               "20%02d年%02d月%02d日 周%s"
 #define fmtDate(x,fmt,d,m,y,w) sprintf(x,fmt,y,m,d,w) 
+//=====================================================================

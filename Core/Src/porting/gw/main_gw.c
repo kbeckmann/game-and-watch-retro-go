@@ -14,6 +14,7 @@
 
 #include "common.h"
 #include "rom_manager.h"
+#include "rg_i18n.h"
 
 /* G&W system support */
 #include "gw_system.h"
@@ -337,9 +338,9 @@ static bool gw_debug_submenu_set_deflicker(odroid_dialog_choice_t *option, odroi
     if (event == ODROID_DIALOG_NEXT)
         flag_lcd_deflicker_level = flag_lcd_deflicker_level < max_flag_lcd_deflicker_level ? flag_lcd_deflicker_level + 1 : 0;
 
-    if (flag_lcd_deflicker_level == 0) strcpy(option->value, "0-none");
-    if (flag_lcd_deflicker_level == 1) strcpy(option->value, "1-medium");
-    if (flag_lcd_deflicker_level == 2) strcpy(option->value, "2-high");
+    if (flag_lcd_deflicker_level == 0) strcpy(option->value, s_filter_0_none);
+    if (flag_lcd_deflicker_level == 1) strcpy(option->value, s_filter_1_medium);
+    if (flag_lcd_deflicker_level == 2) strcpy(option->value, s_filter_2_high);
 
     return event == ODROID_DIALOG_ENTER;
 }
@@ -355,8 +356,8 @@ static bool gw_debug_submenu_display_ram(odroid_dialog_choice_t *option, odroid_
     if (event == ODROID_DIALOG_PREV || event == ODROID_DIALOG_NEXT)
         debug_display_ram = debug_display_ram == 0 ? 1 : 0;
 
-    if (debug_display_ram == 0) strcpy(option->value, "no ");
-    if (debug_display_ram == 1) strcpy(option->value, "yes");
+    if (debug_display_ram == 0) strcpy(option->value, s_No);
+    if (debug_display_ram == 1) strcpy(option->value, s_Yes);
 
     return event == ODROID_DIALOG_ENTER;
 }
@@ -473,8 +474,8 @@ static void gw_display_ram_overlay(){
 static odroid_dialog_choice_t options[] = {
   //  {310, "Press TIME", "", 0, &gw_debug_submenu_press_time},
   //  {320, "Press ALARM", "", 0, &gw_debug_submenu_press_alarm},
-    {330, "copy RTC to G&W time", "", 1, &gw_debug_submenu_autoset_time},
-    {331, "copy G&W time to RTC", "", 1, &gw_debug_submenu_autoget_time},
+    {330, s_copy_RTC_to_GW_time, "", 1, &gw_debug_submenu_autoset_time},
+    {331, s_copy_GW_time_to_RTC, "", 1, &gw_debug_submenu_autoget_time},
     #ifdef DEBUG_TIME
     // {340, "Hour regH", hour_addr_value_msb, 1, &gw_debug_submenu_set_hour_addr_msb},
     // {341, "Hour regL", hour_addr_value_lsb, 1, &gw_debug_submenu_set_hour_addr_lsb},
@@ -483,9 +484,9 @@ static odroid_dialog_choice_t options[] = {
     // {352, "Sec  regH", sec_addr_value_msb, 1, &gw_debug_submenu_set_sec_addr_msb},
     // {353, "Sec  regL", sec_addr_value_lsb, 1, &gw_debug_submenu_set_sec_addr_lsb},
     #endif
-    {360, "LCD filter", LCD_deflicker_value, 1, &gw_debug_submenu_set_deflicker},
-    {370, "Display RAM", display_ram_value, 1, &gw_debug_submenu_display_ram},
-    {380, "Press ACL", "", 1, &gw_debug_submenu_autoclear},
+    {360, s_LCD_filter, LCD_deflicker_value, 1, &gw_debug_submenu_set_deflicker},
+    {370, s_Display_RAM, display_ram_value, 1, &gw_debug_submenu_display_ram},
+    {380, s_Press_ACL, "", 1, &gw_debug_submenu_autoclear},
     ODROID_DIALOG_CHOICE_LAST};
 
 /* Main */
