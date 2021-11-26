@@ -22,6 +22,9 @@ EXTFLASH_OFFSET ?= 0
 # Configure Game & Watch target device mario|zelda
 GNW_TARGET ?= mario
 
+# Use the full 256KB of BANK_X. Requires patched openocd
+EXTENDED ?= 0
+
 # Set the preprocessor options
 ifeq ($(GNW_TARGET),mario)
 	GNW_TARGET_ZELDA = 0
@@ -38,7 +41,7 @@ ifeq ($(LARGE_FLASH),1)
 	# 16MB
 	EXTFLASH_SIZE_MB ?= 16
 else
-	# 4MB for Zelda otherwise 1MB 
+	# 4MB for Zelda otherwise 1MB
 	ifeq ($(GNW_TARGET),zelda)
 		EXTFLASH_SIZE_MB ?= 4
 	else
@@ -333,7 +336,11 @@ LDFLAGS += -Wl,--defsym=__INTFLASH__=$(INTFLASH_ADDRESS)
 # LDFLAGS
 #######################################
 # link script
+ifeq ($(EXTENDED),1)
+LDSCRIPT ?= STM32H7B0VBTx_FLASH_EXTENDED.ld
+else
 LDSCRIPT ?= STM32H7B0VBTx_FLASH.ld
+endif
 
 # libraries
 LIBS = -lc -lm -lnosys
