@@ -399,7 +399,7 @@ int odroid_overlay_dialog(const char *header, odroid_dialog_choice_t *options, i
 
         odroid_overlay_draw_dialog(header, options, sel);
         lcd_swap();
-        HAL_Delay(20);
+        lcd_wait_for_vblank();
     }
 
     odroid_input_wait_for_key(last_key, false);

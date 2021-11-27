@@ -222,7 +222,7 @@ void lcd_wait_for_vblank(void)
 {
   uint32_t old_counter = frame_counter;
   while (old_counter == frame_counter) {
-    __asm("nop");
+    cpumon_sleep();
   }
 }
 
