@@ -70,7 +70,7 @@ __RAM_UC_LENGTH__   = 300K;
 __RAM_CORE_LENGTH__ = 68K;
 __RAM_EMU_LENGTH__  = 1024K - __RAM_UC_LENGTH__ - __RAM_CORE_LENGTH__;
 __AHBRAM_LENGTH__   = 128K;
-__FLASH_LENGTH__    = 128K;
+__FLASH_LENGTH__    = 256K;
 
 __EXTFLASH_TOTAL_LENGTH__ = DEFINED(__EXTFLASH_TOTAL_LENGTH__) ? __EXTFLASH_TOTAL_LENGTH__ : 1024K;
 __EXTFLASH_OFFSET__ = DEFINED(__EXTFLASH_OFFSET__) ? __EXTFLASH_OFFSET__ : 0;
@@ -208,31 +208,15 @@ SECTIONS
   ._extflash :
   {
     . = ALIGN(4);
-    __extflash_font_start__ = .;
-    *(.extflash_font)
-    . = ALIGN(4);
-    __extflash_font_end__ = .;
     __extflash_emu_data_start__ = .;
     *(.extflash_emu_data)
     . = ALIGN(4);
     __extflash_emu_data_end__ = .;
     . = ALIGN(4);
-    __extflash_nes_start__ = .;
-    build/core/logo*.o (.text .text* .rodata .rodata*)
+    __extflash_font_start__ = .;
+    *(.extflash_font)
     . = ALIGN(4);
-    build/core/header*.o (.text .text* .rodata .rodata*)
-    . = ALIGN(4);
-    __extflash_end_start__ = .;
-    . = ALIGN(4);
-    __extflash_text_start__ = .;
-    *(.extflash_text)
-    . = ALIGN(4);
-    __extflash_text_end__ = .;
-    __extflash_data_start__ = .;
-    . = ALIGN(4);
-    *(.extflash_data)
-    . = ALIGN(4);
-    __extflash_data_end__ = .;
+    __extflash_font_end__ = .;
     . = ALIGN(4K);
     __extflash_game_rom_start__ = .;
     *(.extflash_game_rom)
@@ -421,6 +405,20 @@ SECTIONS
   /* The program code and other data goes into FLASH */
   .text :
   {
+    . = ALIGN(4);
+    build/core/logo*.o (.text .text* .rodata .rodata*)
+    . = ALIGN(4);
+    build/core/header*.o (.text .text* .rodata .rodata*)
+    . = ALIGN(4);
+    __extflash_text_start__ = .;
+    *(.extflash_text)
+    . = ALIGN(4);
+    __extflash_text_end__ = .;
+    __extflash_data_start__ = .;
+    . = ALIGN(4);
+    *(.extflash_data)
+    . = ALIGN(4);
+    __extflash_data_end__ = .;
     . = ALIGN(4);
     *(.text)           /* .text sections (code) */
     *(.text*)          /* .text* sections (code) */
