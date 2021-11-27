@@ -286,7 +286,8 @@ const flash_config_t config_quad_24b_issi = FLASH_CONFIG_DEF(cmds_quad_24b_issi,
 const jedec_config_t jedec_map[] = {
 #if (EXTFLASH_FORCE_SPI == 0)
     // MX 24 bit address
-    JEDEC_CONFIG_DEF(0xC2, 0x25, 0x34, "MX25U8035F",  &config_quad_24b_mx),   // Stock 1MB
+    JEDEC_CONFIG_DEF(0xC2, 0x25, 0x34, "MX25U8035F",  &config_quad_24b_mx),   // Stock 1MB (Mario)
+    JEDEC_CONFIG_DEF(0xC2, 0x25, 0x36, "MX25U3232F",  &config_quad_24b_mx),   // Stock 4MB (Zelda)
     JEDEC_CONFIG_DEF(0xC2, 0x25, 0x37, "MX25U6432F",  &config_quad_24b_mx),   // 8MB
     JEDEC_CONFIG_DEF(0xC2, 0x25, 0x38, "MX25U1283xF", &config_quad_24b_mx),   // 16MB MX25U12832F, MX25U12835F
 
