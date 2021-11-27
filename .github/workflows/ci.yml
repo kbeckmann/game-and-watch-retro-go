@@ -41,14 +41,15 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  build-macos:
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: true
-      - name: Build
-        run: ./scripts/.ci_build_macos.sh
+  # Disable macos for the time being. The github action has issues downloading large files for some reason.
+  # build-macos:
+  #   runs-on: macos-latest
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #       with:
+  #         submodules: true
+  #     - name: Build
+  #       run: ./scripts/.ci_build_macos.sh
 
   build-docker:
     runs-on: ubuntu-latest
