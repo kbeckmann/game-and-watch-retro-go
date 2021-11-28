@@ -272,9 +272,7 @@ void common_emu_input_loop(odroid_gamepad_state_t *joystick, odroid_dialog_choic
     if (joystick->values[ODROID_INPUT_POWER]) {
         // Save-state and poweroff
         HAL_SAI_DMAStop(&hsai_BlockA1);
-#if STATE_SAVING == 1
         app->saveState("");
-#endif
         odroid_system_sleep();
     }
 

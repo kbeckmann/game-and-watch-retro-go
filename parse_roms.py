@@ -30,20 +30,7 @@ ROM_ENTRY_TEMPLATE = """\t{{
 \t\t.img_size = {img_size},
 \t\t#endif
 \t\t.save_address = {save_entry},
-\t\t.save_size = sizeof({save_entry}),
-\t\t.system = &{system},
-\t\t.region = {region},
-\t}},"""
-
-ROM_ENTRY_TEMPLATE_NO_SAVE = """\t{{
-\t\t.name = "{name}",
-\t\t.ext = "{extension}",
-\t\t.address = {rom_entry},
-\t\t.size = {size},
-\t\t#if COVERFLOW != 0
-\t\t.img_address = {img_entry},
-\t\t.img_size = {img_size},
-\t\t#endif
+\t\t.save_size = {save_size},
 \t\t.system = &{system},
 \t\t.region = {region},
 \t}},"""
@@ -298,7 +285,9 @@ class ROM:
         romdef = romdefs[self.filename]
         romdef.setdefault('name', self.filename)
         romdef.setdefault('publish', '1')
+        romdef.setdefault('enable_save', '0')
         self.publish = (romdef['publish'] == '1')
+        self.enable_save = (romdef['enable_save'] == '1') or args.save
         self.name = romdef['name']
         print("Found rom " + self.filename +" will display name as: " + romdef['name'])
         if not (self.publish):
@@ -389,30 +378,18 @@ class ROMParser:
                 ]
             )
             region = "REGION_PAL" if is_pal else "REGION_NTSC"
-            if args.save:
-                body += ROM_ENTRY_TEMPLATE.format(
-                    name=str(rom.name),
-                    size=rom.size,
-                    rom_entry=rom.symbol,
-                    img_size=rom.img_size,
-                    img_entry=rom.img_symbol if rom.img_size else "NULL",
-                    save_entry=save_prefix + str(i),
-                    region=region,
-                    extension=rom.ext,
-                    system=system,
-                )
-            else:
-                body += ROM_ENTRY_TEMPLATE_NO_SAVE.format(
-                    name=str(rom.name),
-                    size=rom.size,
-                    rom_entry=rom.symbol,
-                    img_size=rom.img_size,
-                    img_entry=rom.img_symbol if rom.img_size else "NULL",
-                    save_entry=save_prefix + str(i),
-                    region=region,
-                    extension=rom.ext,
-                    system=system,
-                )
+            body += ROM_ENTRY_TEMPLATE.format(
+                name=str(rom.name),
+                size=rom.size,
+                rom_entry=rom.symbol,
+                img_size=rom.img_size,
+                img_entry=rom.img_symbol if rom.img_size else "NULL",
+                save_entry=(save_prefix + str(i)) if rom.enable_save else "NULL",
+                save_size=("sizeof(" + save_prefix + str(i) + ")") if rom.enable_save else "0",
+                region=region,
+                extension=rom.ext,
+                system=system,
+            )
             body += "\n"
             pubcount += 1
 
@@ -722,9 +699,10 @@ class ROMParser:
 
                 # Aligned
                 aligned_size = 4 * 1024
-                total_save_size += (
-                    (save_size + aligned_size - 1) // (aligned_size)
-                ) * aligned_size
+                if rom.enable_save:
+                    total_save_size += (
+                        (save_size + aligned_size - 1) // (aligned_size)
+                    ) * aligned_size
                 total_rom_size += rom.size
                 if (args.coverflow != 0) :
                     total_img_size += rom.img_size
@@ -735,7 +713,7 @@ class ROMParser:
                         f.write(self.generate_img_object_file(rom, cover_width, cover_height))
                     except NoArtworkError:
                         pass
-                if args.save:
+                if rom.enable_save:
                     f.write(self.generate_save_entry(save_prefix + str(i), save_size))
 
             rom_entries = self.generate_rom_entries(
@@ -755,10 +733,7 @@ class ROMParser:
                 )
             )
 
-        if args.save:
-            return total_save_size, total_rom_size, total_img_size
-        else:
-            return 0, total_rom_size, total_img_size
+        return total_save_size, total_rom_size, total_img_size
 
     def write_if_changed(self, path: str, data: str):
         path = Path(path)
