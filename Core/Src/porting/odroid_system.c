@@ -47,22 +47,19 @@ rg_app_desc_t *odroid_system_get_app()
 
 bool odroid_system_emu_load_state(int slot)
 {
-#if STATE_SAVING == 1
+    if (ACTIVE_FILE->save_address == 0) {
+        return false;
+    }
     if (currentApp.loadState != NULL) {
         (*currentApp.loadState)("");
     }
-#endif
-    return true;
 }
 
 bool odroid_system_emu_save_state(int slot)
 {
-#if STATE_SAVING == 1
     if (currentApp.saveState != NULL) {
         (*currentApp.saveState)("");
     }
-#endif
-    return true;
 }
 
 IRAM_ATTR void odroid_system_tick(uint skippedFrame, uint fullFrame, uint busyTime)

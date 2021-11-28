@@ -32,6 +32,7 @@ class ROMParser:
             romdef = romdefs[file_name]
             romdef.setdefault("name", file_name)
             romdef.setdefault("publish", "1")
+            romdef.setdefault("enable_save", "0")
             print(folder + ":" + file_name + " >> " + romdef["name"] + ",P: " + romdef["publish"])
 
         return romdefs

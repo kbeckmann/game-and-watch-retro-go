@@ -221,6 +221,10 @@ int _write(int file, char *ptr, int len)
 
 void store_erase(const uint8_t *flash_ptr, uint32_t size)
 {
+  // Disable clear data when save address is zero
+  if (flash_ptr == 0) {
+    return;
+  }
   // Only allow addresses in the areas meant for erasing and writing.
   assert(
     ((flash_ptr >= &__SAVEFLASH_START__)   && ((flash_ptr + size) <= &__SAVEFLASH_END__)) ||
@@ -250,7 +254,10 @@ void store_save(const uint8_t *flash_ptr, const uint8_t *data, size_t size)
 #ifdef DISABLE_STORE
   return;
 #endif
-
+  // Disable save data when save address is zero
+  if (flash_ptr == 0) {
+    return;
+  }
   // Convert mem mapped pointer to flash address
   uint32_t save_address = flash_ptr - &__EXTFLASH_BASE__;
 

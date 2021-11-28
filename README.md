@@ -17,12 +17,16 @@ Please run `make help` to see more information.
 ### Coverflow support
 `make COVERFLOW=1 JPG_QUALITY=(90)`  set `COVERFLOW=1` to support show cover art. support `.png` `.bmp` `.jpg` file which filename same as rom's filename and same floder. CFW will convet it to jpg format file `.img` and pack it into firmware, you can custom jpg's quality use `JPG_QUALITY`.
 
-### Custom game display title and cover size support
-Before you run `make flash`, please run `make romdef` then you can get some romdef file in `roms` folder as `gb.json` `nes.json` ..etc. you can edit that file to set every game rom's display title (**Title's charset be must your custom lang supported**). 
+### Other features
+Here some other features you can edit the rom define file to custom by youself.
+Before you run `make flash`, please run `make romdef` then you can get some romdef file in `roms` folder as `gb.json` `nes.json` ..etc. Edit this files then you can custom the follow feature.
+
+- Game display title(Set `name` value, title's charset be must your custom language supported)
+- Pack or don't pack rom to firmware (Set `publish` to `1` or `0`)
+- Enable save for single game even `STATE_SAVING=0` (Set `enable_save` to `1`, if `STATE_SAVING=1` all games will be save enabled)
+- Emulator system cover image size(Set `_cover_width` and `_cover_height`, 180>=`_cover_width`>=64 and 136>=`_cover_height`>=64)
 
 `make romdef` is run patched mode for `*emu*.json` if the file already exist, each time only append new rom's information when command execute.
-
-At that file, you also can custom that emu system cover image height and width size.
 
 ***********
 # Emulator collection for Nintendo® Game & Watch™
