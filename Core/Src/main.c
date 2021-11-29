@@ -456,14 +456,20 @@ int main(void)
 
   // Save the button states as early as possible
   boot_buttons = buttons_get();
-
+  // reduce the power consumption before lcd init
+  lcd_backlight_off();
   // Keep this
-  for (int i = 0; i < 10; i++) {
+  for (int i = 0; i < 5; i++) {
       wdog_refresh();
       HAL_Delay(50);
   }
 
   lcd_init(&hspi2, &hltdc);
+
+  for (int i = 0; i < 5; i++) {
+      wdog_refresh();
+      HAL_Delay(50);
+  }
 
   if (trigger_wdt_bsod) {
     BSOD(BSOD_WATCHDOG, 0, 0);
