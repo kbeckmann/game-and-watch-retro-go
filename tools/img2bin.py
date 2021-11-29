@@ -1,15 +1,12 @@
 import argparse
 from pathlib import Path
 
-
 def parse_args():
     """Parse bmp file to bin txt"""
     parser = argparse.ArgumentParser()
     parser.add_argument("bmp", type=Path)
     args = parser.parse_args()
     return args
-
-
 
 def write_rgb565(fi, fn):
     from PIL import Image, ImageOps
@@ -26,7 +23,7 @@ def write_rgb565(fi, fn):
                 b = (pixels[(y * img.width) + x][2] >> 3) & 0x1F
                 px = (r << 11) + (g << 5) + b
                 f.write(str.encode(f"0x{px:04X},", "utf-8"))
-            f.write(str.encode("\n", "utf-8"))
+            f.write(str.encode("//\n", "utf-8"))
 
 def main():
     args = parse_args()
