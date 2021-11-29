@@ -29,7 +29,7 @@ def write_pixels(fi, fn):
                 b_i = 7 - (x % 8);
                 b_p = pixels[(y * img.width) + x][0] + pixels[(y * img.width) + x][1] + pixels[(y * img.width) + x][2];
                 #print("x:" + str(x) + ", y:" + str(y) + ", color:" + str( pixels[(y * img.width) + x][2]));
-                if (b_p < 100):
+                if (b_p > 100):
                     b_b = b_b | (1 << b_i)
                     binData[(x+8) // 8 -1] = b_b;
                 #f.write(str.encode(f"0x{px:04X},", "utf-8"))
