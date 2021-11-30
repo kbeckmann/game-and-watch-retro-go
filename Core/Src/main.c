@@ -29,6 +29,7 @@
 #include "gw_linker.h"
 #include "githash.h"
 #include "flashapp.h"
+#include "bitmaps.h"
 
 #include "odroid_colors.h"
 #include "odroid_system.h"
@@ -459,16 +460,16 @@ int main(void)
   // reduce the power consumption before lcd init
   lcd_backlight_off();
   // Keep this
-  for (int i = 0; i < 5; i++) {
+  for (int i = 0; i < 1; i++) {
       wdog_refresh();
-      HAL_Delay(50);
+      HAL_Delay(10);
   }
 
   lcd_init(&hspi2, &hltdc);
 
-  for (int i = 0; i < 5; i++) {
+  for (int i = 0; i < 1; i++) {
       wdog_refresh();
-      HAL_Delay(50);
+      HAL_Delay(10);
   }
 
   if (trigger_wdt_bsod) {

@@ -24,6 +24,7 @@ void odroid_system_init(int appId, int sampleRate)
     odroid_settings_init();
     odroid_audio_init(sampleRate);
     odroid_display_init();
+
     counters.resetTime = get_elapsed_time();
 
     printf("%s: System ready!\n\n", __func__);
