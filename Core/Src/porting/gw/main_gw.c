@@ -26,7 +26,7 @@
 
 /* Uncomment to enable debug menu in overlay */
 //#define GW_EMU_DEBUG_OVERLAY
-//#define DEBUG_TIME
+
 
 #define ODROID_APPID_GW 6
 
@@ -81,6 +81,30 @@ static void gw_get_time() {
         Error_Handler();
     }
 }
+
+static void gw_check_time() {
+
+    static unsigned int is_gw_time_sync=0;
+
+    // Update time before we can set it
+    RTC_TimeTypeDef GW_currentTime = {0};
+    RTC_DateTypeDef GW_currentDate = {0};
+    gw_time_t time = {0};
+
+    HAL_RTC_GetTime(&hrtc, &GW_currentTime, RTC_FORMAT_BIN);
+    HAL_RTC_GetDate(&hrtc, &GW_currentDate, RTC_FORMAT_BIN);
+
+    // Set times
+    time.hours = GW_currentTime.Hours;
+    time.minutes = GW_currentTime.Minutes;
+    time.seconds = GW_currentTime.Seconds;
+
+    // update time every 30s
+    if ( (time.seconds == 30) || (is_gw_time_sync==0) ) {
+        is_gw_time_sync = 1;
+        gw_system_set_time(time);
+    }
+}
 static unsigned char state_save_buffer[sizeof(gw_state_t)];
 
 static bool gw_system_SaveState(char *pathName)
@@ -90,19 +114,14 @@ static bool gw_system_SaveState(char *pathName)
     memset(state_save_buffer, '\x00', sizeof(state_save_buffer));
     gw_state_save(state_save_buffer);
     store_save(ACTIVE_FILE->save_address, state_save_buffer, sizeof(state_save_buffer));
-    printf("Saving state done!\n");
     return false;
 }
 
 static bool gw_system_LoadState(char *pathName)
 {
     printf("Loading state...\n");
-    gw_state_load((unsigned char *) ACTIVE_FILE->save_address);
-    printf("Loading state done!\n");
+    return gw_state_load(ACTIVE_FILE->save_address);
 
-    gw_set_time();
-
-    return true;
 }
 
 /* callback to get buttons state */
@@ -122,7 +141,7 @@ unsigned int gw_get_buttons()
 
     // software keys
     hw_buttons |= ((unsigned int)softkey_time_pressed) << 10;
-    hw_buttons |= ((unsigned int)softkey_time_pressed) << 11;
+    hw_buttons |= ((unsigned int)softkey_alarm_pressed) << 11;
 
     return hw_buttons;
 }
@@ -297,7 +316,6 @@ static bool gw_debug_submenu_autoget_time(odroid_dialog_choice_t *option, odroid
     return event == ODROID_DIALOG_ENTER;
 }
 
-/*
 static bool gw_debug_submenu_press_time(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat)
 {
     if (event == ODROID_DIALOG_ENTER)
@@ -307,9 +325,6 @@ static bool gw_debug_submenu_press_time(odroid_dialog_choice_t *option, odroid_d
     }
     return event == ODROID_DIALOG_ENTER;
 }
-*/
-
-/*
 
 static bool gw_debug_submenu_press_alarm(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat)
 {
@@ -320,7 +335,7 @@ static bool gw_debug_submenu_press_alarm(odroid_dialog_choice_t *option, odroid_
     }
     return event == ODROID_DIALOG_ENTER;
 }
-*/
+
 
 static char LCD_deflicker_value[10];
 static bool gw_debug_submenu_set_deflicker(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat)
@@ -328,7 +343,7 @@ static bool gw_debug_submenu_set_deflicker(odroid_dialog_choice_t *option, odroi
     /* LCD deflicker filter level */
     /*
     0 : filter is disabled
-    1 : refreshed on keys polling and call subroutine return    
+    1 : refreshed on keys polling and call subroutine return
     2 : refreshed on keys polling only
     */
     unsigned int max_flag_lcd_deflicker_level = 2;
@@ -351,7 +366,7 @@ static bool gw_debug_submenu_set_deflicker(odroid_dialog_choice_t *option, odroi
 static char display_ram_value[10];
 
 // Display RAM bool
-static unsigned int debug_display_ram = 0; 
+static unsigned int debug_display_ram = 0;
 static bool gw_debug_submenu_display_ram(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat)
 {
     if (event == ODROID_DIALOG_PREV || event == ODROID_DIALOG_NEXT)
@@ -362,98 +377,6 @@ static bool gw_debug_submenu_display_ram(odroid_dialog_choice_t *option, odroid_
 
     return event == ODROID_DIALOG_ENTER;
 }
-
-#ifdef DEBUG_TIME
-
-static char hour_addr_value_msb[5];
-static char hour_addr_value_lsb[5];
-static char min_addr_value_msb[5];
-static char min_addr_value_lsb[5];
-static char sec_addr_value_msb[5];
-static char sec_addr_value_lsb[5];
-
-static bool gw_debug_submenu_set_hour_addr_msb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat)
-{
-    if (event == ODROID_DIALOG_PREV)
-        gw_head.time_hour_address_msb = gw_head.time_hour_address_msb > 0 ? gw_head.time_hour_address_msb - 1 : 255;
-
-    if (event == ODROID_DIALOG_NEXT)
-        gw_head.time_hour_address_msb = gw_head.time_hour_address_msb < 255 ? gw_head.time_hour_address_msb + 1 : 0;
-
-    sprintf(option->value, "x%02x %u", gw_head.time_hour_address_msb, gw_head.time_hour_address_msb);
-
-    return event == ODROID_DIALOG_ENTER;
-}
-
-static bool gw_debug_submenu_set_hour_addr_lsb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat)
-{
-    if (event == ODROID_DIALOG_PREV)
-        gw_head.time_hour_address_lsb = gw_head.time_hour_address_lsb > 0 ? gw_head.time_hour_address_lsb - 1 : 127;
-
-    if (event == ODROID_DIALOG_NEXT)
-        gw_head.time_hour_address_lsb = gw_head.time_hour_address_lsb < 127 ? gw_head.time_hour_address_lsb + 1 : 0;
-
-    sprintf(option->value, "x%02x %u", gw_head.time_hour_address_lsb, gw_head.time_hour_address_lsb);
-
-    return event == ODROID_DIALOG_ENTER;
-}
-
-static bool gw_debug_submenu_set_min_addr_msb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat)
-{
-    if (event == ODROID_DIALOG_PREV)
-        gw_head.time_min_address_msb = gw_head.time_min_address_msb > 0 ? gw_head.time_min_address_msb - 1 : 127;
-
-    if (event == ODROID_DIALOG_NEXT)
-        gw_head.time_min_address_msb = gw_head.time_min_address_msb < 127 ? gw_head.time_min_address_msb + 1 : 0;
-
-    sprintf(option->value, "x%02x %u", gw_head.time_min_address_msb, gw_head.time_min_address_msb);
-
-    return event == ODROID_DIALOG_ENTER;
-}
-
-static bool gw_debug_submenu_set_min_addr_lsb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat)
-{
-    if (event == ODROID_DIALOG_PREV)
-        gw_head.time_min_address_lsb = gw_head.time_min_address_lsb > 0 ? gw_head.time_min_address_lsb - 1 : 127;
-
-    if (event == ODROID_DIALOG_NEXT)
-        gw_head.time_min_address_lsb = gw_head.time_min_address_lsb < 127 ? gw_head.time_min_address_lsb + 1 : 0;
-
-    sprintf(option->value, "x%02x %u", gw_head.time_min_address_lsb, gw_head.time_min_address_lsb);
-
-    return event == ODROID_DIALOG_ENTER;
-}
-
-static bool gw_debug_submenu_set_sec_addr_msb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat)
-{
-    
-    if (event == ODROID_DIALOG_PREV)
-        gw_head.time_sec_address_msb = gw_head.time_sec_address_msb > 0 ? gw_head.time_sec_address_msb - 1 : 127;
-
-
-    if (event == ODROID_DIALOG_NEXT)
-        gw_head.time_sec_address_msb = gw_head.time_sec_address_msb < 127 ? gw_head.time_sec_address_msb + 1 : 0;
-
-    sprintf(option->value, "x%02x %u", gw_head.time_sec_address_msb, gw_head.time_sec_address_msb);
-
-    return event == ODROID_DIALOG_ENTER;
-}
-
-static bool gw_debug_submenu_set_sec_addr_lsb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat)
-{
-    
-    if (event == ODROID_DIALOG_PREV)
-        gw_head.time_sec_address_lsb = gw_head.time_sec_address_lsb > 0 ? gw_head.time_sec_address_lsb - 1 : 127;
-
-
-    if (event == ODROID_DIALOG_NEXT)
-        gw_head.time_sec_address_lsb = gw_head.time_sec_address_lsb < 127 ? gw_head.time_sec_address_lsb + 1 : 0;
-
-    sprintf(option->value, "x%02x %u", gw_head.time_sec_address_lsb, gw_head.time_sec_address_lsb);
-
-    return event == ODROID_DIALOG_ENTER;
-}
-#endif
 
 static char draw_line_content[1+2*17];
 
@@ -473,29 +396,22 @@ static void gw_display_ram_overlay(){
 }
 
 static odroid_dialog_choice_t options[] = {
-  //  {310, "Press TIME", "", 0, &gw_debug_submenu_press_time},
-  //  {320, "Press ALARM", "", 0, &gw_debug_submenu_press_alarm},
-    {330, s_copy_RTC_to_GW_time, "", 1, &gw_debug_submenu_autoset_time},
-    {331, s_copy_GW_time_to_RTC, "", 1, &gw_debug_submenu_autoget_time},
-    #ifdef DEBUG_TIME
-    // {340, "Hour regH", hour_addr_value_msb, 1, &gw_debug_submenu_set_hour_addr_msb},
-    // {341, "Hour regL", hour_addr_value_lsb, 1, &gw_debug_submenu_set_hour_addr_lsb},
-    // {350, "Min  regH", min_addr_value_msb, 1, &gw_debug_submenu_set_min_addr_msb},
-    // {351, "Min  regL", min_addr_value_lsb, 1, &gw_debug_submenu_set_min_addr_lsb},
-    // {352, "Sec  regH", sec_addr_value_msb, 1, &gw_debug_submenu_set_sec_addr_msb},
-    // {353, "Sec  regL", sec_addr_value_lsb, 1, &gw_debug_submenu_set_sec_addr_lsb},
-    #endif
-    {360, s_LCD_filter, LCD_deflicker_value, 1, &gw_debug_submenu_set_deflicker},
-    {370, s_Display_RAM, display_ram_value, 1, &gw_debug_submenu_display_ram},
-    {380, s_Press_ACL, "", 1, &gw_debug_submenu_autoclear},
+    {309, "Press ACL or reset", "", 1, &gw_debug_submenu_autoclear},
+    {310, "Press TIME or B+TIME", "", 1, &gw_debug_submenu_press_time},
+    {320, "Press ALARM or B+GAME", "", 1, &gw_debug_submenu_press_alarm},
+    {330, "copy RTC to G&W time", "", 1, &gw_debug_submenu_autoset_time},
+    {331, "copy G&W time to RTC", "", 1, &gw_debug_submenu_autoget_time},
+    {360, "LCD filter", LCD_deflicker_value, 1, &gw_debug_submenu_set_deflicker},
+    {370, "Display RAM", display_ram_value, 1, &gw_debug_submenu_display_ram},
     ODROID_DIALOG_CHOICE_LAST};
 
 /* Main */
 int app_main_gw(uint8_t load_state)
 {
 
-    odroid_system_init(APPID_GW, GW_AUDIO_FREQ);
+    odroid_system_init(ODROID_APPID_GW, GW_AUDIO_FREQ);
     odroid_system_emu_init(&gw_system_LoadState, &gw_system_SaveState, NULL);
+    rg_app_desc_t *app = odroid_system_get_app();
     static unsigned previous_m_halt = 2;
 
     common_emu_state.frame_time_10us = (uint16_t)(100000 / GW_REFRESH_RATE + 0.5f);
@@ -529,13 +445,34 @@ int app_main_gw(uint8_t load_state)
     /*** Main emulator loop */
     printf("Main emulator loop start\n");
 
-    /* check if we to have to load state */
-    if (load_state != 0)
-        gw_system_LoadState(NULL);
+    /* check if we have to load state */
+    bool LoadState_done = false;
+    if (load_state != 0) {
+        LoadState_done = gw_system_LoadState(NULL);
+        gw_check_time();
+        gw_set_time();
+    }
+
+    /* emulate watch mode */
+    if (!LoadState_done) {
+
+       printf("G&W emulate watch mode\n");
+        // From reset state : run
+        gw_system_run(GW_AUDIO_FREQ*2);
+
+        // press TIME to exit TIME settings mode
+        softkey_time_pressed = 1;
+        gw_system_run(GW_AUDIO_FREQ*2);
+        softkey_time_pressed = 0;
+        gw_system_run(GW_AUDIO_FREQ*2);
+
+        // synchronize G&W with RTC and run
+        gw_check_time();
+        gw_set_time();
+        gw_system_run(GW_AUDIO_FREQ*2);
+    }
 
     clear_dwt_cycles();
-
-    gw_set_time();
 
     while (true)
     {
@@ -545,7 +482,7 @@ int app_main_gw(uint8_t load_state)
         wdog_refresh();
 
         /* refresh internal G&W timer on emulated CPU state transition */
-        if (previous_m_halt != m_halt) gw_set_time();
+        if (previous_m_halt != m_halt) gw_check_time();
 
         previous_m_halt = m_halt;
 
