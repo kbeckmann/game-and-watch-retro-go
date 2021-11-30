@@ -208,14 +208,18 @@ SECTIONS
   ._extflash :
   {
     . = ALIGN(4);
-    __extflash_font_start__ = .;
-    *(.extflash_font)
-    . = ALIGN(4);
-    __extflash_font_end__ = .;
     __extflash_emu_data_start__ = .;
     *(.extflash_emu_data)
     . = ALIGN(4);
     __extflash_emu_data_end__ = .;
+    __extflash_logo_start__ = .;
+    *(.extflash_logo)
+    . = ALIGN(4);
+    __extflash_logo_end__ = .;
+    __extflash_font_start__ = .;
+    *(.extflash_font)
+    . = ALIGN(4);
+    __extflash_font_end__ = .;
     . = ALIGN(4);
     __extflash_nes_start__ = .;
     build/core/logo*.o (.text .text* .rodata .rodata*)

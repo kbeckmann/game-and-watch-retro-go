@@ -39,6 +39,7 @@ int odroid_overlay_game_menu()
 #include "odroid_overlay.h"
 #include "main.h"
 #include "rom_manager.h"
+#include "bitmaps.h"
 
 // static uint16_t *overlay_buffer = NULL;
 static uint16_t overlay_buffer[ODROID_SCREEN_WIDTH * 32 * 2] __attribute__((aligned(4)));
@@ -67,34 +68,33 @@ int odroid_overlay_get_font_width()
     return 8;
 }
 
-static const uint8_t img_logo[] =
-    {
-        0x07, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xe0, //
-        0x18, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x18, //
-        0x27, 0xff, 0xff, 0xff, 0xff, 0xda, 0x3c, 0x04, 0x08, 0x5e, 0x18, 0x21, 0x09, 0x73, 0xc8, 0x84, //
-        0x5f, 0x07, 0xfe, 0x7f, 0xff, 0xda, 0x42, 0x0c, 0x18, 0xd0, 0x24, 0x23, 0x13, 0x24, 0x28, 0x82, //
-        0xbf, 0x33, 0x8c, 0x30, 0xc7, 0xb4, 0x80, 0x14, 0x29, 0x50, 0x38, 0x23, 0x15, 0x28, 0x08, 0x81, //
-        0xbf, 0x33, 0x26, 0x73, 0x93, 0xb4, 0x80, 0x14, 0x29, 0x50, 0x10, 0x25, 0x25, 0x28, 0x0f, 0x81, //
-        0xbf, 0x06, 0x0e, 0x63, 0x33, 0x68, 0x8f, 0x3c, 0x4a, 0x5e, 0x3e, 0x29, 0x4f, 0x28, 0x08, 0x81, //
-        0xbe, 0x66, 0x7c, 0xe7, 0x27, 0x68, 0x81, 0x44, 0x8c, 0x50, 0x48, 0x29, 0x51, 0x28, 0x08, 0x81, //
-        0x5e, 0x67, 0x0c, 0xe7, 0x8e, 0xd0, 0x42, 0x44, 0x8c, 0x50, 0x4c, 0x31, 0x91, 0x24, 0x28, 0x82, //
-        0x27, 0xff, 0xff, 0xff, 0xfe, 0xd0, 0x3c, 0x85, 0x08, 0x5e, 0x72, 0x21, 0x21, 0x23, 0xc8, 0x84, //
-        0x18, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x18, //
-        0x07, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xe0, //
-    };
-
-void odroid_overlay_draw_logo(uint16_t x_pos, uint16_t y_pos, uint16_t color)
+void odroid_overlay_draw_logo(uint16_t x_pos, uint16_t y_pos, retro_logo_image *logo, uint16_t color)
 {
     uint16_t *dst_img = lcd_get_active_buffer();
-    for (int i = 0; i < 16; i++)     //128=16*8
-        for (int y = 0; y < 12; y++) //height=12
+    int w = (logo->width + 7) / 8;
+    for (int i = 0; i < w; i++)
+        for (int y = 0; y < logo->height; y++)
         {
-            const char glyph = img_logo[y * 16 + i]; //every line 16 byte; wtf the tools chg bytes.
-            for (int x = 0; x < 8; x++)
-                if (glyph & (0x80 >> x))
-                    dst_img[(y + y_pos) * 320 + i * 8 + x + x_pos] = color;
+            const char glyph = logo->logo[y * w + i];
+            //for (int x = 0; x < 8; x++)
+            if (glyph & 0x80)
+                dst_img[(y + y_pos) * 320 + i * 8 + 0 + x_pos] = color;
+            if (glyph & 0x40)
+                dst_img[(y + y_pos) * 320 + i * 8 + 1 + x_pos] = color;
+            if (glyph & 0x20)
+                dst_img[(y + y_pos) * 320 + i * 8 + 2 + x_pos] = color;
+            if (glyph & 0x10)
+                dst_img[(y + y_pos) * 320 + i * 8 + 3 + x_pos] = color;
+            if (glyph & 0x08)
+                dst_img[(y + y_pos) * 320 + i * 8 + 4 + x_pos] = color;
+            if (glyph & 0x04)
+                dst_img[(y + y_pos) * 320 + i * 8 + 5 + x_pos] = color;
+            if (glyph & 0x02)
+                dst_img[(y + y_pos) * 320 + i * 8 + 6 + x_pos] = color;
+            if (glyph & 0x01)
+                dst_img[(y + y_pos) * 320 + i * 8 + 7 + x_pos] = color;
         }
-}
+};
 
 int odroid_overlay_draw_text_line(uint16_t x_pos, uint16_t y_pos, uint16_t width, const char *text, uint16_t color, uint16_t color_bg)
 {
@@ -253,30 +253,28 @@ uint16_t get_shined_pixel(uint16_t color, uint16_t shined)
 
 void app_start_logo()
 {
-    lcd_set_buffers(framebuffer1, framebuffer1);
-    odroid_overlay_draw_fill_rect(0, 0, 320, 240, C_BLACK);
     for (int i = 10; i <= 100; i++)
     {
-        odroid_overlay_draw_logo(96, 100, get_darken_pixel(C_GW_YELLOW, i));
+        odroid_overlay_draw_logo(124, 100, &logo_rgo, get_darken_pixel(C_GW_YELLOW, i));
         lcd_sync();
         lcd_swap();
-        wdog_refresh();
-        HAL_Delay(4);
+        if ((i % 10) == 0) wdog_refresh();
+        HAL_Delay(2);
     }
-    for (int i = 0; i < 40; i++)
+    for (int i = 0; i < 10; i++)
     {
         wdog_refresh();
         HAL_Delay(10);
     }
-    odroid_overlay_draw_fill_rect(0, 0, 320, 240, C_BLACK);
-    lcd_sync();
+    //odroid_overlay_draw_fill_rect(0, 0, 320, 240, C_BLACK);
+    //lcd_sync();
 }
 
 void app_sleep_logo()
 {
-    lcd_set_buffers(framebuffer1, framebuffer1);
+    lcd_set_buffers(framebuffer1, framebuffer2);
     odroid_overlay_draw_fill_rect(0, 0, 320, 240, C_BLACK);
-    odroid_overlay_draw_logo(96, 100, C_GW_YELLOW);
+    odroid_overlay_draw_logo(142, 105, &logo_gnw, C_GW_YELLOW);
     for (int i = 0; i < 40; i++)
     {
         wdog_refresh();
@@ -284,7 +282,7 @@ void app_sleep_logo()
     }
     for (int i = 10; i <= 100; i++)
     {
-        odroid_overlay_draw_logo(96, 100, get_darken_pixel(C_GW_YELLOW, 110 - i));
+        odroid_overlay_draw_logo(142, 105, &logo_gnw, get_darken_pixel(C_GW_YELLOW, 110 - i));
         lcd_sync();
         lcd_swap();
         wdog_refresh();
@@ -617,7 +615,7 @@ static bool volume_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event
 }
 
 #if COVERFLOW != 0
-const char * GW_Themes[] = {s_Theme_sList, s_Theme_CoverV, s_Theme_CoverH,s_Theme_CoverLightH,s_Theme_CoverLightV};
+const char *GW_Themes[] = {s_Theme_sList, s_Theme_CoverV, s_Theme_CoverH, s_Theme_CoverLightH, s_Theme_CoverLightV};
 
 static bool theme_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat)
 {
@@ -627,13 +625,15 @@ static bool theme_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_
     {
         if (theme > 0)
             odroid_settings_theme_set(--theme);
-        else {
+        else
+        {
             theme = 4;
             odroid_settings_theme_set(4);
         }
     }
-    else if (event == ODROID_DIALOG_NEXT) {
-        if (theme < 4) 
+    else if (event == ODROID_DIALOG_NEXT)
+    {
+        if (theme < 4)
             odroid_settings_theme_set(++theme);
         else
         {
@@ -672,17 +672,22 @@ static bool filter_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event
     int8_t mode = odroid_display_get_filter_mode();
     int8_t prev = mode;
 
-    if (event == ODROID_DIALOG_PREV && --mode < 0) mode = max; // 0;
-    if (event == ODROID_DIALOG_NEXT && ++mode > max) mode = 0; // max;
+    if (event == ODROID_DIALOG_PREV && --mode < 0)
+        mode = max; // 0;
+    if (event == ODROID_DIALOG_NEXT && ++mode > max)
+        mode = 0; // max;
 
     if (mode != prev)
     {
         odroid_display_set_filter_mode(mode);
     }
 
-    if (mode == ODROID_DISPLAY_FILTER_OFF)   strcpy(option->value, s_FilteringOff);
-    if (mode == ODROID_DISPLAY_FILTER_SHARP) strcpy(option->value, s_FilteringSharp);
-    if (mode == ODROID_DISPLAY_FILTER_SOFT)  strcpy(option->value, s_FilteringSoft);
+    if (mode == ODROID_DISPLAY_FILTER_OFF)
+        strcpy(option->value, s_FilteringOff);
+    if (mode == ODROID_DISPLAY_FILTER_SHARP)
+        strcpy(option->value, s_FilteringSharp);
+    if (mode == ODROID_DISPLAY_FILTER_SOFT)
+        strcpy(option->value, s_FilteringSoft);
 
     return event == ODROID_DIALOG_ENTER;
 }
@@ -693,17 +698,24 @@ static bool scaling_update_cb(odroid_dialog_choice_t *option, odroid_dialog_even
     int8_t mode = odroid_display_get_scaling_mode();
     int8_t prev = mode;
 
-    if (event == ODROID_DIALOG_PREV && --mode < 0) mode =  max; // 0;
-    if (event == ODROID_DIALOG_NEXT && ++mode > max) mode = 0;  // max;
+    if (event == ODROID_DIALOG_PREV && --mode < 0)
+        mode = max; // 0;
+    if (event == ODROID_DIALOG_NEXT && ++mode > max)
+        mode = 0; // max;
 
-    if (mode != prev) {
+    if (mode != prev)
+    {
         odroid_display_set_scaling_mode(mode);
     }
 
-    if (mode == ODROID_DISPLAY_SCALING_OFF)     strcpy(option->value, s_SCalingOff);
-    if (mode == ODROID_DISPLAY_SCALING_FIT)     strcpy(option->value, s_SCalingFit);
-    if (mode == ODROID_DISPLAY_SCALING_FULL)    strcpy(option->value, s_SCalingFull);
-    if (mode == ODROID_DISPLAY_SCALING_CUSTOM)  strcpy(option->value, s_SCalingCustom);
+    if (mode == ODROID_DISPLAY_SCALING_OFF)
+        strcpy(option->value, s_SCalingOff);
+    if (mode == ODROID_DISPLAY_SCALING_FIT)
+        strcpy(option->value, s_SCalingFit);
+    if (mode == ODROID_DISPLAY_SCALING_FULL)
+        strcpy(option->value, s_SCalingFull);
+    if (mode == ODROID_DISPLAY_SCALING_CUSTOM)
+        strcpy(option->value, s_SCalingCustom);
 
     return event == ODROID_DIALOG_ENTER;
 }
@@ -866,7 +878,8 @@ int odroid_overlay_game_menu(odroid_dialog_choice_t *extra_options)
     //Del Some item
     if (ACTIVE_FILE->save_address == 0)
     {
-        for (int i=0; i<7; i++) {
+        for (int i = 0; i < 7; i++)
+        {
             choices[i] = choices[i + 3];
         }
     }

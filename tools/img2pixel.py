@@ -16,6 +16,8 @@ def write_pixels(fi, fn):
         # TODO: this header could probably be a bit shorter, didn't really investigate
         #create a array;
         binData = [];
+        #print("// width" + str(img.width) + ", height:" + str(img.height));
+        f.write(str.encode("// width" + str(img.width) + ", height:" + str(img.height) + "\n", "utf-8"))
         for x in range((img.width+7) // 8):
             binData.append(0);
 
@@ -28,7 +30,7 @@ def write_pixels(fi, fn):
                 b_b = binData[(x+8) // 8 - 1];
                 b_i = 7 - (x % 8);
                 b_p = pixels[(y * img.width) + x][0] + pixels[(y * img.width) + x][1] + pixels[(y * img.width) + x][2];
-                #print("x:" + str(x) + ", y:" + str(y) + ", color:" + str( pixels[(y * img.width) + x][2]));
+                #print("x:" + str(x) + ", y:" + str(y) + ", color:" + str(b_p));
                 if (b_p > 100):
                     b_b = b_b | (1 << b_i)
                     binData[(x+8) // 8 -1] = b_b;

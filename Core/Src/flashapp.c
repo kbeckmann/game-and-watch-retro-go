@@ -9,6 +9,7 @@
 
 #include "githash.h"
 #include "gui.h"
+#include "bitmaps.h"
 #include "gw_buttons.h"
 #include "gw_flash.h"
 #include "gw_lcd.h"
@@ -180,8 +181,8 @@ static void redraw(flashapp_t *flashapp)
     gui_draw_status(&flashapp->tab);
 
     // Empty logo
-    odroid_overlay_draw_fill_rect(0, ODROID_SCREEN_HEIGHT - IMAGE_BANNER_HEIGHT - 15,
-                                  IMAGE_BANNER_WIDTH, IMAGE_BANNER_HEIGHT, C_GW_MAIN_COLOR);
+    //odroid_overlay_draw_fill_rect(0, ODROID_SCREEN_HEIGHT - IMAGE_BANNER_HEIGHT - 15,
+    //                              IMAGE_BANNER_WIDTH, IMAGE_BANNER_HEIGHT, C_GW_MAIN_COLOR);
 
     draw_progress(flashapp);
     lcd_swap();
@@ -516,6 +517,7 @@ static void flashapp_run(flashapp_t *flashapp)
 void flashapp_main(void)
 {
     flashapp_t flashapp = {};
+    flashapp.tab.img_header = &logo_flash;
 
     SCB_InvalidateDCache();
     SCB_DisableDCache();
@@ -540,6 +542,7 @@ void flashapp_main(void)
             }
         }
 
+        lcd_sync();
         lcd_swap();
         lcd_wait_for_vblank();
         redraw(&flashapp);

@@ -16,6 +16,7 @@
 #include "gw_flash.h"
 #include "rg_rtc.h"
 #include "rg_i18n.h"
+#include "bitmaps.h"
 
 #if 0
 #define KEY_SELECTED_TAB "SelectedTab"
@@ -496,7 +497,7 @@ void app_check_data_loop()
     if (extflash_magic_sign != intflash_magic_sign)
     {
         //flash is not compare read;
-        lcd_set_buffers(framebuffer1, framebuffer1);
+        lcd_set_buffers(framebuffer1, framebuffer2);
         odroid_overlay_draw_fill_rect(0, 0, 320, 240, C_BLACK);
         for (int y = 0; y < 14; y++)
         {
@@ -509,7 +510,7 @@ void app_check_data_loop()
                 if (pt & (0x80 >> x))
                     odroid_overlay_draw_fill_rect((20 + x) * 8, (9 + y) * 8, 8, 8, C_GW_MAIN_COLOR);
         }
-        odroid_overlay_draw_logo(96, 42, C_GW_YELLOW);
+        odroid_overlay_draw_logo(124, 42, &logo_rgo, C_GW_YELLOW);
         odroid_overlay_draw_text_line(15 * 8, 20 * 8, 10 * 8, "DATA ERROR", C_RED, C_BLACK);
         odroid_overlay_draw_text_line(9 * 8, 24 * 8 - 4, 23 * 8, "It's seemed you need to", C_GW_OPAQUE_YELLOW, C_BLACK);
         odroid_overlay_draw_text_line(9 * 8, 25 * 8, 23 * 8, "programs external flash", C_GW_OPAQUE_YELLOW, C_BLACK);
@@ -545,13 +546,15 @@ void app_check_data_loop()
 void app_main(void)
 {
 
+    lcd_set_buffers(framebuffer1, framebuffer2);
+    odroid_overlay_draw_fill_rect(0, 0, 320, 240, C_BLACK);
     odroid_system_init(ODROID_APPID_LAUNCHER, 32000);
     // odroid_display_clear(0);
 
     //check data;
     app_check_data_loop();
 
-    //app_start_logo();
+    app_start_logo();
 
     emulators_init();
     // favorites_init();
