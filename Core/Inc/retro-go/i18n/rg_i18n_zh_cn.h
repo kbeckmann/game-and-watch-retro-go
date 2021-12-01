@@ -64,6 +64,8 @@
 #define s_Quit_to_menu          "× 退出游戏"
 #define s_Retro_Go_options      "游戏选项"
 
+#define s_Colors                "色彩"
+
 #define s_Theme_Title           "界面"
 #define s_Theme_sList           "简单列表"
 #define s_Theme_CoverV          "垂直滚动"  //vertical

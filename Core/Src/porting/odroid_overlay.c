@@ -40,6 +40,7 @@ int odroid_overlay_game_menu()
 #include "main.h"
 #include "rom_manager.h"
 #include "bitmaps.h"
+#include "gui.h"
 
 // static uint16_t *overlay_buffer = NULL;
 static uint16_t overlay_buffer[ODROID_SCREEN_WIDTH * 32 * 2] __attribute__((aligned(4)));
@@ -191,10 +192,10 @@ void odroid_overlay_draw_battery(int x_pos, int y_pos)
 {
     uint16_t percentage = odroid_input_read_battery().percentage;
     odroid_battery_charge_state_t battery_state = odroid_input_read_battery().state;
-    uint16_t color_fill = C_GW_YELLOW;
-    uint16_t color_border = C_GW_YELLOW;
-    uint16_t color_empty = C_GW_MAIN_COLOR;
-    uint16_t color_battery = C_BLACK;
+    uint16_t color_fill = curr_colors->sel_c;
+    uint16_t color_border = curr_colors->sel_c;
+    uint16_t color_empty = curr_colors->main_c;
+    uint16_t color_battery = curr_colors->bg_c;
     uint16_t width_fill = 20.f / 100 * percentage;
     uint16_t width_empty = 20 - width_fill;
 
@@ -255,7 +256,7 @@ void app_start_logo()
 {
     for (int i = 10; i <= 100; i++)
     {
-        odroid_overlay_draw_logo(124, 100, &logo_rgo, get_darken_pixel(C_GW_YELLOW, i));
+        odroid_overlay_draw_logo(124, 100, &logo_rgo, get_darken_pixel(curr_colors->sel_c, i));
         lcd_sync();
         lcd_swap();
         if ((i % 10) == 0) wdog_refresh();
@@ -266,15 +267,15 @@ void app_start_logo()
         wdog_refresh();
         HAL_Delay(10);
     }
-    //odroid_overlay_draw_fill_rect(0, 0, 320, 240, C_BLACK);
+    //odroid_overlay_draw_fill_rect(0, 0, 320, 240, curr_colors->bg_c);
     //lcd_sync();
 }
 
 void app_sleep_logo()
 {
     lcd_set_buffers(framebuffer1, framebuffer2);
-    odroid_overlay_draw_fill_rect(0, 0, 320, 240, C_BLACK);
-    odroid_overlay_draw_logo(142, 105, &logo_gnw, C_GW_YELLOW);
+    odroid_overlay_draw_fill_rect(0, 0, 320, 240, curr_colors->bg_c);
+    odroid_overlay_draw_logo(142, 105, &logo_gnw, curr_colors->sel_c);
     for (int i = 0; i < 40; i++)
     {
         wdog_refresh();
@@ -282,7 +283,7 @@ void app_sleep_logo()
     }
     for (int i = 10; i <= 100; i++)
     {
-        odroid_overlay_draw_logo(142, 105, &logo_gnw, get_darken_pixel(C_GW_YELLOW, 110 - i));
+        odroid_overlay_draw_logo(142, 105, &logo_gnw, get_darken_pixel(curr_colors->sel_c, 110 - i));
         lcd_sync();
         lcd_swap();
         wdog_refresh();
@@ -319,9 +320,9 @@ void odroid_overlay_draw_dialog(const char *header, odroid_dialog_choice_t *opti
     int box_width = 64;
     int box_height = 64;
     int box_padding = 6;
-    int box_color = C_BLACK;
-    int box_border_color = C_GW_OPAQUE_YELLOW;
-    int box_text_color = C_GW_YELLOW;
+    int box_color = curr_colors->bg_c;
+    int box_border_color = curr_colors->dis_c;
+    int box_text_color = curr_colors->sel_c;
     odroid_dialog_choice_t separator = ODROID_DIALOG_CHOICE_SEPARATOR;
 
     int options_count = get_dialog_items_count(options);
@@ -386,16 +387,16 @@ void odroid_overlay_draw_dialog(const char *header, odroid_dialog_choice_t *opti
     if (header)
     {
         odroid_overlay_draw_rect(box_x - 1, box_y - 1, box_width + 2, row_height + 8, 1, box_border_color);
-        odroid_overlay_draw_fill_rect(box_x, box_y, box_width, row_height + 7, C_GW_MAIN_COLOR);
-        odroid_overlay_draw_local_text_line(x, box_y + 5, inner_width, header, C_GW_YELLOW, C_GW_MAIN_COLOR, NULL, 0);
-        odroid_overlay_draw_fill_rect(x + inner_width - 2, box_y + 5, 4, 4, C_GW_YELLOW);
-        odroid_overlay_draw_fill_rect(x + inner_width, box_y + 11, 2, 4, C_GW_OPAQUE_YELLOW);
+        odroid_overlay_draw_fill_rect(box_x, box_y, box_width, row_height + 7, curr_colors->main_c);
+        odroid_overlay_draw_local_text_line(x, box_y + 5, inner_width, header, curr_colors->sel_c, curr_colors->main_c, NULL, 0);
+        odroid_overlay_draw_fill_rect(x + inner_width - 2, box_y + 5, 4, 4, curr_colors->sel_c);
+        odroid_overlay_draw_fill_rect(x + inner_width, box_y + 11, 2, 4, curr_colors->dis_c);
         y += row_height + 8;
     }
 
     for (int i = 0; i < options_count; i++)
     {
-        color = options[i].enabled == 1 ? box_text_color : C_GW_OPAQUE_YELLOW;
+        color = options[i].enabled == 1 ? box_text_color : curr_colors->dis_c;
         if (options[i].enabled == 1)
         {
             fg = (i == sel) ? box_color : color;
@@ -404,7 +405,7 @@ void odroid_overlay_draw_dialog(const char *header, odroid_dialog_choice_t *opti
         else
         {
             fg = color;
-            bg = C_BLACK;
+            bg = curr_colors->bg_c;
         }
 
         if (options[i].id == separator.id)
@@ -414,7 +415,23 @@ void odroid_overlay_draw_dialog(const char *header, odroid_dialog_choice_t *opti
         }
         else
         {
-            row_height = odroid_overlay_draw_local_text(x, y + row_margin, inner_width, rows + i * 256, fg, bg, 0);
+            if (options[i].id == 0x0F0F0E0E) //color select
+            {
+                row_height = odroid_overlay_draw_local_text(x + odroid_overlay_get_local_font_width(), y + row_margin, inner_width - odroid_overlay_get_local_font_width(), options[i].label, fg, bg, 0);
+                odroid_overlay_draw_fill_rect(x, y, odroid_overlay_get_local_font_width(), row_height + row_margin, bg);
+                uint16_t *color = options[i].value;
+                for (int j=0; j < 4; j++) {
+                    odroid_overlay_draw_fill_rect(x + inner_width - (9 - j * 2) * odroid_overlay_get_local_font_width() - 2, 
+                    y, 
+                    odroid_overlay_get_local_font_width() * 2, odroid_overlay_get_local_font_size(), 
+                    color[j]);
+                };
+                odroid_overlay_draw_rect(x + inner_width - 9 * odroid_overlay_get_local_font_width() - 3, y + 1, odroid_overlay_get_local_font_width() * 8 + 2, row_height - 1, 1, fg);
+            }
+            else
+            {
+                row_height = odroid_overlay_draw_local_text(x, y + row_margin, inner_width, rows + i * 256, fg, bg, 0);
+            }
             row_height += row_margin * 2;
             odroid_overlay_draw_rect(x, y, inner_width, row_height, row_margin, bg);
         }
@@ -646,6 +663,36 @@ static bool theme_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_
 }
 #endif
 
+static bool colors_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat)
+{
+    int8_t colors = odroid_settings_colors_get();
+
+    if (event == ODROID_DIALOG_PREV)
+    {
+        if (colors > 0)
+            odroid_settings_colors_set(--colors);
+        else
+        {
+            colors = gui_colors_count - 1;
+            odroid_settings_colors_set(gui_colors_count - 1);
+        }
+    }
+    else if (event == ODROID_DIALOG_NEXT)
+    {
+        if (colors < gui_colors_count - 1)
+            odroid_settings_colors_set(++colors);
+        else
+        {
+            colors = 0;
+            odroid_settings_colors_set(0);
+        }
+    }
+    curr_colors = &gui_colors[colors];
+    memcpy(option->value, curr_colors, sizeof(colors_t));
+    //sprintf(option->value, "%s", curr_colors->name);
+    return event == ODROID_DIALOG_ENTER;
+}
+
 static bool brightness_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat)
 {
     int8_t level = odroid_display_get_backlight();
@@ -761,13 +808,16 @@ int odroid_overlay_settings_menu(odroid_dialog_choice_t *extra_options)
     static char bright_value[25];
     static char volume_value[25];
     static char theme_value[25];
+    static char colors_value[25];
 
     odroid_dialog_choice_t options[32] = {                         //
         {0, s_Brightness, bright_value, 1, &brightness_update_cb}, //
         {1, s_Volume, volume_value, 1, &volume_update_cb},
-#if COVERFLOW != 0
         ODROID_DIALOG_CHOICE_SEPARATOR,
-        {2, s_Theme_Title, theme_value, 1, &theme_update_cb},
+        {0x0F0F0E0E, s_Colors, colors_value, 1, &colors_update_cb},
+#if COVERFLOW != 0
+        //ODROID_DIALOG_CHOICE_SEPARATOR,
+        {4, s_Theme_Title, theme_value, 1, &theme_update_cb},
 #endif
 
         ODROID_DIALOG_CHOICE_LAST, //
@@ -801,10 +851,10 @@ static void draw_game_status_bar(runtime_stats_t stats)
              (int)stats.busyPercent, (int)fmod(stats.busyPercent * 10, 10));
     snprintf(bottom, 40, "%s", ACTIVE_FILE ? (ACTIVE_FILE->name) : "N/A");
 
-    odroid_overlay_draw_fill_rect(0, 0, width, height, C_GW_MAIN_COLOR);
-    odroid_overlay_draw_fill_rect(0, ODROID_SCREEN_HEIGHT - height, width, height, C_GW_MAIN_COLOR);
-    odroid_overlay_draw_local_text(0, pad_text, width, header, C_GW_YELLOW, C_GW_MAIN_COLOR, 0);
-    odroid_overlay_draw_local_text(0, ODROID_SCREEN_HEIGHT - height + pad_text, width, bottom, C_GW_YELLOW, C_GW_MAIN_COLOR, 0);
+    odroid_overlay_draw_fill_rect(0, 0, width, height, curr_colors->main_c);
+    odroid_overlay_draw_fill_rect(0, ODROID_SCREEN_HEIGHT - height, width, height, curr_colors->main_c);
+    odroid_overlay_draw_local_text(0, pad_text, width, header, curr_colors->sel_c, curr_colors->main_c, 0);
+    odroid_overlay_draw_local_text(0, ODROID_SCREEN_HEIGHT - height + pad_text, width, bottom, curr_colors->sel_c, curr_colors->main_c, 0);
     odroid_overlay_draw_battery(width - 26, 3);
 }
 

@@ -64,6 +64,8 @@
 #define s_Quit_to_menu          "× 退出遊戲"
 #define s_Retro_Go_options      "遊戲選項"
 
+#define s_Colors                "Colors"
+
 #define s_Theme_Title           "介面"
 #define s_Theme_sList           "簡單列表"
 #define s_Theme_CoverV          "垂直捲動"
@@ -91,6 +93,7 @@
 #define s_Delete_save           "□ 刪除進度"
 #define s_Confiem_del_save      "您確認要刪除已保存的遊戲進度？"
 //=====================================================================
+
 
 //Core\Src\retro-go\rg_main.c =========================================
 #define s_Second_Unit               "秒"

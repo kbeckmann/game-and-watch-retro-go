@@ -498,30 +498,30 @@ void app_check_data_loop()
     {
         //flash is not compare read;
         lcd_set_buffers(framebuffer1, framebuffer2);
-        odroid_overlay_draw_fill_rect(0, 0, 320, 240, C_BLACK);
+        odroid_overlay_draw_fill_rect(0, 0, 320, 240, curr_colors->bg_c);
         for (int y = 0; y < 14; y++)
         {
             uint8_t pt = img_error[2 * y];
             for (int x = 0; x < 8; x++)
                 if (pt & (0x80 >> x))
-                    odroid_overlay_draw_fill_rect((12 + x) * 8, (9 + y) * 8, 8, 8, C_GW_MAIN_COLOR);
+                    odroid_overlay_draw_fill_rect((12 + x) * 8, (9 + y) * 8, 8, 8, curr_colors->main_c);
             pt = img_error[2 * y + 1];
             for (int x = 0; x < 8; x++)
                 if (pt & (0x80 >> x))
-                    odroid_overlay_draw_fill_rect((20 + x) * 8, (9 + y) * 8, 8, 8, C_GW_MAIN_COLOR);
+                    odroid_overlay_draw_fill_rect((20 + x) * 8, (9 + y) * 8, 8, 8, curr_colors->main_c);
         }
-        odroid_overlay_draw_logo(124, 42, &logo_rgo, C_GW_YELLOW);
-        odroid_overlay_draw_text_line(15 * 8, 20 * 8, 10 * 8, "DATA ERROR", C_RED, C_BLACK);
-        odroid_overlay_draw_text_line(9 * 8, 24 * 8 - 4, 23 * 8, "It's seemed you need to", C_GW_OPAQUE_YELLOW, C_BLACK);
-        odroid_overlay_draw_text_line(9 * 8, 25 * 8, 23 * 8, "programs external flash", C_GW_OPAQUE_YELLOW, C_BLACK);
-        odroid_overlay_draw_text_line(320 - strlen(GIT_HASH) * 8 - 4, 29 * 8 - 4, strlen(GIT_HASH) * 8, GIT_HASH, C_GW_YELLOW, C_BLACK);
+        odroid_overlay_draw_logo(124, 42, &logo_rgo, curr_colors->sel_c);
+        odroid_overlay_draw_text_line(15 * 8, 20 * 8, 10 * 8, "DATA ERROR", C_RED, curr_colors->bg_c);
+        odroid_overlay_draw_text_line(9 * 8, 24 * 8 - 4, 23 * 8, "It's seemed you need to", curr_colors->dis_c, curr_colors->bg_c);
+        odroid_overlay_draw_text_line(9 * 8, 25 * 8, 23 * 8, "programs external flash", curr_colors->dis_c, curr_colors->bg_c);
+        odroid_overlay_draw_text_line(320 - strlen(GIT_HASH) * 8 - 4, 29 * 8 - 4, strlen(GIT_HASH) * 8, GIT_HASH, curr_colors->sel_c, curr_colors->bg_c);
         odroid_gamepad_state_t joystick;
         while (1)
         {
             wdog_refresh();
             int steps = uptime_get() - idle_s;
             sprintf(s, "%ds to sleep", 600 - steps);
-            odroid_overlay_draw_text_line(4, 29 * 8 - 4, strlen(s) * 8, s, C_RED, C_BLACK);
+            odroid_overlay_draw_text_line(4, 29 * 8 - 4, strlen(s) * 8, s, C_RED, curr_colors->bg_c);
 
             lcd_sync();
             lcd_swap();
@@ -547,7 +547,7 @@ void app_main(void)
 {
 
     lcd_set_buffers(framebuffer1, framebuffer2);
-    odroid_overlay_draw_fill_rect(0, 0, 320, 240, C_BLACK);
+    odroid_overlay_draw_fill_rect(0, 0, 320, 240, curr_colors->bg_c);
     odroid_system_init(ODROID_APPID_LAUNCHER, 32000);
     // odroid_display_clear(0);
 
