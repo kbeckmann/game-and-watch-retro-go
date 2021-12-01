@@ -58,6 +58,8 @@
 #define s_Quit_to_menu          "Quit to menu"
 #define s_Retro_Go_options      "Retro-Go"
 
+#define s_Colors                "Colors"
+
 #define s_Theme_Title           "UI Theme"
 #define s_Theme_sList           "Simple List"
 #define s_Theme_CoverV          "Coverflow V"
@@ -67,7 +69,6 @@
 //=====================================================================
 
 //Core\Src\retro-go\rg_emulators.c ====================================
-
 #define s_Title_Date_Format               "%02d-%02d %s %02d:%02d:%02d"
 #define fmt_Title_Date_Format(outstr,datefmt,day,month,weekday,hour,minutes,seconds) sprintf(outstr,datefmt,day,month,weekday,hour,minutes,seconds) 
 

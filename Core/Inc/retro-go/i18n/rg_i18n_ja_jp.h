@@ -65,6 +65,8 @@
 #define s_Quit_to_menu          "Quit to menu"
 #define s_Retro_Go_options      "Retro-Go"
 
+#define s_Colors                "Colors"
+
 #define s_Theme_Title           "UI Theme"
 #define s_Theme_sList           "Simple List"
 #define s_Theme_CoverV          "Coverflow H"
@@ -92,6 +94,7 @@
 #define s_Delete_save           "Delete save"
 #define s_Confiem_del_save      "Delete save file?"
 //=====================================================================
+
 
 //Core\Src\retro-go\rg_main.c =========================================
 #define s_Second_Unit               "s"

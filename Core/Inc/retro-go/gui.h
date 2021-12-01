@@ -24,11 +24,12 @@ typedef enum {
 } scroll_mode_t;
 
 typedef struct {
-    uint16_t list_background;
-    uint16_t list_standard;
-    uint16_t list_selected;
-    uint16_t list_disabled;
-} theme_t;
+    //char name[24];
+    uint16_t bg_c;
+    uint16_t main_c;
+    uint16_t sel_c;
+    uint16_t dis_c;
+} colors_t;
 
 typedef struct {
     const char * text;
@@ -72,7 +73,9 @@ typedef struct {
 } retro_gui_t;
 
 extern retro_gui_t gui;
-extern int gui_themes_count;
+extern int gui_colors_count;
+extern colors_t *curr_colors;
+extern const colors_t gui_colors[];
 
 tab_t *gui_add_tab(const char *name, const void *logo, const void *header, void *arg, void *event_handler);
 tab_t *gui_get_tab(int index);

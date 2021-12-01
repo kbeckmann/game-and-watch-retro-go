@@ -65,6 +65,8 @@
 #define s_Quit_to_menu "Volver al menu"
 #define s_Retro_Go_options "Retro-Go"
 
+#define s_Colors                "Colors"
+
 #define s_Theme_Title "UI Tema"
 #define s_Theme_sList "Listado"
 #define s_Theme_CoverV          "Flow V"
@@ -92,6 +94,7 @@
 #define s_Delete_save "Borrar guardado"
 #define s_Confiem_del_save "¿Borrar guardado?"
 //=====================================================================
+
 
 //Core\Src\retro-go\rg_main.c =========================================
 #define s_Second_Unit "s"

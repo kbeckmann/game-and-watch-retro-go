@@ -146,11 +146,11 @@ static void draw_progress(flashapp_t *flashapp)
 {
     char progress_str[16];
 
-    odroid_overlay_draw_fill_rect(0, LIST_Y_OFFSET, LIST_WIDTH, LIST_HEIGHT, C_BLACK);
+    odroid_overlay_draw_fill_rect(0, LIST_Y_OFFSET, LIST_WIDTH, LIST_HEIGHT, curr_colors->bg_c);
 
-    odroid_overlay_draw_text_line(8, LIST_Y_OFFSET + LIST_LINE_HEIGHT, strlen(flashapp->tab.status) * font_width, flashapp->tab.status, C_GW_YELLOW, C_BLACK);
+    odroid_overlay_draw_text_line(8, LIST_Y_OFFSET + LIST_LINE_HEIGHT, strlen(flashapp->tab.status) * font_width, flashapp->tab.status, curr_colors->sel_c, curr_colors->bg_c);
 
-    draw_text_line_centered(LIST_Y_OFFSET + 5 * LIST_LINE_HEIGHT, flashapp->tab.name, C_GW_YELLOW, C_BLACK);
+    draw_text_line_centered(LIST_Y_OFFSET + 5 * LIST_LINE_HEIGHT, flashapp->tab.name, curr_colors->sel_c, curr_colors->bg_c);
 
     if (flashapp->progress_max != 0) {
         int32_t progress_percent = (100 * (uint64_t)flashapp->progress_value) / flashapp->progress_max;
@@ -162,15 +162,15 @@ static void draw_progress(flashapp_t *flashapp)
                                       PROGRESS_Y_OFFSET,
                                       PROGRESS_WIDTH,
                                       PROGRESS_HEIGHT,
-                                      C_GW_MAIN_COLOR);
+                                      curr_colors->main_c);
 
         odroid_overlay_draw_fill_rect(PROGRESS_X_OFFSET,
                                       PROGRESS_Y_OFFSET,
                                       progress_width,
                                       PROGRESS_HEIGHT,
-                                      C_GW_YELLOW);
+                                      curr_colors->sel_c);
 
-        draw_text_line_centered(LIST_Y_OFFSET + 8 * LIST_LINE_HEIGHT, progress_str, C_GW_YELLOW, C_BLACK);
+        draw_text_line_centered(LIST_Y_OFFSET + 8 * LIST_LINE_HEIGHT, progress_str, curr_colors->sel_c, curr_colors->bg_c);
     }
 }
 
@@ -182,7 +182,7 @@ static void redraw(flashapp_t *flashapp)
 
     // Empty logo
     //odroid_overlay_draw_fill_rect(0, ODROID_SCREEN_HEIGHT - IMAGE_BANNER_HEIGHT - 15,
-    //                              IMAGE_BANNER_WIDTH, IMAGE_BANNER_HEIGHT, C_GW_MAIN_COLOR);
+    //                              IMAGE_BANNER_WIDTH, IMAGE_BANNER_HEIGHT, curr_colors->main_c);
 
     draw_progress(flashapp);
     lcd_swap();

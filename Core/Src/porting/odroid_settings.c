@@ -6,6 +6,7 @@
 #include "main.h"
 #include "rg_i18n.h"
 #include "appid.h"
+#include "gui.h"
 
 #define CONFIG_MAGIC 0xcafef00d
 #define ODROID_APPID_COUNT 4
@@ -38,6 +39,7 @@ typedef struct persistent_config {
     uint8_t volume;
     uint8_t font_size;
     uint8_t theme;
+    uint8_t colors;
     uint8_t startup_app;
     void *startup_file;
 
@@ -59,6 +61,7 @@ static const persistent_config_t persistent_config_default = {
     .volume = ODROID_AUDIO_VOLUME_MAX / 2, // Too high volume can cause brown out if the battery isn't connected.
     .font_size = 8,
     .theme = 0, //use as theme index
+    .colors = 0,
     .startup_app = 0,
     .main_menu_timeout_s = 60 * 10, // Turn off after 10 minutes of idle time in the main menu
     .main_menu_selected_tab = 0,
@@ -111,6 +114,8 @@ void odroid_settings_init()
         odroid_settings_reset();
         return;
     }
+    //set colors;
+    curr_colors = &gui_colors[persistent_config_flash.colors];
 }
 
 void odroid_settings_commit()
@@ -147,8 +152,28 @@ void odroid_settings_int32_set(const char *key, int32_t value)
 {
 }
 
+
+int8_t odroid_settings_colors_get()
+{
+    int colors = persistent_config_ram.colors;
+    if (colors < 0)
+        persistent_config_ram.colors = 0;
+    else if (colors >= gui_colors_count)
+        persistent_config_ram.colors = gui_colors_count - 1;
+    return persistent_config_ram.colors;
+}
+
+void odroid_settings_colors_set(int8_t colors)
+{
+    if (colors < 0)
+        colors = 0;
+    else if (colors >= gui_colors_count)
+        colors = gui_colors_count - 1;
+    persistent_config_ram.colors = colors;
+}
+
 #if COVERFLOW != 0
-int32_t odroid_settings_theme_get()
+int8_t odroid_settings_theme_get()
 {
     int theme = persistent_config_ram.theme;
     if (theme < 0)
@@ -157,7 +182,7 @@ int32_t odroid_settings_theme_get()
         persistent_config_ram.theme = 4;
     return persistent_config_ram.theme;
 }
-void odroid_settings_theme_set(int32_t theme)
+void odroid_settings_theme_set(int8_t theme)
 {
     if (theme < 0)
         theme = 0;

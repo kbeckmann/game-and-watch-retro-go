@@ -66,6 +66,8 @@
 #define s_Quit_to_menu          "매뉴로 나가기"
 #define s_Retro_Go_options      "Retro-Go"
 
+#define s_Colors                "Colors"
+
 #define s_Theme_Title           "UI 태마"
 #define s_Theme_sList           "심플 리스트"
 #define s_Theme_CoverV          "커버플로우 세로"
