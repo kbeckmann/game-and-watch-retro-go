@@ -70,7 +70,7 @@ const colors_t gui_colors[] = {
     {C_BLACK, C_DARK_GREEN, C_GW_YELLOW, C_GW_OPAQUE_YELLOW},
 #else
     {C_BLACK, C_GW_RED, C_GW_YELLOW, C_GW_OPAQUE_YELLOW},
-$endif
+#endif
 
     {C_BLACK, C_DARK_RED, C_GW_YELLOW, C_GW_OPAQUE_YELLOW},
     {C_BLACK, C_DARK_BLUE, C_GW_YELLOW, C_GW_OPAQUE_YELLOW},
