@@ -715,10 +715,12 @@ class ROMParser:
             )
             exit(-1)
 
-        print(
-            f"Save data:\t{total_save_size} bytes\nROM data:\t{total_rom_size} bytes\n"
-            f"Total:\t\t{total_size} / {args.flash_size} bytes (plus some metadata)."
-        )
+        if args.verbose:
+            print(
+                f"Save data:\t{total_save_size} bytes\nROM data:\t{total_rom_size} bytes\n"
+                f"Total:\t\t{total_size} / {args.flash_size} bytes (plus some metadata)."
+            )
+
         if total_size > args.flash_size:
             print("Error: External flash will overflow!")
             exit(-1)
@@ -760,6 +762,11 @@ if __name__ == "__main__":
     parser.set_defaults(compress_gb_speed=False)
     parser.add_argument(
         "--no-save", dest="save", action="store_false"
+    )
+    parser.add_argument(
+        "--verbose",
+        action="store_true",
+        help="Enable verbose prints",
     )
     args = parser.parse_args()
 
