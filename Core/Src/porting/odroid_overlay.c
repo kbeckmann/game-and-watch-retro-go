@@ -631,68 +631,6 @@ static bool volume_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event
     return event == ODROID_DIALOG_ENTER;
 }
 
-#if COVERFLOW != 0
-const char *GW_Themes[] = {s_Theme_sList, s_Theme_CoverV, s_Theme_CoverH, s_Theme_CoverLightH, s_Theme_CoverLightV};
-
-static bool theme_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat)
-{
-    int8_t theme = odroid_settings_theme_get();
-
-    if (event == ODROID_DIALOG_PREV)
-    {
-        if (theme > 0)
-            odroid_settings_theme_set(--theme);
-        else
-        {
-            theme = 4;
-            odroid_settings_theme_set(4);
-        }
-    }
-    else if (event == ODROID_DIALOG_NEXT)
-    {
-        if (theme < 4)
-            odroid_settings_theme_set(++theme);
-        else
-        {
-            theme = 0;
-            odroid_settings_theme_set(0);
-        }
-    }
-    sprintf(option->value, "%s", (char *)GW_Themes[theme]);
-    return event == ODROID_DIALOG_ENTER;
-}
-#endif
-
-static bool colors_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat)
-{
-    int8_t colors = odroid_settings_colors_get();
-
-    if (event == ODROID_DIALOG_PREV)
-    {
-        if (colors > 0)
-            odroid_settings_colors_set(--colors);
-        else
-        {
-            colors = gui_colors_count - 1;
-            odroid_settings_colors_set(gui_colors_count - 1);
-        }
-    }
-    else if (event == ODROID_DIALOG_NEXT)
-    {
-        if (colors < gui_colors_count - 1)
-            odroid_settings_colors_set(++colors);
-        else
-        {
-            colors = 0;
-            odroid_settings_colors_set(0);
-        }
-    }
-    curr_colors = &gui_colors[colors];
-    memcpy(option->value, curr_colors, sizeof(colors_t));
-    //sprintf(option->value, "%s", curr_colors->name);
-    return event == ODROID_DIALOG_ENTER;
-}
-
 static bool brightness_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat)
 {
     int8_t level = odroid_display_get_backlight();
@@ -807,18 +745,10 @@ int odroid_overlay_settings_menu(odroid_dialog_choice_t *extra_options)
 {
     static char bright_value[25];
     static char volume_value[25];
-    static char theme_value[25];
-    static char colors_value[25];
 
     odroid_dialog_choice_t options[32] = {                         //
         {0, s_Brightness, bright_value, 1, &brightness_update_cb}, //
         {1, s_Volume, volume_value, 1, &volume_update_cb},
-        ODROID_DIALOG_CHOICE_SEPARATOR,
-        {0x0F0F0E0E, s_Colors, colors_value, 1, &colors_update_cb},
-#if COVERFLOW != 0
-        //ODROID_DIALOG_CHOICE_SEPARATOR,
-        {4, s_Theme_Title, theme_value, 1, &theme_update_cb},
-#endif
 
         ODROID_DIALOG_CHOICE_LAST, //
     };
