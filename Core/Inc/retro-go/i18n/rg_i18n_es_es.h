@@ -18,14 +18,14 @@
 //=====================================================================
 
 //Core\Src\porting\gw\main_gw.c =======================================
-#define s_copy_RTC_to_GW_time   "copy RTC to G&W time"
-#define s_copy_GW_time_to_RTC   "copy G&W time to RTC"
-#define s_LCD_filter            "LCD filter"
-#define s_Display_RAM           "Display RAM"
-#define s_Press_ACL             "Press ACL" 
-#define s_filter_0_none         "0-none"
-#define s_filter_1_medium       "1-medium"
-#define s_filter_2_high         "2-high"
+#define s_copy_RTC_to_GW_time   "Copiar RTC a hora G&W"
+#define s_copy_GW_time_to_RTC   "Copiar hora G&W a RTC"
+#define s_LCD_filter            "Filtro LCD"
+#define s_Display_RAM           "Mostrar RAM"
+#define s_Press_ACL             "Pulsar ACL" 
+#define s_filter_0_none         "0-Ninguno"
+#define s_filter_1_medium       "1-Medio"
+#define s_filter_2_high         "2-Alto"
 //=====================================================================
 
 
@@ -65,7 +65,7 @@
 #define s_Quit_to_menu "Volver al menu"
 #define s_Retro_Go_options "Retro-Go"
 
-#define s_Colors                "Colors"
+#define s_Colors                "Colores"
 
 #define s_Theme_Title "UI Tema"
 #define s_Theme_sList "Listado"
