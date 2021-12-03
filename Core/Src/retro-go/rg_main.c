@@ -145,6 +145,69 @@ static bool main_menu_timeout_cb(odroid_dialog_choice_t *option, odroid_dialog_e
     return event == ODROID_DIALOG_ENTER;
 }
 
+
+#if COVERFLOW != 0
+const char *GW_Themes[] = {s_Theme_sList, s_Theme_CoverV, s_Theme_CoverH, s_Theme_CoverLightH, s_Theme_CoverLightV};
+
+static bool theme_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat)
+{
+    int8_t theme = odroid_settings_theme_get();
+
+    if (event == ODROID_DIALOG_PREV)
+    {
+        if (theme > 0)
+            odroid_settings_theme_set(--theme);
+        else
+        {
+            theme = 4;
+            odroid_settings_theme_set(4);
+        }
+    }
+    else if (event == ODROID_DIALOG_NEXT)
+    {
+        if (theme < 4)
+            odroid_settings_theme_set(++theme);
+        else
+        {
+            theme = 0;
+            odroid_settings_theme_set(0);
+        }
+    }
+    sprintf(option->value, "%s", (char *)GW_Themes[theme]);
+    return event == ODROID_DIALOG_ENTER;
+}
+#endif
+
+static bool colors_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat)
+{
+    int8_t colors = odroid_settings_colors_get();
+
+    if (event == ODROID_DIALOG_PREV)
+    {
+        if (colors > 0)
+            odroid_settings_colors_set(--colors);
+        else
+        {
+            colors = gui_colors_count - 1;
+            odroid_settings_colors_set(gui_colors_count - 1);
+        }
+    }
+    else if (event == ODROID_DIALOG_NEXT)
+    {
+        if (colors < gui_colors_count - 1)
+            odroid_settings_colors_set(++colors);
+        else
+        {
+            colors = 0;
+            odroid_settings_colors_set(0);
+        }
+    }
+    curr_colors = &gui_colors[colors];
+    memcpy(option->value, curr_colors, sizeof(colors_t));
+    //sprintf(option->value, "%s", curr_colors->name);
+    return event == ODROID_DIALOG_ENTER;
+}
+
 static inline bool tab_enabled(tab_t *tab)
 {
     int disabled_tabs = 0;
@@ -350,7 +413,15 @@ void retro_loop()
             else if (last_key == ODROID_INPUT_VOLUME)
             {
                 char timeout_value[32];
+                char theme_value[25];
+                char colors_value[25];
                 odroid_dialog_choice_t choices[] = {
+                    ODROID_DIALOG_CHOICE_SEPARATOR,
+                    {0x0F0F0E0E, s_Colors, colors_value, 1, &colors_update_cb},
+#if COVERFLOW != 0
+                     //ODROID_DIALOG_CHOICE_SEPARATOR,
+                    {4, s_Theme_Title, theme_value, 1, &theme_update_cb},
+#endif
                     ODROID_DIALOG_CHOICE_SEPARATOR,
                     {0, s_Idle_power_off, timeout_value, 1, &main_menu_timeout_cb},
                     // {0, "Color theme", "1/10", 1, &color_shift_cb},
