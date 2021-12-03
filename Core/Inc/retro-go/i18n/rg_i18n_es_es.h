@@ -18,14 +18,14 @@
 //=====================================================================
 
 //Core\Src\porting\gw\main_gw.c =======================================
-#define s_copy_RTC_to_GW_time   "copy RTC to G&W time"
-#define s_copy_GW_time_to_RTC   "copy G&W time to RTC"
-#define s_LCD_filter            "LCD filter"
-#define s_Display_RAM           "Display RAM"
-#define s_Press_ACL             "Press ACL" 
-#define s_filter_0_none         "0-none"
-#define s_filter_1_medium       "1-medium"
-#define s_filter_2_high         "2-high"
+#define s_copy_RTC_to_GW_time   "Copiar RTC a hora G&W"
+#define s_copy_GW_time_to_RTC   "Copiar hora G&W a RTC"
+#define s_LCD_filter            "Filtro LCD"
+#define s_Display_RAM           "Mostrar RAM"
+#define s_Press_ACL             "Pulsar ACL" 
+#define s_filter_0_none         "0-Ninguno"
+#define s_filter_1_medium       "1-Medio"
+#define s_filter_2_high         "2-Alto"
 //=====================================================================
 
 
@@ -65,7 +65,7 @@
 #define s_Quit_to_menu "Volver al menu"
 #define s_Retro_Go_options "Retro-Go"
 
-#define s_Colors                "Colors"
+#define s_Colors                "Colores"
 
 #define s_Theme_Title "UI Tema"
 #define s_Theme_sList "Listado"
@@ -83,16 +83,16 @@
 
 #define s_File "Archivo"
 #define s_Type "Tipo"
-#define s_Size "Tamaño"
-#define s_ImgSize "Tamaño Imagen"
+#define s_Size "TamaÃ±o"
+#define s_ImgSize "TamaÃ±o Imagen"
 #define s_Close "Cerrar"
 #define s_GameProp "Propiedades"
 #define s_Resume_game "Continuar"
 #define s_New_game "Nuevo juego"
 #define s_Del_favorite "Borrar favorito"
-#define s_Add_favorite "Añadir favorito"
+#define s_Add_favorite "AÃ±adir favorito"
 #define s_Delete_save "Borrar guardado"
-#define s_Confiem_del_save "¿Borrar guardado?"
+#define s_Confiem_del_save "Â¿Borrar guardado?"
 //=====================================================================
 
 
@@ -102,13 +102,13 @@
 #define s_Author         "Por    :"
 #define s_Author_        "       :"
 #define s_UI_Mod         "UI Mod :"
-#define s_Lang           "Español"
+#define s_Lang           "EspaÃ±ol"
 #define s_LangAuthor     "Icebox2"
 #define s_Debug_menu "Debug_menu"
-#define s_Reset_settings "Resetear configuración"
+#define s_Reset_settings "Resetear configuraciÃ³n"
 //#define s_Close "Cerrar"
 #define s_Retro_Go "Sobre Retro-Go"
-#define s_Confirm_Reset_settings "¿Resetear?"
+#define s_Confirm_Reset_settings "Â¿Resetear?"
 
 #define s_Flash_JEDEC_ID "Flash JEDEC ID"
 #define s_Flash_Name "Flash Nombre"
@@ -120,7 +120,7 @@
 #define s_Disable_DBGMCU_CK "Deshabilitar DBGMCU CK"
 //#define s_Close "Cerrar"
 #define s_Debug_Title "Debug"
-#define s_Idle_power_off "Apagado automático"
+#define s_Idle_power_off "Apagado automÃ¡tico"
 
 #define s_Time "Hora"
 #define s_Date "Fecha"
@@ -130,18 +130,18 @@
 #define s_Second "Segundo"
 #define s_Time_setup "Conf. hora"
 
-#define s_Day "Día"
+#define s_Day "DÃ­a"
 #define s_Month "Mes"
-#define s_Year "Año"
-#define s_Weekday "Día de la semana"
+#define s_Year "AÃ±o"
+#define s_Weekday "DÃ­a de la semana"
 #define s_Date_setup "Configurar fecha"
 
 #define s_Weekday_Mon "Lun"
 #define s_Weekday_Tue "Mar"
-#define s_Weekday_Wed "Míe"
+#define s_Weekday_Wed "MÃ­e"
 #define s_Weekday_Thu "Jue"
 #define s_Weekday_Fri "Vie"
-#define s_Weekday_Sat "Sáb"
+#define s_Weekday_Sat "SÃ¡b"
 #define s_Weekday_Sun "Dom"
 
 #define s_Date_Format               "%02d.%02d.20%02d %s"
