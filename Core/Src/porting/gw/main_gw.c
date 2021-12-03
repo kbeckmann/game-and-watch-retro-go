@@ -37,6 +37,9 @@
 static odroid_gamepad_state_t joystick;
 static bool softkey_time_pressed = 0;
 static bool softkey_alarm_pressed = 0;
+static bool softkey_A_pressed = 0;
+static bool softkey_only = 0;
+
 static unsigned int softkey_duration = 0;
 
 static void gw_set_time() {
@@ -128,18 +131,22 @@ static bool gw_system_LoadState(char *pathName)
 unsigned int gw_get_buttons()
 {
     unsigned int hw_buttons = 0;
-    hw_buttons |= joystick.values[ODROID_INPUT_LEFT];
-    hw_buttons |= joystick.values[ODROID_INPUT_UP] << 1;
-    hw_buttons |= joystick.values[ODROID_INPUT_RIGHT] << 2;
-    hw_buttons |= joystick.values[ODROID_INPUT_DOWN] << 3;
-    hw_buttons |= joystick.values[ODROID_INPUT_A] << 4;
-    hw_buttons |= joystick.values[ODROID_INPUT_B] << 5;
-    hw_buttons |= joystick.values[ODROID_INPUT_SELECT] << 6;
-    hw_buttons |= joystick.values[ODROID_INPUT_START] << 7;
-    hw_buttons |= joystick.values[ODROID_INPUT_VOLUME] << 8;
-    hw_buttons |= joystick.values[ODROID_INPUT_POWER] << 9;
+    if (!softkey_only)
+    {
+        hw_buttons |= joystick.values[ODROID_INPUT_LEFT];
+        hw_buttons |= joystick.values[ODROID_INPUT_UP] << 1;
+        hw_buttons |= joystick.values[ODROID_INPUT_RIGHT] << 2;
+        hw_buttons |= joystick.values[ODROID_INPUT_DOWN] << 3;
+        hw_buttons |= joystick.values[ODROID_INPUT_A] << 4;
+        hw_buttons |= joystick.values[ODROID_INPUT_B] << 5;
+        hw_buttons |= joystick.values[ODROID_INPUT_SELECT] << 6;
+        hw_buttons |= joystick.values[ODROID_INPUT_START] << 7;
+        hw_buttons |= joystick.values[ODROID_INPUT_VOLUME] << 8;
+        hw_buttons |= joystick.values[ODROID_INPUT_POWER] << 9;
+    }
 
     // software keys
+    hw_buttons |= ((unsigned int)softkey_A_pressed) << 4;
     hw_buttons |= ((unsigned int)softkey_time_pressed) << 10;
     hw_buttons |= ((unsigned int)softkey_alarm_pressed) << 11;
 
@@ -442,35 +449,55 @@ int app_main_gw(uint8_t load_state)
     gw_system_reset();
     printf("G&W reset\n");
 
-    /*** Main emulator loop */
-    printf("Main emulator loop start\n");
-
     /* check if we have to load state */
     bool LoadState_done = false;
     if (load_state != 0) {
         LoadState_done = gw_system_LoadState(NULL);
-        gw_check_time();
-        gw_set_time();
+        if (LoadState_done) {
+            gw_check_time();
+            gw_set_time();
+        }
     }
 
     /* emulate watch mode */
     if (!LoadState_done) {
+        softkey_time_pressed = 0;
+        softkey_alarm_pressed = 0;
+        softkey_A_pressed = 0;
 
-       printf("G&W emulate watch mode\n");
+        // disable user keys
+        softkey_only = 1;
+
+        printf("G&W emulate watch mode\n");
+
+        gw_system_reset();
+
         // From reset state : run
         gw_system_run(GW_AUDIO_FREQ*2);
 
         // press TIME to exit TIME settings mode
         softkey_time_pressed = 1;
-        gw_system_run(GW_AUDIO_FREQ*2);
+        gw_system_run(GW_AUDIO_FREQ/2);
         softkey_time_pressed = 0;
         gw_system_run(GW_AUDIO_FREQ*2);
 
         // synchronize G&W with RTC and run
         gw_check_time();
         gw_set_time();
-        gw_system_run(GW_AUDIO_FREQ*2);
+        gw_system_run(GW_AUDIO_FREQ);
+
+        // press A required by some game
+        softkey_A_pressed = 1;
+        gw_system_run(GW_AUDIO_FREQ/2);
+        softkey_A_pressed = 0;
+        gw_system_run(GW_AUDIO_FREQ);
+
+        // enable user keys
+        softkey_only = 0;
     }
+
+    /*** Main emulator loop */
+    printf("Main emulator loop start\n");
 
     clear_dwt_cycles();
 
