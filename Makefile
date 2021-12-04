@@ -164,13 +164,6 @@ C_INCLUDES +=  \
 -ILCD-Game-Emulator/src/cpus \
 -ILCD-Game-Emulator/src/gw_sys
 
-C_DEFS += \
--DIS_LITTLE_ENDIAN \
--DDISABLE_AHBRAM_DCACHE \
--DMINIZ_NO_MALLOC \
--DMINIZ_NO_ZLIB_APIS
-
-
 include Makefile.common
 
 
