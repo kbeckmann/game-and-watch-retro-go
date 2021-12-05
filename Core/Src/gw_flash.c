@@ -273,6 +273,24 @@ const flash_cmd_t cmds_quad_24b_issi[CMD_COUNT] = {
     [CMD_READ]   = CMD_DEF(0xEB, LINES_1, LINES_4, ADDR_SIZE_24B, LINES_4,    6), // FRQIO dummy=6
 };
 
+const flash_cmd_t cmds_quad_24b_wb[CMD_COUNT] = {
+    // cmd                  cmd  i_lines  a_lines         a_size  d_lines  dummy
+    [CMD_WRSR]   = CMD_DEF(0x01, LINES_1, LINES_0, ADDR_SIZE_24B, LINES_1,    0),
+    [CMD_RDSR]   = CMD_DEF(0x05, LINES_1, LINES_0, ADDR_SIZE_24B, LINES_1,    0),
+    [CMD_RDCR]   = CMD_DEF(0x15, LINES_1, LINES_0, ADDR_SIZE_24B, LINES_1,    0),
+    [CMD_WREN]   = CMD_DEF(0x06, LINES_1, LINES_0, ADDR_SIZE_24B, LINES_0,    0),
+    [CMD_RDID]   = CMD_DEF(0x9F, LINES_1, LINES_0, ADDR_SIZE_24B, LINES_1,    0),
+    [CMD_RSTEN]  = CMD_DEF(0x66, LINES_1, LINES_0, ADDR_SIZE_24B, LINES_0,    0),
+    [CMD_RST]    = CMD_DEF(0x99, LINES_1, LINES_0, ADDR_SIZE_24B, LINES_0,    0),
+    [CMD_CE]     = CMD_DEF(0x60, LINES_1, LINES_0, ADDR_SIZE_24B, LINES_0,    0), // Chip Erase
+    [CMD_ERASE1] = CMD_DEF(0x20, LINES_1, LINES_1, ADDR_SIZE_24B, LINES_0,    0), // Sector Erase 4K
+    [CMD_ERASE2] = CMD_DEF(0x52, LINES_1, LINES_1, ADDR_SIZE_24B, LINES_0,    0), // Block Erase 32K
+    [CMD_ERASE3] = CMD_DEF(0xD8, LINES_1, LINES_1, ADDR_SIZE_24B, LINES_0,    0), // Block Erase 64K
+    [CMD_ERASE4] = { },
+    [CMD_PP]     = CMD_DEF(0x32, LINES_1, LINES_1, ADDR_SIZE_24B, LINES_4,    0), // Quad Input Page Program
+    [CMD_READ]   = CMD_DEF(0xEB, LINES_1, LINES_4, ADDR_SIZE_24B, LINES_4,    6), // Fast Read Quad I/O
+};
+
 static void init_spansion(void);
 static void init_mx_issi(void);
 
@@ -282,6 +300,7 @@ const flash_config_t config_quad_32b_mx   = FLASH_CONFIG_DEF(cmds_quad_32b_mx,  
 const flash_config_t config_quad_32b_mx54 = FLASH_CONFIG_DEF(cmds_quad_32b_mx54, 0x01000,  0x8000, 0x10000, 0,   true, init_mx_issi);
 const flash_config_t config_quad_32b_s    = FLASH_CONFIG_DEF(cmds_quad_32b_s,    0x40000,       0,       0, 0,   true, init_spansion);
 const flash_config_t config_quad_24b_issi = FLASH_CONFIG_DEF(cmds_quad_24b_issi, 0x01000,  0x8000, 0x10000, 0,   true, init_mx_issi);
+const flash_config_t config_quad_24b_wb   = FLASH_CONFIG_DEF(cmds_quad_24b_wb,   0x01000,  0x8000, 0x10000, 0,   true, NULL);
 
 const jedec_config_t jedec_map[] = {
 #if (EXTFLASH_FORCE_SPI == 0)
@@ -306,6 +325,9 @@ const jedec_config_t jedec_map[] = {
     // ISSI 24 bit *untested*
     // TODO: Test and uncomment when it's confirmed they work well.
     JEDEC_CONFIG_DEF(0x9D, 0x70, 0x18, "IS25WP128F",  &config_quad_24b_issi), // 16MB
+
+	// Winbond 24 bit address
+    JEDEC_CONFIG_DEF(0xEF, 0x60, 0x18, "W25Q128JWxxQ", &config_quad_24b_wb), // 16MB, e.g. W25Q128JWSIQ
 #endif
 };
 
