@@ -403,13 +403,14 @@ static void gw_display_ram_overlay(){
 }
 
 static odroid_dialog_choice_t options[] = {
-    {309, "Press ACL or reset", "", 1, &gw_debug_submenu_autoclear},
-    {310, "Press TIME or B+TIME", "", 1, &gw_debug_submenu_press_time},
-    {320, "Press ALARM or B+GAME", "", 1, &gw_debug_submenu_press_alarm},
-    {330, "copy RTC to G&W time", "", 1, &gw_debug_submenu_autoset_time},
-    {331, "copy G&W time to RTC", "", 1, &gw_debug_submenu_autoget_time},
-    {360, "LCD filter", LCD_deflicker_value, 1, &gw_debug_submenu_set_deflicker},
-    {370, "Display RAM", display_ram_value, 1, &gw_debug_submenu_display_ram},
+    ODROID_DIALOG_CHOICE_SEPARATOR,
+    {309, s_Press_ACL, "", 1, &gw_debug_submenu_autoclear},
+    {310, s_Press_TIME, "", 1, &gw_debug_submenu_press_time},
+    {320, s_Press_ALARM, "", 1, &gw_debug_submenu_press_alarm},
+    {330, s_copy_RTC_to_GW_time, "", 1, &gw_debug_submenu_autoset_time},
+    {331, s_copy_GW_time_to_RTC, "", 1, &gw_debug_submenu_autoget_time},
+    {360, s_LCD_filter, LCD_deflicker_value, 1, &gw_debug_submenu_set_deflicker},
+    {370, s_Display_RAM, display_ram_value, 1, &gw_debug_submenu_display_ram},
     ODROID_DIALOG_CHOICE_LAST};
 
 /* Main */
