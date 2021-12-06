@@ -474,7 +474,7 @@ void emulators_init()
 #endif
 
 #ifdef ENABLE_EMULATOR_PCE
-    add_emulator("PC Engine", "pce", "pce", "huexpress-go", 0, &logo_gnw, &header_pce);
+    add_emulator("PC Engine", "pce", "pce", "huexpress-go", 0, &logo_pce, &header_pce);
 #endif
 
 #ifdef ENABLE_EMULATOR_GG
@@ -491,7 +491,7 @@ void emulators_init()
 #endif
 
 #ifdef ENABLE_EMULATOR_COL
-    add_emulator("Colecovision", "col", "col", "smsplusgx-go", 0, &logo_gnw, &header_col);
+    add_emulator("Colecovision", "col", "col", "smsplusgx-go", 0, &logo_coleco, &header_col);
 #endif
 
     // add_emulator("ColecoVision", "col", "col", "smsplusgx-go", 0, logo_col, header_col);
