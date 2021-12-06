@@ -23,6 +23,8 @@
 #define s_LCD_filter            "屏幕抗锯齿"
 #define s_Display_RAM           "显示内存信息"
 #define s_Press_ACL             "重置游戏" 
+#define s_Press_TIME            "模拟按下 TIME  [B+TIME]"
+#define s_Press_ALARM           "模拟按下 ALARM [B+GAME]"
 #define s_filter_0_none         "关"
 #define s_filter_1_medium       "中"
 #define s_filter_2_high         "高"

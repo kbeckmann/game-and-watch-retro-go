@@ -456,42 +456,42 @@ void emulators_init()
 {
 #if !( defined(ENABLE_EMULATOR_GB) || defined(ENABLE_EMULATOR_NES) || defined(ENABLE_EMULATOR_SMS) || defined(ENABLE_EMULATOR_GG) || defined(ENABLE_EMULATOR_COL) || defined(ENABLE_EMULATOR_SG1000) || defined(ENABLE_EMULATOR_PCE) || defined(ENABLE_EMULATOR_GW))
     // Add gameboy as a placeholder in case no emulator is built.
-    add_emulator("Nintendo Gameboy", "gb", "gb", "gnuboy-go", 0, logo_gb, &header_gb);
+    add_emulator("Nintendo Gameboy", "gb", "gb", "gnuboy-go", 0, &logo_gnw, &header_gb);
 #endif
 
 
 #ifdef ENABLE_EMULATOR_GB
-    add_emulator("Nintendo Gameboy", "gb", "gb", "gnuboy-go", 0, logo_gb, &header_gb);
+    add_emulator("Nintendo Gameboy", "gb", "gb", "gnuboy-go", 0, &logo_gnw, &header_gb);
     // add_emulator("Nintendo Gameboy Color", "gbc", "gbc", "gnuboy-go", 0, logo_gbc, header_gbc);
 #endif
 
 #ifdef ENABLE_EMULATOR_NES
-    add_emulator("Nintendo Entertainment System", "nes", "nes", "nofrendo-go", 16, logo_nes, &header_nes);
+    add_emulator("Nintendo Entertainment System", "nes", "nes", "nofrendo-go", 16, &logo_gnw, &header_nes);
 #endif
     
 #ifdef ENABLE_EMULATOR_GW
-    add_emulator("Game & Watch", "gw", "gw", "LCD-Game-Emulator", 0, logo_gw, &header_gw);
+    add_emulator("Game & Watch", "gw", "gw", "LCD-Game-Emulator", 0, &logo_gnw, &header_gw);
 #endif
 
 #ifdef ENABLE_EMULATOR_PCE
-    add_emulator("PC Engine", "pce", "pce", "huexpress-go", 0, logo_nes, &header_pce);
+    add_emulator("PC Engine", "pce", "pce", "huexpress-go", 0, &logo_gnw, &header_pce);
 #endif
 
 #ifdef ENABLE_EMULATOR_GG
-    add_emulator("Sega Game Gear", "gg", "gg", "smsplusgx-go", 0, logo_gg, &header_gg);
+    add_emulator("Sega Game Gear", "gg", "gg", "smsplusgx-go", 0, &logo_gnw, &header_gg);
 #endif
 
 #ifdef ENABLE_EMULATOR_SMS
-    add_emulator("Sega Master System", "sms", "sms", "smsplusgx-go", 0, logo_sms, &header_sms);
+    add_emulator("Sega Master System", "sms", "sms", "smsplusgx-go", 0, &logo_gnw, &header_sms);
 #endif
 
 
 #ifdef ENABLE_EMULATOR_SG1000
-    add_emulator("Sega SG-1000", "sg", "sg", "smsplusgx-go", 0, logo_sg1000, &header_sg1000);
+    add_emulator("Sega SG-1000", "sg", "sg", "smsplusgx-go", 0, &logo_gnw, &header_sg1000);
 #endif
 
 #ifdef ENABLE_EMULATOR_COL
-    add_emulator("Colecovision", "col", "col", "smsplusgx-go", 0, logo_col, &header_col);
+    add_emulator("Colecovision", "col", "col", "smsplusgx-go", 0, &logo_gnw, &header_col);
 #endif
 
     // add_emulator("ColecoVision", "col", "col", "smsplusgx-go", 0, logo_col, header_col);
