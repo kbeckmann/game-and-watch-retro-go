@@ -290,10 +290,10 @@ C_DEFS +=  \
 -DEXTFLASH_FORCE_SPI=$(EXTFLASH_FORCE_SPI) \
 -DUSE_HAL_DRIVER \
 -DSTM32H7B0xx \
--DVECT_TAB_ITCM \
 -DIS_LITTLE_ENDIAN \
+-DMINIZ_NO_MALLOC \
+-DMINIZ_NO_ZLIB_APIS \
 -DDEBUG_RG_ALLOC \
--DMINIZ_NO_TIME \
 -DSTATE_SAVING=$(STATE_SAVING) \
 -DENABLE_SCREENSHOT=$(ENABLE_SCREENSHOT) \
 -DGNW_TARGET_MARIO=$(GNW_TARGET_MARIO) \
@@ -316,7 +316,6 @@ C_INCLUDES +=  \
 -IDrivers/STM32H7xx_HAL_Driver/Inc/Legacy \
 -IDrivers/CMSIS/Device/ST/STM32H7xx/Include \
 -IDrivers/CMSIS/Include \
--Iretro-go-stm32/components/miniz \
 -Iretro-go-stm32/components/lupng \
 
 # Force include the configuration
