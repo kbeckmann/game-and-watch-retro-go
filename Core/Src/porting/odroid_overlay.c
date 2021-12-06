@@ -793,6 +793,8 @@ int odroid_overlay_game_settings_menu(odroid_dialog_choice_t *extra_options)
     char speedup_value[12];
     char scaling_value[12];
     char filtering_value[12];
+    strcpy(filtering_value, s_FilteringOff);
+    strcpy(scaling_value, s_SCalingFull);
 
     odroid_dialog_choice_t options[32] = {
         ODROID_DIALOG_CHOICE_SEPARATOR,
