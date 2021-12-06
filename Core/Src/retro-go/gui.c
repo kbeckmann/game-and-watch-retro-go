@@ -376,7 +376,16 @@ void gui_draw_header(tab_t *tab)
     if (tab->img_header)
         odroid_overlay_draw_logo(8, ODROID_SCREEN_HEIGHT - IMAGE_BANNER_HEIGHT - 15 + 7, tab->img_header, curr_colors->sel_c);
 
-    odroid_overlay_draw_logo(284, ODROID_SCREEN_HEIGHT - IMAGE_BANNER_HEIGHT - 15 + 1, &logo_gnw, get_shined_pixel(curr_colors->main_c, 25));
+    if (tab->img_logo) {
+        retro_logo_image *img_logo = tab->img_logo;
+        int h = img_logo->height;
+        h = (IMAGE_BANNER_HEIGHT - h) / 2;
+        int w = h + img_logo->width;
+        
+        odroid_overlay_draw_logo(ODROID_SCREEN_WIDTH - w - 1, 
+                                 ODROID_SCREEN_HEIGHT - IMAGE_BANNER_HEIGHT - 15 + h, 
+                                 tab->img_logo, get_shined_pixel(curr_colors->main_c, 25));
+    }
 
     odroid_overlay_draw_fill_rect(0, ODROID_SCREEN_HEIGHT - 15, ODROID_SCREEN_WIDTH, 1, curr_colors->sel_c);
     odroid_overlay_draw_fill_rect(0, ODROID_SCREEN_HEIGHT - 13, ODROID_SCREEN_WIDTH, 4, curr_colors->main_c);

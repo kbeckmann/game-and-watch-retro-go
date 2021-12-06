@@ -518,6 +518,7 @@ void flashapp_main(void)
 {
     flashapp_t flashapp = {};
     flashapp.tab.img_header = &logo_flash;
+    flashapp.tab.img_logo = &logo_gnw;
 
     SCB_InvalidateDCache();
     SCB_DisableDCache();
