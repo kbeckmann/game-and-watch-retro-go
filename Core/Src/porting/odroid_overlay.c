@@ -28,6 +28,7 @@ int odroid_overlay_game_menu()
 #include <string.h>
 #include <stdio.h>
 #include <math.h>
+#include <assert.h>
 
 #include "gw_buttons.h"
 #include "gw_lcd.h"
@@ -231,7 +232,14 @@ void odroid_overlay_draw_dialog(const char *header, odroid_dialog_choice_t *opti
 
     int options_count = get_dialog_items_count(options);
 
+#ifdef USE_DYNAMIC_MENU_ALLOC
+    // Issues with current code
     char *rows = rg_alloc(options_count * 256, MEM_ANY);
+#else
+    // Use stackspace instead.
+    char rows[16 * 256];
+    assert(options_count < (sizeof(rows) / 256));
+#endif
 
     for (int i = 0; i < options_count; i++)
     {
@@ -290,7 +298,9 @@ void odroid_overlay_draw_dialog(const char *header, odroid_dialog_choice_t *opti
     odroid_overlay_draw_rect(box_x, box_y, box_width, box_height, box_padding, box_color);
     odroid_overlay_draw_rect(box_x - 1, box_y - 1, box_width + 2, box_height + 2, 1, box_border_color);
 
+#ifdef USE_DYNAMIC_MENU_ALLOC
     rg_free(rows);
+#endif
 }
 
 int odroid_overlay_dialog(const char *header, odroid_dialog_choice_t *options, int selected)
