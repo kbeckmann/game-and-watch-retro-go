@@ -454,7 +454,7 @@ void retro_loop()
                     static char second_value[8];
 
                     // Time setup
-                    odroid_dialog_choice_t timeoptions[32] = {
+                    odroid_dialog_choice_t timeoptions[8] = {
                         {0, s_Hour, hour_value, 1, &hour_update_cb},
                         {1, s_Minute, minute_value, 1, &minute_update_cb},
                         {2, s_Second, second_value, 1, &second_update_cb},
@@ -470,7 +470,7 @@ void retro_loop()
                     static char weekday_value[8];
 
                     // Date setup
-                    odroid_dialog_choice_t dateoptions[32] = {
+                    odroid_dialog_choice_t dateoptions[8] = {
                         {0, s_Day, day_value, 1, &day_update_cb},
                         {1, s_Month, month_value, 1, &month_update_cb},
                         {2, s_Year, year_value, 1, &year_update_cb},

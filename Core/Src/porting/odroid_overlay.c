@@ -746,7 +746,7 @@ int odroid_overlay_settings_menu(odroid_dialog_choice_t *extra_options)
     static char bright_value[25];
     static char volume_value[25];
 
-    odroid_dialog_choice_t options[32] = {                         //
+    odroid_dialog_choice_t options[16] = {                         //
         {0, s_Brightness, bright_value, 1, &brightness_update_cb}, //
         {1, s_Volume, volume_value, 1, &volume_update_cb},
 
@@ -796,7 +796,7 @@ int odroid_overlay_game_settings_menu(odroid_dialog_choice_t *extra_options)
     strcpy(filtering_value, s_FilteringOff);
     strcpy(scaling_value, s_SCalingFull);
 
-    odroid_dialog_choice_t options[32] = {
+    odroid_dialog_choice_t options[16] = {
         ODROID_DIALOG_CHOICE_SEPARATOR,
         {200, s_Scaling, scaling_value, 1, &scaling_update_cb},
         {210, s_Filtering, filtering_value, 1, &filter_update_cb}, // Interpolation
