@@ -458,7 +458,7 @@ int main(void)
   // Save the button states as early as possible
   boot_buttons = buttons_get();
   // reduce the power consumption before lcd init
-  lcd_backlight_off();
+  // lcd_backlight_off();
   // Keep this
   for (int i = 0; i < 1; i++) {
       wdog_refresh();
