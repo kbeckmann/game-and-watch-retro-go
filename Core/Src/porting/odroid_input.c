@@ -53,8 +53,9 @@ void update_gamepad_state(odroid_gamepad_state_t *state, uint32_t buttons, odroi
     update_gamepad_state(out_state, buttons, ODROID_INPUT_POWER, B_POWER);
     update_gamepad_state(out_state, buttons, ODROID_INPUT_A, B_A);
     update_gamepad_state(out_state, buttons, ODROID_INPUT_B, B_B);
+    update_gamepad_state(out_state, buttons, ODROID_INPUT_X, B_START);
+    update_gamepad_state(out_state, buttons, ODROID_INPUT_Y, B_SELECT);
     // if(buttons & B_Left)
-
 }
 
 void odroid_input_wait_for_key(odroid_gamepad_key_t key, bool pressed)
