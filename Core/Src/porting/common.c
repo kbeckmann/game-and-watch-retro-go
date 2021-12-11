@@ -165,9 +165,6 @@ void common_emu_input_loop(odroid_gamepad_state_t *joystick, odroid_dialog_choic
                 odroid_audio_mute(true);
                 store_save((uint8_t *) framebuffer_capture, lcd_get_inactive_buffer(), sizeof(framebuffer_capture));
                 set_ingame_overlay(INGAME_OVERLAY_SC);
-                common_ingame_overlay();
-                lcd_sync();
-
                 odroid_audio_mute(false);
                 common_emu_state.startup_frames = 0;
                 printf("Screenshot captured\n");
