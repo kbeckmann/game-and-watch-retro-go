@@ -313,7 +313,7 @@ void retro_loop()
             }
 #endif
 
-            if (last_key == ODROID_INPUT_START)
+            if ((last_key == ODROID_INPUT_START) || (last_key == ODROID_INPUT_X))
             {
                 odroid_dialog_choice_t choices[] = {
                     {9, s_Version, GIT_HASH, 1, NULL},
@@ -410,7 +410,7 @@ void retro_loop()
 
                 gui_redraw();
             }
-            else if (last_key == ODROID_INPUT_VOLUME)
+            else if ((last_key == ODROID_INPUT_VOLUME) || (last_key == ODROID_INPUT_Y))
             {
                 char timeout_value[32];
                 char theme_value[25];
