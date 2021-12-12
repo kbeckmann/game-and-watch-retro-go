@@ -202,7 +202,7 @@ static bool colors_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event
             odroid_settings_colors_set(0);
         }
     }
-    curr_colors = &gui_colors[colors];
+    * curr_colors = gui_colors[colors];
     option->value[0] = 0;
     option->value[10] = 0;
     memcpy(option->value + 2, curr_colors, sizeof(colors_t));
@@ -562,7 +562,7 @@ void app_check_data_loop()
         0x40, 0x02, 0x3F, 0xFC,             //
     };
 
-    char s[16];
+    char s[22];
     int idle_s = uptime_get();
     //     - gui.idle_start;
 
@@ -583,7 +583,7 @@ void app_check_data_loop()
                 if (pt & (0x80 >> x))
                     odroid_overlay_draw_fill_rect((20 + x) * 8, (9 + y) * 8, 8, 8, curr_colors->main_c);
         }
-        odroid_overlay_draw_logo(124, 42, &logo_rgo, curr_colors->sel_c);
+        odroid_overlay_draw_logo(124, 42, (retro_logo_image *)(&logo_rgo), curr_colors->sel_c);
         odroid_overlay_draw_text_line(15 * 8, 20 * 8, 10 * 8, "DATA ERROR", C_RED, curr_colors->bg_c);
         odroid_overlay_draw_text_line(9 * 8, 24 * 8 - 4, 23 * 8, "It's seemed you need to", curr_colors->dis_c, curr_colors->bg_c);
         odroid_overlay_draw_text_line(9 * 8, 25 * 8, 23 * 8, "programs external flash", curr_colors->dis_c, curr_colors->bg_c);
@@ -623,8 +623,8 @@ void app_start_logo()
     //tab_t *tab = gui_get_tab(odroid_settings_MainMenuSelectedTab_get());
     //tab = tab ? tab : gui_get_tab(0);
     tab_t *tab = gui_set_current_tab(odroid_settings_MainMenuSelectedTab_get());
-    retro_logo_image *l_top = tab->img_header;
-    retro_logo_image *l_bot = tab->img_logo;
+    retro_logo_image *l_top = (retro_logo_image *)(tab->img_header);
+    retro_logo_image *l_bot = (retro_logo_image *)(tab->img_logo);
 
     // for (int i = 10; i <= 100; i++)
     // {
@@ -646,8 +646,8 @@ void app_start_logo()
     const retro_logo_image* headers[] = {&header_gb, &header_nes, &header_gw, &header_pce, &header_gg, &header_sms, &header_sg1000, &header_col};
     for (int i = 0; i < 8; i++)
     {
-        l_top = headers[i];
-        l_bot = logos[i];
+        l_top = (retro_logo_image *)headers[i];
+        l_bot = (retro_logo_image *)logos[i];
         odroid_overlay_draw_fill_rect(0, 0, 320, 240, curr_colors->bg_c);
         odroid_overlay_draw_logo((320 - l_top->width) / 2, 90, l_top, curr_colors->sel_c);
         odroid_overlay_draw_logo((320 - l_bot->width) / 2, 160 + (40 - l_bot->height) / 2, l_bot, curr_colors->dis_c);
@@ -660,8 +660,8 @@ void app_start_logo()
         }
     }
 
-    l_top = tab->img_header;
-    l_bot = tab->img_logo;
+    l_top = (retro_logo_image *)(tab->img_header);
+    l_bot = (retro_logo_image *)(tab->img_logo);
     odroid_overlay_draw_fill_rect(0, 0, 320, 240, curr_colors->bg_c);
     odroid_overlay_draw_logo((320 - l_top->width) / 2, 90, l_top, curr_colors->sel_c);
     odroid_overlay_draw_logo((320 - l_bot->width) / 2, 160 + (40 - l_bot->height) / 2, l_bot, curr_colors->dis_c);
@@ -681,8 +681,8 @@ void app_sleep_logo()
 {
     lcd_set_buffers(framebuffer1, framebuffer2);
     odroid_overlay_draw_fill_rect(0, 0, 320, 240, curr_colors->bg_c);
-    odroid_overlay_draw_logo(142, 72, &logo_gnw, curr_colors->sel_c);
-    odroid_overlay_draw_logo(124, 200, &logo_rgo, curr_colors->dis_c);
+    odroid_overlay_draw_logo(142, 72, (retro_logo_image *)(&logo_gnw), curr_colors->sel_c);
+    odroid_overlay_draw_logo(124, 200, (retro_logo_image *)(&logo_rgo), curr_colors->dis_c);
     for (int i = 0; i < 40; i++)
     {
         wdog_refresh();
@@ -690,10 +690,10 @@ void app_sleep_logo()
     }
     for (int i = 10; i <= 100; i++)
     {
-        odroid_overlay_draw_logo(142, 72, &logo_gnw, 
+        odroid_overlay_draw_logo(142, 72,(retro_logo_image *)(&logo_gnw), 
             get_darken_pixel_d(curr_colors->sel_c, curr_colors->bg_c, 110 - i));
 
-        odroid_overlay_draw_logo(124, 200, &logo_rgo, 
+        odroid_overlay_draw_logo(124, 200, (retro_logo_image *)(&logo_rgo), 
            get_darken_pixel_d(curr_colors->dis_c,curr_colors->bg_c, 110 - i));
 
         lcd_sync();

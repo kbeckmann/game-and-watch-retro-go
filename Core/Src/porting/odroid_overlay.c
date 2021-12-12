@@ -69,7 +69,7 @@ int odroid_overlay_get_font_width()
     return 8;
 }
 
-void odroid_overlay_draw_logo(uint16_t x_pos, uint16_t y_pos, retro_logo_image *logo, uint16_t color)
+void odroid_overlay_draw_logo(uint16_t x_pos, uint16_t y_pos, const retro_logo_image *logo, uint16_t color)
 {
     uint16_t *dst_img = lcd_get_active_buffer();
     int w = (logo->width + 7) / 8;
@@ -394,7 +394,7 @@ void odroid_overlay_draw_dialog(const char *header, odroid_dialog_choice_t *opti
             {
                 row_height = odroid_overlay_draw_local_text(x + odroid_overlay_get_local_font_width(), y + row_margin, inner_width - odroid_overlay_get_local_font_width(), options[i].label, fg, bg, 0);
                 odroid_overlay_draw_fill_rect(x, y, odroid_overlay_get_local_font_width(), row_height + row_margin, bg);
-                uint16_t *color = options[i].value;
+                uint16_t *color = (uint16_t *)(options[i].value);
                 for (int j=0; j < 4; j++) {
                     odroid_overlay_draw_fill_rect(x + inner_width - (9 - j * 2) * odroid_overlay_get_local_font_width() - 2, 
                     y, 
@@ -610,7 +610,7 @@ static bool brightness_update_cb(odroid_dialog_choice_t *option, odroid_dialog_e
 {
     int8_t level = odroid_display_get_backlight();
     int8_t max = ODROID_BACKLIGHT_LEVEL_COUNT - 1;
-    char bright_value[max + 1];
+    char bright_value[max + 2];
 
     if (event == ODROID_DIALOG_PREV && level > 0)
         odroid_display_set_backlight(--level);
@@ -621,7 +621,7 @@ static bool brightness_update_cb(odroid_dialog_choice_t *option, odroid_dialog_e
     for (int i = ODROID_BACKLIGHT_LEVEL0; i <= ODROID_BACKLIGHT_LEVEL9; i++)
         bright_value[i - ODROID_BACKLIGHT_LEVEL0] = (i - ODROID_BACKLIGHT_LEVEL0) <= level ? s_Full : s_Fill;
 
-    bright_value[ODROID_BACKLIGHT_LEVEL9 + 1] = 0;
+    bright_value[max + 1] = 0;
     sprintf(option->value, "%s", (char *)bright_value);
     return event == ODROID_DIALOG_ENTER;
 }

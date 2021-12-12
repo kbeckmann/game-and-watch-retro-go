@@ -55,8 +55,8 @@ typedef struct {
 } retro_emulator_t;
 
 
-extern const uint32_t extflash_magic_sign;
-extern const uint32_t intflash_magic_sign;
+extern const unsigned int extflash_magic_sign;
+extern const unsigned int intflash_magic_sign;
 
 void emulators_init();
 void emulator_init(retro_emulator_t *emu);

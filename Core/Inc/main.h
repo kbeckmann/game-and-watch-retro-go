@@ -116,6 +116,13 @@ void GW_EnterDeepSleep(void);
 uint32_t GW_GetBootButtons(void);
 void wdog_refresh(void);
 
+void app_sleep_logo(void);
+uint16_t get_darken_pixel_d(uint16_t color, uint16_t color1, uint16_t darken);
+uint16_t get_darken_pixel(uint16_t color, uint16_t darken);
+uint16_t get_shined_pixel(uint16_t color, uint16_t shined);
+int odroid_overlay_draw_text_line(uint16_t x_pos, uint16_t y_pos, uint16_t width, const char *text, uint16_t color, uint16_t color_bg);
+
+
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
