@@ -10,6 +10,7 @@
 #include "gw_lcd.h"
 #include "rg_i18n.h"
 #include "bitmaps.h"
+#include "main.h"
 
 #if !defined(COVERFLOW)
 #define COVERFLOW 0
@@ -107,7 +108,7 @@ const colors_t gui_colors[] = {
 
 };
 
-colors_t *curr_colors = &gui_colors[0];
+colors_t *curr_colors = (colors_t *)(&gui_colors[0]);
 
 int gui_colors_count = 26;
 
@@ -335,17 +336,17 @@ void gui_draw_header(tab_t *tab)
     odroid_overlay_draw_fill_rect(0, ODROID_SCREEN_HEIGHT - IMAGE_BANNER_HEIGHT - 15, ODROID_SCREEN_WIDTH, 32, curr_colors->main_c);
 
     if (tab->img_header)
-        odroid_overlay_draw_logo(8, ODROID_SCREEN_HEIGHT - IMAGE_BANNER_HEIGHT - 15 + 7, tab->img_header, curr_colors->sel_c);
+        odroid_overlay_draw_logo(8, ODROID_SCREEN_HEIGHT - IMAGE_BANNER_HEIGHT - 15 + 7, (retro_logo_image *)(tab->img_header), curr_colors->sel_c);
 
     if (tab->img_logo) {
-        retro_logo_image *img_logo = tab->img_logo;
+        retro_logo_image *img_logo = (retro_logo_image *)(tab->img_logo);
         int h = img_logo->height;
         h = (IMAGE_BANNER_HEIGHT - h) / 2;
         int w = h + img_logo->width;
         
         odroid_overlay_draw_logo(ODROID_SCREEN_WIDTH - w - 1, 
                                  ODROID_SCREEN_HEIGHT - IMAGE_BANNER_HEIGHT - 15 + h, 
-                                 tab->img_logo, get_shined_pixel(curr_colors->main_c, 25));
+                                 img_logo, get_shined_pixel(curr_colors->main_c, 25));
     }
 
     odroid_overlay_draw_fill_rect(0, ODROID_SCREEN_HEIGHT - 15, ODROID_SCREEN_WIDTH, 1, curr_colors->sel_c);
@@ -371,7 +372,7 @@ void gui_draw_status(tab_t *tab)
     odroid_overlay_draw_fill_rect(0, 4, ODROID_SCREEN_WIDTH, 2, curr_colors->bg_c);
     odroid_overlay_draw_fill_rect(0, 8, ODROID_SCREEN_WIDTH, 2, curr_colors->bg_c);
 
-    odroid_overlay_draw_logo(8, 16, &logo_rgo, curr_colors->sel_c);
+    odroid_overlay_draw_logo(8, 16, (retro_logo_image *)(&logo_rgo), curr_colors->sel_c);
 
     odroid_overlay_draw_battery(ODROID_SCREEN_WIDTH - 32, 17);
 }
@@ -1012,7 +1013,7 @@ void gui_draw_coverflow_v(tab_t *tab, int start_posx) // ||||||||
     odroid_overlay_draw_fill_rect(start_posx + (cover_width - p_width2) * 3 / 4 + 7, start_ypos + 4, p_width2 - 6, 1, get_darken_pixel_d(curr_colors->dis_c,curr_colors->bg_c, 60));
     odroid_overlay_draw_fill_rect(start_posx + (cover_width - p_width2) * 3 / 4 + 3, start_ypos + 6, p_width2, 1, get_darken_pixel_d(curr_colors->dis_c, curr_colors->bg_c,80));
 
-    odroid_overlay_draw_rect(start_posx + (cover_width - p_width1) * 3 / 4 + 1, start_ypos + 9, p_width1 + 4, p_height + 2, 1, get_darken_pixel_d(curr_colors->dis_c, 80));
+    odroid_overlay_draw_rect(start_posx + (cover_width - p_width1) * 3 / 4 + 1, start_ypos + 9, p_width1 + 4, p_height + 2, 1, get_darken_pixel_d(curr_colors->dis_c, curr_colors->bg_c, 80));
 
     odroid_overlay_draw_rect(start_posx, start_ypos + 13 + p_height, cover_width + 6, cover_height + 6, 1, curr_colors->sel_c);
     odroid_overlay_draw_rect(start_posx + 1, start_ypos + 14 + p_height, cover_width + 4, cover_height + 4, 1, curr_colors->dis_c);

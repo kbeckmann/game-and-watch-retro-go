@@ -26,8 +26,8 @@
 static retro_emulator_t emulators[MAX_EMULATORS];
 static int emulators_count = 0;
 
-const uint32_t intflash_magic_sign = 0xABAB;
-const uint32_t extflash_magic_sign __attribute__((section(".extflash_emu_data"))) = intflash_magic_sign;
+const unsigned int intflash_magic_sign = 0xABAB;
+const unsigned int extflash_magic_sign __attribute__((section(".extflash_emu_data"))) = intflash_magic_sign;
 
 retro_emulator_t *file_to_emu(retro_emulator_file_t *file) {
     for (int i = 0; i < MAX_EMULATORS; i++)
@@ -77,9 +77,9 @@ static void event_handler(gui_event_t event, tab_t *tab)
         {
             sprintf(tab->status, " No games");
             gui_resize_list(tab, 8);
-            size_t len = 0;
+            //size_t len = 0;
             //tab->listbox.items[0].text = asnprintf(NULL, &len, "Place roms in folder: /roms/%s", emu->dirname);
-            len = 0;
+            //len = 0;
             //tab->listbox.items[2].text = asnprintf(NULL, &len, "With file extension: .%s", emu->ext);
             //tab->listbox.items[4].text = "Use SELECT and START to navigate.";
             tab->listbox.cursor = 3;
@@ -320,8 +320,8 @@ void emulator_show_file_info(retro_emulator_file_t *file)
     char type_value[32];
     char size_value[32];
     char img_size[32];
-    char crc_value[32];
-    crc_value[0] = '\x00';
+    //char crc_value[32];
+    //crc_value[0] = '\x00';
 
     odroid_dialog_choice_t choices[] = {
         {0, s_File, filename_value, 1, NULL},
@@ -337,7 +337,7 @@ void emulator_show_file_info(retro_emulator_file_t *file)
 
     sprintf(choices[0].value, "%.127s", file->name);
     sprintf(choices[1].value, "%s", file->ext);
-    sprintf(choices[2].value, "%d KB", file->size / 1024);
+    sprintf(choices[2].value, "%d KB", (int)(file->size / 1024));
     #if COVERFLOW != 0
     sprintf(choices[3].value, "%d KB", file->img_size / 1024);
 	#endif
@@ -355,7 +355,7 @@ void emulator_show_file_menu(retro_emulator_file_t *file)
 
     bool has_save = 1;
     bool has_sram = 0;
-    bool is_fav = 0;
+    //bool is_fav = 0;
 
     odroid_dialog_choice_t choices[] = {
         {0, s_Resume_game, "", has_save && (file->save_address != 0), NULL},

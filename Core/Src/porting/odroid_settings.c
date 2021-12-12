@@ -115,7 +115,7 @@ void odroid_settings_init()
         return;
     }
     //set colors;
-    curr_colors = &gui_colors[persistent_config_flash.colors];
+    curr_colors = (colors_t *)(&gui_colors[persistent_config_flash.colors]);
 }
 
 void odroid_settings_commit()

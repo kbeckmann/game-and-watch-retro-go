@@ -8,6 +8,7 @@ typedef struct
     const char logo[];
 } retro_logo_image;
 
+void odroid_overlay_draw_logo(uint16_t x_pos, uint16_t y_pos, const retro_logo_image *logo, uint16_t color);
 
 extern const retro_logo_image logo_rgo;
 extern const retro_logo_image logo_flash;

@@ -54,14 +54,16 @@ bool odroid_system_emu_load_state(int slot)
     if (currentApp.loadState != NULL) {
         (*currentApp.loadState)("");
     }
-}
+    return true;
+};
 
 bool odroid_system_emu_save_state(int slot)
 {
     if (currentApp.saveState != NULL) {
         (*currentApp.saveState)("");
     }
-}
+    return true;
+};
 
 IRAM_ATTR void odroid_system_tick(uint skippedFrame, uint fullFrame, uint busyTime)
 {

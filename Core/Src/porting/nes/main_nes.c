@@ -417,7 +417,7 @@ static bool palette_update_cb(odroid_dialog_choice_t *option, odroid_dialog_even
 void osd_getinput(void)
 {
     uint16 pad0 = 0;
-    char pal_name[16];
+    //char pal_name[16];
 
     wdog_refresh();
 

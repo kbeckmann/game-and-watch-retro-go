@@ -123,7 +123,7 @@ static bool gw_system_SaveState(char *pathName)
 static bool gw_system_LoadState(char *pathName)
 {
     printf("Loading state...\n");
-    return gw_state_load(ACTIVE_FILE->save_address);
+    return gw_state_load((unsigned char *)(ACTIVE_FILE->save_address));
 
 }
 
@@ -419,7 +419,7 @@ int app_main_gw(uint8_t load_state)
 
     odroid_system_init(ODROID_APPID_GW, GW_AUDIO_FREQ);
     odroid_system_emu_init(&gw_system_LoadState, &gw_system_SaveState, NULL);
-    rg_app_desc_t *app = odroid_system_get_app();
+    //rg_app_desc_t *app = odroid_system_get_app();
     static unsigned previous_m_halt = 2;
 
     common_emu_state.frame_time_10us = (uint16_t)(100000 / GW_REFRESH_RATE + 0.5f);

@@ -1,3 +1,5 @@
+#pragma GCC diagnostic ignored "-Wstack-usage="
+
 #if !((CODEPAGE == 932) || (CODEPAGE == 936) || (CODEPAGE == 949) || (CODEPAGE == 950))
 
 #include <unistd.h>
@@ -7,6 +9,7 @@
 #include <math.h>
 
 #include "rg_i18n.h"
+#include "gw_lcd.h"
 #include "odroid_system.h"
 #include "odroid_overlay.h"
 
@@ -29,7 +32,7 @@ int odroid_overlay_get_local_font_width()
 
 void odroid_overlay_read_screen_rect(uint16_t x_pos, uint16_t y_pos, uint16_t width, uint16_t height)
 {
-    uint16_t *dst_img = lcd_get_active_buffer();
+    uint16_t *dst_img = (uint16_t *)(lcd_get_active_buffer());
     for (int x = 0; x < width; x++)
         for (int y = 0; y < height; y++)
             overlay_buffer[x + y * width] = dst_img[(y + y_pos) * ODROID_SCREEN_WIDTH + x_pos + x];
@@ -103,7 +106,7 @@ int odroid_overlay_draw_local_text(uint16_t x_pos, uint16_t y_pos, uint16_t widt
         sprintf(buffer, "%.*s", line_len, text + pos);
         if (strchr(buffer, '\n'))
             *(strchr(buffer, '\n')) = 0;
-        height += odroid_overlay_draw_local_text_line(x_pos, y_pos + height, width, buffer, color, color_bg, &outlength, transparent);
+        height += odroid_overlay_draw_local_text_line(x_pos, y_pos + height, width, buffer, color, color_bg, (uint16_t *)(&outlength), transparent);
         pos += outlength;
         if (*(text + pos) == 0 || *(text + pos) == '\n')
             pos++;
