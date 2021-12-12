@@ -236,6 +236,20 @@ static int get_dialog_items_count(odroid_dialog_choice_t *options)
     return 0;
 }
 
+uint16_t get_darken_pixel_d(uint16_t color, uint16_t color1, uint16_t darken)
+{
+    int16_t r = (color1 & 0xF800);
+    if ((color & 0xF800) > (color1 & 0xF800)) 
+        r = (int16_t)((color1 & 0xF800) + (((color & 0xF800) - (color1 & 0xF800)) * darken / 100)) & 0xF800;
+    int16_t g = (color1 & 0x7E0);
+    if ((color & 0x07E0) > (color1 & 0x07E0)) 
+        g = (int16_t)((color1 & 0x07E0) + (((color & 0x07E0) - (color1 & 0x07E0)) * darken / 100)) & 0x07E0;
+    int16_t b = (color1 & 0x1F);
+    if ((color & 0x001F) > (color1 & 0x001F)) 
+        b = (int16_t)((color1 & 0x001F) + (((color & 0x001F) - (color1 & 0x001F)) * darken / 100)) & 0x001F;
+    return r | g | b;
+}
+
 uint16_t get_darken_pixel(uint16_t color, uint16_t darken)
 {
     int16_t r = (int16_t)((color & 0b1111100000000000) * darken / 100) & 0b1111100000000000;
@@ -250,45 +264,6 @@ uint16_t get_shined_pixel(uint16_t color, uint16_t shined)
     int16_t g = (int16_t)((color & 0b0000011111100000) + (0b0000011111100000 - (color & 0b0000011111100000)) / 100 * shined) & 0b0000011111100000;
     int16_t b = (int16_t)((color & 0b0000000000011111) + (0b0000000000011111 - (color & 0b0000000000011111)) * shined / 100) & 0b0000000000011111;
     return r | g | b;
-}
-
-void app_start_logo()
-{
-    for (int i = 10; i <= 100; i++)
-    {
-        odroid_overlay_draw_logo(124, 100, &logo_rgo, get_darken_pixel(curr_colors->sel_c, i));
-        lcd_sync();
-        lcd_swap();
-        if ((i % 10) == 0) wdog_refresh();
-        HAL_Delay(2);
-    }
-    for (int i = 0; i < 10; i++)
-    {
-        wdog_refresh();
-        HAL_Delay(10);
-    }
-    //odroid_overlay_draw_fill_rect(0, 0, 320, 240, curr_colors->bg_c);
-    //lcd_sync();
-}
-
-void app_sleep_logo()
-{
-    lcd_set_buffers(framebuffer1, framebuffer2);
-    odroid_overlay_draw_fill_rect(0, 0, 320, 240, curr_colors->bg_c);
-    odroid_overlay_draw_logo(142, 105, &logo_gnw, curr_colors->sel_c);
-    for (int i = 0; i < 40; i++)
-    {
-        wdog_refresh();
-        HAL_Delay(10);
-    }
-    for (int i = 10; i <= 100; i++)
-    {
-        odroid_overlay_draw_logo(142, 105, &logo_gnw, get_darken_pixel(curr_colors->sel_c, 110 - i));
-        lcd_sync();
-        lcd_swap();
-        wdog_refresh();
-        HAL_Delay(i / 10);
-    }
 }
 
 void odroid_overlay_darken_all()
@@ -424,7 +399,7 @@ void odroid_overlay_draw_dialog(const char *header, odroid_dialog_choice_t *opti
                     odroid_overlay_draw_fill_rect(x + inner_width - (9 - j * 2) * odroid_overlay_get_local_font_width() - 2, 
                     y, 
                     odroid_overlay_get_local_font_width() * 2, odroid_overlay_get_local_font_size(), 
-                    color[j]);
+                    color[j+1]);
                 };
                 odroid_overlay_draw_rect(x + inner_width - 9 * odroid_overlay_get_local_font_width() - 3, y + 1, odroid_overlay_get_local_font_width() * 8 + 2, row_height - 1, 1, fg);
             }
