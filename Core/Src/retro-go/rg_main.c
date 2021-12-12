@@ -653,10 +653,10 @@ void app_start_logo()
         odroid_overlay_draw_logo((320 - l_bot->width) / 2, 160 + (40 - l_bot->height) / 2, l_bot, curr_colors->dis_c);
         lcd_sync();
         lcd_swap();
-        for (int j = 0; j < 6; j++)
+        for (int j = 0; j < 5; j++)
         {
             wdog_refresh();
-            HAL_Delay(10);
+            HAL_Delay(9);
         }
     }
 
