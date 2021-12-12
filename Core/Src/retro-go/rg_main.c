@@ -203,7 +203,9 @@ static bool colors_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event
         }
     }
     curr_colors = &gui_colors[colors];
-    memcpy(option->value, curr_colors, sizeof(colors_t));
+    option->value[0] = 0;
+    option->value[10] = 0;
+    memcpy(option->value + 2, curr_colors, sizeof(colors_t));
     //sprintf(option->value, "%s", curr_colors->name);
     return event == ODROID_DIALOG_ENTER;
 }
@@ -614,6 +616,93 @@ void app_check_data_loop()
     }
 }
 
+
+void app_start_logo()
+{
+    odroid_overlay_draw_fill_rect(0, 0, 320, 240, curr_colors->bg_c);
+    //tab_t *tab = gui_get_tab(odroid_settings_MainMenuSelectedTab_get());
+    //tab = tab ? tab : gui_get_tab(0);
+    tab_t *tab = gui_set_current_tab(odroid_settings_MainMenuSelectedTab_get());
+    retro_logo_image *l_top = tab->img_header;
+    retro_logo_image *l_bot = tab->img_logo;
+
+    // for (int i = 10; i <= 100; i++)
+    // {
+    //     if (l_top) {
+    //         odroid_overlay_draw_logo((320 - l_top->width) / 2, 90, l_top, 
+    //            get_darken_pixel_d(curr_colors->sel_c,curr_colors->bg_c, i));
+    //     }
+    //     if (l_bot) {
+    //         odroid_overlay_draw_logo((320 - l_bot->width) / 2, 160 + (40 - l_bot->height) / 2, l_bot, 
+    //            get_darken_pixel_d(curr_colors->dis_c,curr_colors->bg_c, i));
+    //     }
+    //     lcd_sync();
+    //     lcd_swap();
+    //     if ((i % 10) == 0) wdog_refresh();
+    //     HAL_Delay(2);
+    // }
+
+    const retro_logo_image* logos[] = {&logo_gnw, &logo_gnw, &logo_gnw, &logo_pce, &logo_gnw, &logo_gnw, &logo_gnw, &logo_coleco};
+    const retro_logo_image* headers[] = {&header_gb, &header_nes, &header_gw, &header_pce, &header_gg, &header_sms, &header_sg1000, &header_col};
+    for (int i = 0; i < 8; i++)
+    {
+        l_top = headers[i];
+        l_bot = logos[i];
+        odroid_overlay_draw_fill_rect(0, 0, 320, 240, curr_colors->bg_c);
+        odroid_overlay_draw_logo((320 - l_top->width) / 2, 90, l_top, curr_colors->sel_c);
+        odroid_overlay_draw_logo((320 - l_bot->width) / 2, 160 + (40 - l_bot->height) / 2, l_bot, curr_colors->dis_c);
+        lcd_sync();
+        lcd_swap();
+        for (int j = 0; j < 6; j++)
+        {
+            wdog_refresh();
+            HAL_Delay(10);
+        }
+    }
+
+    l_top = tab->img_header;
+    l_bot = tab->img_logo;
+    odroid_overlay_draw_fill_rect(0, 0, 320, 240, curr_colors->bg_c);
+    odroid_overlay_draw_logo((320 - l_top->width) / 2, 90, l_top, curr_colors->sel_c);
+    odroid_overlay_draw_logo((320 - l_bot->width) / 2, 160 + (40 - l_bot->height) / 2, l_bot, curr_colors->dis_c);
+    lcd_sync();
+    lcd_swap();
+
+    for (int i = 0; i < 30; i++)
+    {
+        wdog_refresh();
+        HAL_Delay(10);
+    }
+    //odroid_overlay_draw_fill_rect(0, 0, 320, 240, curr_colors->bg_c);
+    //lcd_sync();
+}
+
+void app_sleep_logo()
+{
+    lcd_set_buffers(framebuffer1, framebuffer2);
+    odroid_overlay_draw_fill_rect(0, 0, 320, 240, curr_colors->bg_c);
+    odroid_overlay_draw_logo(142, 72, &logo_gnw, curr_colors->sel_c);
+    odroid_overlay_draw_logo(124, 200, &logo_rgo, curr_colors->dis_c);
+    for (int i = 0; i < 40; i++)
+    {
+        wdog_refresh();
+        HAL_Delay(10);
+    }
+    for (int i = 10; i <= 100; i++)
+    {
+        odroid_overlay_draw_logo(142, 72, &logo_gnw, 
+            get_darken_pixel_d(curr_colors->sel_c, curr_colors->bg_c, 110 - i));
+
+        odroid_overlay_draw_logo(124, 200, &logo_rgo, 
+           get_darken_pixel_d(curr_colors->dis_c,curr_colors->bg_c, 110 - i));
+
+        lcd_sync();
+        lcd_swap();
+        wdog_refresh();
+        HAL_Delay(i / 10);
+    }
+}
+
 void app_main(void)
 {
 
@@ -624,10 +713,10 @@ void app_main(void)
 
     //check data;
     app_check_data_loop();
+    emulators_init();
 
     app_start_logo();
 
-    emulators_init();
     // favorites_init();
 
     // Start the previously running emulator directly if it's a valid pointer.
