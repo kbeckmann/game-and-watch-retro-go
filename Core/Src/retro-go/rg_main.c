@@ -202,7 +202,7 @@ static bool colors_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event
             odroid_settings_colors_set(0);
         }
     }
-    * curr_colors = gui_colors[colors];
+    curr_colors = (colors_t *)(&gui_colors[colors]);
     option->value[0] = 0;
     option->value[10] = 0;
     memcpy(option->value + 2, curr_colors, sizeof(colors_t));
