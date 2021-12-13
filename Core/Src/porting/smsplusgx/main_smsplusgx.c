@@ -281,8 +281,8 @@ static void sms_update_keys( odroid_gamepad_state_t* joystick )
 
   if (consoleIsGG)
   {
-      if (joystick->values[ODROID_INPUT_SELECT]) input.system |= INPUT_PAUSE;
-      if (joystick->values[ODROID_INPUT_START])  input.system |= INPUT_START;
+      if ((joystick->values[ODROID_INPUT_SELECT]) || (joystick->values[ODROID_INPUT_Y]))  input.system |= INPUT_PAUSE;
+      if ((joystick->values[ODROID_INPUT_START]) || (joystick->values[ODROID_INPUT_X]))  input.system |= INPUT_START;
   }
   else if (consoleIsCOL)
   {
@@ -303,13 +303,13 @@ static void sms_update_keys( odroid_gamepad_state_t* joystick )
       // Time + B     : 5
 
       coleco.keypad[0] = 0xf0;
-      if (joystick->values[ODROID_INPUT_SELECT]) coleco.keypad[0] = 11 - k;
+      if ((joystick->values[ODROID_INPUT_SELECT]) || (joystick->values[ODROID_INPUT_Y])) coleco.keypad[0] = 11 - k;
       else
-      if (joystick->values[ODROID_INPUT_START])  coleco.keypad[0] = (1 + k) % 7;
+      if ((joystick->values[ODROID_INPUT_START]) || (joystick->values[ODROID_INPUT_X]))  coleco.keypad[0] = (1 + k) % 7;
   }
   else { // Default like SMS
-      if (joystick->values[ODROID_INPUT_SELECT]) input.system |= INPUT_PAUSE;
-      if (joystick->values[ODROID_INPUT_START])  input.system |= INPUT_START;
+      if ((joystick->values[ODROID_INPUT_SELECT]) || (joystick->values[ODROID_INPUT_Y])) input.system |= INPUT_PAUSE;
+      if ((joystick->values[ODROID_INPUT_START]) || (joystick->values[ODROID_INPUT_X]))  input.system |= INPUT_START;
   }
 }
 

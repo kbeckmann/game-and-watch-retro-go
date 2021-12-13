@@ -597,8 +597,8 @@ void app_main_gb(uint8_t load_state, uint8_t start_paused)
         pad_set(PAD_RIGHT, joystick.values[ODROID_INPUT_RIGHT]);
         pad_set(PAD_DOWN, joystick.values[ODROID_INPUT_DOWN]);
         pad_set(PAD_LEFT, joystick.values[ODROID_INPUT_LEFT]);
-        pad_set(PAD_SELECT, joystick.values[ODROID_INPUT_SELECT]);
-        pad_set(PAD_START, joystick.values[ODROID_INPUT_START]);
+        pad_set(PAD_SELECT, joystick.values[ODROID_INPUT_SELECT] | joystick.values[ODROID_INPUT_Y]);
+        pad_set(PAD_START, joystick.values[ODROID_INPUT_START] | joystick.values[ODROID_INPUT_X]);
         pad_set(PAD_A, joystick.values[ODROID_INPUT_A]);
         pad_set(PAD_B, joystick.values[ODROID_INPUT_B]);
 
