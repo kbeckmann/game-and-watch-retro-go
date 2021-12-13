@@ -143,6 +143,8 @@ unsigned int gw_get_buttons()
         hw_buttons |= joystick.values[ODROID_INPUT_START] << 7;
         hw_buttons |= joystick.values[ODROID_INPUT_VOLUME] << 8;
         hw_buttons |= joystick.values[ODROID_INPUT_POWER] << 9;
+        hw_buttons |= joystick.values[ODROID_INPUT_X] << 10;
+        hw_buttons |= joystick.values[ODROID_INPUT_Y] << 11;
     }
 
     // software keys

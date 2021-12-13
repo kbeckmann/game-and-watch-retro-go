@@ -356,8 +356,8 @@ void pce_input_read(odroid_gamepad_state_t* out_state) {
     if (out_state->values[ODROID_INPUT_DOWN])   rc |= JOY_DOWN;
     if (out_state->values[ODROID_INPUT_A])      rc |= JOY_A;
     if (out_state->values[ODROID_INPUT_B])      rc |= JOY_B;
-    if (out_state->values[ODROID_INPUT_START])  rc |= JOY_RUN;
-    if (out_state->values[ODROID_INPUT_SELECT]) rc |= JOY_SELECT;
+    if ((out_state->values[ODROID_INPUT_START]) || (out_state->values[ODROID_INPUT_X]))  rc |= JOY_RUN;
+    if ((out_state->values[ODROID_INPUT_SELECT]) || (out_state->values[ODROID_INPUT_Y])) rc |= JOY_SELECT;
     PCE.Joypad.regs[0] = rc;
 }
 

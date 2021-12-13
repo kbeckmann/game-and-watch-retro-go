@@ -433,8 +433,8 @@ void osd_getinput(void)
     common_emu_input_loop(&joystick, options);
 
 
-    if (joystick.values[ODROID_INPUT_START])  pad0 |= INP_PAD_START;
-    if (joystick.values[ODROID_INPUT_SELECT]) pad0 |= INP_PAD_SELECT;
+    if ((joystick.values[ODROID_INPUT_START]) || (joystick.values[ODROID_INPUT_X])) pad0 |= INP_PAD_START;
+    if ((joystick.values[ODROID_INPUT_SELECT]) || (joystick.values[ODROID_INPUT_Y])) pad0 |= INP_PAD_SELECT;
     if (joystick.values[ODROID_INPUT_UP]) pad0 |= INP_PAD_UP;
     if (joystick.values[ODROID_INPUT_DOWN]) pad0 |= INP_PAD_DOWN;
     if (joystick.values[ODROID_INPUT_LEFT]) pad0 |= INP_PAD_LEFT;
