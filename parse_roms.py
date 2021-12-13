@@ -529,7 +529,7 @@ class ROMParser:
         roms_compressed = find_compressed_roms()
 
         roms_raw = [r for r in roms_raw if not contains_rom_by_name(r, roms_compressed)]
-        if roms_raw and compress != None:
+        if roms_raw and compress is not None:
             pbar = tqdm(roms_raw) if tqdm else roms_raw
             for r in pbar:
                 if tqdm:
@@ -760,9 +760,7 @@ if __name__ == "__main__":
         "--no-compress_gb_speed", dest="compress_gb_speed", action="store_false"
     )
     parser.set_defaults(compress_gb_speed=False)
-    parser.add_argument(
-        "--no-save", dest="save", action="store_false"
-    )
+    parser.add_argument("--no-save", dest="save", action="store_false")
     parser.add_argument(
         "--verbose",
         action="store_true",
@@ -775,6 +773,17 @@ if __name__ == "__main__":
 
     roms_path = Path("build/roms")
     roms_path.mkdir(mode=0o755, parents=True, exist_ok=True)
+
+    # Check for zip and 7z files. If found, tell user to extract and delete them.
+    zip_files = []
+    zip_files.extend(Path("roms").glob("*/*.zip"))
+    zip_files.extend(Path("roms").glob("*/*.7z"))
+    if zip_files:
+        print("\nzip and/or 7z rom files found. Please extract and delete them:")
+        for f in zip_files:
+            print(f"    {f}")
+        print("")
+        exit(-1)
 
     try:
         ROMParser().parse(args)
