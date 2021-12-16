@@ -707,8 +707,8 @@ void app_main(void)
 {
 
     lcd_set_buffers(framebuffer1, framebuffer2);
-    odroid_overlay_draw_fill_rect(0, 0, 320, 240, curr_colors->bg_c);
     odroid_system_init(ODROID_APPID_LAUNCHER, 32000);
+    odroid_overlay_draw_fill_rect(0, 0, 320, 240, curr_colors->bg_c);
     // odroid_display_clear(0);
 
     //check data;
