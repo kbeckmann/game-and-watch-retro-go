@@ -904,7 +904,12 @@ class ROMParser:
                 f"Total:\t\t{total_size} / {args.flash_size} bytes (plus some metadata)."
             )
         if total_size > args.flash_size:
-            print("Error: External flash will overflow!")
+            print(f"Error: External flash will overflow! Need at least {total_size / 1024 / 1024 :.2f} MB")
+            # Delete build/roms.a - the makefile will run parse_roms.py if this file is outdated or missing.
+            try:
+                Path("build/roms.a").unlink()
+            except FileNotFoundError as e:
+                pass
             exit(-1)
 
         self.write_if_changed(
