@@ -626,31 +626,17 @@ void app_start_logo()
     retro_logo_image *l_top = (retro_logo_image *)(tab->img_header);
     retro_logo_image *l_bot = (retro_logo_image *)(tab->img_logo);
 
-    // for (int i = 10; i <= 100; i++)
-    // {
-    //     if (l_top) {
-    //         odroid_overlay_draw_logo((320 - l_top->width) / 2, 90, l_top, 
-    //            get_darken_pixel_d(curr_colors->sel_c,curr_colors->bg_c, i));
-    //     }
-    //     if (l_bot) {
-    //         odroid_overlay_draw_logo((320 - l_bot->width) / 2, 160 + (40 - l_bot->height) / 2, l_bot, 
-    //            get_darken_pixel_d(curr_colors->dis_c,curr_colors->bg_c, i));
-    //     }
-    //     lcd_sync();
-    //     lcd_swap();
-    //     if ((i % 10) == 0) wdog_refresh();
-    //     HAL_Delay(2);
-    // }
-
-    const retro_logo_image* logos[] = {&logo_gnw, &logo_gnw, &logo_gnw, &logo_pce, &logo_gnw, &logo_gnw, &logo_gnw, &logo_coleco};
-    const retro_logo_image* headers[] = {&header_gb, &header_nes, &header_gw, &header_pce, &header_gg, &header_sms, &header_sg1000, &header_col};
+    const retro_logo_image* logos[] =   {&logo_nitendo, &logo_sega,     &logo_nitendo, &logo_sega,  &logo_nitendo, &logo_pce,    &logo_sega,  &logo_coleco};
+    const retro_logo_image* headers[] = {&header_gb,    &header_sg1000, &header_nes,   &header_gg,  &header_gw,    &header_pce,  &header_sms, &header_col};
     for (int i = 0; i < 8; i++)
     {
-        l_top = (retro_logo_image *)headers[i];
-        l_bot = (retro_logo_image *)logos[i];
+        if (l_top == (retro_logo_image *)headers[i])
+        {
+            l_bot = (retro_logo_image *)logos[i];
+        }
         odroid_overlay_draw_fill_rect(0, 0, 320, 240, curr_colors->bg_c);
-        odroid_overlay_draw_logo((320 - l_top->width) / 2, 90, l_top, curr_colors->sel_c);
-        odroid_overlay_draw_logo((320 - l_bot->width) / 2, 160 + (40 - l_bot->height) / 2, l_bot, curr_colors->dis_c);
+        odroid_overlay_draw_logo((320 - ((retro_logo_image *)(headers[i]))->width) / 2, 90, (retro_logo_image *)(headers[i]), curr_colors->sel_c);
+        odroid_overlay_draw_logo((320 - ((retro_logo_image *)(logos[i]))->width) / 2, 160 + (40 - ((retro_logo_image *)(logos[i]))->height) / 2, (retro_logo_image *)(logos[i]), curr_colors->dis_c);
         lcd_sync();
         lcd_swap();
         for (int j = 0; j < 5; j++)
@@ -660,8 +646,6 @@ void app_start_logo()
         }
     }
 
-    l_top = (retro_logo_image *)(tab->img_header);
-    l_bot = (retro_logo_image *)(tab->img_logo);
     odroid_overlay_draw_fill_rect(0, 0, 320, 240, curr_colors->bg_c);
     odroid_overlay_draw_logo((320 - l_top->width) / 2, 90, l_top, curr_colors->sel_c);
     odroid_overlay_draw_logo((320 - l_bot->width) / 2, 160 + (40 - l_bot->height) / 2, l_bot, curr_colors->dis_c);
