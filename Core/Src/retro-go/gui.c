@@ -60,7 +60,7 @@ void gui_event(gui_event_t event, tab_t *tab)
         (*tab->event_handler)(event, tab);
 }
 
-tab_t *gui_add_tab(const char *name, const void *logo, const void *header, void *arg, void *event_handler)
+tab_t *gui_add_tab(const char *name, const void *header, void *arg, void *event_handler)
 {
     tab_t *tab = rg_calloc(1, sizeof(tab_t));
 
@@ -69,7 +69,6 @@ tab_t *gui_add_tab(const char *name, const void *logo, const void *header, void 
 
     tab->event_handler = event_handler;
     tab->img_header = header;
-    tab->img_logo = logo ?: (void*)tab;
     tab->initialized = false;
     tab->is_empty = false;
     tab->arg = arg;
@@ -239,14 +238,6 @@ void gui_redraw()
     gui_event(TAB_REDRAW, tab);
 
     lcd_swap();
-}
-
-void gui_draw_navbar()
-{
-    for (int i = 0; i < gui.tabcount; i++)
-    {
-        odroid_display_write(i * IMAGE_LOGO_WIDTH, 0, IMAGE_LOGO_WIDTH, IMAGE_LOGO_HEIGHT, gui.tabs[i]->img_logo);
-    }
 }
 
 void gui_draw_header(tab_t *tab)
