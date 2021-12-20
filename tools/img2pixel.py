@@ -23,6 +23,7 @@ def write_pixels(fi, fn):
 
         for y in range(img.height):
         #for pix in pixels:
+            s_pix = ""
             for x in range((img.width+7) // 8):
                binData[x] = 0;
             for x in range(img.width):
@@ -33,12 +34,15 @@ def write_pixels(fi, fn):
                 #print("x:" + str(x) + ", y:" + str(y) + ", color:" + str(b_p));
                 if (b_p > 100):
                     b_b = b_b | (1 << b_i)
-                    binData[(x+8) // 8 -1] = b_b;
+                    binData[(x+8) // 8 -1] = b_b
+                    s_pix = s_pix + "#"
+                else:
+                    s_pix = s_pix + "_"
                 #f.write(str.encode(f"0x{px:04X},", "utf-8"))
             for x in range((img.width+7) // 8):
                #binData[x] = 0;
                f.write(str.encode(f"0x{binData[x]:02x}, ", "utf-8"))
-            f.write(str.encode("//\n", "utf-8"))
+            f.write(str.encode("//{s}\n".format(s=s_pix), "utf-8"))
 
 def main():
     args = parse_args()
