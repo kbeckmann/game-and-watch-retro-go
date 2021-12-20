@@ -51,7 +51,6 @@ typedef void (*gui_event_handler_t)(gui_event_t event, void *arg);
 typedef struct {
     char name[64];
     char status[64];
-    const void *img_logo;
     const void *img_header;
     bool initialized;
     bool is_empty;
@@ -77,7 +76,7 @@ extern int gui_colors_count;
 extern colors_t *curr_colors;
 extern const colors_t gui_colors[];
 
-tab_t *gui_add_tab(const char *name, const void *logo, const void *header, void *arg, void *event_handler);
+tab_t *gui_add_tab(const char *name, const void *header, void *arg, void *event_handler);
 tab_t *gui_get_tab(int index);
 tab_t *gui_get_current_tab();
 tab_t *gui_set_current_tab(int index);
@@ -91,7 +90,6 @@ listbox_item_t *gui_get_selected_item(tab_t *tab);
 
 void gui_event(gui_event_t event, tab_t *tab);
 void gui_redraw(void);
-void gui_draw_navbar(void);
 void gui_draw_header(tab_t *tab);
 void gui_draw_status(tab_t *tab);
 void gui_draw_list(tab_t *tab);
