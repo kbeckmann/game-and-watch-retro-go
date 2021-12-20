@@ -35,6 +35,7 @@ int odroid_overlay_game_menu()
 #include "odroid_system.h"
 #include "odroid_overlay.h"
 #include "main.h"
+#include "bitmaps.h"
 
 // static uint16_t *overlay_buffer = NULL;
 static uint16_t overlay_buffer[ODROID_SCREEN_WIDTH * 32 * 2]  __attribute__ ((aligned (4)));
@@ -62,6 +63,34 @@ int odroid_overlay_get_font_width()
 {
     return 8;
 }
+
+void odroid_overlay_draw_logo(uint16_t x_pos, uint16_t y_pos, const retro_logo_image *logo, uint16_t color)
+{
+    uint16_t *dst_img = lcd_get_active_buffer();
+    int w = (logo->width + 7) / 8;
+    for (int i = 0; i < w; i++)
+        for (int y = 0; y < logo->height; y++)
+        {
+            const char glyph = logo->logo[y * w + i];
+            //for (int x = 0; x < 8; x++)
+            if (glyph & 0x80)
+                dst_img[(y + y_pos) * 320 + i * 8 + 0 + x_pos] = color;
+            if (glyph & 0x40)
+                dst_img[(y + y_pos) * 320 + i * 8 + 1 + x_pos] = color;
+            if (glyph & 0x20)
+                dst_img[(y + y_pos) * 320 + i * 8 + 2 + x_pos] = color;
+            if (glyph & 0x10)
+                dst_img[(y + y_pos) * 320 + i * 8 + 3 + x_pos] = color;
+            if (glyph & 0x08)
+                dst_img[(y + y_pos) * 320 + i * 8 + 4 + x_pos] = color;
+            if (glyph & 0x04)
+                dst_img[(y + y_pos) * 320 + i * 8 + 5 + x_pos] = color;
+            if (glyph & 0x02)
+                dst_img[(y + y_pos) * 320 + i * 8 + 6 + x_pos] = color;
+            if (glyph & 0x01)
+                dst_img[(y + y_pos) * 320 + i * 8 + 7 + x_pos] = color;
+        }
+};
 
 int odroid_overlay_draw_text_line(uint16_t x_pos, uint16_t y_pos, uint16_t width, const char *text, uint16_t color, uint16_t color_bg)
 {

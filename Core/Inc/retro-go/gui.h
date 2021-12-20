@@ -51,6 +51,7 @@ typedef struct {
     char name[64];
     char status[64];
     const void *img_header;
+    const void *img_logo;
     bool initialized;
     bool is_empty;
     void *arg;
@@ -73,7 +74,9 @@ typedef struct {
 extern retro_gui_t gui;
 extern int gui_themes_count;
 
-tab_t *gui_add_tab(const char *name, const void *header, void *arg, void *event_handler);
+uint16_t get_shined_pixel(uint16_t color, uint16_t shined);
+
+tab_t *gui_add_tab(const char *name, const void *logo, const void *header, void *arg, void *event_handler);
 tab_t *gui_get_tab(int index);
 tab_t *gui_get_current_tab();
 tab_t *gui_set_current_tab(int index);

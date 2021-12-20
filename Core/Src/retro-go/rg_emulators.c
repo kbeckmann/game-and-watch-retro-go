@@ -99,7 +99,7 @@ static void event_handler(gui_event_t event, tab_t *tab)
 }
 
 static void add_emulator(const char *system, const char *dirname, const char* ext, const char *part,
-                          uint16_t crc_offset, const void *header)
+                          uint16_t crc_offset, const void *logo, const void *header)
 {
     assert(emulators_count <= MAX_EMULATORS);
     retro_emulator_t *p = &emulators[emulators_count++];
@@ -112,7 +112,7 @@ static void add_emulator(const char *system, const char *dirname, const char* ex
     p->initialized = false;
     p->crc_offset = crc_offset;
 
-    gui_add_tab(dirname, header, p, event_handler);
+    gui_add_tab(dirname, logo, header, p, event_handler);
 
     emulator_init(p);
 }
@@ -435,39 +435,39 @@ void emulators_init()
 {
 #if !( defined(ENABLE_EMULATOR_GB) || defined(ENABLE_EMULATOR_NES) || defined(ENABLE_EMULATOR_SMS) || defined(ENABLE_EMULATOR_GG) || defined(ENABLE_EMULATOR_COL) || defined(ENABLE_EMULATOR_SG1000) || defined(ENABLE_EMULATOR_PCE) || defined(ENABLE_EMULATOR_GW))
     // Add gameboy as a placeholder in case no emulator is built.
-    add_emulator("Nintendo Gameboy", "gb", "gb", "gnuboy-go", 0, header_gb);
+    add_emulator("Nintendo Gameboy", "gb", "gb", "gnuboy-go", 0, &logo_gb, &header_gb);
 #endif
 
 #ifdef ENABLE_EMULATOR_GB
-    add_emulator("Nintendo Gameboy", "gb", "gb", "gnuboy-go", 0, header_gb);
+    add_emulator("Nintendo Gameboy", "gb", "gb", "gnuboy-go", 0, &logo_gb, &header_gb);
 #endif
 
 #ifdef ENABLE_EMULATOR_NES
-    add_emulator("Nintendo Entertainment System", "nes", "nes", "nofrendo-go", 16, header_nes);
+    add_emulator("Nintendo Entertainment System", "nes", "nes", "nofrendo-go", 16, &logo_nes, &header_nes);
 #endif
     
 #ifdef ENABLE_EMULATOR_SMS
-    add_emulator("Sega Master System", "sms", "sms", "smsplusgx-go", 0, header_sms);
+    add_emulator("Sega Master System", "sms", "sms", "smsplusgx-go", 0, &logo_sms, &header_sms);
 #endif
 
 #ifdef ENABLE_EMULATOR_GG
-    add_emulator("Sega Game Gear", "gg", "gg", "smsplusgx-go", 0, header_gg);
+    add_emulator("Sega Game Gear", "gg", "gg", "smsplusgx-go", 0, &logo_gg, &header_gg);
 #endif
 
 #ifdef ENABLE_EMULATOR_COL
-    add_emulator("Colecovision", "col", "col", "smsplusgx-go", 0, header_col);
+    add_emulator("Colecovision", "col", "col", "smsplusgx-go", 0, &logo_col, &header_col);
 #endif
 
 #ifdef ENABLE_EMULATOR_SG1000
-    add_emulator("Sega SG-1000", "sg", "sg", "smsplusgx-go", 0, header_sg1000);
+    add_emulator("Sega SG-1000", "sg", "sg", "smsplusgx-go", 0, &logo_sg1000, &header_sg1000);
 #endif
 
 #ifdef ENABLE_EMULATOR_PCE
-    add_emulator("PC Engine", "pce", "pce", "huexpress-go", 0, header_pce);
+    add_emulator("PC Engine", "pce", "pce", "huexpress-go", 0, &logo_pce, &header_pce);
 #endif
 
 #ifdef ENABLE_EMULATOR_GW
-    add_emulator("Game & Watch", "gw", "gw", "LCD-Game-Emulator", 0, header_gw);
+    add_emulator("Game & Watch", "gw", "gw", "LCD-Game-Emulator", 0, &logo_gw, &header_gw);
 #endif
 
 }

@@ -8,6 +8,7 @@
 #include <unistd.h>
 
 #include "githash.h"
+#include "bitmaps.h"
 #include "gui.h"
 #include "gw_buttons.h"
 #include "gw_flash.h"
@@ -175,10 +176,6 @@ static void redraw(flashapp_t *flashapp)
     // Re-use header, status and footer from the retro-go code
     gui_draw_header(&flashapp->tab);
     gui_draw_status(&flashapp->tab);
-
-    // Empty logo
-    odroid_overlay_draw_fill_rect(0, ODROID_SCREEN_HEIGHT - IMAGE_BANNER_HEIGHT - 15,
-                                  IMAGE_BANNER_WIDTH, IMAGE_BANNER_HEIGHT, C_GW_MAIN_COLOR);
 
     draw_progress(flashapp);
     lcd_swap();
@@ -513,6 +510,8 @@ static void flashapp_run(flashapp_t *flashapp)
 void flashapp_main(void)
 {
     flashapp_t flashapp = {};
+    flashapp.tab.img_header = &logo_flash;
+    flashapp.tab.img_logo = &logo_gnw;
 
     SCB_InvalidateDCache();
     SCB_DisableDCache();
