@@ -42,7 +42,7 @@ def write_pixels(fi, fn):
             for x in range((img.width+7) // 8):
                #binData[x] = 0;
                f.write(str.encode(f"0x{binData[x]:02x}, ", "utf-8"))
-            f.write(str.encode("//{s}\n".format(s=s_pix), "utf-8"))
+            f.write(str.encode("//  {s}\n".format(s=s_pix), "utf-8"))
 
 def main():
     args = parse_args()

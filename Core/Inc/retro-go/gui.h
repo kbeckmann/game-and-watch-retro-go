@@ -51,8 +51,8 @@ typedef void (*gui_event_handler_t)(gui_event_t event, void *arg);
 typedef struct {
     char name[64];
     char status[64];
-    const void *img_logo;
     const void *img_header;
+    const void *img_logo;
     bool initialized;
     bool is_empty;
     void *arg;
@@ -91,7 +91,6 @@ listbox_item_t *gui_get_selected_item(tab_t *tab);
 
 void gui_event(gui_event_t event, tab_t *tab);
 void gui_redraw(void);
-void gui_draw_navbar(void);
 void gui_draw_header(tab_t *tab);
 void gui_draw_status(tab_t *tab);
 void gui_draw_list(tab_t *tab);
