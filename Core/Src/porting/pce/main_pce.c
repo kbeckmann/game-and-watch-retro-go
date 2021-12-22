@@ -527,7 +527,7 @@ int app_main_pce(uint8_t load_state, uint8_t start_paused) {
     printf("PCE Core initialized\n");
 
     // If user select "RESUME" in main menu
-    if (load_state) LoadState(NULL);
+    if (load_state) LoadStateStm(NULL);
 
     // Main emulator loop
     printf("Main emulator loop start\n");
