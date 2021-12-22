@@ -75,15 +75,15 @@ const svar_t SaveStateVars[] =
     SVAR_A("PAL", PCE.Palette),  SVAR_A("MMR", PCE.MMR),
 
     // CPU registers
-    SVAR_2("CPU.PC", hu_CPU.PC),    SVAR_1("CPU.A", hu_CPU.A),    SVAR_1("CPU.X", hu_CPU.X),
-    SVAR_1("CPU.Y", hu_CPU.Y),      SVAR_1("CPU.P", hu_CPU.P),    SVAR_1("CPU.S", hu_CPU.S),
+    SVAR_2("CPU.PC", CPU.PC),    SVAR_1("CPU.A", CPU.A),    SVAR_1("CPU.X", CPU.X),
+    SVAR_1("CPU.Y", CPU.Y),      SVAR_1("CPU.P", CPU.P),    SVAR_1("CPU.S", CPU.S),
 
     // Misc
     SVAR_4("Cycles", Cycles),                   SVAR_4("MaxCycles", PCE.MaxCycles),
     SVAR_1("SF2", PCE.SF2),
 
     // IRQ
-    SVAR_1("irq_mask", hu_CPU.irq_mask),           SVAR_1("irq_lines", hu_CPU.irq_lines),
+    SVAR_1("irq_mask", CPU.irq_mask),           SVAR_1("irq_lines", CPU.irq_lines),
 
     // PSG
     SVAR_1("psg.ch", PCE.PSG.ch),               SVAR_1("psg.vol", PCE.PSG.volume),
@@ -133,7 +133,7 @@ static void netplay_callback(netplay_event_t event, void *arg) {
     // Where we're going we don't need netplay!
 }
 
-static bool SaveState(char *pathName) {
+static bool SaveStateStm(char *pathName) {
     int pos=0;
     uint8_t *pce_save_buf = emulator_framebuffer_pce;
     memset(pce_save_buf, 0x00, 76*1024); // 76K save size
@@ -161,7 +161,7 @@ static bool SaveState(char *pathName) {
     return false;
 }
 
-static bool LoadState(char *pathName) {
+static bool LoadStateStm(char *pathName) {
     uint8_t *pce_save_buf = (uint8_t *)ACTIVE_FILE->save_address;
     if (ACTIVE_FILE->save_size==0) return true;
     sprintf(pce_log,"%ld",ACTIVE_FILE->save_size);
@@ -281,7 +281,6 @@ void LoadCartPCE() {
 
        // US Encrypted
     if ((pceRomFlags[IDX].Flags & US_ENCODED) || PCE.ROM_DATA[0x1FFF] < 0xE0) {
-		MESSAGE_INFO("This rom is probably US encrypted, decrypting...\n");
 
 		unsigned char inverted_nibble[16] = {
 			0, 8, 4, 12, 2, 10, 6, 14,
@@ -360,7 +359,7 @@ static inline void pce_timer_run(void) {
             // Trigger when it underflows from 0
             if (PCE.Timer.counter > 0x7F) {
                 PCE.Timer.counter = PCE.Timer.reload;
-                hu_CPU.irq_lines |= INT_TIMER;
+                CPU.irq_lines |= INT_TIMER;
             }
             PCE.Timer.counter--;
         }
@@ -375,8 +374,8 @@ void pce_input_read(odroid_gamepad_state_t* out_state) {
     if (out_state->values[ODROID_INPUT_DOWN])   rc |= JOY_DOWN;
     if (out_state->values[ODROID_INPUT_A])      rc |= JOY_A;
     if (out_state->values[ODROID_INPUT_B])      rc |= JOY_B;
-    if ((out_state->values[ODROID_INPUT_START]) || (out_state->values[ODROID_INPUT_X]))  rc |= JOY_RUN;
-    if ((out_state->values[ODROID_INPUT_SELECT]) || (out_state->values[ODROID_INPUT_Y])) rc |= JOY_SELECT;
+    if (out_state->values[ODROID_INPUT_START])  rc |= JOY_RUN;
+    if (out_state->values[ODROID_INPUT_SELECT]) rc |= JOY_SELECT;
     PCE.Joypad.regs[0] = rc;
 }
 
@@ -503,7 +502,7 @@ int app_main_pce(uint8_t load_state, uint8_t start_paused) {
     }
 
     odroid_system_init(APPID_PCE, PCE_SAMPLE_RATE);
-    odroid_system_emu_init(&LoadState, &SaveState, &netplay_callback);
+    odroid_system_emu_init(&LoadStateStm, &SaveStateStm, &netplay_callback);
     pce_log[0]=0;
 
     // Init Graphics
