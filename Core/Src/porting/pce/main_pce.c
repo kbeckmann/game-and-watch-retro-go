@@ -7,7 +7,7 @@
 // It's a hack, but it'll do.
 #undef CYCLES_PER_LINE
 
-#include <hard_pce.h>
+#include <pce.h>
 #include <romdb_pce.h>
 #include "lz4_depack.h"
 #include <assert.h>
@@ -75,15 +75,15 @@ const svar_t SaveStateVars[] =
     SVAR_A("PAL", PCE.Palette),  SVAR_A("MMR", PCE.MMR),
 
     // CPU registers
-    SVAR_2("CPU.PC", reg_pc),    SVAR_1("CPU.A", reg_a),    SVAR_1("CPU.X", reg_x),
-    SVAR_1("CPU.Y", reg_y),      SVAR_1("CPU.P", reg_p),    SVAR_1("CPU.S", reg_s),
+    SVAR_2("CPU.PC", hu_CPU.PC),    SVAR_1("CPU.A", hu_CPU.A),    SVAR_1("CPU.X", hu_CPU.X),
+    SVAR_1("CPU.Y", hu_CPU.Y),      SVAR_1("CPU.P", hu_CPU.P),    SVAR_1("CPU.S", hu_CPU.S),
 
     // Misc
     SVAR_4("Cycles", Cycles),                   SVAR_4("MaxCycles", PCE.MaxCycles),
     SVAR_1("SF2", PCE.SF2),
 
     // IRQ
-    SVAR_1("irq_mask", PCE.irq_mask),           SVAR_1("irq_status", PCE.irq_status),
+    SVAR_1("irq_mask", hu_CPU.irq_mask),           SVAR_1("irq_lines", hu_CPU.irq_lines),
 
     // PSG
     SVAR_1("psg.ch", PCE.PSG.ch),               SVAR_1("psg.vol", PCE.PSG.volume),
@@ -125,7 +125,7 @@ void osd_gfx_init(void) {
 
 }
 
-void osd_log(const char *format, ...) {
+void osd_log(int type, const char *format, ...) {
 
 }
 
@@ -189,7 +189,7 @@ static bool LoadState(char *pathName) {
     for(int i = 0; i < 8; i++) {
         pce_bank_set(i, PCE.MMR[i]);
     }
-    gfx_clear_cache();
+    gfx_reset(true);
     osd_gfx_set_mode(IO_VDC_SCREEN_WIDTH, IO_VDC_SCREEN_HEIGHT);
     return true;
 }
@@ -253,9 +253,12 @@ void LoadCartPCE() {
     int offset;
     size_t rom_length = pce_osd_getromdata(&PCE.ROM);
     offset = rom_length & 0x1fff;
-    PCE.ROM_SIZE = (rom_length - offset) / 0x2000;
-     PCE.ROM_DATA = PCE.ROM + offset;
+       
+       
+       PCE.ROM_SIZE = (rom_length - offset) / 0x2000;
+       PCE.ROM_DATA = PCE.ROM + offset;
        PCE.ROM_CRC = crc32_le(0, PCE.ROM, rom_length);
+       
        uint IDX = 0;
        uint ROM_MASK = 1;
 
@@ -278,11 +281,27 @@ void LoadCartPCE() {
 
        // US Encrypted
     if ((pceRomFlags[IDX].Flags & US_ENCODED) || PCE.ROM_DATA[0x1FFF] < 0xE0) {
-        printf("This rom is probably US encrypted, Not supported!!!\n");
-        assert(0);
-       }
+		MESSAGE_INFO("This rom is probably US encrypted, decrypting...\n");
 
-    if (pceRomFlags[IDX].Flags & TWO_PART_ROM) PCE.ROM_SIZE = 0x30;
+		unsigned char inverted_nibble[16] = {
+			0, 8, 4, 12, 2, 10, 6, 14,
+			1, 9, 5, 13, 3, 11, 7, 15
+		};
+
+		for (int x = 0; x < PCE.ROM_SIZE * 0x2000; x++) {
+			unsigned char temp = PCE.ROM_DATA[x] & 15;
+
+			PCE.ROM_DATA[x] &= ~0x0F;
+			PCE.ROM_DATA[x] |= inverted_nibble[PCE.ROM_DATA[x] >> 4];
+
+			PCE.ROM_DATA[x] &= ~0xF0;
+			PCE.ROM_DATA[x] |= inverted_nibble[temp] << 4;
+		}
+    }
+
+	// For example with Devil Crush 512Ko
+    if (pceRomFlags[IDX].Flags & TWO_PART_ROM) 
+        PCE.ROM_SIZE = 0x30;
 
     // Game ROM
     for (int i = 0; i < 0x80; i++) {
@@ -291,43 +310,43 @@ void LoadCartPCE() {
             case 0x00:
             case 0x10:
             case 0x50:
-                MemoryMapR[i] = PCE.ROM_DATA + (i & ROM_MASK) * 0x2000;
+                PCE.MemoryMapR[i] = PCE.ROM_DATA + (i & ROM_MASK) * 0x2000;
                 break;
             case 0x20:
             case 0x60:
-                MemoryMapR[i] = PCE.ROM_DATA + ((i - 0x20) & ROM_MASK) * 0x2000;
+                PCE.MemoryMapR[i] = PCE.ROM_DATA + ((i - 0x20) & ROM_MASK) * 0x2000;
                 break;
             case 0x30:
             case 0x70:
-                MemoryMapR[i] = PCE.ROM_DATA + ((i - 0x10) & ROM_MASK) * 0x2000;
+                PCE.MemoryMapR[i] = PCE.ROM_DATA + ((i - 0x10) & ROM_MASK) * 0x2000;
                 break;
             case 0x40:
-                MemoryMapR[i] = PCE.ROM_DATA + ((i - 0x20) & ROM_MASK) * 0x2000;
+                PCE.MemoryMapR[i] = PCE.ROM_DATA + ((i - 0x20) & ROM_MASK) * 0x2000;
                 break;
             }
         } else {
-            MemoryMapR[i] = PCE.ROM_DATA + (i & ROM_MASK) * 0x2000;
+            PCE.MemoryMapR[i] = PCE.ROM_DATA + (i & ROM_MASK) * 0x2000;
         }
-        MemoryMapW[i] = PCE.NULLRAM;
+        PCE.MemoryMapW[i] = PCE.NULLRAM;
     }
 
     // Allocate the card's onboard ram
     if (pceRomFlags[IDX].Flags & ONBOARD_RAM) {
         PCE.ExRAM = PCE.ExRAM ?: PCE_EXRAM_BUF;
-        MemoryMapR[0x40] = MemoryMapW[0x40] = PCE.ExRAM;
-        MemoryMapR[0x41] = MemoryMapW[0x41] = PCE.ExRAM + 0x2000;
-        MemoryMapR[0x42] = MemoryMapW[0x42] = PCE.ExRAM + 0x4000;
-        MemoryMapR[0x43] = MemoryMapW[0x43] = PCE.ExRAM + 0x6000;
+        PCE.MemoryMapR[0x40] = PCE.MemoryMapW[0x40] = PCE.ExRAM;
+        PCE.MemoryMapR[0x41] = PCE.MemoryMapW[0x41] = PCE.ExRAM + 0x2000;
+        PCE.MemoryMapR[0x42] = PCE.MemoryMapW[0x42] = PCE.ExRAM + 0x4000;
+        PCE.MemoryMapR[0x43] = PCE.MemoryMapW[0x43] = PCE.ExRAM + 0x6000;
     }
 
     // Mapper for roms >= 1.5MB (SF2, homebrews)
     if (PCE.ROM_SIZE >= 192)
-        MemoryMapW[0x00] = PCE.IOAREA;
+        PCE.MemoryMapW[0x00] = PCE.IOAREA;
 }
 
-void ResetPCE() {
-    gfx_clear_cache();
-    pce_reset();
+void ResetPCE(bool hard) {
+    gfx_reset(hard);
+    pce_reset(hard);
 
 }
 
@@ -341,7 +360,7 @@ static inline void pce_timer_run(void) {
             // Trigger when it underflows from 0
             if (PCE.Timer.counter > 0x7F) {
                 PCE.Timer.counter = PCE.Timer.reload;
-                PCE.irq_status |= INT_TIMER;
+                hu_CPU.irq_lines |= INT_TIMER;
             }
             PCE.Timer.counter--;
         }
@@ -356,8 +375,8 @@ void pce_input_read(odroid_gamepad_state_t* out_state) {
     if (out_state->values[ODROID_INPUT_DOWN])   rc |= JOY_DOWN;
     if (out_state->values[ODROID_INPUT_A])      rc |= JOY_A;
     if (out_state->values[ODROID_INPUT_B])      rc |= JOY_B;
-    if (out_state->values[ODROID_INPUT_START])  rc |= JOY_RUN;
-    if (out_state->values[ODROID_INPUT_SELECT]) rc |= JOY_SELECT;
+    if ((out_state->values[ODROID_INPUT_START]) || (out_state->values[ODROID_INPUT_X]))  rc |= JOY_RUN;
+    if ((out_state->values[ODROID_INPUT_SELECT]) || (out_state->values[ODROID_INPUT_Y])) rc |= JOY_SELECT;
     PCE.Joypad.regs[0] = rc;
 }
 
@@ -395,17 +414,6 @@ void pce_osd_gfx_blit(bool drawFrame) {
         frames = 0;
         lastFPSTime = currentTime;
     }
-
-#ifdef PCE_SHOW_DEBUG1
-    // Calculate no. of active Tiles and Sprites
-    int sprCount=0, tileCount=0;
-    for(int j=0;j<2048;j++) {
-        if (TILE_CACHE[j]) tileCount++;
-     }
-    for(int j=0;j<512;j++) {
-        if (SPR_CACHE[j]) sprCount++;
-    }
-#endif
 
     uint8_t *emuFrameBuffer = osd_gfx_framebuffer();
     pixel_t *framebuffer_active = lcd_get_active_buffer();
@@ -458,7 +466,7 @@ void pce_osd_gfx_blit(bool drawFrame) {
 #ifdef PCE_SHOW_DEBUG
     char debugMsg[100];
     sprintf(debugMsg,"FPS:%d.%d,W:%d,H:%d,L:%s", framePerSecond / 10,framePerSecond % 10,current_width,current_height,pce_log);
-    odroid_overlay_draw_text(0,0, GW_LCD_WIDTH, debugMsg,  C_GW_YELLOW, C_GW_MAIN_COLOR);
+    odroid_overlay_draw_text(0,0, GW_LCD_WIDTH, debugMsg,  curr_colors->sel_c, curr_colors->main_c);
 #endif
 
     common_ingame_overlay();
@@ -516,7 +524,7 @@ int app_main_pce(uint8_t load_state, uint8_t start_paused) {
     // Init PCE Core
     pce_init();
     LoadCartPCE();
-    ResetPCE();
+    ResetPCE(false);
     printf("PCE Core initialized\n");
 
     // If user select "RESUME" in main menu
@@ -536,10 +544,9 @@ int app_main_pce(uint8_t load_state, uint8_t start_paused) {
             ODROID_DIALOG_CHOICE_LAST
         };
         common_emu_input_loop(&joystick, options);
-
         pce_input_read(&joystick);
 
-        for (Scanline = 0; Scanline < 263; ++Scanline) {
+        for (PCE.Scanline = 0; PCE.Scanline < 263; ++PCE.Scanline) {
             PCE.MaxCycles += CYCLES_PER_LINE;
             h6280_run();
             pce_timer_run();
