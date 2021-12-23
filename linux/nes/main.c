@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -60,9 +61,45 @@ static bool netplay  = false;
 static bool fullFrame = 0;
 static uint frameTime = 0;
 
+static bool autoload;
+static char *autoload_name;
+
 void odroid_display_force_refresh(void)
 {
     // forceVideoRefresh = true;
+}
+
+
+static bool SaveState(char *pathName)
+{
+    uint8_t nes_save_buffer[24000];
+
+    memset(nes_save_buffer, 0, sizeof(nes_save_buffer));
+
+    nes_state_save(nes_save_buffer, 24000);
+
+    FILE *fp = fopen(pathName, "wb");
+    assert(fp);
+    fwrite(nes_save_buffer, 1, sizeof(nes_save_buffer), fp);
+    fclose(fp);
+
+    return true;
+}
+
+static bool LoadState(char *pathName)
+{
+    uint8_t nes_save_buffer[24000];
+
+    memset(nes_save_buffer, 0, sizeof(nes_save_buffer));
+
+    FILE *fp = fopen(pathName, "rb");
+    assert(fp);
+    fread(nes_save_buffer, 1, sizeof(nes_save_buffer), fp);
+    fclose(fp);
+
+    nes_state_load(nes_save_buffer, sizeof(nes_save_buffer));
+
+    return true;
 }
 
 int osd_init()
@@ -84,6 +121,8 @@ void osd_setpalette(rgb_t *pal)
 
 void osd_vsync()
 {
+    nes_getptr()->drawframe = true;
+
 }
 
 
@@ -138,6 +177,8 @@ void osd_blitscreen(bitmap_t *bmp)
 void osd_getinput(void)
 {
     SDL_Event event;
+    static SDL_Event last_down_event;
+
     if (SDL_PollEvent(&event)) {
         if (event.type == SDL_KEYDOWN) {
             // printf("Press %d\n", event.key.keysym.sym);
@@ -166,12 +207,11 @@ void osd_getinput(void)
             case SDLK_RIGHT:
                 joystick1.values[ODROID_INPUT_RIGHT] = 1;
                 break;
-            case SDLK_ESCAPE:
-                nes_getptr()->poweroff = 1;
-                break;
             default:
                 break;
             }
+
+            last_down_event = event;
         } else if (event.type == SDL_KEYUP) {
             // printf("Release %d\n", event.key.keysym.sym);
             switch (event.key.keysym.sym) {
@@ -198,6 +238,18 @@ void osd_getinput(void)
                 break;
             case SDLK_RIGHT:
                 joystick1.values[ODROID_INPUT_RIGHT] = 0;
+                break;
+            case SDLK_ESCAPE:
+                if (last_down_event.key.keysym.sym == SDLK_ESCAPE)
+                    nes_getptr()->poweroff = 1;
+                break;
+            case SDLK_F1:
+                if (last_down_event.key.keysym.sym == SDLK_F1)
+                    SaveState("save_nes.bin");
+                break;
+            case SDLK_F4:
+                if (last_down_event.key.keysym.sym == SDLK_F4)
+                    LoadState("save_nes.bin");
                 break;
             default:
                 break;
@@ -238,16 +290,9 @@ uint osd_getromcrc()
 
 void osd_loadstate()
 {
-}
-
-static bool SaveState(char *pathName)
-{
-    return true;
-}
-
-static bool LoadState(char *pathName)
-{
-    return true;
+    if (autoload) {
+        LoadState(autoload_name);
+    }
 }
 
 void fill_audio(void *udata, Uint8 *stream, int len)
@@ -315,6 +360,12 @@ int main(int argc, char *argv[])
 
     printf("Nofrendo start!\n");
 
+    // Usage: argv[0] [save_state.bin]
+    if (argc == 2) {
+        autoload = true;
+        autoload_name = argv[1];
+    }
+
     // nofrendo_start("Rom name (E).nes", NES_PAL, AUDIO_SAMPLE_RATE);
     nofrendo_start("Rom name (USA).nes", NES_NTSC, AUDIO_SAMPLE_RATE, false);
 
@@ -322,15 +373,3 @@ int main(int argc, char *argv[])
 
     return 0;
 }
-
-
-
-
-
-
-
-
-
-
-
-
