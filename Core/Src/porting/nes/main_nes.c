@@ -539,7 +539,7 @@ int app_main_nes(uint8_t load_state, uint8_t start_paused)
     odroid_system_emu_init(&LoadState, &SaveState, NULL);
 
     if (start_paused) {
-        common_emu_state.pause_after_frames = 3;
+        common_emu_state.pause_after_frames = 4;
         odroid_audio_mute(true);
     } else {
         common_emu_state.pause_after_frames = 0;
