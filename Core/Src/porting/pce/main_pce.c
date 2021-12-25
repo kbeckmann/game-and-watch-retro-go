@@ -3,7 +3,7 @@
 #include "shared.h"
 
 // shared.h includes sms.h which defined CYCLES_PER_LINE.
-// hard_pce.h defines it to the desired value.
+// pce.h defines it to the desired value.
 // It's a hack, but it'll do.
 #undef CYCLES_PER_LINE
 
@@ -39,36 +39,39 @@
 #define JOY_RIGHT   0x20
 #define JOY_DOWN    0x40
 #define JOY_LEFT    0x80
-#define SVAR_1(k, v) { 1, k, &v }
-#define SVAR_2(k, v) { 2, k, &v }
-#define SVAR_4(k, v) { 4, k, &v }
-#define SVAR_A(k, v) { sizeof(v), k, &v }
-#define SVAR_N(k, v, n) { n, k, &v }
-#define SVAR_END { 0, "\0\0\0\0", 0 }
-#define COLOR_RGB(r, g, b) ((((r) << 13) & 0xf800) + (((g) << 8) & 0x07e0) + (((b) << 3) & 0x001f))
 
-typedef struct
-{
-    uint len;
-    char key[16];
-    void *ptr;
-} svar_t;
+#define COLOR_RGB(r, g, b) ((((r) << 13) & 0xf800) + (((g) << 8) & 0x07e0) + (((b) << 3) & 0x001f))
 
 static uint16_t mypalette[256];
 static int current_height, current_width;
 static short audioBuffer_pce[ AUDIO_BUFFER_LENGTH_PCE * 2];
 static uint8_t emulator_framebuffer_pce[XBUF_WIDTH * XBUF_HEIGHT];
-static uint8_t OBJ_CACHE_buf[0x10000];
 static uint8_t PCE_EXRAM_BUF[0x8000];
 static int framePerSecond=0;
 
 // TODO: Move to lcd.c/h
 extern LTDC_HandleTypeDef hltdc;
 static char pce_log[100];
+
+/**
+ * Describes what is saved in a save state. Changing the order will break
+ * previous saves so add a place holder if necessary. Eventually we could use
+ * the keys to make order irrelevant...
+ */
+#define SVAR_1(k, v) { 1, k, &v }
+#define SVAR_2(k, v) { 2, k, &v }
+#define SVAR_4(k, v) { 4, k, &v }
+#define SVAR_A(k, v) { sizeof(v), k, &v }
+#define SVAR_N(k, v, n) { n, k, &v }
+#define SVAR_END { 0, "\0\0\0\0", 0 }
+
 const char SAVESTATE_HEADER[8] = "PCE_V004";
-
-
-const svar_t SaveStateVars[] =
+static const struct
+{
+	size_t len;
+	char key[16];
+	void *ptr;
+} SaveStateVars[] =
 {
     // Arrays
     SVAR_A("RAM", PCE.RAM),      SVAR_A("VRAM", PCE.VRAM),  SVAR_A("SPRAM", PCE.SPRAM),
@@ -111,12 +114,24 @@ uint8_t *osd_gfx_framebuffer(void){
     return emulator_framebuffer_pce + FB_INTERNAL_OFFSET;
 }
 
-void* osd_alloc(size_t size) {
-    assert(size==0x10000);
-    return OBJ_CACHE_buf;
+void set_color(int index, uint8_t r, uint8_t g, uint8_t b) {
+    uint16_t col = 0xffff;
+    if (index != 255)  {
+        col = COLOR_RGB(r,g,b);
+    }
+    mypalette[index] = col;
+}
+
+void init_color_pals() {
+    for (int i = 0; i < 255; i++) {
+        // GGGRR RBB
+          set_color(i, (i & 0x1C)>>2, (i & 0xE0) >> 5, (i & 0x03) );
+    }
+    set_color(255, 0x3f, 0x3f, 0x3f);
 }
 
 void osd_gfx_set_mode(int width, int height) {
+    init_color_pals();
     current_width = width;
     current_height = height;
 }
@@ -379,22 +394,6 @@ void pce_input_read(odroid_gamepad_state_t* out_state) {
     PCE.Joypad.regs[0] = rc;
 }
 
-void set_color(int index, uint8_t r, uint8_t g, uint8_t b) {
-    uint16_t col = 0xffff;
-    if (index != 255)  {
-        col = COLOR_RGB(r,g,b);
-    }
-    mypalette[index] = col;
-}
-
-void init_color_pals() {
-    for (int i = 0; i < 255; i++) {
-        // GGGRR RBB
-          set_color(i, (i & 0x1C)>>2, (i & 0xE0) >> 5, (i & 0x03) );
-    }
-    set_color(255, 0x3f, 0x3f, 0x3f);
-}
-
 void pce_osd_gfx_blit(bool drawFrame) {
     static uint32_t lastFPSTime = 0;
     static uint32_t frames = 0;
@@ -511,13 +510,14 @@ int app_main_pce(uint8_t load_state, uint8_t start_paused) {
     sprintf(pce_log,"%d",refresh_rate);
     memset(framebuffer1, 0, sizeof(framebuffer1));
     memset(framebuffer2, 0, sizeof(framebuffer2));
+    
     gfx_init();
     printf("Graphics initialized\n");
 
     // Init Sound
     memset(audiobuffer_dma, 0, sizeof(audiobuffer_dma));
     HAL_SAI_Transmit_DMA(&hsai_BlockA1, (uint8_t *)audiobuffer_dma, AUDIO_BUFFER_LENGTH_PCE * 2 );
-    pce_snd_init();
+    pce_snd_init();    
     printf("Sound initialized\n");
 
     // Init PCE Core
