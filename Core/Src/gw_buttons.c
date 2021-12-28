@@ -2,8 +2,18 @@
 
 #include "stm32h7xx_hal.h"
 #include "main.h"
+#include "odroid_system.h"
 
 #include <stdbool.h>
+
+#if ENABLE_TURBO_BUTTONS == 1
+#define TURBO_FREQUENCY_HZ 30
+
+bool is_turbo_high() {
+  int turbo_period_ms = 1000 / TURBO_FREQUENCY_HZ;
+  return (get_elapsed_time() % turbo_period_ms) < (turbo_period_ms / 2);
+}
+#endif
 
 uint32_t buttons_get() {
     bool left = HAL_GPIO_ReadPin(BTN_Left_GPIO_Port, BTN_Left_Pin) == GPIO_PIN_RESET;
@@ -17,8 +27,13 @@ uint32_t buttons_get() {
     bool pause = HAL_GPIO_ReadPin(BTN_PAUSE_GPIO_Port, BTN_PAUSE_Pin) == GPIO_PIN_RESET;
     bool power = HAL_GPIO_ReadPin(BTN_PWR_GPIO_Port, BTN_PWR_Pin) == GPIO_PIN_RESET;
 
+#if ENABLE_TURBO_BUTTONS == 1
+    a |= HAL_GPIO_ReadPin(BTN_START_GPIO_Port, BTN_START_Pin) == GPIO_PIN_RESET && is_turbo_high();
+    b |= HAL_GPIO_ReadPin(BTN_SELECT_GPIO_Port, BTN_SELECT_Pin) == GPIO_PIN_RESET && is_turbo_high();
+#else
     game |= HAL_GPIO_ReadPin(BTN_START_GPIO_Port, BTN_START_Pin) == GPIO_PIN_RESET;
     time |= HAL_GPIO_ReadPin(BTN_SELECT_GPIO_Port, BTN_SELECT_Pin) == GPIO_PIN_RESET;
+#endif
 
     return (
         left | (up << 1) | (right << 2) | (down << 3) | (a << 4) | (b << 5) |
