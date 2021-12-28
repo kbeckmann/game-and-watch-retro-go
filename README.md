@@ -26,6 +26,7 @@ Supported emulators:
   - [Build and flash using Docker](#build-and-flash-using-docker)
   - [Backing up and restoring save state files](#backing-up-and-restoring-save-state-files)
   - [Screenshots](#screenshots)
+  - [Game Genie](#game-genie)
   - [Upgrading the flash](#upgrading-the-flash)
   - [Advanced Flash Examples](#advanced-flash-examples)
     - [Custom Firmware (CFW)](#custom-firmware-cfw)
@@ -173,6 +174,28 @@ You can also erase all of the save slots by running `make flash_saves_erase`.
 Screenshots can be captured by pressing `PAUSE/SET` + `GAME`. This feature is disabled by default if the external flash is 1MB (stock units), because it takes up 150kB in the external flash.
 
 Screenshots can be downloaded by running `make dump_screenshot`, and will be saved as a 24-bit RGB PNG.
+
+## Game Genie
+
+Note: Currently Game Genie codes are only working with NES games.
+
+To enable, add GAME_GENIE=1 to your make command. If you have already compiled without GAME_GENIE=1, I recommend running make clean first.
+
+To add Game Genie codes, create a file ending in .ggcodes in the same directory as your rom with the same name as your rom. For instance, for 
+"roms/nes/Super Mario Bros.nes" make a file called "roms/nes/Super Mario Bros.ggcodes". In that file, each line can have up to 3 Game Genie codes and a maximum
+of 16 lines of active codes (for a max of 3 x 16 = 48 codes). Each line can also have a description (up to 25 characters long).
+You can comment out a line by prefixing with # or //. For example:
+```
+SXIOPO, Inf lives
+APZLGG+APZLTG+GAZUAG, Mega jump
+YSAOPE+YEAOZA+YEAPYA, Start on World 8-1
+YSAOPE+YEAOZA+LXAPYA, Start on World -1
+GOZSXX, Invincibility
+# TVVOAE, Circus music
+```
+When you re-flash, you can enable / disable each of your codes in the game selection screen.
+
+A collection of codes can be found here: [https://github.com/martaaay/game-and-watch-retro-go-game-genie-codes](https://github.com/martaaay/game-and-watch-retro-go-game-genie-codes).
 
 ## Upgrading the flash
 

@@ -5,6 +5,7 @@
 #include "odroid_settings.h"
 #include "main.h"
 #include "appid.h"
+#include "game_genie.h"
 
 #define CONFIG_MAGIC 0xcafef00d
 #define ODROID_APPID_COUNT 4
@@ -25,6 +26,15 @@ typedef struct app_config {
     uint8_t sprite_limit;
 } app_config_t;
 
+#if GAME_GENIE == 1
+#if MAX_GAME_GENIE_CODES != 16
+#error MAX_GAME_GENIE_CODES is assumed to be 16. Changing this value requires adjusting the type of active_game_genie_codes below
+#endif
+typedef struct rom_config {
+    uint16_t active_game_genie_codes; // A bit array for which game genie codes in retro_emulator_file_t.game_genie_codes are active for this rom
+} rom_config_t;
+#endif
+
 typedef struct persistent_config {
     uint32_t magic;
     uint8_t version;
@@ -42,12 +52,16 @@ typedef struct persistent_config {
 
     app_config_t app[APPID_COUNT];
 
+#if GAME_GENIE == 1
+    rom_config_t rom[ROM_COUNT]; // index is the same as 'id' in retro_emulator_file_t
+#endif
+
     uint32_t crc32;
 } persistent_config_t;
 
 static const persistent_config_t persistent_config_default = {
     .magic = CONFIG_MAGIC,
-    .version = 4,
+    .version = 5,
 
     .backlight = ODROID_BACKLIGHT_LEVEL6,
     .start_action = ODROID_START_ACTION_RESUME,
@@ -75,6 +89,9 @@ static const persistent_config_t persistent_config_default = {
         {0}, // PCE
         {0}, // GW
     },
+#if GAME_GENIE == 1
+    .rom = {{0}},
+#endif
 };
 
 __attribute__((section (".configflash"))) __attribute__((aligned(4096))) persistent_config_t persistent_config_flash;
@@ -331,3 +348,31 @@ void odroid_settings_DisplayOverscan_set(int32_t value)
 {
     persistent_config_ram.app[odroid_system_get_app()->id].disp_overscan = value;
 }
+
+
+#if GAME_GENIE == 1 
+bool odroid_settings_ActiveGameGenieCodes_is_enabled(uint32_t rom_id, int code_index)
+{
+    if (rom_id < 0 || rom_id >= ROM_COUNT || code_index < 0 || code_index > MAX_GAME_GENIE_CODES) {
+        return false;
+    }
+
+    uint16_t active_game_genie_codes = persistent_config_ram.rom[rom_id].active_game_genie_codes;
+    return ((active_game_genie_codes >> code_index) & 0x1) == 1;
+}
+
+bool odroid_settings_ActiveGameGenieCodes_set(uint32_t rom_id, int code_index, bool enable)
+{
+    if (rom_id < 0 || rom_id >= ROM_COUNT || code_index < 0 || code_index > MAX_GAME_GENIE_CODES) {
+        return false;
+    }
+
+    if (enable) {
+        persistent_config_ram.rom[rom_id].active_game_genie_codes |= (1<<code_index);
+    } else  {
+        persistent_config_ram.rom[rom_id].active_game_genie_codes &= ~(1<<code_index);
+    }
+
+    return true;
+}
+#endif

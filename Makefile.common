@@ -60,6 +60,9 @@ ifeq ($(STATE_SAVING),0)
 	SAVE_PARAM := --no-save
 endif
 
+# Set to 1 to add game genie support
+GAME_GENIE ?= 0
+
 # Screenshot support allocates 150kB of external flash. Disabled by default for 1MB flash.
 ifeq ($(EXTFLASH_SIZE), 1048576)
 	ENABLE_SCREENSHOT ?= 0
@@ -278,7 +281,8 @@ C_DEFS +=  \
 -DSTATE_SAVING=$(STATE_SAVING) \
 -DENABLE_SCREENSHOT=$(ENABLE_SCREENSHOT) \
 -DGNW_TARGET_MARIO=$(GNW_TARGET_MARIO) \
--DGNW_TARGET_ZELDA=$(GNW_TARGET_ZELDA)
+-DGNW_TARGET_ZELDA=$(GNW_TARGET_ZELDA) \
+-DGAME_GENIE=$(GAME_GENIE) \
 
 # AS includes
 AS_INCLUDES +=
@@ -384,7 +388,9 @@ $(BUILD_DIR)/rom_files.txt: FORCE | $(BUILD_DIR)
 	$(V)$(ECHO) [ BASH ] Checking for updated roms
 	$(V)./scripts/update_rom_files.sh build/rom_files.txt roms/gb roms/nes roms/sms roms/gg roms/col roms/pce roms/sg roms/gw
 
-$(BUILD_DIR)/roms.a: $(BUILD_DIR)/rom_files.txt parse_roms.py
+roms/*/*.ggcodes:
+
+$(BUILD_DIR)/roms.a: $(BUILD_DIR)/rom_files.txt parse_roms.py roms/*/*.ggcodes
 	$(V)$(ECHO) [ PYTHON3 ] $(notdir $<)
 	$(V)$(PYTHON3) parse_roms.py --flash-size $(EXTFLASH_SIZE) $(SAVE_PARAM) $(COMPRESS_PARAM)
 
@@ -646,6 +652,7 @@ help:
 	@echo "                        Set to 0 to disable power saving (default=1)"
 	@echo "  ENABLE_SCREENSHOT   - Set to 1 to enable screenshot support (default disabled if extflash is 1MB)"
 	@echo "  GNW_TARGET          - Game & Watch target, Valid values {mario,zelda} (default=mario)"
+	@echo "  GAME_GENIE   - Set to 1 to enable game genie support (default=0)"
 	@echo ""
 	@echo "Current configuration:"
 	@echo "  EXTFLASH_FORCE_SPI=$(EXTFLASH_FORCE_SPI)"
@@ -659,6 +666,7 @@ help:
 	@echo "  RESET_DBGMCU=$(RESET_DBGMCU)"
 	@echo "  ENABLE_SCREENSHOT=$(ENABLE_SCREENSHOT)"
 	@echo "  GNW_TARGET=$(GNW_TARGET)"
+	@echo "  GAME_GENIE=$(GAME_GENIE)"
 	@echo "  GCC_PATH=$(GCC_PATH)"
 	@echo "  PREFIX=$(PREFIX)"
 	@echo ""

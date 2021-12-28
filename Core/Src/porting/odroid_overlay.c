@@ -40,6 +40,8 @@ int odroid_overlay_game_menu()
 static uint16_t overlay_buffer[ODROID_SCREEN_WIDTH * 32 * 2]  __attribute__ ((aligned (4)));
 static short dialog_open_depth = 0;
 static short font_size = 8;
+char* ODROID_DIALOG_VALUE_ON = "ON";
+char* ODROID_DIALOG_VALUE_OFF = "OFF";
 
 void odroid_overlay_init()
 {
@@ -203,7 +205,7 @@ static int get_dialog_items_count(odroid_dialog_choice_t *options)
     if (options == NULL)
         return 0;
 
-    for (int i = 0; i < 16; i++)
+    for (int i = 0; i < 17; i++)
     {
         // if (memcmp(&last, options + i, sizeof(last))) {
         if (options[i].id == last.id && options[i].enabled == last.enabled) {
