@@ -45,7 +45,7 @@
 static uint16_t mypalette[256];
 static int current_height, current_width;
 static short audioBuffer_pce[ AUDIO_BUFFER_LENGTH_PCE * 2];
-static uint8_t emulator_framebuffer_pce[XBUF_WIDTH * XBUF_HEIGHT];
+static uint8_t emulator_framebuffer_pce[XBUF_WIDTH * XBUF_HEIGHT * 2];
 static uint8_t PCE_EXRAM_BUF[0x8000];
 static int framePerSecond=0;
 
