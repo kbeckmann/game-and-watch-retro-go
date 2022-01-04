@@ -136,12 +136,11 @@ void osd_gfx_set_mode(int width, int height) {
     current_height = height;
 }
 
-void osd_gfx_init(void) {
-
-}
-
 void osd_log(int type, const char *format, ...) {
-
+    va_list ap;
+    va_start(ap, format);
+    vprintf(format, ap);
+    va_end(ap);
 }
 
 static void netplay_callback(netplay_event_t event, void *arg) {
@@ -268,14 +267,11 @@ void LoadCartPCE() {
     int offset;
     size_t rom_length = pce_osd_getromdata(&PCE.ROM);
     offset = rom_length & 0x1fff;
-       
-       
        PCE.ROM_SIZE = (rom_length - offset) / 0x2000;
        PCE.ROM_DATA = PCE.ROM + offset;
        PCE.ROM_CRC = crc32_le(0, PCE.ROM, rom_length);
-       
-       uint IDX = 0;
-       uint ROM_MASK = 1;
+       uint32_t IDX = 0;
+       uint32_t ROM_MASK = 1;
 
        while (ROM_MASK < PCE.ROM_SIZE) ROM_MASK <<= 1;
        ROM_MASK--;
@@ -296,7 +292,7 @@ void LoadCartPCE() {
 
        // US Encrypted
     if ((pceRomFlags[IDX].Flags & US_ENCODED) || PCE.ROM_DATA[0x1FFF] < 0xE0) {
-
+		printf("US Encrypted rom code");
 		unsigned char inverted_nibble[16] = {
 			0, 8, 4, 12, 2, 10, 6, 14,
 			1, 9, 5, 13, 3, 11, 7, 15
@@ -510,14 +506,14 @@ int app_main_pce(uint8_t load_state, uint8_t start_paused) {
     sprintf(pce_log,"%d",refresh_rate);
     memset(framebuffer1, 0, sizeof(framebuffer1));
     memset(framebuffer2, 0, sizeof(framebuffer2));
-    
+
     gfx_init();
     printf("Graphics initialized\n");
 
     // Init Sound
     memset(audiobuffer_dma, 0, sizeof(audiobuffer_dma));
     HAL_SAI_Transmit_DMA(&hsai_BlockA1, (uint8_t *)audiobuffer_dma, AUDIO_BUFFER_LENGTH_PCE * 2 );
-    pce_snd_init();    
+    pce_snd_init();
     printf("Sound initialized\n");
 
     // Init PCE Core
@@ -531,12 +527,11 @@ int app_main_pce(uint8_t load_state, uint8_t start_paused) {
 
     // Main emulator loop
     printf("Main emulator loop start\n");
+    odroid_gamepad_state_t joystick = {0};
 
     while (true) {
         wdog_refresh();
         bool drawFrame = common_emu_frame_loop();
-
-        odroid_gamepad_state_t joystick;
         odroid_input_read_gamepad(&joystick);
 
         odroid_dialog_choice_t options[] = {
