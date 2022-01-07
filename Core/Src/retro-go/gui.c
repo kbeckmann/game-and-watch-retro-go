@@ -393,8 +393,8 @@ void gui_draw_clock()
     draw_clock_digit(dst_img, GW_currentTime.Hours / 10, ODROID_SCREEN_WIDTH - 80, 17, curr_colors->sel_c);
     
     color = (GW_currentTime.SubSeconds < 100) ? curr_colors->sel_c : get_darken_pixel(curr_colors->main_c, 70);
-    odroid_overlay_draw_fill_rect(ODROID_SCREEN_WIDTH - 61, 19, 2, 2, color);
-    odroid_overlay_draw_fill_rect(ODROID_SCREEN_WIDTH - 61, 23, 2, 2, color);
+    odroid_overlay_draw_fill_rect(ODROID_SCREEN_WIDTH - 63, 19, 2, 2, color);
+    odroid_overlay_draw_fill_rect(ODROID_SCREEN_WIDTH - 63, 23, 2, 2, color);
 };
 
 void gui_draw_status(tab_t *tab)
