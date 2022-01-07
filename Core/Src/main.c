@@ -459,14 +459,14 @@ int main(void)
   boot_buttons = buttons_get();
   // reduce the power consumption before lcd init
   // Keep this
-  for (int i = 0; i < 1; i++) {
+  for (int i = 0; i < 5; i++) {
       wdog_refresh();
       HAL_Delay(10);
   }
 
   lcd_init(&hspi2, &hltdc);
 
-  for (int i = 0; i < 6; i++) {
+  for (int i = 0; i < 5; i++) {
       wdog_refresh();
       HAL_Delay(10);
   }

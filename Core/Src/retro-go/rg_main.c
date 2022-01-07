@@ -217,7 +217,7 @@ static bool splashani_update_cb(odroid_dialog_choice_t *option, odroid_dialog_ev
     if ((event == ODROID_DIALOG_PREV) || (event == ODROID_DIALOG_NEXT))
     {
         splashani = splashani ? 0 : 1;
-        odroid_settings_colors_set(splashani);
+        odroid_settings_splashani_set(splashani);
     };
 
     sprintf(option->value, "%s", splashani ? s_Splash_On : s_Splash_Off);
@@ -438,7 +438,6 @@ void retro_loop()
                     {4, s_Theme_Title, theme_value, 1, &theme_update_cb},
 #endif
                     {0, s_Splash_Option, splashani_value, 1, &splashani_update_cb},
-                    ODROID_DIALOG_CHOICE_SEPARATOR,
                     {0, s_Idle_power_off, timeout_value, 1, &main_menu_timeout_cb},
                     // {0, "Color theme", "1/10", 1, &color_shift_cb},
                     // {0, "Font size", "Small", 1, &font_size_cb},
@@ -633,6 +632,8 @@ void app_check_data_loop()
 
 void app_start_logo()
 {
+    if (! odroid_settings_splashani_get())
+        return;
     odroid_overlay_draw_fill_rect(0, 0, 320, 240, curr_colors->bg_c);
     //tab_t *tab = gui_get_tab(odroid_settings_MainMenuSelectedTab_get());
     //tab = tab ? tab : gui_get_tab(0);
