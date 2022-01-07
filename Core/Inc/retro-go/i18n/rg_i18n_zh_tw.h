@@ -122,6 +122,9 @@
 //#define s_Close                   "Close"
 #define s_Debug_Title               "調試選項"
 #define s_Idle_power_off            "空閒待機"
+#define s_Splash_Option             "Splash Animation"
+#define s_Splash_On                 "ON"
+#define s_Splash_Off                "OFF"
 
 #define s_Time                      "時間："
 #define s_Date                      "日期："

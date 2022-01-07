@@ -124,6 +124,9 @@
 //#define s_Close                   "닫기"
 #define s_Debug_Title               "디버그"
 #define s_Idle_power_off            "모든 전원 종료"
+#define s_Splash_Option             "Splash Animation"
+#define s_Splash_On                 "ON"
+#define s_Splash_Off                "OFF"
 
 #define s_Time                      "시간"
 #define s_Date                      "날싸"

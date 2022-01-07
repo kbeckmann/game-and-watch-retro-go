@@ -12,6 +12,7 @@ void odroid_overlay_draw_logo(uint16_t x_pos, uint16_t y_pos, const retro_logo_i
 
 extern const retro_logo_image logo_rgo;
 extern const retro_logo_image logo_flash;
+extern const retro_logo_image logo_rgw;
 extern const retro_logo_image logo_gnw;
 
 extern const retro_logo_image header_sg1000;
@@ -53,3 +54,16 @@ extern const unsigned char IMG_BUTTON_A[];
 extern const unsigned char IMG_BUTTON_A_P[];
 extern const unsigned char IMG_BUTTON_B[];
 extern const unsigned char IMG_BUTTON_B_P[];
+
+extern const unsigned char img_clock_00[];
+extern const unsigned char img_clock_01[];
+extern const unsigned char img_clock_02[];
+extern const unsigned char img_clock_03[];
+extern const unsigned char img_clock_04[];
+extern const unsigned char img_clock_05[];
+extern const unsigned char img_clock_06[];
+extern const unsigned char img_clock_07[];
+extern const unsigned char img_clock_08[];
+extern const unsigned char img_clock_09[];
+
+
