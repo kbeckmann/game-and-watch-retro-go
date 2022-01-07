@@ -210,6 +210,21 @@ static bool colors_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event
     return event == ODROID_DIALOG_ENTER;
 }
 
+static bool splashani_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat)
+{
+    int8_t splashani = odroid_settings_splashani_get();
+
+    if ((event == ODROID_DIALOG_PREV) || (event == ODROID_DIALOG_NEXT))
+    {
+        splashani = splashani ? 0 : 1;
+        odroid_settings_colors_set(splashani);
+    };
+
+    sprintf(option->value, "%s", splashani ? s_Splash_On : s_Splash_Off);
+    return event == ODROID_DIALOG_ENTER;
+}
+
+
 static inline bool tab_enabled(tab_t *tab)
 {
     int disabled_tabs = 0;
@@ -261,13 +276,13 @@ void retro_loop()
             tab = gui_set_current_tab(gui.selected);
             if (!tab->initialized)
             {
-                gui_redraw();
                 gui_init_tab(tab);
-                if (tab_enabled(tab))
-                {
-                    gui_draw_status(tab);
-                    gui_draw_list(tab);
-                }
+                gui_redraw();
+                // if (tab_enabled(tab))
+                // {
+                //     gui_draw_status(tab);
+                //     gui_draw_list(tab);
+                // }
             }
             else if (tab_enabled(tab))
             {
@@ -288,9 +303,6 @@ void retro_loop()
         if (idle_s > 0 && gui.joystick.bitmask == 0)
         {
             gui_event(TAB_IDLE, tab);
-
-            if (idle_s % 10 == 0)
-                gui_draw_status(tab);
         }
 
         if ((last_key < 0) || ((repeat >= 30) && (repeat % 5 == 0)))
@@ -414,9 +426,10 @@ void retro_loop()
             }
             else if ((last_key == ODROID_INPUT_VOLUME) || (last_key == ODROID_INPUT_Y))
             {
-                char timeout_value[32];
-                char theme_value[25];
-                char colors_value[25];
+                char splashani_value[16];
+                char timeout_value[16];
+                char theme_value[16];
+                char colors_value[16];
                 odroid_dialog_choice_t choices[] = {
                     ODROID_DIALOG_CHOICE_SEPARATOR,
                     {0x0F0F0E0E, s_Colors, colors_value, 1, &colors_update_cb},
@@ -424,6 +437,7 @@ void retro_loop()
                      //ODROID_DIALOG_CHOICE_SEPARATOR,
                     {4, s_Theme_Title, theme_value, 1, &theme_update_cb},
 #endif
+                    {0, s_Splash_Option, splashani_value, 1, &splashani_update_cb},
                     ODROID_DIALOG_CHOICE_SEPARATOR,
                     {0, s_Idle_power_off, timeout_value, 1, &main_menu_timeout_cb},
                     // {0, "Color theme", "1/10", 1, &color_shift_cb},

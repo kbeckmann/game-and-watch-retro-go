@@ -113,6 +113,9 @@
 //#define s_Close                   "Close"
 #define s_Debug_Title               "Debug"
 #define s_Idle_power_off            "Idle power off"
+#define s_Splash_Option             "Splash Animation"
+#define s_Splash_On                 "ON"
+#define s_Splash_Off                "OFF"
 
 #define s_Time                      "Time"
 #define s_Date                      "Date"

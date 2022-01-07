@@ -109,10 +109,7 @@ static void event_handler(gui_event_t event, tab_t *tab)
     }
     else if (event == TAB_REDRAW)
     {
-        gui_draw_status(tab);
-        //if (gui.show_cover)
-        //    gui_draw_cover(file);
-        
+        gui_redraw();
     }
 }
 

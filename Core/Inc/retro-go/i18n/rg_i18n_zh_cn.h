@@ -119,6 +119,10 @@
 //#define s_Close                   "Close"
 #define s_Debug_Title               "调试选项"
 #define s_Idle_power_off            "空闲待机"
+#define s_Splash_Option             "启动动画"
+#define s_Splash_On                 "开"
+#define s_Splash_Off                "关"
+
 
 #define s_Time                      "时间："
 #define s_Date                      "日期："

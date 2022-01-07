@@ -36,7 +36,8 @@ int8_t odroid_settings_theme_get();
 void odroid_settings_theme_set(int8_t theme);
 int8_t odroid_settings_colors_get();
 void odroid_settings_colors_set(int8_t colors);
-
+int8_t odroid_settings_splashani_get();
+void odroid_settings_splashani_set(int8_t splashani);
 
 
 
