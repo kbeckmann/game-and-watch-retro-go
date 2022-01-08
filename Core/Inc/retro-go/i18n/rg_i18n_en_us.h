@@ -96,7 +96,7 @@
 #define s_UI_Mod                    "UI Mod :"
 #define s_Lang                      "English"
 #define s_LangAuthor                "Default"
-#define s_Debug_menu                "Debug_menu"
+#define s_Debug_menu                "Debug menu"
 #define s_Reset_settings            "Reset settings"
 //#define s_Close                   "Close"
 #define s_Retro_Go                  "About Retro-Go"
@@ -113,7 +113,7 @@
 //#define s_Close                   "Close"
 #define s_Debug_Title               "Debug"
 #define s_Idle_power_off            "Idle power off"
-#define s_Splash_Option             "Splash Animation"
+#define s_Splash_Option             "Splash animation"
 #define s_Splash_On                 "ON"
 #define s_Splash_Off                "OFF"
 
