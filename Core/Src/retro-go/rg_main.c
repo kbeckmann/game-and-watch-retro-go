@@ -278,11 +278,6 @@ void retro_loop()
             {
                 gui_init_tab(tab);
                 gui_redraw();
-                // if (tab_enabled(tab))
-                // {
-                //     gui_draw_status(tab);
-                //     gui_draw_list(tab);
-                // }
             }
             else if (tab_enabled(tab))
             {
@@ -535,7 +530,14 @@ void retro_loop()
             }
             else if (last_key == ODROID_INPUT_POWER)
             {
-                odroid_system_sleep();
+                if ((gui.joystick.values[ODROID_INPUT_UP]) || (gui.joystick.values[ODROID_INPUT_DOWN]) ||
+                    (gui.joystick.values[ODROID_INPUT_LEFT]) || (gui.joystick.values[ODROID_INPUT_RIGHT]))
+                {
+                    odroid_system_switch_app(0);
+                    return;
+                }
+                else
+                    odroid_system_sleep();
             }
         }
         if (repeat > 0)
