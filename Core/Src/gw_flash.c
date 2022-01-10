@@ -75,6 +75,15 @@
 #define S_CR_QUAD_Pos    (1U)
 #define S_CR_QUAD_Msk    (1UL << S_CR_QUAD_Pos)
 
+// WB (Winbond) specific SR1-3 (status register) bits
+#define WB_SR1_PROTECT_Msk 0xFC
+#define WB_SR2_PROTECT_Msk 0x41 // excluding OTP security register lock bits
+#define WB_SR2_QE_Pos      1
+#define WB_SR3_PROTECT_Msk 0x04
+#define WB_SR3_DRV_Msk     (0b11<<5)
+#define WB_SR3_DRV_Val_50  (0b10<<5) // 50%
+#define WB_SR3_ADS_Pos     0
+
 typedef enum {
     LINES_0,        // Mapped to HAL_OSPI_*_NONE
     LINES_1,        // Mapped to HAL_OSPI_*_1_LINE
@@ -273,8 +282,45 @@ const flash_cmd_t cmds_quad_24b_issi[CMD_COUNT] = {
     [CMD_READ]   = CMD_DEF(0xEB, LINES_1, LINES_4, ADDR_SIZE_24B, LINES_4,    6), // FRQIO dummy=6
 };
 
+const flash_cmd_t cmds_quad_24b_wb[CMD_COUNT] = {
+    // cmd                  cmd  i_lines  a_lines         a_size  d_lines  dummy
+    [CMD_WRSR]   = CMD_DEF(0x01, LINES_1, LINES_0, ADDR_SIZE_24B, LINES_1,    0),
+    [CMD_RDSR]   = CMD_DEF(0x05, LINES_1, LINES_0, ADDR_SIZE_24B, LINES_1,    0),
+    [CMD_RDCR]   = CMD_DEF(0x15, LINES_1, LINES_0, ADDR_SIZE_24B, LINES_1,    0),
+    [CMD_WREN]   = CMD_DEF(0x06, LINES_1, LINES_0, ADDR_SIZE_24B, LINES_0,    0),
+    [CMD_RDID]   = CMD_DEF(0x9F, LINES_1, LINES_0, ADDR_SIZE_24B, LINES_1,    0),
+    [CMD_RSTEN]  = CMD_DEF(0x66, LINES_1, LINES_0, ADDR_SIZE_24B, LINES_0,    0),
+    [CMD_RST]    = CMD_DEF(0x99, LINES_1, LINES_0, ADDR_SIZE_24B, LINES_0,    0),
+    [CMD_CE]     = CMD_DEF(0x60, LINES_1, LINES_0, ADDR_SIZE_24B, LINES_0,    0), // Chip Erase
+    [CMD_ERASE1] = CMD_DEF(0x20, LINES_1, LINES_1, ADDR_SIZE_24B, LINES_0,    0), // Sector Erase 4KB
+    [CMD_ERASE2] = CMD_DEF(0x52, LINES_1, LINES_1, ADDR_SIZE_24B, LINES_0,    0), // Block Erase 32KB
+    [CMD_ERASE3] = CMD_DEF(0xD8, LINES_1, LINES_1, ADDR_SIZE_24B, LINES_0,    0), // Block Erase 64KB
+    [CMD_ERASE4] = { },
+    [CMD_PP]     = CMD_DEF(0x32, LINES_1, LINES_1, ADDR_SIZE_24B, LINES_4,    0), // Quad Input Page Program
+    [CMD_READ]   = CMD_DEF(0xEB, LINES_1, LINES_4, ADDR_SIZE_24B, LINES_4,    6), // Fast Read Quad I/O
+};
+
+const flash_cmd_t cmds_quad_32b_wb[CMD_COUNT] = {
+    // cmd                  cmd  i_lines  a_lines         a_size  d_lines  dummy
+    [CMD_WRSR]   = CMD_DEF(0x01, LINES_1, LINES_0, ADDR_SIZE_24B, LINES_1,    0),
+    [CMD_RDSR]   = CMD_DEF(0x05, LINES_1, LINES_0, ADDR_SIZE_24B, LINES_1,    0),
+    [CMD_RDCR]   = CMD_DEF(0x15, LINES_1, LINES_0, ADDR_SIZE_24B, LINES_1,    0),
+    [CMD_WREN]   = CMD_DEF(0x06, LINES_1, LINES_0, ADDR_SIZE_24B, LINES_0,    0),
+    [CMD_RDID]   = CMD_DEF(0x9F, LINES_1, LINES_0, ADDR_SIZE_24B, LINES_1,    0),
+    [CMD_RSTEN]  = CMD_DEF(0x66, LINES_1, LINES_0, ADDR_SIZE_24B, LINES_0,    0),
+    [CMD_RST]    = CMD_DEF(0x99, LINES_1, LINES_0, ADDR_SIZE_24B, LINES_0,    0),
+    [CMD_CE]     = CMD_DEF(0x60, LINES_1, LINES_0, ADDR_SIZE_24B, LINES_0,    0), // Chip Erase
+    [CMD_ERASE1] = CMD_DEF(0x21, LINES_1, LINES_1, ADDR_SIZE_32B, LINES_0,    0), // Sector Erase 4KB with 4-Byte Address
+    [CMD_ERASE2] = CMD_DEF(0xDC, LINES_1, LINES_1, ADDR_SIZE_32B, LINES_0,    0), // Block Erase 64KB with 4-Byte Address
+    [CMD_ERASE3] = { },
+    [CMD_ERASE4] = { },
+    [CMD_PP]     = CMD_DEF(0x34, LINES_1, LINES_1, ADDR_SIZE_32B, LINES_4,    0), // Quad Page Program with 4-Byte Address
+    [CMD_READ]   = CMD_DEF(0xEC, LINES_1, LINES_4, ADDR_SIZE_32B, LINES_4,    6), // Fast Read Quad I/O with 4-Byte Address
+};
+
 static void init_spansion(void);
 static void init_mx_issi(void);
+static void init_winbond(void);
 
 const flash_config_t config_spi_24b       = FLASH_CONFIG_DEF(cmds_spi_24b,       0x01000,  0x8000, 0x10000, 0,  false, NULL);
 const flash_config_t config_quad_24b_mx   = FLASH_CONFIG_DEF(cmds_quad_24b_mx,   0x01000,  0x8000, 0x10000, 0,   true, init_mx_issi);
@@ -282,6 +328,8 @@ const flash_config_t config_quad_32b_mx   = FLASH_CONFIG_DEF(cmds_quad_32b_mx,  
 const flash_config_t config_quad_32b_mx54 = FLASH_CONFIG_DEF(cmds_quad_32b_mx54, 0x01000,  0x8000, 0x10000, 0,   true, init_mx_issi);
 const flash_config_t config_quad_32b_s    = FLASH_CONFIG_DEF(cmds_quad_32b_s,    0x40000,       0,       0, 0,   true, init_spansion);
 const flash_config_t config_quad_24b_issi = FLASH_CONFIG_DEF(cmds_quad_24b_issi, 0x01000,  0x8000, 0x10000, 0,   true, init_mx_issi);
+const flash_config_t config_quad_24b_wb   = FLASH_CONFIG_DEF(cmds_quad_24b_wb,   0x01000,  0x8000, 0x10000, 0,   true, init_winbond);
+const flash_config_t config_quad_32b_wb   = FLASH_CONFIG_DEF(cmds_quad_32b_wb,   0x01000, 0x10000,       0, 0,   true, init_winbond);
 
 const jedec_config_t jedec_map[] = {
 #if (EXTFLASH_FORCE_SPI == 0)
@@ -306,6 +354,15 @@ const jedec_config_t jedec_map[] = {
     // ISSI 24 bit *untested*
     // TODO: Test and uncomment when it's confirmed they work well.
     JEDEC_CONFIG_DEF(0x9D, 0x70, 0x18, "IS25WP128F",  &config_quad_24b_issi), // 16MB
+
+	// Winbond 24 bit address
+    JEDEC_CONFIG_DEF(0xEF, 0x60, 0x18, "W25Q128JW-Q/N", &config_quad_24b_wb), // 16MB, tested with W25Q128JWSIQ
+    JEDEC_CONFIG_DEF(0xEF, 0x80, 0x18, "W25Q128JW-M",   &config_quad_24b_wb), // 16MB
+
+	// Winbond 32 bit address
+    JEDEC_CONFIG_DEF(0xEF, 0x60, 0x20, "W25Q512NW-Q/N", &config_quad_32b_wb), // 64MB
+    JEDEC_CONFIG_DEF(0xEF, 0x80, 0x20, "W25Q512NW-M",   &config_quad_32b_wb), // 64MB, tested with W25Q512NWEIM
+
 #endif
 };
 
@@ -675,6 +732,76 @@ static void init_spansion(void)
         OSPI_ReadBytes(CMD(RDSR), 0, &rd_sr1, 1);
         OSPI_ReadBytes(CMD(RDCR), 0, &rd_cr1, 1);
         DBG("QUAD bit set. SR: %02X CR: %02X\n", rd_sr1, rd_cr1);
+    }
+}
+
+static void init_winbond(void)
+{
+	//                                    cmd   i_lines  a_lines  a_size         d_lines  dummy
+	const flash_cmd_t cmd_rdsr2 = CMD_DEF(0x35, LINES_1, LINES_0, ADDR_SIZE_24B, LINES_1, 0);
+	const flash_cmd_t cmd_rdsr3 = CMD_DEF(0x15, LINES_1, LINES_0, ADDR_SIZE_24B, LINES_1, 0);
+	const flash_cmd_t cmd_wrsr2 = CMD_DEF(0x31, LINES_1, LINES_0, ADDR_SIZE_24B, LINES_1, 0);
+	const flash_cmd_t cmd_wrsr3 = CMD_DEF(0x11, LINES_1, LINES_0, ADDR_SIZE_24B, LINES_1, 0);
+
+	const bool is_quad = flash.config->set_quad;
+
+	uint8_t sr1, sr2, sr3;
+
+	OSPI_ReadBytes(CMD(RDSR),  0, &sr1, 1);
+	OSPI_ReadBytes(&cmd_rdsr2, 0, &sr2, 1);
+	OSPI_ReadBytes(&cmd_rdsr3, 0, &sr3, 1);
+	DBG("Winbond SR1: %02X SR2: %02X SR3: %02X\n", sr1, sr2, sr3);
+
+	// try to clear writeable protect bits if set
+
+	if (sr1 & WB_SR1_PROTECT_Msk) {
+		DBG("clearing SR1 protect bits\n");
+		sr1 = 0;
+
+		OSPI_NOR_WriteEnable();
+		OSPI_WriteBytes(CMD(WRSR), 0, &sr1, 1);
+		wait_for_status(STATUS_WIP_Msk, 0, TMO_DEFAULT);
+
+		OSPI_ReadBytes(CMD(RDSR), 0, &sr1, 1);
+		if (sr1 & WB_SR1_PROTECT_Msk)
+			DBG("SR1: %02X, change failed\n", sr1);
+	}
+
+	if ((sr2 & WB_SR2_PROTECT_Msk) || (is_quad && !(sr2 & 1<<WB_SR2_QE_Pos))) {
+		DBG("clearing SR2 protect bits\n");
+		sr2 = 0;
+
+		if (is_quad) {
+			DBG("and enabling quad mode\n");
+			sr2 = 1<<WB_SR2_QE_Pos;
+		}
+
+		OSPI_NOR_WriteEnable();
+		OSPI_WriteBytes(&cmd_wrsr2, 0, &sr2, 1);
+		wait_for_status(STATUS_WIP_Msk, 0, TMO_DEFAULT);
+
+		OSPI_ReadBytes(&cmd_rdsr2, 0, &sr2, 1);
+		if ((sr2 & WB_SR2_PROTECT_Msk) || (is_quad && !(sr2 & 1<<WB_SR2_QE_Pos)))
+			DBG("SR2: %02X, change failed\n", sr2);
+	}
+
+	if ((sr3 & WB_SR3_PROTECT_Msk) || ((sr3 & WB_SR3_DRV_Msk) != WB_SR3_DRV_Val_50)) {
+		DBG("clearing SR3 protect bits, setting drive strength 50%%\n");
+		sr3 = WB_SR3_DRV_Val_50;
+
+		OSPI_NOR_WriteEnable();
+		OSPI_WriteBytes(&cmd_wrsr3, 0, &sr3, 1);
+		wait_for_status(STATUS_WIP_Msk, 0, TMO_DEFAULT);
+
+		OSPI_ReadBytes(&cmd_rdsr3, 0, &sr3, 1);
+		if ((sr3 & WB_SR3_PROTECT_Msk) || ((sr3 & WB_SR3_DRV_Msk) != WB_SR3_DRV_Val_50))
+			DBG("SR3: %02X, change failed\n", sr3);
+	}
+
+    if (is_quad && !(sr2 & 1<<WB_SR2_QE_Pos)) {
+        DBG("Windbond quad mode not enabled, falling back to SPI\n");
+        flash.config = &config_spi_24b;
+        flash.name = "Winbond SPI";
     }
 }
 
