@@ -93,7 +93,7 @@ static int current_height, current_width;
 #define SVAR_N(k, v, n) { n, k, &v }
 #define SVAR_END { 0, "\0\0\0\0", 0 }
 
-const char SAVESTATE_HEADER[8] = "PCE_V004";
+const char SAVESTATE_HEADER[8] = "PCE_V005";
 
 static const struct
 {
@@ -135,6 +135,7 @@ static const struct
     // Timer
     SVAR_4("timer_reload", PCE.Timer.reload),   SVAR_4("timer_running", PCE.Timer.running),
     SVAR_4("timer_counter", PCE.Timer.counter), SVAR_4("timer_next", PCE.Timer.cycles_counter),
+    SVAR_4("timer_freq", PCE.Timer.cycles_per_line),
 
     SVAR_END
 };
