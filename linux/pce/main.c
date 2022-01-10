@@ -48,7 +48,7 @@ static uint16_t mypalette[256];
 #define AUDIO_BUFFER_LENGTH_DMA_GB ((2 * AUDIO_SAMPLE_RATE) / 60)
 
 #define FB_INTERNAL_OFFSET (((XBUF_HEIGHT - current_height) / 2 + 16) * XBUF_WIDTH + (XBUF_WIDTH - current_width) / 2)
-static uint8_t emulator_framebuffer_pce[XBUF_WIDTH * XBUF_HEIGHT * 4];
+static uint8_t emulator_framebuffer_pce[XBUF_WIDTH * XBUF_HEIGHT * 2];
 
 extern unsigned char ROM_DATA[];
 extern unsigned int cart_rom_len;
@@ -506,7 +506,7 @@ void pce_osd_gfx_blit(bool drawFrame) {
 }
 
 static inline void pce_timer_run(void) {
-    PCE.Timer.cycles_counter -= CYCLES_PER_LINE;
+    PCE.Timer.cycles_counter -= PCE.Timer.cycles_per_line;
 
     // Trigger when it underflows
     if (PCE.Timer.cycles_counter > CYCLES_PER_TIMER_TICK) {
@@ -627,7 +627,7 @@ int main(int argc, char *argv[])
         pce_input_read(&joystick);
 
         for (PCE.Scanline = 0; PCE.Scanline < 263; ++PCE.Scanline) {
-            PCE.MaxCycles += CYCLES_PER_LINE;
+            PCE.MaxCycles += PCE.Timer.cycles_per_line;
             h6280_run();
             pce_timer_run();
             gfx_run();

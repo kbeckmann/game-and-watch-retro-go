@@ -361,7 +361,7 @@ void ResetPCE(bool hard) {
 }
 
 static inline void pce_timer_run(void) {
-    PCE.Timer.cycles_counter -= CYCLES_PER_LINE;
+    PCE.Timer.cycles_counter -= PCE.Timer.cycles_per_line;
 
     // Trigger when it underflows
     if (PCE.Timer.cycles_counter > CYCLES_PER_TIMER_TICK) {
@@ -541,7 +541,7 @@ int app_main_pce(uint8_t load_state, uint8_t start_paused) {
         pce_input_read(&joystick);
 
         for (PCE.Scanline = 0; PCE.Scanline < 263; ++PCE.Scanline) {
-            PCE.MaxCycles += CYCLES_PER_LINE;
+            PCE.MaxCycles += PCE.Timer.cycles_per_line;
             h6280_run();
             pce_timer_run();
             gfx_run();
