@@ -542,7 +542,7 @@ static void draw_darken_rounded_rectangle(pixel_t *fb, uint16_t x1, uint16_t y1,
 }
 
 static inline void clear_pixel(pixel_t *p){
-    *p = 0
+    *p = 0;
 }
 
 __attribute__((optimize("unroll-loops")))
