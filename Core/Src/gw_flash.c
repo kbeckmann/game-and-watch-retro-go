@@ -342,6 +342,7 @@ const jedec_config_t jedec_map[] = {
     // MX 32 bit address
     JEDEC_CONFIG_DEF(0xC2, 0x25, 0x39, "MX25U25635F",    &config_quad_32b_mx),   // 32 MB
     JEDEC_CONFIG_DEF(0xC2, 0x25, 0x3A, "MX25U51245G",    &config_quad_32b_mx),   // 64 MB
+    JEDEC_CONFIG_DEF(0xC2, 0x24, 0x3A, "MX25U51245G",    &config_quad_32b_mx),   // 64 MB variant of unknown cause supplied by DigiKey (not listed in datasheet)	
     JEDEC_CONFIG_DEF(0xC2, 0x95, 0x3A, "MX25U51245G-54", &config_quad_32b_mx54), // 64 MB
     JEDEC_CONFIG_DEF(0xC2, 0x25, 0x3B, "MX66U1G45G",     &config_quad_32b_mx),   // 128 MB
     JEDEC_CONFIG_DEF(0xC2, 0x25, 0x3C, "MX66U2G45G",     &config_quad_32b_mx),   // 256 MB
