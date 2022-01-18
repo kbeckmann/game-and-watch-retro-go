@@ -81,6 +81,9 @@ static int current_height, current_width;
 #define AUDIO_BUFFER_LENGTH_PCE  (PCE_SAMPLE_RATE / 60)
 //static short audioBuffer_pce[ AUDIO_BUFFER_LENGTH_PCE * 2];
 
+//The frames per second cap timer
+int capTimer;
+
 /**
  * Describes what is saved in a save state. Changing the order will break
  * previous saves so add a place holder if necessary. Eventually we could use
@@ -211,8 +214,7 @@ int init_window(int width, int height)
     if (!window)
         return 0;
 
-    renderer = SDL_CreateRenderer(window, -1,
-        SDL_RENDERER_PRESENTVSYNC);
+    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     if (!renderer)
         return 0;
 
@@ -456,10 +458,7 @@ void init(void)
 void pce_osd_gfx_blit(bool drawFrame) {
     static uint32_t lastFPSTime = 0;
     static uint32_t frames = 0;
-
-    //no need to slow down intentionally
-    //int wantedTime = 1000 / 60;
-    //SDL_Delay(wantedTime); // rendering takes basically "0ms"
+    static int wantedTime = 1000 / 60;
 
     if (!drawFrame) {
         memset(fb_data,0,sizeof(fb_data));
@@ -504,6 +503,14 @@ void pce_osd_gfx_blit(bool drawFrame) {
     SDL_RenderPresent(renderer);
 
     memset(fb_data,0,sizeof(fb_data));
+
+    //If frame finished early
+    int frameTicks = SDL_GetTicks() - capTimer;
+    if( frameTicks < wantedTime )
+    {
+        //Wait remaining time
+        SDL_Delay( wantedTime - frameTicks );
+    }
 }
 
 static inline void pce_timer_run(void) {
@@ -621,6 +628,9 @@ int main(int argc, char *argv[])
 
     while (true)
     {
+
+        //Start cap timer
+        capTimer = SDL_GetTicks();
         //wdog_refresh();
         bool drawFrame = true;// common_emu_frame_loop();
 
