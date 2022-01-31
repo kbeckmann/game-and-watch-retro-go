@@ -11,7 +11,6 @@
 #include "rg_i18n.h"
 #include "bitmaps.h"
 #include "main.h"
-#include "rg_rtc.h"
 
 #if !defined(COVERFLOW)
 #define COVERFLOW 0

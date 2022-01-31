@@ -41,6 +41,7 @@ int odroid_overlay_game_menu()
 #include "rom_manager.h"
 #include "bitmaps.h"
 #include "gui.h"
+#include "rg_rtc.h"
 
 // static uint16_t *overlay_buffer = NULL;
 static uint16_t overlay_buffer[ODROID_SCREEN_WIDTH * 32 * 2] __attribute__((aligned(4)));
