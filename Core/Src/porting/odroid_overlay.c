@@ -206,7 +206,7 @@ void odroid_overlay_clock(int x_pos, int y_pos, uint16_t c)
     HAL_RTC_GetTime(&hrtc, &GW_currentTime, RTC_FORMAT_BIN);
     HAL_RTC_GetDate(&hrtc, &GW_currentDate, RTC_FORMAT_BIN);
 
-    uint16_t color = get_darken_pixel(c, 70);
+    uint16_t color = get_darken_pixel(c, 50);
     draw_clock_digit(dst_img, 8, x_pos + 30, y_pos, color);
     draw_clock_digit(dst_img, 8, x_pos + 22, y_pos, color);
     draw_clock_digit(dst_img, 8, x_pos + 8, y_pos, color);
@@ -217,7 +217,7 @@ void odroid_overlay_clock(int x_pos, int y_pos, uint16_t c)
     draw_clock_digit(dst_img, GW_currentTime.Hours % 10, x_pos + 8, y_pos, c);
     draw_clock_digit(dst_img, GW_currentTime.Hours / 10, x_pos, y_pos, c);
     
-    color = (GW_currentTime.SubSeconds < 100) ? c : get_darken_pixel(c, 70);
+    color = (GW_currentTime.SubSeconds < 100) ? c : get_darken_pixel(c, 50);
     odroid_overlay_draw_fill_rect(x_pos + 17, y_pos + 2, 2, 2, color);
     odroid_overlay_draw_fill_rect(x_pos + 17, y_pos + 6, 2, 2, color);
 };
@@ -779,7 +779,7 @@ int odroid_overlay_settings_menu(odroid_dialog_choice_t *extra_options)
 
 static void draw_game_status_bar(runtime_stats_t stats)
 {
-    int width = ODROID_SCREEN_WIDTH - 40, height = 16;
+    int width = ODROID_SCREEN_WIDTH - 48, height = 16;
     int pad_text = (height - odroid_overlay_get_local_font_size()) / 2;
     char bottom[40], header[40];
 
@@ -793,9 +793,9 @@ static void draw_game_status_bar(runtime_stats_t stats)
 
     odroid_overlay_draw_fill_rect(0, 0, ODROID_SCREEN_WIDTH, height, curr_colors->main_c);
     odroid_overlay_draw_fill_rect(0, ODROID_SCREEN_HEIGHT - height, ODROID_SCREEN_WIDTH, height, curr_colors->main_c);
-    odroid_overlay_draw_local_text(40, pad_text, width, header, curr_colors->sel_c, curr_colors->main_c, 0);
+    odroid_overlay_draw_local_text(48, pad_text, width, header, curr_colors->sel_c, curr_colors->main_c, 0);
     odroid_overlay_draw_local_text(0, ODROID_SCREEN_HEIGHT - height + pad_text, ODROID_SCREEN_WIDTH, bottom, curr_colors->sel_c, curr_colors->main_c, 0);
-    odroid_overlay_clock(2, 3, get_shined_pixel(curr_colors->sel_c, 50));
+    odroid_overlay_clock(2, 3, curr_colors->sel_c);
     odroid_overlay_draw_battery(ODROID_SCREEN_WIDTH - 26, 3);
 }
 
