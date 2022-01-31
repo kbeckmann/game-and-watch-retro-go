@@ -365,38 +365,6 @@ void gui_draw_notice(const char *text, uint16_t color)
     odroid_overlay_draw_text(CRC_X_OFFSET, CRC_Y_OFFSET, CRC_WIDTH, text, color, curr_colors->bg_c);
 };
 
-static void draw_clock_digit(uint16_t *fb, const uint8_t clock, uint16_t px, uint16_t py, uint16_t color)
-{
-    static const unsigned char *CLOCK_DIGITS[] = {img_clock_00, img_clock_01, img_clock_02, img_clock_03, img_clock_04, img_clock_05, img_clock_06, img_clock_07, img_clock_08, img_clock_09};
-    const unsigned char *img = CLOCK_DIGITS[clock];
-    for (uint8_t y = 0; y < 10; y++)
-        for (uint8_t x = 0; x < 6; x++)
-            if (img[y] & (1 << (7 - x)))
-                fb[px + x + GW_LCD_WIDTH * (py + y)] = color;
-};
-
-void gui_draw_clock()
-{
-    uint16_t *dst_img = lcd_get_active_buffer();
-    HAL_RTC_GetTime(&hrtc, &GW_currentTime, RTC_FORMAT_BIN);
-    HAL_RTC_GetDate(&hrtc, &GW_currentDate, RTC_FORMAT_BIN);
-
-    uint16_t color = get_darken_pixel(curr_colors->main_c, 70);
-    draw_clock_digit(dst_img, 8, ODROID_SCREEN_WIDTH - 50, 17, color);
-    draw_clock_digit(dst_img, 8, ODROID_SCREEN_WIDTH - 58, 17, color);
-    draw_clock_digit(dst_img, 8, ODROID_SCREEN_WIDTH - 72, 17, color);
-    draw_clock_digit(dst_img, 8, ODROID_SCREEN_WIDTH - 80, 17, color);
-
-    draw_clock_digit(dst_img, GW_currentTime.Minutes % 10, ODROID_SCREEN_WIDTH - 50, 17, curr_colors->sel_c);
-    draw_clock_digit(dst_img, GW_currentTime.Minutes / 10, ODROID_SCREEN_WIDTH - 58, 17, curr_colors->sel_c);
-    draw_clock_digit(dst_img, GW_currentTime.Hours % 10, ODROID_SCREEN_WIDTH - 72, 17, curr_colors->sel_c);
-    draw_clock_digit(dst_img, GW_currentTime.Hours / 10, ODROID_SCREEN_WIDTH - 80, 17, curr_colors->sel_c);
-    
-    color = (GW_currentTime.SubSeconds < 100) ? curr_colors->sel_c : get_darken_pixel(curr_colors->main_c, 70);
-    odroid_overlay_draw_fill_rect(ODROID_SCREEN_WIDTH - 63, 19, 2, 2, color);
-    odroid_overlay_draw_fill_rect(ODROID_SCREEN_WIDTH - 63, 23, 2, 2, color);
-};
-
 void gui_draw_status(tab_t *tab)
 {
     odroid_overlay_draw_fill_rect(0, 0, ODROID_SCREEN_WIDTH, STATUS_HEIGHT, curr_colors->main_c);
@@ -407,7 +375,7 @@ void gui_draw_status(tab_t *tab)
     odroid_overlay_draw_logo(8, 16, (retro_logo_image *)(&logo_rgw), curr_colors->sel_c);
 
     odroid_overlay_draw_battery(ODROID_SCREEN_WIDTH - 32, 17);
-    gui_draw_clock();
+    odroid_overlay_clock(ODROID_SCREEN_WIDTH - 80, 17, curr_colors->main_c);
 }
 
 listbox_item_t *gui_get_selected_prior_item(tab_t *tab)
