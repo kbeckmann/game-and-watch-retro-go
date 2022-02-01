@@ -14,7 +14,7 @@ except ImportError:
     tqdm = None
 
 ROM_ENTRIES_TEMPLATE = """
-const retro_emulator_file_t {name}[] = {{
+const retro_emulator_file_t {name}[] __attribute__((section(".extflash_emu_data")))  = {{
 {body}
 }};
 const uint32_t {name}_count = {rom_count};
@@ -43,7 +43,7 @@ extern const rom_system_t {name};
 """
 
 SYSTEM_TEMPLATE = """
-const rom_system_t {name} = {{
+const rom_system_t {name} __attribute__((section(".extflash_emu_data"))) = {{
 \t.system_name = "{system_name}",
 \t.roms = {variable_name},
 \t.extension = "{extension}",
