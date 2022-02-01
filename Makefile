@@ -128,9 +128,9 @@ retro-go-stm32/smsplusgx-go/components/smsplus/sound/ym2413.c \
 Core/Src/porting/smsplusgx/main_smsplusgx.c
 
 PCE_C_SOURCES = \
-retro-go-stm32/huexpress-go/components/huexpress/engine/gfx.c \
-retro-go-stm32/huexpress-go/components/huexpress/engine/h6280.c \
-retro-go-stm32/huexpress-go/components/huexpress/engine/hard_pce.c \
+retro-go-stm32/pce-go/components/pce-go/gfx.c \
+retro-go-stm32/pce-go/components/pce-go/h6280.c \
+retro-go-stm32/pce-go/components/pce-go/pce.c \
 Core/Src/porting/pce/sound_pce.c \
 Core/Src/porting/pce/main_pce.c
 
@@ -160,7 +160,7 @@ C_INCLUDES +=  \
 -Iretro-go-stm32/smsplusgx-go/components/smsplus \
 -Iretro-go-stm32/smsplusgx-go/components/smsplus/cpu \
 -Iretro-go-stm32/smsplusgx-go/components/smsplus/sound \
--Iretro-go-stm32/huexpress-go/components/huexpress/engine \
+-Iretro-go-stm32/pce-go/components/pce-go \
 -ILCD-Game-Emulator/src \
 -ILCD-Game-Emulator/src/cpus \
 -ILCD-Game-Emulator/src/gw_sys
