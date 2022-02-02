@@ -361,7 +361,7 @@ void odroid_overlay_draw_dialog(const char *header, odroid_dialog_choice_t *opti
     value_padding = value_padding + 1;
     max_titlen = max_titlen + 2;
     max_titlen = (padding + value_padding + 1) > max_titlen ? padding + value_padding + 1 : max_titlen;
-    width = (ODROID_SCREEN_WIDTH - 60) / odroid_overlay_get_local_font_width();
+    width = (ODROID_SCREEN_WIDTH - 20) / odroid_overlay_get_local_font_width();
     max_titlen = (max_titlen > width) ? width : max_titlen;
     if ((max_titlen - padding - value_padding - 1) < 0)
     {
