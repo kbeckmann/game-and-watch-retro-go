@@ -96,10 +96,10 @@
 
 //Core\Src\retro-go\rg_main.c =========================================
 #define s_Second_Unit               "s"
-#define s_Version                   "Ver.   :"
+#define s_Version                   "Ver.    :"
 #define s_Author                    "Por     :"
-#define s_Author_                   "       :"
-#define s_UI_Mod                    "UI Mod :"
+#define s_Author_                   "        :"
+#define s_UI_Mod                    "UI Mod  :"
 #define s_Lang                      "Português"
 #define s_LangAuthor                "DefKorns"
 #define s_Debug_menu                "Menu Depuração"

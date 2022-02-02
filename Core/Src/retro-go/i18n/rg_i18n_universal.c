@@ -13,7 +13,7 @@
 #include "odroid_system.h"
 #include "odroid_overlay.h"
 
-#if CODEPAGE == 12521
+#if (CODEPAGE == 12521) || (CODEPAGE == 12522) 
 #include "fonts/font_es_es.h"
 #else
 #include "fonts/font_en_us.h"

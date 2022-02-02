@@ -18,6 +18,8 @@
     #include "i18n/rg_i18n_zh_tw.h"
 #elif CODEPAGE==12521
     #include "i18n/rg_i18n_es_es.h"
+#elif CODEPAGE==12522
+    #include "i18n/rg_i18n_pt_pt.h"
 #else
     #include "i18n/rg_i18n_en_us.h"
 #endif

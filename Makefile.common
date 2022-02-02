@@ -665,7 +665,7 @@ help:
 	@echo "                        Set to 0 to disable power saving (default=1)"
 	@echo "  CODEPAGE            - Sets codepage to configures display langrage.(default=1252)"
 	@echo "                        set 932 as Japanese; 936 as simple Chinese; 950 as traditional Chinese"
-	@echo "                        949 as Korean; 12521 as Spanish; "
+	@echo "                        949 as Korean; 12521 as Spanish; 12522 as Portuguese; "
 	@echo "  COVERFLOW           - Set to 1 include cover art with rom (default=0)"
 	@echo "  JPG_QUALITY         - Set convert cover art image jpg quality (default = 90)"
 	@echo "  ENABLE_SCREENSHOT   - Set to 1 to enable screenshot support (default disabled if extflash is 1MB)"
