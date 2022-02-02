@@ -14,7 +14,7 @@ except ImportError:
     tqdm = None
 
 ROM_ENTRIES_TEMPLATE = """
-const retro_emulator_file_t {name}[] __attribute__((section(".extflash_emu_data")))  = {{
+const retro_emulator_file_t {name}[] EMU_DATA = {{
 {body}
 }};
 const uint32_t {name}_count = {rom_count};
@@ -39,11 +39,19 @@ SYSTEM_PROTO_TEMPLATE = """
 #if !defined (COVERFLOW)
   #define COVERFLOW 0
 #endif /* COVERFLOW */
+#if !defined (BIG_BANK)
+#define BIG_BANK 1
+#endif
+#if BIG_BANK == 1
+#define EMU_DATA 
+#else
+#define EMU_DATA __attribute__((section(".extflash_emu_data")))
+#endif
 extern const rom_system_t {name};
 """
 
 SYSTEM_TEMPLATE = """
-const rom_system_t {name} __attribute__((section(".extflash_emu_data"))) = {{
+const rom_system_t {name} EMU_DATA = {{
 \t.system_name = "{system_name}",
 \t.roms = {variable_name},
 \t.extension = "{extension}",

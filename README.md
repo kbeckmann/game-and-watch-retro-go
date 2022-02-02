@@ -5,8 +5,13 @@
 # NewUI howto
 Please run `make help` to see more information.
 
+## <font color=red>**Undocumented 256k BANK used by default**</font>
+Now NewUI used BANK as undocumented size 256k by default, It's required patched OPENOCD to work. You can set `BIG_BANK=0` disabled it to use 128k BANK size.
+
+
 ### i18n support
 `make CODEPAGE=lang` Sets codepage to configures display langrage.(default=1252 as English);
+- 1252 : English
 - 936 : 简体中文
 - 950 : 繁體中文
 - 949  : 한국어 (translation by [Augen(히힛마스터)](https://github.com/#))

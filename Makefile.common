@@ -49,6 +49,7 @@ endif
 # Configure external flash size in MB (Megabytes)
 EXTFLASH_SIZE_MB ?= 1
 INTFLASH_BANK ?= 1
+BIG_BANK ?= 1
 
 EXTFLASH_SIZE ?= $(shell echo "$$(( $(EXTFLASH_SIZE_MB) * 1024 * 1024 ))")
 
@@ -284,6 +285,7 @@ AS_DEFS +=
 # C defines
 C_DEFS +=  \
 -DINTFLASH_BANK=$(INTFLASH_BANK) \
+-DBIG_BANK=$(BIG_BANK) \
 -DCODEPAGE=$(CODEPAGE) \
 -DLANG=$(LANG) \
 -DCOVERFLOW=$(COVERFLOW) \
@@ -346,6 +348,14 @@ else ifeq ($(INTFLASH_BANK), 2)
 endif
 
 LDFLAGS += -Wl,--defsym=__INTFLASH__=$(INTFLASH_ADDRESS)
+
+ifeq ($(BIG_BANK), 1)
+	FLASH_LENGTH = 256k
+else
+	FLASH_LENGTH = 128k
+endif
+
+LDFLAGS += -Wl,--defsym=__FLASH_LENGTH__=$(FLASH_LENGTH)
 
 #######################################
 # LDFLAGS
@@ -659,6 +669,8 @@ help:
 	@echo "  LARGE_FLASH         - Sets the external flash size to 16MB  (deprecated)"
 	@echo "  EXTFLASH_OFFSET     - Places the data at an offset in the external flash (useful for dual boot)"
 	@echo "  INTFLASH_BANK       - Sets the internal flash bank. Valid values {1,2} (default=1)."
+	@echo "  BIG_BANK            - Use internal flash bank as undocumented 256k.(default=1, set 0 to 128k)."
+	@echo "                        It's required patched OPENOCD to work"
 	@echo "  COMPRESS            - Configures ROM compression, Valid values {0,lz4,zopfli,lzma} (default=lzma)."
 	@echo "  STATE_SAVING        - Set to 0 to disable state saving (default=1)"
 	@echo "  RESET_DBGMCU        - Configures if DBGMCU should be reset after flashing."
@@ -678,6 +690,7 @@ help:
 	@echo "  LARGE_FLASH=$(LARGE_FLASH)"
 	@echo "  EXTFLASH_OFFSET=$(EXTFLASH_OFFSET)"
 	@echo "  INTFLASH_BANK=$(INTFLASH_BANK)"
+	@echo "  BIG_BANK=$(BIG_BANK)"
 	@echo "  COMPRESS=$(COMPRESS)"
 	@echo "  STATE_SAVING=$(STATE_SAVING)"
 	@echo "  RESET_DBGMCU=$(RESET_DBGMCU)"

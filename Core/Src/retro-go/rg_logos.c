@@ -1,6 +1,16 @@
 #include "bitmaps.h"
 #include "gw_lcd.h"
 
+
+#if !defined (BIG_BANK)
+#define BIG_BANK 1
+#endif
+#if BIG_BANK == 1
+#define LOGO_DATA 
+#else
+#define LOGO_DATA __attribute__((section(".extflash_logo")))
+#endif
+
 const retro_logo_image logo_rgo = {
     72,
     12,
@@ -127,7 +137,7 @@ const retro_logo_image logo_gnw = {
     },
 };
 
-const retro_logo_image header_sg1000 __attribute__((section(".extflash_logo"))) = {
+const retro_logo_image header_sg1000 LOGO_DATA = {
     128,
     18,
     {
@@ -153,7 +163,7 @@ const retro_logo_image header_sg1000 __attribute__((section(".extflash_logo"))) 
     },
 };
 
-const retro_logo_image header_col __attribute__((section(".extflash_logo"))) = {
+const retro_logo_image header_col LOGO_DATA = {
     184,
     18,
     {
@@ -179,7 +189,7 @@ const retro_logo_image header_col __attribute__((section(".extflash_logo"))) = {
     },
 };
 /*
-const retro_logo_image header_gb __attribute__((section(".extflash_logo"))) = {
+const retro_logo_image header_gb LOGO_DATA = {
     128,
     18,
     {
@@ -205,7 +215,7 @@ const retro_logo_image header_gb __attribute__((section(".extflash_logo"))) = {
     },
 };
 */
-const retro_logo_image header_gb __attribute__((section(".extflash_logo"))) = {
+const retro_logo_image header_gb LOGO_DATA = {
     176,
     18,
     {
@@ -231,7 +241,7 @@ const retro_logo_image header_gb __attribute__((section(".extflash_logo"))) = {
     },
 };
 
-const retro_logo_image header_gg __attribute__((section(".extflash_logo"))) = {
+const retro_logo_image header_gg LOGO_DATA = {
     144,
     18,
     {
@@ -257,7 +267,7 @@ const retro_logo_image header_gg __attribute__((section(".extflash_logo"))) = {
     },
 };
 
-const retro_logo_image header_nes __attribute__((section(".extflash_logo"))) = {
+const retro_logo_image header_nes LOGO_DATA = {
 #if CODEPAGE == 932
     178,
     18,
@@ -309,7 +319,7 @@ const retro_logo_image header_nes __attribute__((section(".extflash_logo"))) = {
 #endif
 };
 
-const retro_logo_image header_pce __attribute__((section(".extflash_logo"))) = {
+const retro_logo_image header_pce LOGO_DATA = {
     128,
     21,
     {
@@ -359,7 +369,7 @@ const retro_logo_image header_pce __attribute__((section(".extflash_logo"))) = {
     },
 };
 
-const retro_logo_image header_sms __attribute__((section(".extflash_logo"))) = {
+const retro_logo_image header_sms LOGO_DATA = {
     138,
     24,
     {
@@ -391,7 +401,7 @@ const retro_logo_image header_sms __attribute__((section(".extflash_logo"))) = {
     },
 };
 
-const retro_logo_image header_gw __attribute__((section(".extflash_logo"))) = {
+const retro_logo_image header_gw LOGO_DATA = {
     172,
     18,
     {
@@ -417,7 +427,7 @@ const retro_logo_image header_gw __attribute__((section(".extflash_logo"))) = {
     },
 };
 
-const retro_logo_image pad_sg1000 __attribute__((section(".extflash_logo"))) = {
+const retro_logo_image pad_sg1000 LOGO_DATA = {
     56,
     32,
     {
@@ -457,7 +467,7 @@ const retro_logo_image pad_sg1000 __attribute__((section(".extflash_logo"))) = {
     },
 };
 
-const retro_logo_image pad_col __attribute__((section(".extflash_logo"))) = {
+const retro_logo_image pad_col LOGO_DATA = {
     56,
     32,
     {
@@ -497,7 +507,7 @@ const retro_logo_image pad_col __attribute__((section(".extflash_logo"))) = {
     },
 };
 
-const retro_logo_image pad_gb __attribute__((section(".extflash_logo"))) = {
+const retro_logo_image pad_gb LOGO_DATA = {
     56,
     32,
     {
@@ -537,7 +547,7 @@ const retro_logo_image pad_gb __attribute__((section(".extflash_logo"))) = {
     },
 };
 
-const retro_logo_image pad_gg __attribute__((section(".extflash_logo"))) = {
+const retro_logo_image pad_gg LOGO_DATA = {
     56,
     32,
     {
@@ -577,7 +587,7 @@ const retro_logo_image pad_gg __attribute__((section(".extflash_logo"))) = {
     },
 };
 
-const retro_logo_image pad_nes __attribute__((section(".extflash_logo"))) = {
+const retro_logo_image pad_nes LOGO_DATA = {
     56,
     32,
     {
@@ -618,7 +628,7 @@ const retro_logo_image pad_nes __attribute__((section(".extflash_logo"))) = {
     },
 };
 
-const retro_logo_image pad_pce __attribute__((section(".extflash_logo"))) = {
+const retro_logo_image pad_pce LOGO_DATA = {
     56,
     32,
     {
@@ -692,7 +702,7 @@ const retro_logo_image pad_pce __attribute__((section(".extflash_logo"))) = {
     },
 };
 
-const retro_logo_image pad_sms __attribute__((section(".extflash_logo"))) = {
+const retro_logo_image pad_sms LOGO_DATA = {
     56,
     32,
     {
@@ -732,7 +742,7 @@ const retro_logo_image pad_sms __attribute__((section(".extflash_logo"))) = {
     },
 };
 
-const retro_logo_image pad_gw __attribute__((section(".extflash_logo"))) = {
+const retro_logo_image pad_gw LOGO_DATA = {
     56,
     32,
     {
@@ -772,7 +782,7 @@ const retro_logo_image pad_gw __attribute__((section(".extflash_logo"))) = {
     },
 };
 
-const retro_logo_image logo_coleco __attribute__((section(".extflash_logo"))) = {
+const retro_logo_image logo_coleco LOGO_DATA = {
     72,
     16,
     {
@@ -796,7 +806,7 @@ const retro_logo_image logo_coleco __attribute__((section(".extflash_logo"))) = 
     },
 };
 
-const retro_logo_image logo_nitendo __attribute__((section(".extflash_logo"))) = {
+const retro_logo_image logo_nitendo LOGO_DATA = {
 #if (CODEPAGE == 936) || (CODEPAGE == 950)
     56,
     16,
@@ -844,7 +854,7 @@ const retro_logo_image logo_nitendo __attribute__((section(".extflash_logo"))) =
 #endif
 };
 
-const retro_logo_image logo_sega __attribute__((section(".extflash_logo"))) = {
+const retro_logo_image logo_sega LOGO_DATA = {
     56,
     17,
     {
@@ -869,7 +879,7 @@ const retro_logo_image logo_sega __attribute__((section(".extflash_logo"))) = {
     },
 };
 
-const retro_logo_image logo_pce __attribute__((section(".extflash_logo"))) = {
+const retro_logo_image logo_pce LOGO_DATA = {
     56,
     28,
     {
@@ -905,7 +915,7 @@ const retro_logo_image logo_pce __attribute__((section(".extflash_logo"))) = {
     },
 };
 
-const unsigned char IMG_SPEAKER[] __attribute__((section(".extflash_logo"))) = {
+const unsigned char IMG_SPEAKER[] LOGO_DATA = {
     // width24, height:24
     0x00, 0x00, 0x00, //________________________
     0x00, 0x00, 0x00, //________________________
@@ -933,7 +943,7 @@ const unsigned char IMG_SPEAKER[] __attribute__((section(".extflash_logo"))) = {
     0x00, 0x00, 0x00, //________________________
 };
 
-const unsigned char IMG_SUN[] __attribute__((section(".extflash_logo"))) = {
+const unsigned char IMG_SUN[] LOGO_DATA = {
     // width24, height:24
     0x00, 0x18, 0x00, //___________##___________
     0x00, 0x18, 0x00, //___________##___________
@@ -961,7 +971,7 @@ const unsigned char IMG_SUN[] __attribute__((section(".extflash_logo"))) = {
     0x00, 0x18, 0x00, //___________##___________
 };
 
-const unsigned char IMG_FOLDER[] __attribute__((section(".extflash_logo"))) = {
+const unsigned char IMG_FOLDER[] LOGO_DATA = {
     // width24, height:24
     0x00, 0x00, 0x00, //________________________
     0x00, 0x00, 0x00, //________________________
@@ -989,7 +999,7 @@ const unsigned char IMG_FOLDER[] __attribute__((section(".extflash_logo"))) = {
     0x00, 0x00, 0x00, //________________________
 };
 
-const unsigned char IMG_DISKETTE[] __attribute__((section(".extflash_logo"))) = {
+const unsigned char IMG_DISKETTE[] LOGO_DATA = {
     // width24, height:24
     0x00, 0x00, 0x00, //________________________
     0x3f, 0xff, 0xe0, //__#################_____
@@ -1017,7 +1027,7 @@ const unsigned char IMG_DISKETTE[] __attribute__((section(".extflash_logo"))) = 
     0x00, 0x00, 0x00, //________________________
 };
 
-const unsigned char IMG_0_5X[] __attribute__((section(".extflash_logo"))) = {
+const unsigned char IMG_0_5X[] LOGO_DATA = {
     // width24, height:24
     0x00, 0x00, 0x00, //________________________
     0x00, 0x00, 0x00, //________________________
@@ -1045,7 +1055,7 @@ const unsigned char IMG_0_5X[] __attribute__((section(".extflash_logo"))) = {
     0x00, 0x00, 0x00, //________________________
 };
 
-const unsigned char IMG_0_75X[] __attribute__((section(".extflash_logo"))) = {
+const unsigned char IMG_0_75X[] LOGO_DATA = {
     // width24, height:24
     0x00, 0x00, 0x00, //________________________
     0x00, 0x00, 0x00, //________________________
@@ -1073,7 +1083,7 @@ const unsigned char IMG_0_75X[] __attribute__((section(".extflash_logo"))) = {
     0x00, 0x00, 0x00, //________________________
 };
 
-const unsigned char IMG_1X[] __attribute__((section(".extflash_logo"))) = {
+const unsigned char IMG_1X[] LOGO_DATA = {
     // width24, height:24
     0x00, 0x00, 0x00, //________________________
     0x00, 0x00, 0x00, //________________________
@@ -1101,7 +1111,7 @@ const unsigned char IMG_1X[] __attribute__((section(".extflash_logo"))) = {
     0x00, 0x00, 0x00, //________________________
 };
 
-const unsigned char IMG_1_25X[] __attribute__((section(".extflash_logo"))) = {
+const unsigned char IMG_1_25X[] LOGO_DATA = {
     // width24, height:24
     0x00, 0x00, 0x00, //________________________
     0x00, 0x00, 0x00, //________________________
@@ -1129,7 +1139,7 @@ const unsigned char IMG_1_25X[] __attribute__((section(".extflash_logo"))) = {
     0x00, 0x00, 0x00, //________________________
 };
 
-const unsigned char IMG_1_5X[] __attribute__((section(".extflash_logo"))) = {
+const unsigned char IMG_1_5X[] LOGO_DATA = {
     // width24, height:24
     0x00, 0x00, 0x00, //________________________
     0x00, 0x00, 0x00, //________________________
@@ -1157,7 +1167,7 @@ const unsigned char IMG_1_5X[] __attribute__((section(".extflash_logo"))) = {
     0x00, 0x00, 0x00, //________________________
 };
 
-const unsigned char IMG_2X[] __attribute__((section(".extflash_logo"))) = {
+const unsigned char IMG_2X[] LOGO_DATA = {
     // width24, height:24
     0x00, 0x00, 0x00, //________________________
     0x00, 0x00, 0x00, //________________________
@@ -1185,7 +1195,7 @@ const unsigned char IMG_2X[] __attribute__((section(".extflash_logo"))) = {
     0x00, 0x00, 0x00, //________________________
 };
 
-const unsigned char IMG_3X[] __attribute__((section(".extflash_logo"))) = {
+const unsigned char IMG_3X[] LOGO_DATA = {
     // width24, height:24
     0x00, 0x00, 0x00, //________________________
     0x00, 0x00, 0x00, //________________________
@@ -1213,7 +1223,7 @@ const unsigned char IMG_3X[] __attribute__((section(".extflash_logo"))) = {
     0x00, 0x00, 0x00, //________________________
 };
 
-const unsigned char IMG_SC[] __attribute__((section(".extflash_logo"))) = {
+const unsigned char IMG_SC[] LOGO_DATA = {
     // width24, height:24
     0x3f, 0x01, 0xf8, //__######_______######___
     0x7f, 0x81, 0xfe, //_########______########_
@@ -1241,7 +1251,7 @@ const unsigned char IMG_SC[] __attribute__((section(".extflash_logo"))) = {
     0x3f, 0x01, 0xfc, //__######_______#######__
 };
 
-const unsigned char IMG_BUTTON_A[] __attribute__((section(".extflash_logo"))) = {
+const unsigned char IMG_BUTTON_A[] LOGO_DATA = {
     // width24, height:24
     0x00, 0x7e, 0x00, //_________######_________
     0x03, 0xff, 0xc0, //______############______
@@ -1269,7 +1279,7 @@ const unsigned char IMG_BUTTON_A[] __attribute__((section(".extflash_logo"))) = 
     0x00, 0x7e, 0x00, //_________######_________
 };
 
-const unsigned char IMG_BUTTON_A_P[] __attribute__((section(".extflash_logo"))) = {
+const unsigned char IMG_BUTTON_A_P[] LOGO_DATA = {
     // width24, height:24
     0x00, 0x18, 0x00, //___________##___________
     0x00, 0x38, 0x00, //__________###___________
@@ -1297,7 +1307,7 @@ const unsigned char IMG_BUTTON_A_P[] __attribute__((section(".extflash_logo"))) 
     0x00, 0x18, 0x00, //___________##___________
 };
 
-const unsigned char IMG_BUTTON_B[] __attribute__((section(".extflash_logo"))) = {
+const unsigned char IMG_BUTTON_B[] LOGO_DATA = {
     // width24, height:24
     0x00, 0x7e, 0x00, //_________######_________
     0x03, 0xff, 0xc0, //______############______
@@ -1325,7 +1335,7 @@ const unsigned char IMG_BUTTON_B[] __attribute__((section(".extflash_logo"))) = 
     0x00, 0x7e, 0x00, //_________######_________
 };
 
-const unsigned char IMG_BUTTON_B_P[] __attribute__((section(".extflash_logo"))) = {
+const unsigned char IMG_BUTTON_B_P[] LOGO_DATA = {
     // width24, height:24
     0x00, 0x18, 0x00, //___________##___________
     0x00, 0x38, 0x00, //__________###___________
