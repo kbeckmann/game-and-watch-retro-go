@@ -13,10 +13,10 @@
 #include "odroid_system.h"
 #include "odroid_overlay.h"
 
-#if (CODEPAGE == 12521) || (CODEPAGE == 12522) 
-#include "fonts/font_es_es.h"
-#else
+#if CODEPAGE == 1252 
 #include "fonts/font_en_us.h"
+#else
+#include "fonts/font_es_es.h"
 #endif
 
 static uint16_t overlay_buffer[ODROID_SCREEN_WIDTH * 12 * 2] __attribute__((aligned(4)));
@@ -66,10 +66,10 @@ int odroid_overlay_draw_local_text_line(uint16_t x_pos, uint16_t y_pos, uint16_t
             for (int x = 0; x < font_width; x++)
             {
                 if (glyph[y] & (1 << x))
-#if CODEPAGE == 12521
-                    overlay_buffer[offset + 8 - x] = color;
-#else
+#if CODEPAGE == 1252
                     overlay_buffer[offset + x] = color;
+#else
+                    overlay_buffer[offset + 8 - x] = color;
 #endif
             }
         }

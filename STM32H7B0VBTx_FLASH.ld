@@ -216,7 +216,10 @@ SECTIONS
     *(.extflash_emu_data)
     . = ALIGN(4);
     __extflash_emu_data_end__ = .;
+    __extflash_logo_data_start__ = .;
+    *(.extflash_logo)
     . = ALIGN(4);
+    __extflash_logo_data_start__ = .;
     __extflash_nes_start__ = .;
     build/core/logo*.o (.text .text* .rodata .rodata*)
     . = ALIGN(4);

@@ -11,7 +11,7 @@ Please run `make help` to see more information.
 - 950 : 繁體中文
 - 949  : 한국어 (translation by [Augen(히힛마스터)](https://github.com/#))
 - 12521 : Español (translation by [Icebox2](https://github.com/Icebox2))
-- 12521 : Portuguese (translation by [DefKorns](https://github.com/DefKorns))
+- 12522 : Portuguese (translation by [DefKorns](https://github.com/DefKorns))
 - 932 : 日本語(Wait for translate support)
 - other : Wait your support to translate
 
