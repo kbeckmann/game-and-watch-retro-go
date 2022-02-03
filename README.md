@@ -1,5 +1,3 @@
-![Retro / Game & Watch™](assets/retro_gw.png)
-
 ![](assets/gnw.gif)
 
 # NewUI howto
