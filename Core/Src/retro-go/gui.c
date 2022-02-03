@@ -373,8 +373,8 @@ void gui_draw_status(tab_t *tab)
 
     odroid_overlay_draw_logo(8, 16, (retro_logo_image *)(&logo_rgw), curr_colors->sel_c);
 
-    odroid_overlay_draw_battery(ODROID_SCREEN_WIDTH - 32, 17);
-    odroid_overlay_clock(ODROID_SCREEN_WIDTH - 80, 17);
+    odroid_overlay_draw_battery(ODROID_SCREEN_WIDTH - 28, 17);
+    odroid_overlay_clock(ODROID_SCREEN_WIDTH - 74, 17);
 }
 
 listbox_item_t *gui_get_selected_prior_item(tab_t *tab)

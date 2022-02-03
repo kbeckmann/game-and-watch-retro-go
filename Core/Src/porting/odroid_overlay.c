@@ -230,8 +230,8 @@ void odroid_overlay_draw_battery(int x_pos, int y_pos)
     uint16_t color_fill = curr_colors->sel_c;
     uint16_t color_border = curr_colors->sel_c;
     uint16_t color_empty = curr_colors->main_c;
-    uint16_t width_fill = 18 * percentage / 100;
-    uint16_t width_empty = 20; // - width_fill;
+    uint16_t width_fill = 14 * percentage / 100;
+    uint16_t width_empty = 16; // - width_fill;
     const unsigned char IMG_C_OUT[] = {
         // width8, height:10
         0x0e, //  ____###_
@@ -263,8 +263,8 @@ void odroid_overlay_draw_battery(int x_pos, int y_pos)
     else if (percentage < 40)
         color_fill = C_ORANGE;
 
-    odroid_overlay_draw_rect(x_pos, y_pos, 22, 10, 1, color_border);
-    odroid_overlay_draw_rect(x_pos + 22, y_pos + 2, 2, 6, 1, color_border);
+    odroid_overlay_draw_rect(x_pos, y_pos, 18, 10, 1, color_border);
+    odroid_overlay_draw_rect(x_pos + 18, y_pos + 2, 2, 6, 1, color_border);
     odroid_overlay_draw_fill_rect(x_pos + 1, y_pos + 1, width_empty, 8, color_empty);
     //odroid_overlay_draw_fill_rect(x_pos + 2, y_pos + 2, width_fill, 6, color_fill);
 
@@ -272,6 +272,19 @@ void odroid_overlay_draw_battery(int x_pos, int y_pos)
     {
     case ODROID_BATTERY_CHARGE_STATE_BATTERY_MISSING:
         odroid_overlay_draw_fill_rect(x_pos + 2, y_pos + 2, width_empty - 2, 6, 0x0000);
+        pixel_t *dest = lcd_get_active_buffer();
+        for (int y=0; y<10; y++)
+        {
+            for (int x=0; x<8; x++) 
+            {
+                if (IMG_C[y] & (0x80 >> x))
+                {
+                    dest[(y_pos + y) * ODROID_SCREEN_WIDTH + x_pos + 5 + x] = 0x0FFFF;
+                }
+                else if (IMG_C_OUT[y] & (0x80 >> x))
+                    dest[(y_pos + y) * ODROID_SCREEN_WIDTH + x_pos + 5 + x] = color_empty;
+            };
+        };
         break;
     case ODROID_BATTERY_CHARGE_STATE_CHARGING:
         odroid_overlay_draw_fill_rect(x_pos + 2, y_pos + 2, width_fill, 6, 0x07E0);
@@ -282,10 +295,10 @@ void odroid_overlay_draw_battery(int x_pos, int y_pos)
             {
                 if (IMG_C[y] & (0x80 >> x))
                 {
-                    dest[(y_pos + y) * ODROID_SCREEN_WIDTH + x_pos + 7 + x] = 0x0FFFF;
+                    dest[(y_pos + y) * ODROID_SCREEN_WIDTH + x_pos + 5 + x] = 0x0FFFF;
                 }
                 else if (IMG_C_OUT[y] & (0x80 >> x))
-                    dest[(y_pos + y) * ODROID_SCREEN_WIDTH + x_pos + 7 + x] = color_empty;
+                    dest[(y_pos + y) * ODROID_SCREEN_WIDTH + x_pos + 5 + x] = color_empty;
             };
         };
         //
@@ -838,7 +851,7 @@ static void draw_game_status_bar(runtime_stats_t stats)
     odroid_overlay_draw_local_text(48, pad_text, width, header, curr_colors->sel_c, curr_colors->main_c, 0);
     odroid_overlay_draw_local_text(0, ODROID_SCREEN_HEIGHT - height + pad_text, ODROID_SCREEN_WIDTH, bottom, curr_colors->sel_c, curr_colors->main_c, 0);
     odroid_overlay_clock(2, 3);
-    odroid_overlay_draw_battery(ODROID_SCREEN_WIDTH - 26, ODROID_SCREEN_HEIGHT - 13);
+    odroid_overlay_draw_battery(ODROID_SCREEN_WIDTH - 22, ODROID_SCREEN_HEIGHT - 13);
 }
 
 int odroid_overlay_game_settings_menu(odroid_dialog_choice_t *extra_options)
