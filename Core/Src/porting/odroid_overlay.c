@@ -264,7 +264,9 @@ void odroid_overlay_draw_battery(int x_pos, int y_pos)
         color_fill = C_ORANGE;
 
     odroid_overlay_draw_rect(x_pos, y_pos, 18, 10, 1, color_border);
-    odroid_overlay_draw_rect(x_pos + 18, y_pos + 2, 2, 6, 1, color_border);
+    odroid_overlay_draw_rect(x_pos + 17, y_pos + 3, 1, 4, 1, color_empty);
+    odroid_overlay_draw_rect(x_pos + 18, y_pos + 2, 1, 6, 1, color_border);
+    odroid_overlay_draw_rect(x_pos + 19, y_pos + 3, 1, 4, 1, color_border);
     odroid_overlay_draw_fill_rect(x_pos + 1, y_pos + 1, width_empty, 8, color_empty);
     //odroid_overlay_draw_fill_rect(x_pos + 2, y_pos + 2, width_fill, 6, color_fill);
     pixel_t *dest = lcd_get_active_buffer();
