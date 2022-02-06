@@ -210,6 +210,36 @@ static bool colors_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event
     return event == ODROID_DIALOG_ENTER;
 }
 
+static bool font_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat)
+{
+    int8_t font = odroid_settings_font_get();
+
+    if (event == ODROID_DIALOG_PREV)
+    {
+        if (font > 0)
+            odroid_settings_font_set(--font);
+        else
+        {
+            font = gui_font_count - 1;
+            odroid_settings_font_set(gui_font_count - 1);
+        }
+    }
+    else if (event == ODROID_DIALOG_NEXT)
+    {
+        if (font < gui_font_count - 1)
+            odroid_settings_font_set(++font);
+        else
+        {
+            font = 0;
+            odroid_settings_font_set(0);
+        }
+    }
+    curr_font = (char *)gui_fonts[font];
+    sprintf(option->value, "%d/%d Wg", font + 1, gui_font_count);
+    return event == ODROID_DIALOG_ENTER;
+}
+
+
 static bool splashani_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat)
 {
     int8_t splashani = odroid_settings_splashani_get();
@@ -422,6 +452,7 @@ void retro_loop()
             else if ((last_key == ODROID_INPUT_VOLUME) || (last_key == ODROID_INPUT_Y))
             {
                 char splashani_value[16];
+                char font_value[16];
                 char timeout_value[16];
                 char theme_value[16];
                 char colors_value[16];
@@ -430,9 +461,11 @@ void retro_loop()
                     {0x0F0F0E0E, s_Colors, colors_value, 1, &colors_update_cb},
 #if COVERFLOW != 0
                      //ODROID_DIALOG_CHOICE_SEPARATOR,
-                    {4, s_Theme_Title, theme_value, 1, &theme_update_cb},
+                    {0, s_Theme_Title, theme_value, 1, &theme_update_cb},
 #endif
+                    {0, s_Font, font_value, 1, &font_update_cb},
                     {0, s_Splash_Option, splashani_value, 1, &splashani_update_cb},
+                    ODROID_DIALOG_CHOICE_SEPARATOR,
                     {0, s_Idle_power_off, timeout_value, 1, &main_menu_timeout_cb},
                     // {0, "Color theme", "1/10", 1, &color_shift_cb},
                     // {0, "Font size", "Small", 1, &font_size_cb},

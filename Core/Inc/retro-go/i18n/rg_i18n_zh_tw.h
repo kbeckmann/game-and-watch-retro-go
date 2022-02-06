@@ -66,6 +66,7 @@
 #define s_Quit_to_menu          "× 離開遊戲"
 #define s_Retro_Go_options      "遊戲選項"
 
+#define s_Font                  "字型"
 #define s_Colors                "配色"
 
 #define s_Theme_Title           "介面"
@@ -99,9 +100,9 @@
 
 //Core\Src\retro-go\rg_main.c =========================================
 #define s_Second_Unit               "秒"
-#define s_Version                   "版    本："
+#define s_Version                   "版　　本："
 #define s_Author                    "特別貢獻："
-#define s_Author_                   "        ："
+#define s_Author_                   "　　　　："
 #define s_UI_Mod                    "介面美化："
 #define s_Lang                      "繁體中文："
 #define s_LangAuthor                "撓漿糊的"

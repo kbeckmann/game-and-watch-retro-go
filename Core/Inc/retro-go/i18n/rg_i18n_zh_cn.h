@@ -66,6 +66,7 @@
 #define s_Quit_to_menu          "× 退出游戏"
 #define s_Retro_Go_options      "游戏选项"
 
+#define s_Font                  "字体"
 #define s_Colors                "色彩"
 
 #define s_Theme_Title           "界面"
@@ -96,9 +97,9 @@
 
 //Core\Src\retro-go\rg_main.c =========================================
 #define s_Second_Unit               "秒"
-#define s_Version                   "版    本："
+#define s_Version                   "版　　本："
 #define s_Author                    "特别贡献："
-#define s_Author_                   "        ："
+#define s_Author_                   "　　　　："
 #define s_UI_Mod                    "界面美化："
 #define s_Lang                      "简体中文："
 #define s_LangAuthor                "挠浆糊的"

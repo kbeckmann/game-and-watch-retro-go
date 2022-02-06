@@ -67,8 +67,8 @@
 #define s_Quit_to_menu "Volver al menu"
 #define s_Retro_Go_options "Retro-Go"
 
+#define s_Font                  "Tipo de letra"
 #define s_Colors                "Colores"
-
 #define s_Theme_Title "UI Tema"
 #define s_Theme_sList "Listado"
 #define s_Theme_CoverV          "Flow V"
@@ -100,10 +100,10 @@
 
 //Core\Src\retro-go\rg_main.c =========================================
 #define s_Second_Unit "s"
-#define s_Version        "Ver.   :"
-#define s_Author         "Por    :"
-#define s_Author_        "       :"
-#define s_UI_Mod         "UI Mod :"
+#define s_Version        "Ver."
+#define s_Author         "Por"
+#define s_Author_        " "
+#define s_UI_Mod         "UI Mod"
 #define s_Lang           "Español"
 #define s_LangAuthor     "Icebox2"
 #define s_Debug_menu "Debug_menu"

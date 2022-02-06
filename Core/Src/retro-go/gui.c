@@ -8,9 +8,9 @@
 #include "lupng.h"
 #include "gui.h"
 #include "gw_lcd.h"
-#include "rg_i18n.h"
 #include "bitmaps.h"
 #include "main.h"
+#include "rg_i18n.h"
 
 #if !defined(COVERFLOW)
 #define COVERFLOW 0
@@ -468,13 +468,12 @@ void gui_draw_simple_list(int posx, tab_t *tab)
     listbox_t *list = &tab->listbox;
     if (list->cursor >= 0 && list->cursor < list->length)
     {
-        int font_height = odroid_overlay_get_local_font_size();
-        int w = (ODROID_SCREEN_WIDTH - posx - 10) / odroid_overlay_get_local_font_width();
-        w = w * odroid_overlay_get_local_font_width();
+        int font_height = i18n_get_text_height();
+        int w = ODROID_SCREEN_WIDTH - posx - 12;
         listbox_item_t *item = &list->items[list->cursor];
         int h1 = LIST_Y_OFFSET + (LIST_HEIGHT - font_height) / 2;
         if (item)
-            odroid_overlay_draw_local_text_line(posx, h1, w, list->items[list->cursor].text, curr_colors->sel_c, curr_colors->bg_c, NULL, 0);
+            i18n_draw_text_line(posx, h1, w, list->items[list->cursor].text, curr_colors->sel_c, curr_colors->bg_c, 0);
 
         int index_next = list->cursor + 1;
         int index_proior = list->cursor - 1;
@@ -489,26 +488,24 @@ void gui_draw_simple_list(int posx, tab_t *tab)
             if (h2 < LIST_Y_OFFSET) //out range;
                 break;
             if (next_item)
-                odroid_overlay_draw_local_text_line(
+                i18n_draw_text_line(
                     posx,
                     h1,
                     w,
                     list->items[index_next].text,
                     get_darken_pixel_d(curr_colors->dis_c, curr_colors->bg_c, (max_line - i) * 100 / max_line),
                     curr_colors->bg_c,
-                    NULL,
                     0);
             index_next++;
             listbox_item_t *prior_item = gui_get_item_by_index(tab, &index_proior);
             if (prior_item)
-                odroid_overlay_draw_local_text_line(
+                i18n_draw_text_line(
                     posx,
                     h2,
                     w,
                     list->items[index_proior].text,
                     get_darken_pixel_d(curr_colors->dis_c, curr_colors->bg_c, (max_line - i) * 100 / max_line),
                     curr_colors->bg_c,
-                    NULL,
                     0);
             index_proior--;
         }
@@ -526,14 +523,14 @@ static void draw_centered_local_text_line(uint16_t y_pos,
                                           uint16_t color,
                                           uint16_t color_bg)
 {
-    int width = strlen(text) * odroid_overlay_get_local_font_width();
+    int width = i18n_get_text_width(text);
     int x_pos = (x2 - x1) / 2 - width / 2;
     if (x_pos < 0)
         x_pos = 0;
     if (width > (x2 - x1))
         width = x2 - x1;
 
-    odroid_overlay_draw_local_text_line(x_pos + x1, y_pos, width, text, color, color_bg, NULL, 0);
+    i18n_draw_text_line(x_pos + x1, y_pos, width, text, color, color_bg, 0);
 }
 
 void gui_draw_item_postion_h(int posy, int startx, int endx, int cur, int size)
@@ -795,8 +792,7 @@ void gui_draw_coverlight_v(retro_emulator_file_t *file, int cover_position)
 void gui_draw_coverflow_h(tab_t *tab) //------------
 {
     retro_emulator_t *emu = (retro_emulator_t *)tab->arg;
-    int font_height = odroid_overlay_get_local_font_size();
-    int font_width = odroid_overlay_get_local_font_width();
+    int font_height = i18n_get_text_height();
     int cover_height = emu->cover_height;
     int cover_width = emu->cover_width;
     int r_width1 = cover_width * 5 / 8;
@@ -978,19 +974,17 @@ void gui_draw_coverflow_h(tab_t *tab) //------------
     {
         file = (retro_emulator_file_t *)item->arg;
         sprintf(str_buffer, "%s", file->name);
-        size_t len = strlen(str_buffer);
-        size_t max_len = (ODROID_SCREEN_WIDTH - 24) / font_width;
-        if (len > max_len)
-            len = max_len;
-        size_t width = len * font_width;
-        odroid_overlay_draw_local_text_line((ODROID_SCREEN_WIDTH - width) / 2, STATUS_HEIGHT + LIST_HEIGHT - font_height - 8, width, str_buffer, curr_colors->sel_c, curr_colors->bg_c, NULL, 1);
+        size_t width = i18n_get_text_width(str_buffer);
+        if (width > (ODROID_SCREEN_WIDTH - 24))
+            width = ODROID_SCREEN_WIDTH - 24;
+        i18n_draw_text_line((ODROID_SCREEN_WIDTH - width) / 2, STATUS_HEIGHT + LIST_HEIGHT - font_height - 8, width, str_buffer, curr_colors->sel_c, curr_colors->bg_c, 1);
     };
 };
 
 void gui_draw_coverflow_v(tab_t *tab, int start_posx) // ||||||||
 {
     retro_emulator_t *emu = (retro_emulator_t *)tab->arg;
-    int font_height = odroid_overlay_get_local_font_size();
+    int font_height = i18n_get_text_height();
     int cover_height = emu->cover_height;
     int cover_width = emu->cover_width;
     int space_height = 40;

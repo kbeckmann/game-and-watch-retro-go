@@ -40,6 +40,7 @@ typedef struct persistent_config {
     uint8_t font_size;
     uint8_t theme;
     uint8_t colors;
+    uint8_t font;
     uint8_t splashani;
     uint8_t startup_app;
     void *startup_file;
@@ -63,6 +64,7 @@ static const persistent_config_t persistent_config_default = {
     .font_size = 8,
     .theme = 2, //use as theme index
     .colors = 0,
+    .font = 8,
     .splashani = 1,
     .startup_app = 0,
     .main_menu_timeout_s = 60 * 10, // Turn off after 10 minutes of idle time in the main menu
@@ -118,6 +120,8 @@ void odroid_settings_init()
     }
     //set colors;
     curr_colors = (colors_t *)(&gui_colors[persistent_config_flash.colors]);
+    //set font
+    curr_font = (char *)gui_fonts[persistent_config_flash.font];
 }
 
 void odroid_settings_commit()
@@ -181,6 +185,26 @@ void odroid_settings_colors_set(int8_t colors)
     else if (colors >= gui_colors_count)
         colors = gui_colors_count - 1;
     persistent_config_ram.colors = colors;
+}
+
+
+int8_t odroid_settings_font_get()
+{
+    int font = persistent_config_ram.font;
+    if (font < 0)
+        persistent_config_ram.font = 0;
+    else if (font >= gui_font_count)
+        persistent_config_ram.font = gui_font_count - 1;
+    return persistent_config_ram.font;
+}
+
+void odroid_settings_font_set(int8_t font)
+{
+    if (font < 0)
+        font = 0;
+    else if (font >= gui_font_count)
+        font = gui_font_count - 1;
+    persistent_config_ram.font = font;
 }
 
 #if COVERFLOW != 0

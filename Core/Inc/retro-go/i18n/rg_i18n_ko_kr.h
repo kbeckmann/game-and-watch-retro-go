@@ -68,8 +68,8 @@
 #define s_Quit_to_menu          "매뉴로 나가기"
 #define s_Retro_Go_options      "Retro-Go"
 
+#define s_Font                  "Font"
 #define s_Colors                "Colors"
-
 #define s_Theme_Title           "UI 태마"
 #define s_Theme_sList           "심플 리스트"
 #define s_Theme_CoverV          "커버플로우 세로"
@@ -101,10 +101,10 @@
 
 //Core\Src\retro-go\rg_main.c =========================================
 #define s_Second_Unit               "초"
-#define s_Version                   "Ver.   :"
-#define s_Author                    "By     :"
-#define s_Author_                   "       :"
-#define s_UI_Mod                    "인터페이스 모드 :"
+#define s_Version                   "Ver."
+#define s_Author                    "By"
+#define s_Author_                   " "
+#define s_UI_Mod                    "인터페이스 모드"
 #define s_Lang                      "한국어"
 #define s_LangAuthor                "Augen(히힛마스터)"
 #define s_Debug_menu                "디버그 매뉴"

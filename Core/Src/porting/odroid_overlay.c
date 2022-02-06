@@ -33,7 +33,6 @@ int odroid_overlay_game_menu()
 
 #include "gw_buttons.h"
 #include "bitmaps/font_basic.h"
-#include "rg_i18n.h"
 #include "gw_lcd.h"
 #include "odroid_system.h"
 #include "odroid_overlay.h"
@@ -42,6 +41,7 @@ int odroid_overlay_game_menu()
 #include "bitmaps.h"
 #include "gui.h"
 #include "rg_rtc.h"
+#include "rg_i18n.h"
 
 // static uint16_t *overlay_buffer = NULL;
 static uint16_t overlay_buffer[ODROID_SCREEN_WIDTH * 32 * 2] __attribute__((aligned(4)));
@@ -362,16 +362,16 @@ void odroid_overlay_darken_all()
 
 void odroid_overlay_draw_dialog(const char *header, odroid_dialog_choice_t *options, int sel)
 {
-    int width = 0;
-    int padding = 0;
-    int value_padding = 0;
-    int len = 0;
-    int max_titlen = 8;
+
+    odroid_overlay_darken_all();
+
     int row_margin = 1;
-    int row_height = odroid_overlay_get_local_font_size() + row_margin * 2;
+    int row_height = i18n_get_text_height() + row_margin * 2;
     int box_width = 64;
     int box_height = 64;
     int box_padding = 6;
+    int line_padding = 4;
+    int cen_space = 12;
     int box_color = curr_colors->bg_c;
     int box_border_color = curr_colors->dis_c;
     int box_text_color = curr_colors->sel_c;
@@ -379,9 +379,17 @@ void odroid_overlay_draw_dialog(const char *header, odroid_dialog_choice_t *opti
 
     int options_count = get_dialog_items_count(options);
 
-    char *rows = rg_alloc(options_count * 256, MEM_ANY);
-
-    odroid_overlay_darken_all();
+    uint16_t *i_left = rg_alloc(options_count * 2, MEM_ANY);
+    uint16_t *i_right = rg_alloc(options_count * 2, MEM_ANY);
+    uint16_t *i_width = rg_alloc(options_count * 2, MEM_ANY);
+    uint8_t *i_height = rg_alloc(options_count * 1, MEM_ANY);
+    
+    uint16_t max_left = 0;
+    uint16_t max_right = 0;
+    uint16_t max_width = 0;
+    uint16_t max_height = 0; 
+    bool had_right = false;
+    bool had_extent = false;
 
     for (int i = 0; i < options_count; i++)
         if (options[i].update_cb != NULL)
@@ -389,64 +397,157 @@ void odroid_overlay_draw_dialog(const char *header, odroid_dialog_choice_t *opti
 
     for (int i = 0; i < options_count; i++)
     {
-        len = strlen(options[i].label);
         if (options[i].value[0])
         {
-            padding = (len > padding) ? len : padding;
-            len = strlen(options[i].value);
-            value_padding = (len > value_padding) ? len : value_padding;
+            i_left[i] = i18n_get_text_width(options[i].label);
+            i_right[i] = i18n_get_text_width(options[i].value);
+            i_width[i] = i_left[i] + i_right[i] + cen_space; //center space
+            had_right = true;
+            if (max_left < i_left[i])
+                max_left = i_left[i];
+            if (max_right < i_right[i])
+                max_right = i_right[i];
+            if (max_width < i_width[i])
+                max_width = i_width[i];
+            if (max_width < (max_left + max_right + cen_space))
+                max_width = max_left + max_right +  cen_space;
         }
         else
-            max_titlen = (len > max_titlen) ? len : max_titlen;
-    }
-    padding = padding + 1;
-    value_padding = value_padding + 1;
-    max_titlen = max_titlen + 2;
-    max_titlen = (padding + value_padding + 1) > max_titlen ? padding + value_padding + 1 : max_titlen;
-    width = (ODROID_SCREEN_WIDTH - 20) / odroid_overlay_get_local_font_width();
-    max_titlen = (max_titlen > width) ? width : max_titlen;
-    if ((max_titlen - padding - value_padding - 1) < 0)
+        {
+            i_left[i] = 0;
+            i_right[i] = 0;
+            i_width[i] = i18n_get_text_width(options[i].label);
+            if (max_width < i_width[i])
+                max_width = i_width[i];
+        }
+        i_height[i] = row_height;
+    };
+
+    if (max_width > (ODROID_SCREEN_WIDTH - 40)) 
     {
-        value_padding = max_titlen - padding - 1;
-        width = padding + value_padding + 1;
-    }
-    else
-        width = max_titlen;
+        max_width = ODROID_SCREEN_WIDTH - 40;
+        if (had_right)
+            max_width -= cen_space;
+        if (max_left > (max_width * 2 / 5)) 
+            max_left = max_width * 2 / 5;
+        if (max_left < (max_width - max_right))
+            max_left = (max_width - max_right);
+
+        if (max_right > (max_width * 3 / 5)) 
+            max_right = max_width * 3 / 5;
+        if (max_right < (max_width - max_left))
+            max_right = (max_width - max_left);
+        if (had_right)
+            max_width += cen_space;
+    };
 
     for (int i = 0; i < options_count; i++)
     {
         if (options[i].value[0])
         {
-            if (strlen(options[i].value) < value_padding)
-                sprintf(rows + i * 256, " %*s %*s ", -(padding - 1), options[i].label, value_padding - 1, options[i].value);
-            else
-                sprintf(rows + i * 256, " %*s %s ", -(padding - 1), options[i].label, options[i].value);
+            if (i_right[i] > max_right)
+            {
+                i_right[i] = max_right;
+                int linecount = i18n_get_text_lines(options[i].value, max_right);
+                if (linecount > 8)
+                    linecount = 8;
+                i_height[i] = linecount * i18n_get_text_height() + row_margin * 2; 
+            }
         }
         else
-            sprintf(rows + i * 256, " %s ", options[i].label);
-    }
+        {
+            if (i_width[i] > max_width)
+            {
+                i_width[i] = max_width;
+                int linecount = i18n_get_text_lines(options[i].label, max_width);
+                if (linecount > 8)
+                    linecount = 8;
+                i_height[i] = linecount * i18n_get_text_height() + row_margin * 2; 
+            }
+        }
+        if (options[i].id == separator.id)
+            i_height[i] = row_margin * 2 + 5;
 
-    box_width = (odroid_overlay_get_local_font_width() * width) + box_padding * 2;
-    box_height = (row_height * options_count) + (header ? row_height + 8 : 0) + box_padding * 2;
+        max_height += i_height[i];
+    };
+
+    box_width = max_width + box_padding * 2 + line_padding * 2 ;
+    box_height = max_height + (header ? row_height + 8 : 0) + box_padding * 2;
+
+    had_extent = box_height > (ODROID_SCREEN_HEIGHT - 10);
 
     int box_x = (ODROID_SCREEN_WIDTH - box_width) / 2;
     int box_y = (ODROID_SCREEN_HEIGHT - box_height) / 2;
+    int start_index = 0;
+    int end_index = options_count - 1;
+    bool had_prior = false;
+    bool had_next = false;
+
+    if (had_extent) 
+    {
+        start_index = sel;
+        if (start_index < 0)
+            start_index = 0;
+        int max_bh = ODROID_SCREEN_HEIGHT - 20 - (header ? row_height + 8 : 0) - box_padding * 2;
+        max_bh -= i_height[start_index];
+        box_height += i_height[start_index];
+        while ((max_bh > 0) && (start_index > 0))
+        {
+            start_index --;
+            max_bh -= i_height[start_index];
+            box_height += i_height[start_index];
+            if (max_bh < 0) 
+            {
+              box_height -= i_height[start_index];
+              start_index ++;
+            }
+        };
+        
+        box_height = (header ? row_height + 8 : 0) + box_padding * 2;
+        max_bh = ODROID_SCREEN_HEIGHT - 20;
+        //max height;
+        for (int i = start_index; i < options_count; i ++)
+        {
+            if ((box_height + i_height[i]) <= max_bh)
+            {
+                box_height += i_height[i];
+                end_index = i;
+            }
+        }
+        had_prior = start_index > 0;
+        had_next = end_index < (options_count - 1);
+        if (had_prior) 
+            box_height += 5;
+        if (had_next) 
+            box_height += 5;
+        box_y = (ODROID_SCREEN_HEIGHT - box_height) / 2;
+    }; 
 
     int x = box_x + box_padding;
     int y = box_y + box_padding;
+
 
     uint16_t fg, bg, color, inner_width = box_width - (box_padding * 2);
     if (header)
     {
         odroid_overlay_draw_rect(box_x - 1, box_y - 1, box_width + 2, row_height + 8, 1, box_border_color);
         odroid_overlay_draw_fill_rect(box_x, box_y, box_width, row_height + 7, curr_colors->main_c);
-        odroid_overlay_draw_local_text_line(x, box_y + 5, inner_width, header, curr_colors->sel_c, curr_colors->main_c, NULL, 0);
+        i18n_draw_text_line(x, box_y + 5, inner_width, header, curr_colors->sel_c, curr_colors->main_c, 0);
         odroid_overlay_draw_fill_rect(x + inner_width - 2, box_y + 5, 4, 4, curr_colors->sel_c);
         odroid_overlay_draw_fill_rect(x + inner_width, box_y + 11, 2, 4, curr_colors->dis_c);
         y += row_height + 8;
     }
 
-    for (int i = 0; i < options_count; i++)
+    if (had_prior) 
+    {
+        odroid_overlay_draw_fill_rect(x, y, inner_width, 5, curr_colors->bg_c);
+        odroid_overlay_draw_fill_rect(x + 16, y + 2, inner_width - 32, 1, get_darken_pixel(curr_colors->main_c,70));
+        odroid_overlay_draw_fill_rect(x + 10, y + 3, inner_width - 20, 1, curr_colors->main_c);
+        odroid_overlay_draw_fill_rect(x + 6, y + 4, inner_width - 12, 1, get_darken_pixel(box_border_color, 80));
+        y += 5;
+    }
+
+    for (int i = start_index; i <= end_index; i++)
     {
         color = options[i].enabled == 1 ? box_text_color : curr_colors->dis_c;
         if (options[i].enabled == 1)
@@ -460,34 +561,61 @@ void odroid_overlay_draw_dialog(const char *header, odroid_dialog_choice_t *opti
             bg = curr_colors->bg_c;
         }
 
+        odroid_overlay_draw_fill_rect(x, y, inner_width, i_height[i] + 2 * row_margin, bg);
         if (options[i].id == separator.id)
         {
-            odroid_overlay_draw_fill_rect(x, y, inner_width, row_height + 3 * row_margin, bg);
-            odroid_overlay_draw_fill_rect(x + 6, y + row_height / 2 - row_margin, inner_width - 12, 1, box_border_color);
+            odroid_overlay_draw_fill_rect(x, y, inner_width, i_height[i] + 2 * row_margin, curr_colors->bg_c);
+            odroid_overlay_draw_fill_rect(x + 6, y + row_margin + 2, inner_width - 12, 1, box_border_color);
         }
         else
         {
             if (options[i].id == 0x0F0F0E0E) //color select
             {
-                row_height = odroid_overlay_draw_local_text(x + odroid_overlay_get_local_font_width(), y + row_margin, inner_width - odroid_overlay_get_local_font_width(), options[i].label, fg, bg, 0);
-                odroid_overlay_draw_fill_rect(x, y, odroid_overlay_get_local_font_width(), row_height + row_margin, bg);
+                i18n_draw_text_line(x + line_padding, y + row_margin, max_left, options[i].label, fg, bg, 0);
                 uint16_t *color = (uint16_t *)(options[i].value);
+                int c_b_w = (max_right - 2) / 4;
                 for (int j=0; j < 4; j++) {
-                    odroid_overlay_draw_fill_rect(x + inner_width - (9 - j * 2) * odroid_overlay_get_local_font_width() - 2, 
-                    y, 
-                    odroid_overlay_get_local_font_width() * 2, odroid_overlay_get_local_font_size(), 
-                    color[j+1]);
+                    odroid_overlay_draw_fill_rect(
+                        x + inner_width - line_padding - (4 - j) * c_b_w - 1, 
+                        y + row_margin, 
+                        c_b_w, 
+                        i_height[i] - 2 * row_margin, 
+                        color[j + 1]);
                 };
-                odroid_overlay_draw_rect(x + inner_width - 9 * odroid_overlay_get_local_font_width() - 3, y + 1, odroid_overlay_get_local_font_width() * 8 + 2, row_height - 1, 1, fg);
+                odroid_overlay_draw_rect(x + inner_width - line_padding - 4 * c_b_w - 2, y + row_margin, 4 * c_b_w + 2, i_height[i] - 2 * row_margin, 1, fg);
             }
             else
             {
-                row_height = odroid_overlay_draw_local_text(x, y + row_margin, inner_width, rows + i * 256, fg, bg, 0);
+                if (options[i].value[0])
+                {
+                    i18n_draw_text_line(x + line_padding, y + row_margin, max_left, options[i].label, fg, bg, 0);
+                    int txt_w = i18n_get_text_width(options[i].value);
+                    txt_w = (txt_w > max_right) ? max_right : txt_w;  
+                    i18n_draw_text(
+                        x + inner_width - line_padding - txt_w, 
+                        y + row_margin, 
+                        txt_w, i_height[i],
+                         options[i].value, fg, bg, 0);
+                    //left,right paint;
+                } 
+                else  //single paint;
+                    i18n_draw_text(
+                        x + line_padding, 
+                        y + row_margin, 
+                        inner_width - 2 * line_padding, 
+                        i_height[i], 
+                        options[i].label, fg, bg, 0);
+
             }
-            row_height += row_margin * 2;
-            odroid_overlay_draw_rect(x, y, inner_width, row_height, row_margin, bg);
         }
-        y += row_height;
+        y += i_height[i];
+    };
+    if (had_next) {
+        odroid_overlay_draw_fill_rect(x, y, inner_width, 5, curr_colors->bg_c);
+        odroid_overlay_draw_fill_rect(x + 6, y + 1, inner_width - 12, 1, get_darken_pixel(box_border_color, 80));
+        odroid_overlay_draw_fill_rect(x + 10, y + 2, inner_width - 20, 1, curr_colors->main_c);
+        odroid_overlay_draw_fill_rect(x + 16, y + 3, inner_width - 32, 1, get_darken_pixel(curr_colors->main_c, 70));
+        y += 5;
     }
 
     box_y = header ? box_y + row_height + 8 : box_y;
@@ -495,7 +623,10 @@ void odroid_overlay_draw_dialog(const char *header, odroid_dialog_choice_t *opti
     odroid_overlay_draw_rect(box_x, box_y, box_width, box_height, box_padding, box_color);
     odroid_overlay_draw_rect(box_x - 1, box_y - 1, box_width + 2, box_height + 2, 1, box_border_color);
 
-    rg_free(rows);
+    rg_free(i_left);
+    rg_free(i_right);
+    rg_free(i_width);
+    rg_free(i_height);
 }
 
 int odroid_overlay_dialog(const char *header, odroid_dialog_choice_t *options, int selected)
@@ -822,21 +953,21 @@ int odroid_overlay_settings_menu(odroid_dialog_choice_t *extra_options)
 static void draw_game_status_bar(runtime_stats_t stats)
 {
     int width = ODROID_SCREEN_WIDTH - 48, height = 16;
-    int pad_text = (height - odroid_overlay_get_local_font_size()) / 2;
-    char bottom[40], header[40];
+    int pad_text = (height - i18n_get_text_height()) / 2;
+    char bottom[60], header[60];
 
-    snprintf(header, 40, "%s: %d.%d (%d.%d) / %s: %d.%d%%",
+    snprintf(header, 60, "%s: %d.%d (%d.%d) / %s: %d.%d%%",
              s_FPS,
              (int)stats.totalFPS, (int)fmod(stats.totalFPS * 10, 10),
              (int)stats.skippedFPS, (int)fmod(stats.skippedFPS * 10, 10),
              s_BUSY,
              (int)stats.busyPercent, (int)fmod(stats.busyPercent * 10, 10));
-    snprintf(bottom, 40, "%s", ACTIVE_FILE ? (ACTIVE_FILE->name) : "N/A");
+    snprintf(bottom, 60, "%s", ACTIVE_FILE ? (ACTIVE_FILE->name) : "N/A");
 
     odroid_overlay_draw_fill_rect(0, 0, ODROID_SCREEN_WIDTH, height, curr_colors->main_c);
     odroid_overlay_draw_fill_rect(0, ODROID_SCREEN_HEIGHT - height, ODROID_SCREEN_WIDTH, height, curr_colors->main_c);
-    odroid_overlay_draw_local_text(48, pad_text, width, header, curr_colors->sel_c, curr_colors->main_c, 0);
-    odroid_overlay_draw_local_text(0, ODROID_SCREEN_HEIGHT - height + pad_text, ODROID_SCREEN_WIDTH, bottom, curr_colors->sel_c, curr_colors->main_c, 0);
+    i18n_draw_text_line(48, pad_text, width, header, curr_colors->sel_c, curr_colors->main_c, 0);
+    i18n_draw_text_line(0, ODROID_SCREEN_HEIGHT - height + pad_text, ODROID_SCREEN_WIDTH, bottom, curr_colors->sel_c, curr_colors->main_c, 0);
     odroid_overlay_clock(2, 3);
     odroid_overlay_draw_battery(ODROID_SCREEN_WIDTH - 22, ODROID_SCREEN_HEIGHT - 13);
 }
