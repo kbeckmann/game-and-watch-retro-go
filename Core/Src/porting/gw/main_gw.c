@@ -363,9 +363,9 @@ static bool gw_debug_submenu_set_deflicker(odroid_dialog_choice_t *option, odroi
     if (event == ODROID_DIALOG_NEXT)
         flag_lcd_deflicker_level = flag_lcd_deflicker_level < max_flag_lcd_deflicker_level ? flag_lcd_deflicker_level + 1 : 0;
 
-    if (flag_lcd_deflicker_level == 0) strcpy(option->value, s_filter_0_none);
-    if (flag_lcd_deflicker_level == 1) strcpy(option->value, s_filter_1_medium);
-    if (flag_lcd_deflicker_level == 2) strcpy(option->value, s_filter_2_high);
+    if (flag_lcd_deflicker_level == 0) strcpy(option->value, curr_lang->s_filter_0_none);
+    if (flag_lcd_deflicker_level == 1) strcpy(option->value, curr_lang->s_filter_1_medium);
+    if (flag_lcd_deflicker_level == 2) strcpy(option->value, curr_lang->s_filter_2_high);
 
     return event == ODROID_DIALOG_ENTER;
 }
@@ -381,8 +381,8 @@ static bool gw_debug_submenu_display_ram(odroid_dialog_choice_t *option, odroid_
     if (event == ODROID_DIALOG_PREV || event == ODROID_DIALOG_NEXT)
         debug_display_ram = debug_display_ram == 0 ? 1 : 0;
 
-    if (debug_display_ram == 0) strcpy(option->value, s_No);
-    if (debug_display_ram == 1) strcpy(option->value, s_Yes);
+    if (debug_display_ram == 0) strcpy(option->value, curr_lang->s_No);
+    if (debug_display_ram == 1) strcpy(option->value, curr_lang->s_Yes);
 
     return event == ODROID_DIALOG_ENTER;
 }
@@ -404,20 +404,21 @@ static void gw_display_ram_overlay(){
     }
 }
 
-static odroid_dialog_choice_t options[] = {
-    ODROID_DIALOG_CHOICE_SEPARATOR,
-    {309, s_Press_ACL, "", 1, &gw_debug_submenu_autoclear},
-    {310, s_Press_TIME, "", 1, &gw_debug_submenu_press_time},
-    {320, s_Press_ALARM, "", 1, &gw_debug_submenu_press_alarm},
-    {330, s_copy_RTC_to_GW_time, "", 1, &gw_debug_submenu_autoset_time},
-    {331, s_copy_GW_time_to_RTC, "", 1, &gw_debug_submenu_autoget_time},
-    {360, s_LCD_filter, LCD_deflicker_value, 1, &gw_debug_submenu_set_deflicker},
-    {370, s_Display_RAM, display_ram_value, 1, &gw_debug_submenu_display_ram},
-    ODROID_DIALOG_CHOICE_LAST};
 
 /* Main */
 int app_main_gw(uint8_t load_state)
 {
+
+    odroid_dialog_choice_t options[] = {
+        ODROID_DIALOG_CHOICE_SEPARATOR,
+        {309, curr_lang->s_Press_ACL, "", 1, &gw_debug_submenu_autoclear},
+        {310, curr_lang->s_Press_TIME, "", 1, &gw_debug_submenu_press_time},
+        {320, curr_lang->s_Press_ALARM, "", 1, &gw_debug_submenu_press_alarm},
+        {330, curr_lang->s_copy_RTC_to_GW_time, "", 1, &gw_debug_submenu_autoset_time},
+        {331, curr_lang->s_copy_GW_time_to_RTC, "", 1, &gw_debug_submenu_autoget_time},
+        {360, curr_lang->s_LCD_filter, LCD_deflicker_value, 1, &gw_debug_submenu_set_deflicker},
+        {370, curr_lang->s_Display_RAM, display_ram_value, 1, &gw_debug_submenu_display_ram},
+        ODROID_DIALOG_CHOICE_LAST};
 
     odroid_system_init(ODROID_APPID_GW, GW_AUDIO_FREQ);
     odroid_system_emu_init(&gw_system_LoadState, &gw_system_SaveState, NULL);

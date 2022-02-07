@@ -6,9 +6,9 @@ Please run `make help` to see more information.
 ## <font color=red>**Undocumented 256k BANK used by default**</font>
 Now NewUI used BANK as undocumented size 256k by default, It's required patched OPENOCD to work. You can set `BIG_BANK=0` disabled it to use 128k BANK size.
 
-
 ### i18n support
-`make CODEPAGE=lang` Sets codepage to configures display langrage.(default=1252 as English);
+`make CODEPAGE=lang` Sets codepage to configures default display language.(default=1252 as English);
+Expert `UICODEPAGE=lang` set the ui display language, default `UICODEPAGE=CODEPAGE`;
 - 1252 : English
 - 936 : 简体中文
 - 950 : 繁體中文
@@ -16,6 +16,15 @@ Now NewUI used BANK as undocumented size 256k by default, It's required patched 
 - 12521 : Español (translation by [Icebox2](https://github.com/Icebox2))
 - 12522 : Portuguese (translation by [DefKorns](https://github.com/DefKorns))
 - 932 : 日本語(Wait for translate support)
+
+You can set `[OPT]=[0|1]` to include or exclude some language, List of `OPT` parameter:
+- `EN_US`  **English**;
+- `ES_ES`  **Español**;
+- `PT_PT` **Portuguese**;
+- `ZH_CN` **简体中文**;
+- `ZH_TW` **繁體中文**;
+- `KO_KR` **한국어**;
+- `JA_JP` **日本語**;
 - other : Wait your support to translate
 
 ### Coverflow support
@@ -24,6 +33,8 @@ Now NewUI used BANK as undocumented size 256k by default, It's required patched 
 ### Other features
 Here some other features you can edit the rom define file to custom by youself.
 Before you run `make flash`, please run `make romdef` then you can get some romdef file in `roms` folder as `gb.json` `nes.json` ..etc. Edit this files then you can custom the follow feature.
+
+Use `make ROMINFOCODE=[ascii|?]` to set charset of rominfo sourcecode to enabled local language support.
 
 - Game display title(Set `name` value, title's charset be must your custom language supported)
 - Pack or don't pack rom to firmware (Set `publish` to `1` or `0`)

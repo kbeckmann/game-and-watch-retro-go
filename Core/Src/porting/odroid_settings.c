@@ -15,6 +15,13 @@
   #define COVERFLOW 0
 #endif /* COVERFLOW */
 // Global
+
+#if !defined (CODEPAGE)
+#define CODEPAGE 1252
+#endif
+#if !defined (UICODEPAGE)
+#define UICODEPAGE 1252
+#endif
 static const char* Key_RomFilePath  = "RomFilePath";
 static const char* Key_AudioSink    = "AudioSink";
 
@@ -41,6 +48,8 @@ typedef struct persistent_config {
     uint8_t theme;
     uint8_t colors;
     uint8_t font;
+    uint8_t lang;
+    uint8_t romlang;
     uint8_t splashani;
     uint8_t startup_app;
     void *startup_file;
@@ -65,6 +74,37 @@ static const persistent_config_t persistent_config_default = {
     .theme = 2, //use as theme index
     .colors = 0,
     .font = 8,
+#if CODEPAGE==12521
+    .lang = 1,
+#elif CODEPAGE==12522
+    .lang = 2,
+#elif CODEPAGE==932
+    .lang = 6,
+#elif CODEPAGE==936
+    .lang = 3,
+#elif CODEPAGE==949
+    .lang = 5,
+#elif CODEPAGE==950
+    .lang = 4,
+#else
+    .lang = 0,
+#endif
+
+#if UICODEPAGE==12521
+    .romlang = 1,
+#elif UICODEPAGE==12522
+    .romlang = 2,
+#elif UICODEPAGE==932
+    .romlang = 6,
+#elif UICODEPAGE==936
+    .romlang = 3,
+#elif UICODEPAGE==949
+    .romlang = 5,
+#elif UICODEPAGE==950
+    .romlang = 4,
+#else
+    .romlang = 0,
+#endif
     .splashani = 1,
     .startup_app = 0,
     .main_menu_timeout_s = 60 * 10, // Turn off after 10 minutes of idle time in the main menu
@@ -122,6 +162,9 @@ void odroid_settings_init()
     curr_colors = (colors_t *)(&gui_colors[persistent_config_flash.colors]);
     //set font
     curr_font = (char *)gui_fonts[persistent_config_flash.font];
+    //set lang
+    curr_lang = (lang_t *)gui_lang[odroid_settings_lang_get()];
+    curr_romlang = (lang_t *)gui_lang[odroid_settings_romlang_get()];
 }
 
 void odroid_settings_commit()
@@ -205,6 +248,67 @@ void odroid_settings_font_set(int8_t font)
     else if (font >= gui_font_count)
         font = gui_font_count - 1;
     persistent_config_ram.font = font;
+}
+
+
+int8_t odroid_settings_get_next_lang(uint8_t cur)
+{
+    lang_t* next_lang = NULL;
+    int ret = cur;
+    while (!next_lang)
+    {
+        ret ++;
+        if (ret >= gui_lang_count)
+            ret = 0;
+        next_lang = (lang_t *)gui_lang[ret];  
+    }
+    return ret;
+}
+
+int8_t odroid_settings_get_prior_lang(uint8_t cur)
+{
+    lang_t* prior_lang = NULL;
+    int ret = cur;
+    while (!prior_lang)
+    {
+        ret --;
+        if (ret < 0)
+            ret = gui_lang_count - 1;
+        prior_lang = (lang_t *)gui_lang[ret];  
+    }
+    return ret;
+}
+
+int8_t odroid_settings_lang_get()
+{
+    int lang = persistent_config_ram.lang;
+    return odroid_settings_get_prior_lang(lang + 1);
+}
+
+
+void odroid_settings_lang_set(int8_t lang)
+{
+    if (lang < 0)
+        lang = 0;
+    else if (lang >= gui_lang_count)
+        lang = gui_lang_count - 1;
+    persistent_config_ram.lang = lang;
+}
+
+
+int8_t odroid_settings_romlang_get()
+{
+    int lang = persistent_config_ram.romlang;
+    return odroid_settings_get_prior_lang(lang + 1);
+}
+
+void odroid_settings_romlang_set(int8_t lang)
+{
+    if (lang < 0)
+        lang = 0;
+    else if (lang >= gui_lang_count)
+        lang = gui_lang_count - 1;
+    persistent_config_ram.romlang = lang;
 }
 
 #if COVERFLOW != 0

@@ -141,16 +141,16 @@ static bool main_menu_timeout_cb(odroid_dialog_choice_t *option, odroid_dialog_e
         odroid_settings_MainMenuTimeoutS_set(timeout + step);
         gui_redraw();
     }
-    sprintf(option->value, "%d %s", odroid_settings_MainMenuTimeoutS_get(), s_Second_Unit);
+    sprintf(option->value, "%d %s", odroid_settings_MainMenuTimeoutS_get(), curr_lang->s_Second_Unit);
     return event == ODROID_DIALOG_ENTER;
 }
 
 
 #if COVERFLOW != 0
-const char *GW_Themes[] = {s_Theme_sList, s_Theme_CoverV, s_Theme_CoverH, s_Theme_CoverLightH, s_Theme_CoverLightV};
 
 static bool theme_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat)
 {
+    const char *GW_Themes[] = {curr_lang->s_Theme_sList, curr_lang->s_Theme_CoverV, curr_lang->s_Theme_CoverH, curr_lang->s_Theme_CoverLightH, curr_lang->s_Theme_CoverLightV};
     int8_t theme = odroid_settings_theme_get();
 
     if (event == ODROID_DIALOG_PREV)
@@ -240,6 +240,48 @@ static bool font_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t
 }
 
 
+static bool lang_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat)
+{
+    int8_t lang = odroid_settings_lang_get();
+
+    if (event == ODROID_DIALOG_PREV)
+    {
+        lang = odroid_settings_get_prior_lang(lang);
+        odroid_settings_lang_set(lang);
+    }
+    else if (event == ODROID_DIALOG_NEXT)
+    {
+        lang = odroid_settings_get_next_lang(lang);
+        odroid_settings_lang_set(lang);
+    }
+    curr_lang = (lang_t *)gui_lang[lang];
+    sprintf(option->value, "%s", curr_lang->s_LangName);
+    //sprintf(option->label, "%s", curr_lang->s_Lang);
+    return event == ODROID_DIALOG_ENTER;
+}
+
+
+static bool romlang_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat)
+{
+    int8_t lang = odroid_settings_romlang_get();
+
+    if (event == ODROID_DIALOG_PREV)
+    {
+        lang = odroid_settings_get_prior_lang(lang);
+        odroid_settings_romlang_set(lang);
+    }
+    else if (event == ODROID_DIALOG_NEXT)
+    {
+        lang = odroid_settings_get_next_lang(lang);
+        odroid_settings_romlang_set(lang);
+    }
+    curr_romlang = (lang_t *)gui_lang[lang];
+    sprintf(option->value, "%s", curr_romlang->s_LangName);
+    //sprintf(option->label, "%s", curr_lang->s_Lang);
+    return event == ODROID_DIALOG_ENTER;
+}
+
+
 static bool splashani_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat)
 {
     int8_t splashani = odroid_settings_splashani_get();
@@ -250,7 +292,7 @@ static bool splashani_update_cb(odroid_dialog_choice_t *option, odroid_dialog_ev
         odroid_settings_splashani_set(splashani);
     };
 
-    sprintf(option->value, "%s", splashani ? s_Splash_On : s_Splash_Off);
+    sprintf(option->value, "%s", splashani ? curr_lang->s_Splash_On : curr_lang->s_Splash_Off);
     return event == ODROID_DIALOG_ENTER;
 }
 
@@ -355,25 +397,25 @@ void retro_loop()
             if ((last_key == ODROID_INPUT_START) || (last_key == ODROID_INPUT_X))
             {
                 odroid_dialog_choice_t choices[] = {
-                    {9, s_Version, GIT_HASH, 1, NULL},
-                    {9, s_Author, "ducalex", 1, NULL},
-                    {9, s_Author_, "kbeckmann", 1, NULL},
-                    {9, s_Author_, "stacksmashing", 1, NULL},
-                    {9, s_UI_Mod, "orzeus", 1, NULL},
+                    {9, curr_lang->s_Version, GIT_HASH, 1, NULL},
+                    {9, curr_lang->s_Author, "ducalex", 1, NULL},
+                    {9, curr_lang->s_Author_, "kbeckmann", 1, NULL},
+                    {9, curr_lang->s_Author_, "stacksmashing", 1, NULL},
+                    {9, curr_lang->s_UI_Mod, "orzeus", 1, NULL},
                     ODROID_DIALOG_CHOICE_SEPARATOR,
-                    {9, s_Lang, s_LangAuthor, 1, NULL},
+                    {1, curr_lang->s_Lang, curr_lang->s_LangAuthor, 1, NULL},
                     ODROID_DIALOG_CHOICE_SEPARATOR,
-                    {2, s_Debug_menu, "", 1, NULL},
-                    {1, s_Reset_settings, "", 1, NULL},
+                    {2, curr_lang->s_Debug_menu, "", 1, NULL},
+                    {1, curr_lang->s_Reset_settings, "", 1, NULL},
                     ODROID_DIALOG_CHOICE_SEPARATOR,
-                    {0, s_Close, "", 1, NULL},
+                    {0, curr_lang->s_Close, "", 1, NULL},
                     ODROID_DIALOG_CHOICE_LAST};
 
-                int sel = odroid_overlay_dialog(s_Retro_Go, choices, -1);
+                int sel = odroid_overlay_dialog(curr_lang->s_Retro_Go, choices, -1);
                 if (sel == 1)
                 {
                     // Reset settings
-                    if (odroid_overlay_confirm(s_Confirm_Reset_settings, false) == 1)
+                    if (odroid_overlay_confirm(curr_lang->s_Confirm_Reset_settings, false) == 1)
                     {
                         odroid_settings_reset();
                         odroid_system_switch_app(0); // reset
@@ -407,20 +449,20 @@ void retro_loop()
                     snprintf(dbgmcu_cr_str, sizeof(dbgmcu_cr_str), "0x%08lX", DBGMCU->CR);
 
                     odroid_dialog_choice_t debuginfo[] = {
-                        {0, s_Flash_JEDEC_ID, (char *)jedec_id_str, 1, NULL},
-                        {0, s_Flash_Name, (char *)OSPI_GetFlashName(), 1, NULL},
-                        {0, s_Flash_SR, (char *)status_str, 1, NULL},
-                        {0, s_Flash_CR, (char *)config_str, 1, NULL},
-                        {0, s_Smallest_erase, erase_size_str, 1, NULL},
+                        {0, curr_lang->s_Flash_JEDEC_ID, (char *)jedec_id_str, 1, NULL},
+                        {0, curr_lang->s_Flash_Name, (char *)OSPI_GetFlashName(), 1, NULL},
+                        {0, curr_lang->s_Flash_SR, (char *)status_str, 1, NULL},
+                        {0, curr_lang->s_Flash_CR, (char *)config_str, 1, NULL},
+                        {0, curr_lang->s_Smallest_erase, erase_size_str, 1, NULL},
                         ODROID_DIALOG_CHOICE_SEPARATOR,
-                        {0, s_DBGMCU_IDCODE, dbgmcu_id_str, 1, NULL},
-                        {1, s_Enable_DBGMCU_CK, dbgmcu_cr_str, 1, NULL},
-                        {2, s_Disable_DBGMCU_CK, "", 1, NULL},
+                        {0, curr_lang->s_DBGMCU_IDCODE, dbgmcu_id_str, 1, NULL},
+                        {1, curr_lang->s_Enable_DBGMCU_CK, dbgmcu_cr_str, 1, NULL},
+                        {2, curr_lang->s_Disable_DBGMCU_CK, "", 1, NULL},
                         ODROID_DIALOG_CHOICE_SEPARATOR,
-                        {0, s_Close, "", 1, NULL},
+                        {0, curr_lang->s_Close, "", 1, NULL},
                         ODROID_DIALOG_CHOICE_LAST};
 
-                    int sel = odroid_overlay_dialog(s_Debug_Title, debuginfo, -1);
+                    int sel = odroid_overlay_dialog(curr_lang->s_Debug_Title, debuginfo, -1);
                     switch (sel)
                     {
                     case 1:
@@ -456,17 +498,23 @@ void retro_loop()
                 char timeout_value[16];
                 char theme_value[16];
                 char colors_value[16];
+                char UIlang_value[64];
+                char lang_value[64];
+
                 odroid_dialog_choice_t choices[] = {
                     ODROID_DIALOG_CHOICE_SEPARATOR,
-                    {0x0F0F0E0E, s_Colors, colors_value, 1, &colors_update_cb},
 #if COVERFLOW != 0
                      //ODROID_DIALOG_CHOICE_SEPARATOR,
-                    {0, s_Theme_Title, theme_value, 1, &theme_update_cb},
+                    {0, curr_lang->s_Theme_Title, theme_value, 1, &theme_update_cb},
 #endif
-                    {0, s_Font, font_value, 1, &font_update_cb},
-                    {0, s_Splash_Option, splashani_value, 1, &splashani_update_cb},
+                    {0x0F0F0E0E, curr_lang->s_Colors, colors_value, 1, &colors_update_cb},
+                    {0, curr_lang->s_Splash_Option, splashani_value, 1, &splashani_update_cb},
                     ODROID_DIALOG_CHOICE_SEPARATOR,
-                    {0, s_Idle_power_off, timeout_value, 1, &main_menu_timeout_cb},
+                    {0, curr_lang->s_Font, font_value, 1, &font_update_cb},
+                    {0, curr_lang->s_LangUI, UIlang_value, 1, &lang_update_cb},
+                    {0, curr_lang->s_LangTitle, lang_value, 1, &romlang_update_cb},
+                    ODROID_DIALOG_CHOICE_SEPARATOR,
+                    {0, curr_lang->s_Idle_power_off, timeout_value, 1, &main_menu_timeout_cb},
                     // {0, "Color theme", "1/10", 1, &color_shift_cb},
                     // {0, "Font size", "Small", 1, &font_size_cb},
                     // {0, "Show cover", "Yes", 1, &show_cover_cb},
@@ -485,10 +533,10 @@ void retro_loop()
                 char date_str[24];
 
                 odroid_dialog_choice_t rtcinfo[] = {
-                    {0, s_Time, time_str, 1, &time_display_cb},
-                    {1, s_Date, date_str, 1, &date_display_cb},
+                    {0, curr_lang->s_Time, time_str, 1, &time_display_cb},
+                    {1, curr_lang->s_Date, date_str, 1, &date_display_cb},
                     ODROID_DIALOG_CHOICE_LAST};
-                int sel = odroid_overlay_dialog(s_Time_Title, rtcinfo, 0);
+                int sel = odroid_overlay_dialog(curr_lang->s_Time_Title, rtcinfo, 0);
 
                 if (sel == 0)
                 {
@@ -498,11 +546,11 @@ void retro_loop()
 
                     // Time setup
                     odroid_dialog_choice_t timeoptions[8] = {
-                        {0, s_Hour, hour_value, 1, &hour_update_cb},
-                        {1, s_Minute, minute_value, 1, &minute_update_cb},
-                        {2, s_Second, second_value, 1, &second_update_cb},
+                        {0, curr_lang->s_Hour, hour_value, 1, &hour_update_cb},
+                        {1, curr_lang->s_Minute, minute_value, 1, &minute_update_cb},
+                        {2, curr_lang->s_Second, second_value, 1, &second_update_cb},
                         ODROID_DIALOG_CHOICE_LAST};
-                    sel = odroid_overlay_dialog(s_Time_setup, timeoptions, 0);
+                    sel = odroid_overlay_dialog(curr_lang->s_Time_setup, timeoptions, 0);
                 }
                 else if (sel == 1)
                 {
@@ -514,12 +562,12 @@ void retro_loop()
 
                     // Date setup
                     odroid_dialog_choice_t dateoptions[8] = {
-                        {0, s_Day, day_value, 1, &day_update_cb},
-                        {1, s_Month, month_value, 1, &month_update_cb},
-                        {2, s_Year, year_value, 1, &year_update_cb},
-                        {3, s_Weekday, weekday_value, 1, &weekday_update_cb},
+                        {0, curr_lang->s_Day, day_value, 1, &day_update_cb},
+                        {1, curr_lang->s_Month, month_value, 1, &month_update_cb},
+                        {2, curr_lang->s_Year, year_value, 1, &year_update_cb},
+                        {3, curr_lang->s_Weekday, weekday_value, 1, &weekday_update_cb},
                         ODROID_DIALOG_CHOICE_LAST};
-                    sel = odroid_overlay_dialog(s_Date_setup, dateoptions, 0);
+                    sel = odroid_overlay_dialog(curr_lang->s_Date_setup, dateoptions, 0);
                 }
 
                 (void)sel;

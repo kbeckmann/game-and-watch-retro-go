@@ -7,7 +7,6 @@
 
 RTC_TimeTypeDef GW_currentTime = {0};
 RTC_DateTypeDef GW_currentDate = {0};
-const char * GW_RTC_Weekday[] = {s_Weekday_Mon, s_Weekday_Tue, s_Weekday_Wed, s_Weekday_Thu, s_Weekday_Fri, s_Weekday_Sat, s_Weekday_Sun};
 
 // Getters
 uint8_t GW_GetCurrentHour(void) {
@@ -293,6 +292,7 @@ time_t GW_GetUnixTime(void) {
 }
 
 bool weekday_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat) { 
+    const char * GW_RTC_Weekday[] = {curr_lang->s_Weekday_Mon, curr_lang->s_Weekday_Tue, curr_lang->s_Weekday_Wed, curr_lang->s_Weekday_Thu, curr_lang->s_Weekday_Fri, curr_lang->s_Weekday_Sat, curr_lang->s_Weekday_Sun};
                 
     int8_t weekday = GW_GetCurrentWeekday();
     int8_t min = 1;
@@ -335,16 +335,17 @@ bool time_display_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event
     HAL_RTC_GetTime(&hrtc, &GW_currentTime, RTC_FORMAT_BIN);
     HAL_RTC_GetDate(&hrtc, &GW_currentDate, RTC_FORMAT_BIN);
 
-    sprintf(option->value, "%02d:%02d:%02d", GW_currentTime.Hours, GW_currentTime.Minutes, GW_currentTime.Seconds);
+    curr_lang->fmtTime(option->value, curr_lang->s_Time_Format, GW_currentTime.Hours, GW_currentTime.Minutes, GW_currentTime.Seconds);
     return event == ODROID_DIALOG_ENTER;
     return false;    
 }
 bool date_display_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat) {
 
+    const char * GW_RTC_Weekday[] = {curr_lang->s_Weekday_Mon, curr_lang->s_Weekday_Tue, curr_lang->s_Weekday_Wed, curr_lang->s_Weekday_Thu, curr_lang->s_Weekday_Fri, curr_lang->s_Weekday_Sat, curr_lang->s_Weekday_Sun};
     HAL_RTC_GetTime(&hrtc, &GW_currentTime, RTC_FORMAT_BIN);
     HAL_RTC_GetDate(&hrtc, &GW_currentDate, RTC_FORMAT_BIN);
     
-    fmtDate(option->value, s_Date_Format, GW_currentDate.Date, GW_currentDate.Month, GW_currentDate.Year, (char *) GW_RTC_Weekday[GW_currentDate.WeekDay-1]);
+    curr_lang->fmtDate(option->value, curr_lang->s_Date_Format, GW_currentDate.Date, GW_currentDate.Month, GW_currentDate.Year, (char *) GW_RTC_Weekday[GW_currentDate.WeekDay-1]);
     return event == ODROID_DIALOG_ENTER;
     return false;
 }

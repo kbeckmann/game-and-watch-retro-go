@@ -41,20 +41,7 @@ static void event_handler(gui_event_t event, tab_t *tab)
     retro_emulator_t *emu = (retro_emulator_t *)tab->arg;
     listbox_item_t *item = gui_get_selected_item(tab);
     retro_emulator_file_t *file = (retro_emulator_file_t *)(item ? item->arg : NULL);
-/*
-    //want to show time but can't auto refresh ?    
-    if (GW_currentDate.WeekDay < 1)
-        GW_currentDate.WeekDay = 1;
-    fmt_Title_Date_Format(
-        tab->status, 
-        s_Title_Date_Format,
-        GW_currentDate.Date, 
-        GW_currentDate.Month, 
-        (char *) GW_RTC_Weekday[GW_currentDate.WeekDay-1],
-        GW_currentTime.Hours, 
-        GW_currentTime.Minutes,
-        GW_currentTime.Seconds);
-*/
+
     if (event == TAB_INIT)
     {
         emulator_init(emu);
@@ -321,14 +308,14 @@ void emulator_show_file_info(retro_emulator_file_t *file)
     //crc_value[0] = '\x00';
 
     odroid_dialog_choice_t choices[] = {
-        {0, s_File, filename_value, 1, NULL},
-        {0, s_Type, type_value, 1, NULL},
-        {0, s_Size, size_value, 1, NULL},
+        {0, curr_lang->s_File, filename_value, 1, NULL},
+        {0, curr_lang->s_Type, type_value, 1, NULL},
+        {0, curr_lang->s_Size, size_value, 1, NULL},
 		#if COVERFLOW != 0
-        {0, s_ImgSize, img_size, 1, NULL},
+        {0, curr_lang->s_ImgSize, img_size, 1, NULL},
 		#endif
         ODROID_DIALOG_CHOICE_SEPARATOR,
-        {1, s_Close, "", 1, NULL},
+        {1, curr_lang->s_Close, "", 1, NULL},
         ODROID_DIALOG_CHOICE_LAST
     };
 
@@ -339,7 +326,7 @@ void emulator_show_file_info(retro_emulator_file_t *file)
     sprintf(choices[3].value, "%d KB", file->img_size / 1024);
 	#endif
 
-    odroid_overlay_dialog(s_GameProp, choices, -1);
+    odroid_overlay_dialog(curr_lang->s_GameProp, choices, -1);
 }
 
 void emulator_show_file_menu(retro_emulator_file_t *file)
@@ -355,12 +342,12 @@ void emulator_show_file_menu(retro_emulator_file_t *file)
     //bool is_fav = 0;
 
     odroid_dialog_choice_t choices[] = {
-        {0, s_Resume_game, "", has_save && (file->save_address != 0), NULL},
-        {1, s_New_game, "", 1, NULL},
+        {0, curr_lang->s_Resume_game, "", has_save && (file->save_address != 0), NULL},
+        {1, curr_lang->s_New_game, "", 1, NULL},
         ODROID_DIALOG_CHOICE_SEPARATOR,
         //{3, is_fav ? s_Del_favorite : s_Add_favorite, "", 1, NULL},
 		//ODROID_DIALOG_CHOICE_SEPARATOR,
-        {2, s_Delete_save, "", (has_save || has_sram) && (file->save_address != 0), NULL},
+        {2, curr_lang->s_Delete_save, "", (has_save || has_sram) && (file->save_address != 0), NULL},
         ODROID_DIALOG_CHOICE_LAST
     };
     //Del Some item
@@ -377,7 +364,7 @@ void emulator_show_file_menu(retro_emulator_file_t *file)
         emulator_start(file, sel == 0, false);
     }
     else if (sel == 2) {
-        if (odroid_overlay_confirm(s_Confiem_del_save, false) == 1) {
+        if (odroid_overlay_confirm(curr_lang->s_Confiem_del_save, false) == 1) {
             store_erase(file->save_address, file->save_size);
         }
     }

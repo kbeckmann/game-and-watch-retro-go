@@ -473,7 +473,7 @@ void gui_draw_simple_list(int posx, tab_t *tab)
         listbox_item_t *item = &list->items[list->cursor];
         int h1 = LIST_Y_OFFSET + (LIST_HEIGHT - font_height) / 2;
         if (item)
-            i18n_draw_text_line(posx, h1, w, list->items[list->cursor].text, curr_colors->sel_c, curr_colors->bg_c, 0);
+            i18n_draw_text_line(posx, h1, w, list->items[list->cursor].text, curr_colors->sel_c, curr_colors->bg_c, 0,curr_romlang);
 
         int index_next = list->cursor + 1;
         int index_proior = list->cursor - 1;
@@ -495,7 +495,8 @@ void gui_draw_simple_list(int posx, tab_t *tab)
                     list->items[index_next].text,
                     get_darken_pixel_d(curr_colors->dis_c, curr_colors->bg_c, (max_line - i) * 100 / max_line),
                     curr_colors->bg_c,
-                    0);
+                    0,
+                    curr_romlang);
             index_next++;
             listbox_item_t *prior_item = gui_get_item_by_index(tab, &index_proior);
             if (prior_item)
@@ -506,7 +507,8 @@ void gui_draw_simple_list(int posx, tab_t *tab)
                     list->items[index_proior].text,
                     get_darken_pixel_d(curr_colors->dis_c, curr_colors->bg_c, (max_line - i) * 100 / max_line),
                     curr_colors->bg_c,
-                    0);
+                    0,
+                    curr_romlang);
             index_proior--;
         }
         //draw currpostion
@@ -521,16 +523,17 @@ static void draw_centered_local_text_line(uint16_t y_pos,
                                           uint16_t x1,
                                           uint16_t x2,
                                           uint16_t color,
-                                          uint16_t color_bg)
+                                          uint16_t color_bg,
+                                          const lang_t* lang)
 {
-    int width = i18n_get_text_width(text);
+    int width = i18n_get_text_width(text, lang);
     int x_pos = (x2 - x1) / 2 - width / 2;
     if (x_pos < 0)
         x_pos = 0;
     if (width > (x2 - x1))
         width = x2 - x1;
 
-    i18n_draw_text_line(x_pos + x1, y_pos, width, text, color, color_bg, 0);
+    i18n_draw_text_line(x_pos + x1, y_pos, width, text, color, color_bg, 0, lang);
 }
 
 void gui_draw_item_postion_h(int posy, int startx, int endx, int cur, int size)
@@ -704,7 +707,8 @@ void gui_draw_coverlight_h(retro_emulator_file_t *file, int cover_position)
                                       0,
                                       ODROID_SCREEN_WIDTH,
                                       curr_colors->sel_c,
-                                      curr_colors->bg_c);
+                                      curr_colors->bg_c,
+                                      curr_romlang);
     }
     /* other cover */
     else
@@ -862,7 +866,7 @@ void gui_draw_coverflow_h(tab_t *tab) //------------
         file = (retro_emulator_file_t *)item->arg;
         if (file->img_size == 0)
         {
-            draw_centered_local_text_line(cover_top + (cover_height - font_height) / 2, s_No_Cover, start_xpos + p_width1 + p_width2 + 10, start_xpos + p_width1 + p_width2 + 10 + cover_width, get_darken_pixel(curr_colors->main_c, 80), curr_colors->bg_c);
+            draw_centered_local_text_line(cover_top + (cover_height - font_height) / 2, curr_lang->s_No_Cover, start_xpos + p_width1 + p_width2 + 10, start_xpos + p_width1 + p_width2 + 10 + cover_width, get_darken_pixel(curr_colors->main_c, 80), curr_colors->bg_c, curr_lang);
         }
         else
         {
@@ -883,9 +887,9 @@ void gui_draw_coverflow_h(tab_t *tab) //------------
         file = (retro_emulator_file_t *)item->arg;
         if (file->img_size == 0)
         {
-            draw_centered_local_text_line(cover_top + (cover_height - p_height2) / 4 * 3 + (p_height2 - font_height) / 2, s_No_Cover,
+            draw_centered_local_text_line(cover_top + (cover_height - p_height2) / 4 * 3 + (p_height2 - font_height) / 2, curr_lang->s_No_Cover,
                                           start_xpos + p_width1 + p_width2 + cover_width + 17,
-                                          start_xpos + p_width1 + p_width2 * 2 + cover_width + 17, get_darken_pixel(curr_colors->dis_c, 80), curr_colors->bg_c);
+                                          start_xpos + p_width1 + p_width2 * 2 + cover_width + 17, get_darken_pixel(curr_colors->dis_c, 80), curr_colors->bg_c, curr_lang);
         }
         else
         {
@@ -909,9 +913,9 @@ void gui_draw_coverflow_h(tab_t *tab) //------------
         file = (retro_emulator_file_t *)item->arg;
         if (file->img_size == 0)
         {
-            draw_centered_local_text_line(cover_top + (cover_height - p_height2) / 4 * 3 + (p_height2 - font_height) / 2, s_No_Cover,
+            draw_centered_local_text_line(cover_top + (cover_height - p_height2) / 4 * 3 + (p_height2 - font_height) / 2, curr_lang->s_No_Cover,
                                           start_xpos + p_width1 + 5,
-                                          start_xpos + p_width1 + p_width2 + 5, get_darken_pixel(curr_colors->dis_c, 80), curr_colors->bg_c);
+                                          start_xpos + p_width1 + p_width2 + 5, get_darken_pixel(curr_colors->dis_c, 80), curr_colors->bg_c, curr_lang);
         }
         else
         {
@@ -974,10 +978,10 @@ void gui_draw_coverflow_h(tab_t *tab) //------------
     {
         file = (retro_emulator_file_t *)item->arg;
         sprintf(str_buffer, "%s", file->name);
-        size_t width = i18n_get_text_width(str_buffer);
+        size_t width = i18n_get_text_width(str_buffer, curr_romlang);
         if (width > (ODROID_SCREEN_WIDTH - 24))
             width = ODROID_SCREEN_WIDTH - 24;
-        i18n_draw_text_line((ODROID_SCREEN_WIDTH - width) / 2, STATUS_HEIGHT + LIST_HEIGHT - font_height - 8, width, str_buffer, curr_colors->sel_c, curr_colors->bg_c, 1);
+        i18n_draw_text_line((ODROID_SCREEN_WIDTH - width) / 2, STATUS_HEIGHT + LIST_HEIGHT - font_height - 8, width, str_buffer, curr_colors->sel_c, curr_colors->bg_c, 1, curr_romlang);
     };
 };
 
@@ -1031,7 +1035,7 @@ void gui_draw_coverflow_v(tab_t *tab, int start_posx) // ||||||||
     {
         file = (retro_emulator_file_t *)item->arg;
         if (file->img_size == 0)
-            draw_centered_local_text_line(start_ypos + p_height + 16 + (cover_height - font_height) / 2, s_No_Cover, start_posx + 3, start_posx + 3 + cover_width, get_darken_pixel(curr_colors->main_c, 80), curr_colors->bg_c);
+            draw_centered_local_text_line(start_ypos + p_height + 16 + (cover_height - font_height) / 2, curr_lang->s_No_Cover, start_posx + 3, start_posx + 3 + cover_width, get_darken_pixel(curr_colors->main_c, 80), curr_colors->bg_c, curr_lang);
         else
         {
             JPEG_DecodeToBuffer((uint32_t)(file->img_address), (uint32_t)pCover_Buffer, &jpeg_cover_width, &jpeg_cover_height, 255);
@@ -1048,7 +1052,7 @@ void gui_draw_coverflow_v(tab_t *tab, int start_posx) // ||||||||
             if (file->img_size == 0)
             {
                 if (p_height > font_height)
-                    draw_centered_local_text_line(start_ypos + p_height + cover_height + 21 + (p_height - font_height) / 2, s_No_Cover, start_posx + 3, start_posx + 3 + cover_width, get_darken_pixel(curr_colors->dis_c, 80), curr_colors->bg_c);
+                    draw_centered_local_text_line(start_ypos + p_height + cover_height + 21 + (p_height - font_height) / 2, curr_lang->s_No_Cover, start_posx + 3, start_posx + 3 + cover_width, get_darken_pixel(curr_colors->dis_c, 80), curr_colors->bg_c, curr_lang);
             }
             else
             {
@@ -1068,11 +1072,12 @@ void gui_draw_coverflow_v(tab_t *tab, int start_posx) // ||||||||
                 {
                     if (p_height > font_height)
                         draw_centered_local_text_line(start_ypos + 11 + (p_height - font_height) / 2,
-                                                      s_No_Cover,
+                                                      curr_lang->s_No_Cover,
                                                       start_posx + 3,
                                                       start_posx + 3 + cover_width,
                                                       get_darken_pixel(curr_colors->dis_c, 80),
-                                                      curr_colors->bg_c);
+                                                      curr_colors->bg_c,
+                                                      curr_lang);
                 }
                 else
                 {

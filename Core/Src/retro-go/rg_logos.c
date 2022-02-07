@@ -84,7 +84,7 @@ const retro_logo_image logo_flash = {
     96,
     18,
     {
-#if (CODEPAGE == 936) || (CODEPAGE == 950)
+#if (INCLUDED_ZH_CN == 1) || (INCLUDED_ZH_TW == 1)
         // width96, height:18
         0x09, 0x12, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, //____#__#___#__#_________________________________________________________________________________
         0x09, 0x12, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, //____#__#___#__#_________________________________________________________________________________
@@ -298,7 +298,7 @@ const retro_logo_image header_gg LOGO_DATA = {
 };
 
 const retro_logo_image header_nes LOGO_DATA = {
-#if CODEPAGE == 932
+#if JA_JP == 1
     178,
     18,
     {
@@ -837,7 +837,7 @@ const retro_logo_image logo_coleco LOGO_DATA = {
 };
 
 const retro_logo_image logo_nitendo LOGO_DATA = {
-#if (CODEPAGE == 936) || (CODEPAGE == 950)
+#if (INCLUDED_ZH_CN == 1) || (INCLUDED_ZH_TW == 1)
     56,
     16,
     {

@@ -424,9 +424,9 @@ void osd_getinput(void)
     odroid_gamepad_state_t joystick;
     odroid_input_read_gamepad(&joystick);
     char palette_values[16];
-    snprintf(palette_values, sizeof(palette_values), "%s", s_Default);
+    snprintf(palette_values, sizeof(palette_values), "%s", curr_lang->s_Default);
     odroid_dialog_choice_t options[] = {
-            {100, s_Palette, (char *)palette_values, 1, &palette_update_cb},
+            {100, curr_lang->s_Palette, (char *)palette_values, 1, &palette_update_cb},
             // {101, "More...", "", 1, &advanced_settings_cb},
             ODROID_DIALOG_CHOICE_LAST
     };
