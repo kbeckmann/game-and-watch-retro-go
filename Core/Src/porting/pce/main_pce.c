@@ -65,7 +65,7 @@ static char pce_log[100];
 #define SVAR_N(k, v, n) { n, k, &v }
 #define SVAR_END { 0, "\0\0\0\0", 0 }
 
-const char SAVESTATE_HEADER[8] = "PCE_V005";
+const char SAVESTATE_HEADER[8] = "PCE_V006";
 static const struct
 {
 	size_t len;
@@ -73,42 +73,43 @@ static const struct
 	void *ptr;
 } SaveStateVars[] =
 {
-    // Arrays
-    SVAR_A("RAM", PCE.RAM),      SVAR_A("VRAM", PCE.VRAM),  SVAR_A("SPRAM", PCE.SPRAM),
-    SVAR_A("PAL", PCE.Palette),  SVAR_A("MMR", PCE.MMR),
+	// Arrays
+	SVAR_A("RAM", PCE.RAM),      SVAR_A("VRAM", PCE.VRAM),  SVAR_A("SPRAM", PCE.SPRAM),
+	SVAR_A("PAL", PCE.Palette),  SVAR_A("MMR", PCE.MMR),
 
-    // CPU registers
-    SVAR_2("CPU.PC", CPU.PC),    SVAR_1("CPU.A", CPU.A),    SVAR_1("CPU.X", CPU.X),
-    SVAR_1("CPU.Y", CPU.Y),      SVAR_1("CPU.P", CPU.P),    SVAR_1("CPU.S", CPU.S),
+	// CPU registers
+	SVAR_2("CPU.PC", CPU.PC),    SVAR_1("CPU.A", CPU.A),    SVAR_1("CPU.X", CPU.X),
+	SVAR_1("CPU.Y", CPU.Y),      SVAR_1("CPU.P", CPU.P),    SVAR_1("CPU.S", CPU.S),
 
-    // Misc
-    SVAR_4("Cycles", Cycles),                   SVAR_4("MaxCycles", PCE.MaxCycles),
-    SVAR_1("SF2", PCE.SF2),
+	// Misc
+	SVAR_4("Cycles", Cycles),                   SVAR_4("MaxCycles", PCE.MaxCycles),
+	SVAR_1("SF2", PCE.SF2),
 
-    // IRQ
-    SVAR_1("irq_mask", CPU.irq_mask),           SVAR_1("irq_lines", CPU.irq_lines),
+	// IRQ
+	SVAR_1("irq_mask", CPU.irq_mask),           SVAR_1("irq_mask_delay", CPU.irq_mask_delay),
+	SVAR_1("irq_lines", CPU.irq_lines),
 
-    // PSG
-    SVAR_1("psg.ch", PCE.PSG.ch),               SVAR_1("psg.vol", PCE.PSG.volume),
-    SVAR_1("psg.lfo_f", PCE.PSG.lfo_freq),      SVAR_1("psg.lfo_c", PCE.PSG.lfo_ctrl),
-    SVAR_N("psg.ch0", PCE.PSG.chan[0], 40),     SVAR_N("psg.ch1", PCE.PSG.chan[1], 40),
-    SVAR_N("psg.ch2", PCE.PSG.chan[2], 40),     SVAR_N("psg.ch3", PCE.PSG.chan[3], 40),
-    SVAR_N("psg.ch4", PCE.PSG.chan[4], 40),     SVAR_N("psg.ch5", PCE.PSG.chan[5], 40),
+	// PSG
+	SVAR_1("psg.ch", PCE.PSG.ch),               SVAR_1("psg.vol", PCE.PSG.volume),
+	SVAR_1("psg.lfo_f", PCE.PSG.lfo_freq),      SVAR_1("psg.lfo_c", PCE.PSG.lfo_ctrl),
+	SVAR_N("psg.ch0", PCE.PSG.chan[0], 40),     SVAR_N("psg.ch1", PCE.PSG.chan[1], 40),
+	SVAR_N("psg.ch2", PCE.PSG.chan[2], 40),     SVAR_N("psg.ch3", PCE.PSG.chan[3], 40),
+	SVAR_N("psg.ch4", PCE.PSG.chan[4], 40),     SVAR_N("psg.ch5", PCE.PSG.chan[5], 40),
 
-    // VCE
-    SVAR_A("vce_regs", PCE.VCE.regs),           SVAR_2("vce_reg", PCE.VCE.reg),
+	// VCE
+	SVAR_A("vce_regs", PCE.VCE.regs),           SVAR_2("vce_reg", PCE.VCE.reg),
 
-    // VDC
-    SVAR_A("vdc_regs", PCE.VDC.regs),           SVAR_1("vdc_reg", PCE.VDC.reg),
-    SVAR_1("vdc_status", PCE.VDC.status),       SVAR_1("vdc_satb", PCE.VDC.satb),
-    SVAR_4("vdc_pending_irqs", PCE.VDC.pending_irqs),
+	// VDC
+	SVAR_A("vdc_regs", PCE.VDC.regs),           SVAR_1("vdc_reg", PCE.VDC.reg),
+	SVAR_1("vdc_status", PCE.VDC.status),       SVAR_1("vdc_satb", PCE.VDC.vram),
+	SVAR_1("vdc_satb", PCE.VDC.satb),			SVAR_4("vdc_pending_irqs", PCE.VDC.pending_irqs),
 
-    // Timer
-    SVAR_4("timer_reload", PCE.Timer.reload),   SVAR_4("timer_running", PCE.Timer.running),
-    SVAR_4("timer_counter", PCE.Timer.counter), SVAR_4("timer_next", PCE.Timer.cycles_counter),
-    SVAR_4("timer_freq", PCE.Timer.cycles_per_line),
+	// Timer
+	SVAR_1("timer_reload", PCE.Timer.reload),   SVAR_1("timer_running", PCE.Timer.running),
+	SVAR_1("timer_counter", PCE.Timer.counter), SVAR_4("timer_next", PCE.Timer.cycles_counter),
+	SVAR_2("timer_freq", PCE.Timer.cycles_per_line),
 
-    SVAR_END
+	SVAR_END
 };
 
 uint8_t *osd_gfx_framebuffer(void){
@@ -133,6 +134,14 @@ void init_color_pals() {
 
 void osd_gfx_set_mode(int width, int height) {
     init_color_pals();
+    if (width < 160 || width > 512) {
+		MESSAGE_ERROR("Correcting out of range screen w %d\n", width);
+		width = 256;
+	}
+	if (height < 160 || height > 256) {
+		MESSAGE_ERROR("Correcting out of range screen h %d\n", height);
+		height = 224;
+	}
     current_width = width;
     current_height = height;
 }
@@ -361,22 +370,6 @@ void ResetPCE(bool hard) {
 
 }
 
-static inline void pce_timer_run(void) {
-    PCE.Timer.cycles_counter -= PCE.Timer.cycles_per_line;
-
-    // Trigger when it underflows
-    if (PCE.Timer.cycles_counter > CYCLES_PER_TIMER_TICK) {
-        PCE.Timer.cycles_counter += CYCLES_PER_TIMER_TICK;
-        if (PCE.Timer.running) {
-            // Trigger when it underflows from 0
-            if (PCE.Timer.counter > 0x7F) {
-                PCE.Timer.counter = PCE.Timer.reload;
-                CPU.irq_lines |= INT_TIMER;
-            }
-            PCE.Timer.counter--;
-        }
-    }
-}
 
 void pce_input_read(odroid_gamepad_state_t* out_state) {
     unsigned char rc = 0;
@@ -542,9 +535,7 @@ int app_main_pce(uint8_t load_state, uint8_t start_paused) {
         pce_input_read(&joystick);
 
         for (PCE.Scanline = 0; PCE.Scanline < 263; ++PCE.Scanline) {
-            PCE.MaxCycles += PCE.Timer.cycles_per_line;
             h6280_run();
-            pce_timer_run();
             gfx_run();
         }
 
@@ -562,8 +553,8 @@ int app_main_pce(uint8_t load_state, uint8_t start_paused) {
         }
 
         // Prevent overflow
-        int trim = MIN(Cycles, PCE.MaxCycles);
-        PCE.MaxCycles -= trim;
-        Cycles -= trim;
+        PCE.Timer.cycles_counter -= Cycles;
+        PCE.MaxCycles -= Cycles;
+        Cycles = 0;
     }
 }
