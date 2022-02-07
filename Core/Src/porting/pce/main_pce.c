@@ -135,11 +135,11 @@ void init_color_pals() {
 void osd_gfx_set_mode(int width, int height) {
     init_color_pals();
     if (width < 160 || width > 512) {
-		MESSAGE_ERROR("Correcting out of range screen w %d\n", width);
+		printf("Correcting out of range screen w %d\n", width);
 		width = 256;
 	}
 	if (height < 160 || height > 256) {
-		MESSAGE_ERROR("Correcting out of range screen h %d\n", height);
+		printf("Correcting out of range screen h %d\n", height);
 		height = 224;
 	}
     current_width = width;
