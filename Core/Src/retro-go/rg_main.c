@@ -209,7 +209,7 @@ static bool colors_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event
     //sprintf(option->value, "%s", curr_colors->name);
     return event == ODROID_DIALOG_ENTER;
 }
-
+#if (FONT_COUNT > 1)
 static bool font_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat)
 {
     int8_t font = odroid_settings_font_get();
@@ -238,7 +238,7 @@ static bool font_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t
     sprintf(option->value, "%d/%d Wg", font + 1, gui_font_count);
     return event == ODROID_DIALOG_ENTER;
 }
-
+#endif
 
 static bool lang_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat)
 {
@@ -494,7 +494,9 @@ void retro_loop()
             else if ((last_key == ODROID_INPUT_VOLUME) || (last_key == ODROID_INPUT_Y))
             {
                 char splashani_value[16];
+#if (FONT_COUNT > 1)
                 char font_value[16];
+#endif
                 char timeout_value[16];
                 char theme_value[16];
                 char colors_value[16];
@@ -510,7 +512,9 @@ void retro_loop()
                     {0x0F0F0E0E, curr_lang->s_Colors, colors_value, 1, &colors_update_cb},
                     {0, curr_lang->s_Splash_Option, splashani_value, 1, &splashani_update_cb},
                     ODROID_DIALOG_CHOICE_SEPARATOR,
+#if (FONT_COUNT > 1)
                     {0, curr_lang->s_Font, font_value, 1, &font_update_cb},
+#endif
                     {0, curr_lang->s_LangUI, UIlang_value, 1, &lang_update_cb},
                     {0, curr_lang->s_LangTitle, lang_value, 1, &romlang_update_cb},
                     ODROID_DIALOG_CHOICE_SEPARATOR,

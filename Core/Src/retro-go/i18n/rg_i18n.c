@@ -28,13 +28,23 @@
 #define INCLUDED_PT_PT 1
 #endif
 
+#if !defined (BIG_BANK)
+#define BIG_BANK 1
+#endif
+
 #include "rg_i18n.h"
 #include "rg_i18n_lang.h"
 #include "gw_lcd.h"
 #include "main.h"
 #include "odroid_system.h"
 #include "odroid_overlay.h"
-#include "fonts/font_un_en.h"
+
+#if BIG_BANK == 1
+#define FONT_DATA 
+#else
+#define FONT_DATA __attribute__((section(".extflash_font")))
+#endif
+
 #if INCLUDED_JA_JP == 1
 #include "fonts/font_ja_jp.h"
 #endif
@@ -48,13 +58,10 @@
 #include "fonts/font_zh_tw.h"
 #endif
 
-#if !defined (BIG_BANK)
-#define BIG_BANK 1
-#endif
 #if BIG_BANK == 1
 #define LANG_DATA 
 #else
-#define LANG_DATA __attribute__((section(".extflash_logo")))
+#define LANG_DATA __attribute__((section(".extflash_emu_data")))
 #endif
 
 #include "rg_i18n_en_us.c"
@@ -67,12 +74,118 @@
 
 static uint16_t overlay_buffer[ODROID_SCREEN_WIDTH * 12 * 2] __attribute__((aligned(4)));
 
+#if ONEFONT == 1
+#include "fonts/font_un_01.h"
+const char *gui_fonts[1] = { font_un_01 };
+char *curr_font = font_un_01;
+#elif ONEFONT == 2
+#include "fonts/font_un_02.h"
+const char *gui_fonts[1] = { font_un_02 };
+char *curr_font = font_un_02;
+#elif ONEFONT == 3
+#include "fonts/font_un_03.h"
+const char *gui_fonts[1] = { font_un_03 };
+char *curr_font = font_un_03;
+#elif ONEFONT == 4
+#include "fonts/font_un_04.h"
+const char *gui_fonts[1] = { font_un_04 };
+char *curr_font = font_un_04;
+#elif ONEFONT == 5
+#include "fonts/font_un_05.h"
+const char *gui_fonts[1] = { font_un_05 };
+char *curr_font = font_un_05;
+#elif ONEFONT == 6
+#include "fonts/font_un_06.h"
+const char *gui_fonts[1] = { font_un_06 };
+char *curr_font = font_un_06;
+#elif ONEFONT == 7
+#include "fonts/font_un_07.h"
+const char *gui_fonts[1] = { font_un_07 };
+char *curr_font = font_un_07;
+#elif ONEFONT == 8
+#include "fonts/font_un_08.h"
+const char *gui_fonts[1] = { font_un_08 };
+char *curr_font = font_un_08;
+#elif ONEFONT == 9
+#include "fonts/font_un_09.h"
+const char *gui_fonts[1] = { font_un_09 };
+char *curr_font = font_un_09;
+#elif ONEFONT == 10
+#include "fonts/font_un_10.h"
+const char *gui_fonts[1] = { font_un_10 };
+char *curr_font = font_un_10;
+#elif ONEFONT == 11
+#include "fonts/font_un_11.h"
+const char *gui_fonts[1] = { font_un_11 };
+char *curr_font = font_un_11;
+#elif ONEFONT == 12
+#include "fonts/font_un_12.h"
+const char *gui_fonts[1] = { font_un_12 };
+char *curr_font = font_un_12;
+#elif ONEFONT == 13
+#include "fonts/font_un_13.h"
+const char *gui_fonts[1] = { font_un_13 };
+char *curr_font = font_un_13;
+#elif ONEFONT == 14
+#include "fonts/font_un_14.h"
+const char *gui_fonts[1] = { font_un_14 };
+char *curr_font = font_un_14;
+#elif ONEFONT == 15
+#include "fonts/font_un_15.h"
+const char *gui_fonts[1] = { font_un_15 };
+char *curr_font = font_un_15;
+#elif ONEFONT == 16
+#include "fonts/font_un_16.h"
+const char *gui_fonts[1] = { font_un_16 };
+char *curr_font = font_un_16;
+#elif ONEFONT == 17
+#include "fonts/font_un_17.h"
+const char *gui_fonts[1] = { font_un_17 };
+char *curr_font = font_un_17;
+#elif ONEFONT == 18
+#include "fonts/font_un_18.h"
+const char *gui_fonts[1] = { font_un_18 };
+char *curr_font = font_un_18;
+#elif ONEFONT == 19
+#include "fonts/font_un_19.h"
+const char *gui_fonts[1] = { font_un_19 };
+char *curr_font = font_un_19;
+#elif ONEFONT == 20
+#include "fonts/font_un_20.h"
+const char *gui_fonts[1] = { font_un_20 };
+#elif ONEFONT == 21
+#include "fonts/font_un_21.h"
+const char *gui_fonts[1] = { font_un_21 };
+#else
+#include "fonts/font_un_01.h"
+#include "fonts/font_un_02.h"
+#include "fonts/font_un_03.h"
+#include "fonts/font_un_04.h"
+#include "fonts/font_un_05.h"
+#include "fonts/font_un_06.h"
+#include "fonts/font_un_07.h"
+#include "fonts/font_un_08.h"
+#include "fonts/font_un_09.h"
+#include "fonts/font_un_10.h"
+#include "fonts/font_un_11.h"
+#include "fonts/font_un_12.h"
+#include "fonts/font_un_13.h"
+#include "fonts/font_un_14.h"
+#include "fonts/font_un_15.h"
+#include "fonts/font_un_16.h"
+#include "fonts/font_un_17.h"
+#include "fonts/font_un_18.h"
+#include "fonts/font_un_19.h"
+#include "fonts/font_un_20.h"
+#include "fonts/font_un_21.h"
 const char *gui_fonts[21] = {
     font_un_01,    font_un_02,    font_un_03,    font_un_04,    font_un_05,    font_un_06,    font_un_07,
     font_un_08,    font_un_09,    font_un_10,    font_un_11,    font_un_12,    font_un_13,    font_un_14,
     font_un_15,    font_un_16,    font_un_17,    font_un_18,    font_un_19,    font_un_20,    font_un_21};
 char *curr_font = font_un_09;
-const int gui_font_count = 21;
+#endif
+
+const int gui_font_count = FONT_COUNT;
 
 const lang_t *gui_lang[7] = {
     &lang_en_us,

@@ -6,6 +6,16 @@
 
 #define ODROID_DIALOG_CHOICE_SEPARATOR {0x0F0F0F0E, "-", "-", -1, NULL}
 
+#if !defined ONEFONT
+#define ONEFONT 0
+#endif
+
+#if ((ONEFONT > 0) && (ONEFONT < 22))
+#define FONT_COUNT 1
+#else
+#define FONT_COUNT 21
+#endif
+
 extern char *curr_font;
 extern const char* gui_fonts[];
 extern const int gui_font_count;
