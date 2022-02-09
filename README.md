@@ -4,9 +4,9 @@
 Please run `make help` to see more information.
 
 ## **Undocumented 256k BANK used by default**
- Now NewUI used BANK as undocumented size 256k by default, It's required  to work. You can set `BIG_BANK=0` disabled it to use 128k BANK size.
+ Now NewUI used BANK as undocumented size 256k by default, It's required [patched version of openocd](https://github.com/kbeckmann/ubuntu-openocd-git-builder) to work. You can set `BIG_BANK=0` disabled it to use 128k BANK size.
 
-:exclamation: 128k internal is too small to enough Coverflow UI | i18n | multi font and program more game rom, So [patched version of openocd] is recommend.
+:exclamation: 128k internal is too small to enough Coverflow UI | i18n | multi font and program more game rom, So [patched version of openocd](https://github.com/kbeckmann/ubuntu-openocd-git-builder) is recommend.
 
 ### i18n support
 `make CODEPAGE=lang` Sets codepage to configures default display language.(default=1252 as English);
