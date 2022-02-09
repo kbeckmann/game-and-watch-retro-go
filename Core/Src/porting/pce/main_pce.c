@@ -277,11 +277,17 @@ void LoadCartPCE() {
     int offset;
     size_t rom_length = pce_osd_getromdata(&PCE.ROM);
     offset = rom_length & 0x1fff;
-       PCE.ROM_SIZE = (rom_length - offset) / 0x2000;
-       PCE.ROM_DATA = PCE.ROM + offset;
-       PCE.ROM_CRC = crc32_le(0, PCE.ROM, rom_length);
-       uint32_t IDX = 0;
-       uint32_t ROM_MASK = 1;
+    PCE.ROM_SIZE = (rom_length - offset) / 0x2000;
+    PCE.ROM_DATA = PCE.ROM + offset;
+    if (PCE.ROM_SIZE < 192) {
+        PCE.ROM_CRC = crc32_le(0, PCE.ROM, ROM_DATA_LENGTH);
+    } else {
+        PCE.ROM_CRC = crc32_le(0, PCE.ROM, 4096);
+    }
+    //   PCE.ROM_CRC = crc32_le(0, PCE.ROM, rom_length);
+
+       uint IDX = 0;
+       uint ROM_MASK = 1;
 
        while (ROM_MASK < PCE.ROM_SIZE) ROM_MASK <<= 1;
        ROM_MASK--;
