@@ -1,6 +1,5 @@
 import argparse
 
-
 from fcdata import fontdata 
 
 class char:
@@ -85,7 +84,10 @@ def write_fontpixels(fn, height):
 def main():
     import sys
     #filepath.stem
-    write_fontpixels(sys.argv[0] + ".txt", 12)
+    if (len(sys.argv) > 1):
+        write_fontpixels(sys.argv[1], 12)
+    else:
+        write_fontpixels(sys.argv[0] + ".txt", 12)
 
 if __name__ == "__main__":
     main()

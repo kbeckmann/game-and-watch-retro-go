@@ -146,16 +146,6 @@ char *curr_font = font_un_17;
 #include "fonts/font_un_18.h"
 const char *gui_fonts[1] = { font_un_18 };
 char *curr_font = font_un_18;
-#elif ONEFONT == 19
-#include "fonts/font_un_19.h"
-const char *gui_fonts[1] = { font_un_19 };
-char *curr_font = font_un_19;
-#elif ONEFONT == 20
-#include "fonts/font_un_20.h"
-const char *gui_fonts[1] = { font_un_20 };
-#elif ONEFONT == 21
-#include "fonts/font_un_21.h"
-const char *gui_fonts[1] = { font_un_21 };
 #else
 #include "fonts/font_un_01.h"
 #include "fonts/font_un_02.h"
@@ -175,14 +165,13 @@ const char *gui_fonts[1] = { font_un_21 };
 #include "fonts/font_un_16.h"
 #include "fonts/font_un_17.h"
 #include "fonts/font_un_18.h"
-#include "fonts/font_un_19.h"
-#include "fonts/font_un_20.h"
-#include "fonts/font_un_21.h"
-const char *gui_fonts[21] = {
-    font_un_01,    font_un_02,    font_un_03,    font_un_04,    font_un_05,    font_un_06,    font_un_07,
-    font_un_08,    font_un_09,    font_un_10,    font_un_11,    font_un_12,    font_un_13,    font_un_14,
-    font_un_15,    font_un_16,    font_un_17,    font_un_18,    font_un_19,    font_un_20,    font_un_21};
-char *curr_font = font_un_09;
+const char *gui_fonts[18] = {
+    font_un_01,    font_un_02,    font_un_03,    font_un_04,    font_un_05,    
+    font_un_06,    font_un_07,    font_un_08,    font_un_09,    font_un_10,    
+    font_un_11,    font_un_12,    font_un_13,    font_un_14,    font_un_15,    
+    font_un_16,    font_un_17,    font_un_18,    
+    };
+char *curr_font = font_un_01;
 #endif
 
 const int gui_font_count = FONT_COUNT;
