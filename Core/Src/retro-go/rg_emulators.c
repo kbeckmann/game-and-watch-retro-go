@@ -463,7 +463,7 @@ void emulators_init()
 #endif
 
 #ifdef ENABLE_EMULATOR_PCE
-    add_emulator("PC Engine", "pce", "pce", "huexpress-go", 0, header_pce);
+    add_emulator("PC Engine", "pce", "pce", "pce-go", 0, header_pce);
 #endif
 
 #ifdef ENABLE_EMULATOR_GW

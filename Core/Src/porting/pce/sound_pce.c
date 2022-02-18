@@ -18,6 +18,27 @@ static int32_t noise_level[PSG_CHANNELS];
 // static uint8_t mix_buffer[44100 / 60 * 2];
 static sample_t mix_buffer[PCE_SAMPLE_RATE / 60 * 2];
 
+struct host_machine {
+	bool paused;
+	bool netplay;
+
+	struct {
+		int frameSkip;
+		int bgEnabled;
+		int fgEnabled;
+	} options;
+
+	struct {
+		int stereo;
+		int freq;
+		int sample_size;
+	} sound;
+
+	struct {
+		bool splatterhouse;
+	} hacks;
+};
+
 struct host_machine host;
 
 static inline void
@@ -187,7 +208,8 @@ int pce_snd_init(void) {
 
 
 void pce_snd_term(void) {
-    osd_snd_shutdown();
+    //doesn't exist anymore on the pce-go code
+    //osd_snd_shutdown();
 }
 
 
