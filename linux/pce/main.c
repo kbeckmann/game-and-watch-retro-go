@@ -96,7 +96,7 @@ int capTimer;
 #define SVAR_N(k, v, n) { n, k, &v }
 #define SVAR_END { 0, "\0\0\0\0", 0 }
 
-static const char SAVESTATE_HEADER[8] = "PCE_V006";
+static const char SAVESTATE_HEADER[8] = "PCE_V007";
 static const struct
 {
 	size_t len;
@@ -114,7 +114,7 @@ static const struct
 
 	// Misc
 	SVAR_4("Cycles", Cycles),                   SVAR_4("MaxCycles", PCE.MaxCycles),
-	SVAR_1("SF2", PCE.SF2),
+	SVAR_1("SF2", PCE.SF2),                     SVAR_2("VBlankFL", PCE.VBlankFL),
 
 	// IRQ
 	SVAR_1("irq_mask", CPU.irq_mask),           SVAR_1("irq_mask_delay", CPU.irq_mask_delay),
@@ -128,12 +128,13 @@ static const struct
 	SVAR_N("psg.ch4", PCE.PSG.chan[4], 40),     SVAR_N("psg.ch5", PCE.PSG.chan[5], 40),
 
 	// VCE
+    SVAR_1("vce_cr", PCE.VCE.CR),               SVAR_1("vce_dot_clock", PCE.VCE.dot_clock),
 	SVAR_A("vce_regs", PCE.VCE.regs),           SVAR_2("vce_reg", PCE.VCE.reg),
 
 	// VDC
 	SVAR_A("vdc_regs", PCE.VDC.regs),           SVAR_1("vdc_reg", PCE.VDC.reg),
 	SVAR_1("vdc_status", PCE.VDC.status),       SVAR_1("vdc_satb", PCE.VDC.vram),
-	SVAR_1("vdc_satb", PCE.VDC.satb),			SVAR_4("vdc_pending_irqs", PCE.VDC.pending_irqs),
+	SVAR_1("vdc_satb", PCE.VDC.satb),			SVAR_4("vdc_pen_irqs", PCE.VDC.pending_irqs),
 
 	// Timer
 	SVAR_1("timer_reload", PCE.Timer.reload),   SVAR_1("timer_running", PCE.Timer.running),
@@ -627,11 +628,10 @@ int main(int argc, char *argv[])
         pce_input_read(&joystick);
 
         for (PCE.Scanline = 0; PCE.Scanline < 263; ++PCE.Scanline) {
-            h6280_run();
             gfx_run();
         }
         pce_osd_gfx_blit(drawFrame);
-//        if(drawFrame) pce_pcm_submit();
+        //if(drawFrame) pce_pcm_submit();
 
         // Prevent overflow
         PCE.Timer.cycles_counter -= Cycles;
