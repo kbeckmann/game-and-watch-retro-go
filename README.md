@@ -3,6 +3,12 @@
 # NewUI howto
 Please run `make help` to see more information.
 
+來自[maxxkao](http://maxxkao.blogspot.com/)的刷機攻略：
+
+[Nintendo Game & Watch 刷機完全攻略](https://maxxkao.blogspot.com/2022/01/game-watch.html)
+
+[Zelda Game & Watch Dual System 薩爾達機刷雙系統完全攻略](https://maxxkao.blogspot.com/2022/02/zelda-game-watch-dual-boot-wip.html)
+
 ## **Undocumented 256k BANK used by default**
  Now NewUI used BANK as undocumented size 256k by default, It's required [patched version of openocd](https://github.com/kbeckmann/ubuntu-openocd-git-builder) to work. You can set `BIG_BANK=0` disabled it to use 128k BANK size.
 
