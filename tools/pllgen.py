@@ -26,10 +26,10 @@ if __name__ == "__main__":
     for fracn2 in range(0, 8191):
         for divm2 in range(1, 64):
             for divn2 in range(8, 421):
-                    for divp2 in range(1, 129):
-                        freq = ((hsi / divm2) * (divn2 + fracn2 / (1<<13))) / divp2 / 2048
-                        error = abs(1.0 - args.samplerate / freq)
-                        if freq == args.samplerate:
-                            print(f"DIVM2={divm2}, DIVN2={divn2}, FRACN2={fracn2} DIVP2={divp2} => {freq}")
-                        elif error < args.error:
-                            print(f"DIVM2={divm2}, DIVN2={divn2}, FRACN2={fracn2} DIVP2={divp2} => {freq:.5f}, error={error * 100:.5f}%")
+                for divp2 in range(1, 129):
+                    freq = ((hsi / divm2) * (divn2 + fracn2 / (1<<13))) / divp2 / 2048
+                    error = abs(1.0 - args.samplerate / freq)
+                    if freq == args.samplerate:
+                        print(f"DIVM2={divm2}, DIVN2={divn2}, FRACN2={fracn2} DIVP2={divp2} => {freq}")
+                    elif error < args.error:
+                        print(f"DIVM2={divm2}, DIVN2={divn2}, FRACN2={fracn2} DIVP2={divp2} => {freq:.5f}, error={error * 100:.5f}%")
