@@ -111,6 +111,9 @@ python3 -m pip install -r requirements.txt
 #     * If you are using a modified unit with a larger external flash,
 #       set the EXTFLASH_SIZE_MB to its size in megabytes (MB) (16MB used in the example):
 #           make -j8 EXTFLASH_SIZE_MB=16 flash
+#     * If you have the Zelda version you can set GNW_TARGET=zelda to have the appropriate
+#       flash size and theme set. If you want to stick with the red theme you can set
+#       EXTFLASH_SIZE_MB=4 on your Zelda model.
 
 make -j8 flash
 ```
