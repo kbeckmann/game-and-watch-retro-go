@@ -457,7 +457,7 @@ int main(void)
 
   // Keep this
   // at least 8 frames at the end of power down (lcd_deinit())
-  // 8 x 20 ms => 200ms
+  // 4 x 50 ms => 200ms
   for (int i = 0; i < 4; i++) {
     wdog_refresh();
     HAL_Delay(50);
