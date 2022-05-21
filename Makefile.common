@@ -418,10 +418,10 @@ CheckTools:
 		) \
 		done"
 
-	@# Check that GCC version 10 or 11 is used
-	$(V)$(CC) -v 2>&1 | grep "gcc version 1[01]" > /dev/null || \
+	@# Check that GCC version 10 or higher is used
+	$(V)$(CC) -v 2>&1 | grep "gcc version 1[0-9]" > /dev/null || \
 		( \
-			echo -e "\n\n\nPlease use GCC version 10\n\n\nYou are using:" && \
+			echo -e "\n\n\nPlease use GCC version 10 or higher.\n\n\nYou are using:" && \
 			$(CC) -v 2>&1 | grep "gcc version" ; \
 			echo -e "\n\n\n" && \
 			exit 1 \
