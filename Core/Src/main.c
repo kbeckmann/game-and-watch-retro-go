@@ -450,13 +450,27 @@ int main(void)
   // Save the button states as early as possible
   boot_buttons = buttons_get();
 
+  lcd_backlight_off();
+
+  /* Power off LCD and external Flash */
+  lcd_deinit(&hspi2);
+
   // Keep this
-  for (int i = 0; i < 10; i++) {
-      wdog_refresh();
-      HAL_Delay(50);
+  // at least 8 frames at the end of power down (lcd_deinit())
+  // 4 x 50 ms => 200ms
+  for (int i = 0; i < 4; i++) {
+    wdog_refresh();
+    HAL_Delay(50);
   }
 
+  /* Power on LCD and external Flash */
   lcd_init(&hspi2, &hltdc);
+
+  // Keep this
+  for (int i = 0; i < 4; i++) {
+    wdog_refresh();
+    HAL_Delay(50);
+  }
 
   if (trigger_wdt_bsod) {
     BSOD(BSOD_WATCHDOG, 0, 0);
@@ -1172,16 +1186,24 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIO_Speaker_enable_GPIO_Port, GPIO_Speaker_enable_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
+  /* E8=CE_n USB Charger  */ 
   HAL_GPIO_WritePin(GPIOE, GPIO_PIN_8, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
+  /* PB12 LCD Reset line pull-up VAux1V8 */
   HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
+  /* PD8 LCD_CSn Chip Select line low speed due to capacitor 100nf to GND (inverted) */
   HAL_GPIO_WritePin(GPIOD, GPIO_PIN_8, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_1|GPIO_PIN_4, GPIO_PIN_RESET);
+   /* PD1 1.8V-> 1.8Vaux Disable power for LCD & External FLASH */
+  /* PD4 3.7V-> 3.3V    Enable   power for LCD */
+
+  /* Power off 1.8Vaux and 3.3V */
+  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_1, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_4, GPIO_PIN_RESET);
 
   /*Configure GPIO pins : GPIO_Speaker_enable_Pin PE8 */
   GPIO_InitStruct.Pin = GPIO_Speaker_enable_Pin|GPIO_PIN_8;
