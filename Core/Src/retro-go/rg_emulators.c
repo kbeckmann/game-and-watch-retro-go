@@ -22,6 +22,8 @@
 static retro_emulator_t emulators[MAX_EMULATORS];
 static int emulators_count = 0;
 
+static retro_emulator_file_t *CHOSEN_FILE = NULL;
+
 retro_emulator_t *file_to_emu(retro_emulator_file_t *file) {
     for (int i = 0; i < MAX_EMULATORS; i++)
         if (emulators[i].system == file->system)
@@ -73,8 +75,12 @@ static void event_handler(gui_event_t event, tab_t *tab)
 
     if (event == KEY_PRESS_A)
     {
-        emulator_show_file_menu(file);
-        gui_redraw();
+        while(true) {
+            bool redraw = emulator_show_file_menu(file);
+            gui_redraw();
+            gui_redraw();
+            if (!redraw) break;
+        }
     }
     else if (event == KEY_PRESS_B)
     {
@@ -328,8 +334,59 @@ void emulator_show_file_info(retro_emulator_file_t *file)
     odroid_overlay_dialog("Properties", choices, -1);
 }
 
-void emulator_show_file_menu(retro_emulator_file_t *file)
+#if GAME_GENIE == 1
+static bool game_genie_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat)
 {
+    if (event == ODROID_DIALOG_PREV || event == ODROID_DIALOG_NEXT) {
+      if (option->value == ODROID_DIALOG_VALUE_OFF) {
+          bool result = odroid_settings_ActiveGameGenieCodes_set(CHOSEN_FILE->id, option->id, true);
+          if (result) {
+              option->value = ODROID_DIALOG_VALUE_ON;
+          } else {
+              option->value = ODROID_DIALOG_VALUE_OFF;
+          }
+      } else {
+          option->value = ODROID_DIALOG_VALUE_OFF;
+          odroid_settings_ActiveGameGenieCodes_set(CHOSEN_FILE->id, option->id, false);
+      }
+    }
+
+    return event == ODROID_DIALOG_ENTER;
+}
+
+static bool show_game_genie_dialog()
+{
+    static odroid_dialog_choice_t last = ODROID_DIALOG_CHOICE_LAST;
+
+    // +1 for the terminator sentinel
+    odroid_dialog_choice_t *choices = rg_alloc((CHOSEN_FILE->game_genie_count + 1) * sizeof(odroid_dialog_choice_t), MEM_ANY);
+    for(int i=0; i<CHOSEN_FILE->game_genie_count; i++) {
+        const char *label = CHOSEN_FILE->game_genie_descs[i];
+        if (label == NULL) {
+            label = CHOSEN_FILE->game_genie_codes[i];
+        }
+        bool is_on = odroid_settings_ActiveGameGenieCodes_is_enabled(CHOSEN_FILE->id, i);
+        choices[i].id = i;
+        choices[i].label = label;
+        choices[i].value = is_on ? ODROID_DIALOG_VALUE_ON : ODROID_DIALOG_VALUE_OFF;
+        choices[i].enabled = 1;
+        choices[i].update_cb = game_genie_update_cb;
+    }
+    choices[CHOSEN_FILE->game_genie_count] = last;
+
+    odroid_overlay_dialog("Game Genie Codes", choices, 0);
+
+    rg_free(choices);
+
+    odroid_settings_commit();
+
+    return false;
+}
+#endif
+
+bool emulator_show_file_menu(retro_emulator_file_t *file)
+{
+    CHOSEN_FILE = file;
     // char *save_path = odroid_system_get_path(ODROID_PATH_SAVE_STATE, emu_get_file_path(file));
     // char *sram_path = odroid_system_get_path(ODROID_PATH_SAVE_SRAM, emu_get_file_path(file));
     // bool has_save = odroid_sdcard_get_filesize(save_path) > 0;
@@ -339,6 +396,16 @@ void emulator_show_file_menu(retro_emulator_file_t *file)
     bool has_save = 1;
     bool has_sram = 0;
     bool is_fav = 0;
+    bool force_redraw = false;
+
+#if GAME_GENIE == 1
+    odroid_dialog_choice_t last = ODROID_DIALOG_CHOICE_LAST;
+    odroid_dialog_choice_t game_genie_row = {4, "Game Genie Codes", "", 1, NULL};
+    odroid_dialog_choice_t game_genie_choice = last; 
+    if (strcmp(file->system->system_name, "Nintendo Entertainment System") == 0) {
+        game_genie_choice = game_genie_row;
+    }
+#endif
 
     odroid_dialog_choice_t choices[] = {
 #if STATE_SAVING == 1
@@ -349,6 +416,10 @@ void emulator_show_file_menu(retro_emulator_file_t *file)
         {3, is_fav ? "Del favorite" : "Add favorite", "", 1, NULL},
 #if STATE_SAVING == 1
         {2, "Delete save ", "", has_save || has_sram, NULL},
+#endif
+#if GAME_GENIE == 1
+        {0, "------------", "", -1, NULL},
+        game_genie_choice,
 #endif
         ODROID_DIALOG_CHOICE_LAST
     };
@@ -369,9 +440,18 @@ void emulator_show_file_menu(retro_emulator_file_t *file)
         // else
         //     favorite_add(file);
     }
+    else if (sel == 4) {
+#if GAME_GENIE == 1
+        show_game_genie_dialog();
+        force_redraw = true;
+#endif
+    }
 
     // free(save_path);
     // free(sram_path);
+    CHOSEN_FILE = NULL;
+
+    return force_redraw;
 }
 
 void emulator_start(retro_emulator_file_t *file, bool load_state, bool start_paused)

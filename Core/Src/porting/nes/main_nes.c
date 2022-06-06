@@ -565,7 +565,29 @@ int app_main_nes(uint8_t load_state, uint8_t start_paused)
         HAL_SAI_Transmit_DMA(&hsai_BlockA1, (uint8_t *) audiobuffer_dma, (2 * AUDIO_SAMPLE_RATE) / 60);
     }
 
-    nofrendo_start(ACTIVE_FILE->name, nes_region, AUDIO_SAMPLE_RATE, false);
+    int game_genie_count = 0;
+    const char **active_game_genie_codes = NULL;
+#if GAME_GENIE == 1
+    for(int i=0; i<MAX_GAME_GENIE_CODES && i<ACTIVE_FILE->game_genie_count; i++) {
+        if (odroid_settings_ActiveGameGenieCodes_is_enabled(ACTIVE_FILE->id, i)) {
+            game_genie_count++;
+        }
+    }
+
+    active_game_genie_codes = rg_alloc(game_genie_count * sizeof(char**), MEM_ANY);
+    for(int i=0, j=0; i<MAX_GAME_GENIE_CODES && i<ACTIVE_FILE->game_genie_count; i++) {
+        if (odroid_settings_ActiveGameGenieCodes_is_enabled(ACTIVE_FILE->id, i)) {
+            active_game_genie_codes[j] = ACTIVE_FILE->game_genie_codes[i];
+            j++;
+        }
+    }
+#endif
+
+    nofrendo_start(ACTIVE_FILE->name, active_game_genie_codes, game_genie_count, nes_region, AUDIO_SAMPLE_RATE, false);
+
+#if GAME_GENIE == 1
+    rg_free(active_game_genie_codes); // No need to clean up the objects in the array as they're allocated in read only space
+#endif
 
     return 0;
 }

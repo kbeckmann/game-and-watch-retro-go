@@ -86,7 +86,7 @@ void nofrendo_stop(void)
    // vid_shutdown();
 }
 
-int nofrendo_start(const char *filename, int region, int sample_rate, bool stereo)
+int nofrendo_start(const char *filename, const char **game_genie_codes, int game_genie_codes_count, int region, int sample_rate, bool stereo)
 {
    if (osd_init())
       return -1;
@@ -97,7 +97,7 @@ int nofrendo_start(const char *filename, int region, int sample_rate, bool stere
       return -1;
    }
 
-   if (!nes_insertcart(filename))
+   if (!nes_insertcart(filename, game_genie_codes, game_genie_codes_count))
    {
       MESSAGE_ERROR("Failed to insert NES cart.\n");
       return -2;

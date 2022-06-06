@@ -19,6 +19,7 @@ Core/Src/bilinear.c \
 Core/Src/gw_buttons.c \
 Core/Src/gw_flash.c \
 Core/Src/gw_lcd.c \
+Core/Src/game_genie.c \
 Core/Src/main.c \
 Core/Src/sha256.c \
 Core/Src/flashapp.c \
