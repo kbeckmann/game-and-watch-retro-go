@@ -159,9 +159,13 @@ If you need to change the project settings and generate c-code from stm32cubemx,
 
 ## Backing up and restoring save state files
 
-Save states can be backed up using `./scripts/saves_backup.sh build/gw_retro_go.elf`. Make sure to use the elf file that matches what is running on your device! It is a good idea to keep this elf file in case you want to back up at a later time. This can also be achieved with `make flash_saves_backup`.
+Save states can be backed up using either `./scripts/saves_backup.sh build/gw_retro_go.elf` or by running `make flash_saves_backup`. Make sure to use the elf file that matches what is running on your device! It is a good idea to keep this elf file in case you want to back up at a later time.
+
+:exclamation: Note the same variables that were used to flash have to be set here as well, i.e. `ADAPTER`, `EXTFLASH_SIZE_MB`, `EXTFLASH_OFFSET`, `INTFLASH_BANK` etc. This is best done with `export VARIABLE=value`.
 
 This downloads all save states to the local directory `./save_states`. Each save state will be located in `./save_states/<emu>/<rom name>.save`.
+
+:exclamation: Make sure to keep a backup of your elf file (`build/gw_retro_go.elf`) if you intend to make backups at a later time. The elf file has to match what's running on the device.
 
 After this, it's safe to change roms, pull new code and build & flash the device.
 
