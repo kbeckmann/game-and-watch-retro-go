@@ -196,11 +196,13 @@ The recommended flash to upgrade to is MX25U12835FM2I-10G. It's 16MB, the comman
 ### Custom Firmware (CFW)
 In order to install both the CFW (modified stock rom) and retro-go at the same time, a [patched version of openocd](https://github.com/kbeckmann/ubuntu-openocd-git-builder) needs to be installed and used.
 
+Since we're using the patched version of openocd, we are also going to specify the `EXTENDED=1` flag, which can free up to an additional 128KB of extflash.
+
 In this example, we'll be compiling retro-go to be used with a 64MB (512Mb) `MX25U51245GZ4I00` flash chip and [custom firmware](https://github.com/BrianPugh/game-and-watch-patch). The internal custom firmware will be located at `0x08000000`, which corresponds to `INTFLASH_BANK=1`. The internal retro-go firmware will be flashed to `0x08100000`, which corresponds to `INTFLASH_BANK=2`. The configuration of custom firmware described below won't use any extflash, so no `EXTFLASH_OFFSET` is specified. We can now build and flash the firmware with the following command:
 
 ```bash
 make clean
-make -j8 EXTFLASH_SIZE_MB=64 INTFLASH_BANK=2 flash
+make -j8 EXTFLASH_SIZE_MB=64 INTFLASH_BANK=2 EXTENDED=1 flash
 ```
 
 To flash the custom firmware, [follow the CFW README](https://github.com/BrianPugh/game-and-watch-patch#retro-go). But basically, after you install the dependencies and place the correct files in the directory, run:
