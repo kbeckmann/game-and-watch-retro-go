@@ -33,3 +33,4 @@ venv
 
 **/*.pyc
 
+*.sw[mnop]

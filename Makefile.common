@@ -67,6 +67,8 @@ else
 	ENABLE_SCREENSHOT ?= 1
 endif
 
+ENABLE_TURBO_BUTTONS ?= 0
+
 # Compress supported ROMs by default. Set to 0 to disable.
 COMPRESS ?= lzma
 ifeq ($(COMPRESS),0)
@@ -277,6 +279,7 @@ C_DEFS +=  \
 -DDEBUG_RG_ALLOC \
 -DSTATE_SAVING=$(STATE_SAVING) \
 -DENABLE_SCREENSHOT=$(ENABLE_SCREENSHOT) \
+-DENABLE_TURBO_BUTTONS=$(ENABLE_TURBO_BUTTONS) \
 -DGNW_TARGET_MARIO=$(GNW_TARGET_MARIO) \
 -DGNW_TARGET_ZELDA=$(GNW_TARGET_ZELDA)
 
@@ -645,6 +648,7 @@ help:
 	@echo "  RESET_DBGMCU        - Configures if DBGMCU should be reset after flashing."
 	@echo "                        Set to 0 to disable power saving (default=1)"
 	@echo "  ENABLE_SCREENSHOT   - Set to 1 to enable screenshot support (default disabled if extflash is 1MB)"
+	@echo "  ENABLE_TURBO_BUTTONS- Set to 1 to swap start/select buttons for turbo A and B buttons (Zelda only) (default=0)"
 	@echo "  GNW_TARGET          - Game & Watch target, Valid values {mario,zelda} (default=mario)"
 	@echo ""
 	@echo "Current configuration:"
@@ -658,6 +662,7 @@ help:
 	@echo "  STATE_SAVING=$(STATE_SAVING)"
 	@echo "  RESET_DBGMCU=$(RESET_DBGMCU)"
 	@echo "  ENABLE_SCREENSHOT=$(ENABLE_SCREENSHOT)"
+	@echo "  ENABLE_TURBO_BUTTONS=$(ENABLE_TURBO_BUTTONS)"
 	@echo "  GNW_TARGET=$(GNW_TARGET)"
 	@echo "  GCC_PATH=$(GCC_PATH)"
 	@echo "  PREFIX=$(PREFIX)"
