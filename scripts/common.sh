@@ -44,14 +44,26 @@ fi
 
 function get_symbol {
     name=$1
-    objdump_cmd="${OBJDUMP} -t ${ELF}"
+    uname_out="$(uname -s)"
+    if test "${uname_out#CYGWIN}" != "$uname_out"; then
+        elf_path=$(cygpath -w ${ELF})
+    else
+        elf_path=${ELF}
+    fi
+    objdump_cmd="${OBJDUMP} -t $elf_path"
     size=$(${objdump_cmd} | grep " $name$" | cut -d " " -f1 | tr 'a-f' 'A-F' | head -n 1)
     printf "$((16#${size}))\n"
 }
 
 function get_number_of_saves {
     prefix=$1
-    objdump_cmd="${OBJDUMP} -t ${ELF}"
+    uname_out="$(uname -s)"
+    if test "${uname_out#CYGWIN}" != "$uname_out"; then
+        elf_path=$(cygpath -w ${ELF})
+    else
+        elf_path=${ELF}
+    fi
+    objdump_cmd="${OBJDUMP} -t ${elf_path}"
     echo $(${objdump_cmd} | grep " $prefix" | wc -l)
 }
 
