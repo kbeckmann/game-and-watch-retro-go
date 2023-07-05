@@ -234,8 +234,8 @@ void retro_loop()
                     {0, "By", "ducalex", 1, NULL},
                     {0, "", "kbeckmann", 1, NULL},
                     {0, "", "stacksmashing", 1, NULL},
+                    {0, "", "niflheims", 1, NULL},
                     {0, "", "", -1, NULL},
-                    {2, "Debug menu", "", 1, NULL},
                     {1, "Reset settings", "", 1, NULL},
                     {0, "Close", "", 1, NULL},
                     ODROID_DIALOG_CHOICE_LAST
@@ -247,72 +247,6 @@ void retro_loop()
                     if (odroid_overlay_confirm("Reset all settings?", false) == 1) {
                         odroid_settings_reset();
                         odroid_system_switch_app(0); // reset
-                    }
-                } else if (sel == 2) {
-                    // Debug menu
-                    uint8_t jedec_id[3];
-                    char jedec_id_str[16];
-                    uint8_t status;
-                    char status_str[8];
-                    uint8_t config;
-                    char config_str[8];
-                    char erase_size_str[32];
-                    char dbgmcu_id_str[16];
-                    char dbgmcu_cr_str[16];
-
-                    // Read jedec id and status register from the external flash
-                    OSPI_DisableMemoryMappedMode();
-                    OSPI_ReadJedecId(&jedec_id[0]);
-                    OSPI_ReadSR(&status);
-                    OSPI_ReadCR(&config);
-                    OSPI_EnableMemoryMappedMode();
-
-                    snprintf(jedec_id_str, sizeof(jedec_id_str), "%02X %02X %02X", jedec_id[0], jedec_id[1], jedec_id[2]);
-                    snprintf(status_str, sizeof(status_str), "0x%02X", status);
-                    snprintf(config_str, sizeof(config_str), "0x%02X", config);
-                    snprintf(erase_size_str, sizeof(erase_size_str), "%ld kB", OSPI_GetSmallestEraseSize() / 1024);
-                    snprintf(dbgmcu_id_str, sizeof(dbgmcu_id_str), "0x%08lX", DBGMCU->IDCODE);
-                    snprintf(dbgmcu_cr_str, sizeof(dbgmcu_cr_str), "0x%08lX", DBGMCU->CR);
-
-                    odroid_dialog_choice_t debuginfo[] = {
-                        {0, "Flash JEDEC ID", (char *) jedec_id_str, 1, NULL},
-                        {0, "Flash Name", (char*) OSPI_GetFlashName(), 1, NULL},
-                        {0, "Flash SR", (char *) status_str, 1, NULL},
-                        {0, "Flash CR", (char *) config_str, 1, NULL},
-                        {0, "Smallest erase", erase_size_str, 1, NULL},
-                        {0, "------------------", "", 1, NULL},
-                        {0, "DBGMCU IDCODE", dbgmcu_id_str, 1, NULL},
-                        {1, "Enable DBGMCU CK", dbgmcu_cr_str, 1, NULL},
-                        {2, "Disable DBGMCU CK", "", 1, NULL},
-                        {0, "Close", "", 1, NULL},
-                        ODROID_DIALOG_CHOICE_LAST
-                    };
-
-                    int sel = odroid_overlay_dialog("Debug", debuginfo, -1);
-                    switch (sel) {
-                    case 1:
-                        // Enable debug clocks explicitly
-                        SET_BIT(DBGMCU->CR,
-                            DBGMCU_CR_DBG_SLEEPCD |
-                            DBGMCU_CR_DBG_STOPCD |
-                            DBGMCU_CR_DBG_STANDBYCD |
-                            DBGMCU_CR_DBG_TRACECKEN |
-                            DBGMCU_CR_DBG_CKCDEN |
-                            DBGMCU_CR_DBG_CKSRDEN
-                        );
-                    case 2:
-                        // Disable debug clocks explicitly
-                        CLEAR_BIT(DBGMCU->CR,
-                            DBGMCU_CR_DBG_SLEEPCD |
-                            DBGMCU_CR_DBG_STOPCD |
-                            DBGMCU_CR_DBG_STANDBYCD |
-                            DBGMCU_CR_DBG_TRACECKEN |
-                            DBGMCU_CR_DBG_CKCDEN |
-                            DBGMCU_CR_DBG_CKSRDEN
-                        );
-                        break;
-                    default:
-                        break;
                     }
                 }
 

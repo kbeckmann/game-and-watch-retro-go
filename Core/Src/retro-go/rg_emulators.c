@@ -334,11 +334,9 @@ void emulator_show_file_menu(retro_emulator_file_t *file)
     // char *sram_path = odroid_system_get_path(ODROID_PATH_SAVE_SRAM, emu_get_file_path(file));
     // bool has_save = odroid_sdcard_get_filesize(save_path) > 0;
     // bool has_sram = odroid_sdcard_get_filesize(sram_path) > 0;
-    // bool is_fav = favorite_find(file) != NULL;
 
     bool has_save = 1;
     bool has_sram = 0;
-    bool is_fav = 0;
 
     odroid_dialog_choice_t choices[] = {
 #if STATE_SAVING == 1
@@ -346,7 +344,6 @@ void emulator_show_file_menu(retro_emulator_file_t *file)
 #endif
         {1, "New game    ", "", 1, NULL},
         {0, "------------", "", -1, NULL},
-        {3, is_fav ? "Del favorite" : "Add favorite", "", 1, NULL},
 #if STATE_SAVING == 1
         {2, "Delete save ", "", has_save || has_sram, NULL},
 #endif
@@ -362,12 +359,6 @@ void emulator_show_file_menu(retro_emulator_file_t *file)
         if (odroid_overlay_confirm("Delete save file?", false) == 1) {
             store_erase(file->save_address, file->save_size);
         }
-    }
-    else if (sel == 3) {
-        // if (is_fav)
-        //     favorite_remove(file);
-        // else
-        //     favorite_add(file);
     }
 
     // free(save_path);

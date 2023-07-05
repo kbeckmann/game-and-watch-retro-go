@@ -594,6 +594,7 @@ static void draw_clear_rounded_rectangle(pixel_t *fb, uint16_t x1, uint16_t y1, 
         clear_pixel(&fb[ i + GW_LCD_WIDTH * (y2 - j - 1)]);
 }
 
+// TODO make those macros calling function which return proper dimensions
 #define INGAME_OVERLAY_X 265
 #define INGAME_OVERLAY_Y 10
 #define INGAME_OVERLAY_BARS_H 128
@@ -627,6 +628,7 @@ static uint8_t box_height(uint8_t n) {
     return ((INGAME_OVERLAY_BARS_IMG_Y - INGAME_OVERLAY_BOX_Y) / n) - INGAME_OVERLAY_BOX_GAP;
 }
 
+// FIXME
 void common_ingame_overlay(void) {
     rg_app_desc_t *app = odroid_system_get_app();
     pixel_t *fb = lcd_get_active_buffer();

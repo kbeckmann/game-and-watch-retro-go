@@ -316,7 +316,7 @@ static void blit(void)
     switch (scaling) {
     case ODROID_DISPLAY_SCALING_OFF:
         // Original Resolution
-        screen_blit_nn(160, 144);
+        screen_blit_nn(GW_LCD_ORIG_WIDTH, GW_LCD_ORIG_HEIGHT);
         break;
     case ODROID_DISPLAY_SCALING_FIT:
         // Full height, borders on the side
@@ -325,11 +325,11 @@ static void blit(void)
             /* fall-through */
         case ODROID_DISPLAY_FILTER_SHARP:
             // crisp nearest neighbor scaling
-            screen_blit_nn(266, 240);
+            screen_blit_nn(GW_LCD_FIT_WIDTH, GW_LCD_FIT_HEIGHT);
             break;
         case ODROID_DISPLAY_FILTER_SOFT:
             // soft bilinear scaling
-            screen_blit_bilinear(266);
+            screen_blit_bilinear(GW_LCD_FIT_WIDTH);
             break;
         default:
             printf("Unknown filtering mode %d\n", filtering);
@@ -342,7 +342,7 @@ static void blit(void)
         switch (filtering) {
         case ODROID_DISPLAY_FILTER_OFF:
             // crisp nearest neighbor scaling
-            screen_blit_nn(320, 240);
+            screen_blit_nn(GW_LCD_WIDTH, GW_LCD_HEIGHT);
             break;
         case ODROID_DISPLAY_FILTER_SHARP:
             // sharp bilinear-ish scaling
@@ -350,7 +350,7 @@ static void blit(void)
             break;
         case ODROID_DISPLAY_FILTER_SOFT:
             // soft bilinear scaling
-            screen_blit_bilinear(320);
+            screen_blit_bilinear(GW_LCD_WIDTH);
             break;
         default:
             printf("Unknown filtering mode %d\n", filtering);
