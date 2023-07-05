@@ -32,6 +32,7 @@ typedef struct persistent_config {
     uint8_t backlight;
     uint8_t start_action;
     uint8_t volume;
+    uint8_t sound_profile; // actually a value in ODROID_SOUND_PROFILE
     uint8_t font_size;
     uint8_t startup_app;
     void *startup_file;
@@ -47,11 +48,12 @@ typedef struct persistent_config {
 
 static const persistent_config_t persistent_config_default = {
     .magic = CONFIG_MAGIC,
-    .version = 4,
+    .version = 5,
 
     .backlight = ODROID_BACKLIGHT_LEVEL6,
     .start_action = ODROID_START_ACTION_RESUME,
     .volume = ODROID_AUDIO_VOLUME_MAX / 2, // Too high volume can cause brown out if the battery isn't connected.
+    .sound_profile = ODROID_SOUND_PROFILE_LOW,
     .font_size = 8,
     .startup_app = 0,
     .main_menu_timeout_s = 60 * 10, // Turn off after 10 minutes of idle time in the main menu
@@ -184,6 +186,14 @@ void odroid_settings_Volume_set(int32_t value)
     persistent_config_ram.volume = value;
 }
 
+int32_t odroid_settings_SoundProfile_get()
+{
+    return persistent_config_ram.sound_profile;
+}
+void odroid_settings_SoundProfile_set(int32_t value)
+{
+    persistent_config_ram.sound_profile = value;
+}
 
 int32_t odroid_settings_AudioSink_get()
 {

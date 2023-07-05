@@ -138,6 +138,48 @@ static bool main_menu_timeout_cb(odroid_dialog_choice_t *option, odroid_dialog_e
     return event == ODROID_DIALOG_ENTER;
 }
 
+static bool main_menu_sound_profile_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat)
+{
+    int32_t sp = odroid_settings_SoundProfile_get();
+
+    if (event == ODROID_DIALOG_PREV) {
+        if (sp == 0) {
+            // do not cycle, limited amount of choices
+            // also avoid problems if the key is hold pressed
+            // Lower than 10 seconds doesn't make sense. set to 0 = disabled
+            odroid_settings_SoundProfile_set(0);
+            return false; // no change
+        }
+
+        odroid_settings_SoundProfile_set(sp - 1);
+        gui_redraw();
+    }
+    if (event == ODROID_DIALOG_NEXT) {
+        if (sp == ODROID_SOUND_PROFILE_NORMAL) {
+            odroid_settings_SoundProfile_set(ODROID_SOUND_PROFILE_NORMAL);
+            return false; // no change
+        }
+
+        odroid_settings_SoundProfile_set(sp + 1);
+        gui_redraw();
+    }
+    switch (sp) {
+        case ODROID_SOUND_PROFILE_VERY_LOW:
+            sprintf(option->value, "   very low  ");
+            break;
+        case ODROID_SOUND_PROFILE_LOW:
+            sprintf(option->value, "     low     ");
+            break;
+        case ODROID_SOUND_PROFILE_NORMAL:
+            sprintf(option->value, "    normal   ");
+            break;
+        default:
+            sprintf(option->value, "** invalid **");
+            break;
+    }
+    return event == ODROID_DIALOG_ENTER;
+}
+
 static inline bool tab_enabled(tab_t *tab)
 {
     int disabled_tabs = 0;
@@ -254,9 +296,11 @@ void retro_loop()
             }
             else if (last_key == ODROID_INPUT_VOLUME) {
                 char timeout_value[32];
+                char sp_value[32];
                 odroid_dialog_choice_t choices[] = {
                     {0, "---", "", -1, NULL},
                     {0, "Idle power off", timeout_value, 1, &main_menu_timeout_cb},
+                    {0, "Sound profile",  sp_value,      1, &main_menu_sound_profile_cb},
                     // {0, "Color theme", "1/10", 1, &color_shift_cb},
                     // {0, "Font size", "Small", 1, &font_size_cb},
                     // {0, "Show cover", "Yes", 1, &show_cover_cb},

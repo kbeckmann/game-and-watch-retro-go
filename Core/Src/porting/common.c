@@ -46,6 +46,32 @@ const uint8_t volume_tbl[ODROID_AUDIO_VOLUME_MAX + 1] = {
     (uint8_t)(UINT8_MAX * 1.00f),
 };
 
+const uint8_t volume_tbl_low[ODROID_AUDIO_VOLUME_MAX + 1] = {
+    (uint8_t)(UINT8_MAX * 0.00f),
+    (uint8_t)(UINT8_MAX * 0.015f),
+    (uint8_t)(UINT8_MAX * 0.031f),
+    (uint8_t)(UINT8_MAX * 0.140f),
+    (uint8_t)(UINT8_MAX * 0.25f),
+    (uint8_t)(UINT8_MAX * 0.35f),
+    (uint8_t)(UINT8_MAX * 0.42f),
+    (uint8_t)(UINT8_MAX * 0.60f),
+    (uint8_t)(UINT8_MAX * 0.80f),
+    (uint8_t)(UINT8_MAX * 1.00f),
+};
+
+const uint8_t volume_tbl_very_low[ODROID_AUDIO_VOLUME_MAX + 1] = {
+    (uint8_t)(UINT8_MAX * 0.00f),
+    (uint8_t)(UINT8_MAX * 0.004f),
+    (uint8_t)(UINT8_MAX * 0.008f),
+    (uint8_t)(UINT8_MAX * 0.015f),
+    (uint8_t)(UINT8_MAX * 0.031f),
+    (uint8_t)(UINT8_MAX * 0.140f),
+    (uint8_t)(UINT8_MAX * 0.25f),
+    (uint8_t)(UINT8_MAX * 0.35f),
+    (uint8_t)(UINT8_MAX * 0.42f),
+    (uint8_t)(UINT8_MAX * 0.60f),
+};
+
 void HAL_SAI_TxHalfCpltCallback(SAI_HandleTypeDef *hsai)
 {
     dma_counter++;

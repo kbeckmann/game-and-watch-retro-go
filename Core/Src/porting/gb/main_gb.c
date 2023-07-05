@@ -490,7 +490,20 @@ static bool advanced_settings_cb(odroid_dialog_choice_t *option, odroid_dialog_e
 
 void pcm_submit() {
     uint8_t volume = odroid_audio_volume_get();
-    int32_t factor = volume_tbl[volume];
+    uint8_t sp = odroid_settings_SoundProfile_get();
+    int32_t factor = 0;
+    switch (sp) {
+        case ODROID_SOUND_PROFILE_VERY_LOW:
+            factor = volume_tbl_very_low[volume];
+            break;
+        default:
+        case ODROID_SOUND_PROFILE_LOW:
+            factor = volume_tbl_low[volume];
+            break;
+        case ODROID_SOUND_PROFILE_NORMAL:
+            factor = volume_tbl[volume];
+            break;
+    }
     size_t offset = (dma_state == DMA_TRANSFER_STATE_HF) ? 0 : AUDIO_BUFFER_LENGTH_GB;
 
     if (audio_mute || volume == ODROID_AUDIO_VOLUME_MIN) {
