@@ -33,7 +33,7 @@ int16_t audiobuffer_dma[AUDIO_BUFFER_LENGTH * 2] __attribute__((section (".audio
 dma_transfer_state_t dma_state;
 uint32_t dma_counter;
 
-const uint8_t volume_tbl[ODROID_AUDIO_VOLUME_MAX + 1] = {
+const uint8_t volume_tbl_normal[ODROID_AUDIO_VOLUME_MAX + 1] = {
     (uint8_t)(UINT8_MAX * 0.00f),
     (uint8_t)(UINT8_MAX * 0.06f),
     (uint8_t)(UINT8_MAX * 0.125f),
@@ -71,6 +71,8 @@ const uint8_t volume_tbl_very_low[ODROID_AUDIO_VOLUME_MAX + 1] = {
     (uint8_t)(UINT8_MAX * 0.42f),
     (uint8_t)(UINT8_MAX * 0.60f),
 };
+
+const uint8_t *volume_tbl = volume_tbl_normal;
 
 void HAL_SAI_TxHalfCpltCallback(SAI_HandleTypeDef *hsai)
 {

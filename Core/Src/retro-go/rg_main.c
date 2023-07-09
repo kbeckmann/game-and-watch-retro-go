@@ -6,6 +6,7 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "common.h"
 #include "appid.h"
 #include "rg_emulators.h"
 #include "rg_favorites.h"
@@ -126,7 +127,7 @@ static bool main_menu_timeout_cb(odroid_dialog_choice_t *option, odroid_dialog_e
         else if (timeout == 0xffff) {
             return false;
         }
-        
+
         if (timeout > (0xffff - step)) {
             step = 0xffff - timeout;
         }
@@ -165,16 +166,20 @@ static bool main_menu_sound_profile_cb(odroid_dialog_choice_t *option, odroid_di
     }
     switch (sp) {
         case ODROID_SOUND_PROFILE_VERY_LOW:
-            sprintf(option->value, "   very low  ");
+            volume_tbl = volume_tbl_very_low;
+            sprintf(option->value, "very low ");
             break;
         case ODROID_SOUND_PROFILE_LOW:
-            sprintf(option->value, "     low     ");
+            volume_tbl = volume_tbl_low;
+            sprintf(option->value, "low      ");
             break;
         case ODROID_SOUND_PROFILE_NORMAL:
-            sprintf(option->value, "    normal   ");
+            volume_tbl = volume_tbl_normal;
+            sprintf(option->value, "normal   ");
             break;
         default:
-            sprintf(option->value, "** invalid **");
+            volume_tbl = volume_tbl_normal;
+            sprintf(option->value, "*INVALID*");
             break;
     }
     return event == ODROID_DIALOG_ENTER;
