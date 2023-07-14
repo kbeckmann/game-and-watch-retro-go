@@ -32,7 +32,10 @@ extern int16_t pendingSamples;
 extern int16_t audiobuffer_emulator[AUDIO_BUFFER_LENGTH] __attribute__((section (".audio")));
 extern int16_t audiobuffer_dma[AUDIO_BUFFER_LENGTH * 2] __attribute__((section (".audio")));
 
-extern const uint8_t volume_tbl[ODROID_AUDIO_VOLUME_MAX + 1];
+extern const uint8_t *volume_tbl;
+extern const uint8_t volume_tbl_normal[ODROID_AUDIO_VOLUME_MAX + 1];
+extern const uint8_t volume_tbl_low[ODROID_AUDIO_VOLUME_MAX + 1];
+extern const uint8_t volume_tbl_very_low[ODROID_AUDIO_VOLUME_MAX + 1];
 
 bool common_emu_frame_loop(void);
 void common_emu_input_loop(odroid_gamepad_state_t *joystick, odroid_dialog_choice_t *game_options);
