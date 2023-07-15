@@ -6,6 +6,10 @@
 
 #define GW_LCD_WIDTH  320
 #define GW_LCD_HEIGHT 240
+#define GW_LCD_ORIG_WIDTH   160
+#define GW_LCD_ORIG_HEIGHT  144
+#define GW_LCD_FIT_WIDTH    266
+#define GW_LCD_FIT_HEIGHT   240
 
 #ifdef GW_LCD_MODE_LUT8
 extern uint8_t framebuffer1[GW_LCD_WIDTH * GW_LCD_HEIGHT]  __attribute__((section (".lcd1"))) __attribute__ ((aligned (16)));

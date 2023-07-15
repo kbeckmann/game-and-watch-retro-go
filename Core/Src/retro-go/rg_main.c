@@ -6,6 +6,7 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "common.h"
 #include "appid.h"
 #include "rg_emulators.h"
 #include "rg_favorites.h"
@@ -126,7 +127,7 @@ static bool main_menu_timeout_cb(odroid_dialog_choice_t *option, odroid_dialog_e
         else if (timeout == 0xffff) {
             return false;
         }
-        
+
         if (timeout > (0xffff - step)) {
             step = 0xffff - timeout;
         }
@@ -135,6 +136,52 @@ static bool main_menu_timeout_cb(odroid_dialog_choice_t *option, odroid_dialog_e
         gui_redraw();
     }
     sprintf(option->value, "%d s", odroid_settings_MainMenuTimeoutS_get());
+    return event == ODROID_DIALOG_ENTER;
+}
+
+static bool main_menu_sound_profile_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat)
+{
+    int32_t sp = odroid_settings_SoundProfile_get();
+
+    if (event == ODROID_DIALOG_PREV) {
+        if (sp == 0) {
+            // do not cycle, limited amount of choices
+            // also avoid problems if the key is hold pressed
+            // Lower than 10 seconds doesn't make sense. set to 0 = disabled
+            odroid_settings_SoundProfile_set(0);
+            return false; // no change
+        }
+
+        odroid_settings_SoundProfile_set(sp - 1);
+        gui_redraw();
+    }
+    if (event == ODROID_DIALOG_NEXT) {
+        if (sp == ODROID_SOUND_PROFILE_NORMAL) {
+            odroid_settings_SoundProfile_set(ODROID_SOUND_PROFILE_NORMAL);
+            return false; // no change
+        }
+
+        odroid_settings_SoundProfile_set(sp + 1);
+        gui_redraw();
+    }
+    switch (sp) {
+        case ODROID_SOUND_PROFILE_VERY_LOW:
+            volume_tbl = volume_tbl_very_low;
+            sprintf(option->value, "very low ");
+            break;
+        case ODROID_SOUND_PROFILE_LOW:
+            volume_tbl = volume_tbl_low;
+            sprintf(option->value, "low      ");
+            break;
+        case ODROID_SOUND_PROFILE_NORMAL:
+            volume_tbl = volume_tbl_normal;
+            sprintf(option->value, "normal   ");
+            break;
+        default:
+            volume_tbl = volume_tbl_normal;
+            sprintf(option->value, "*INVALID*");
+            break;
+    }
     return event == ODROID_DIALOG_ENTER;
 }
 
@@ -234,8 +281,8 @@ void retro_loop()
                     {0, "By", "ducalex", 1, NULL},
                     {0, "", "kbeckmann", 1, NULL},
                     {0, "", "stacksmashing", 1, NULL},
+                    {0, "", "niflheims", 1, NULL},
                     {0, "", "", -1, NULL},
-                    {2, "Debug menu", "", 1, NULL},
                     {1, "Reset settings", "", 1, NULL},
                     {0, "Close", "", 1, NULL},
                     ODROID_DIALOG_CHOICE_LAST
@@ -248,81 +295,17 @@ void retro_loop()
                         odroid_settings_reset();
                         odroid_system_switch_app(0); // reset
                     }
-                } else if (sel == 2) {
-                    // Debug menu
-                    uint8_t jedec_id[3];
-                    char jedec_id_str[16];
-                    uint8_t status;
-                    char status_str[8];
-                    uint8_t config;
-                    char config_str[8];
-                    char erase_size_str[32];
-                    char dbgmcu_id_str[16];
-                    char dbgmcu_cr_str[16];
-
-                    // Read jedec id and status register from the external flash
-                    OSPI_DisableMemoryMappedMode();
-                    OSPI_ReadJedecId(&jedec_id[0]);
-                    OSPI_ReadSR(&status);
-                    OSPI_ReadCR(&config);
-                    OSPI_EnableMemoryMappedMode();
-
-                    snprintf(jedec_id_str, sizeof(jedec_id_str), "%02X %02X %02X", jedec_id[0], jedec_id[1], jedec_id[2]);
-                    snprintf(status_str, sizeof(status_str), "0x%02X", status);
-                    snprintf(config_str, sizeof(config_str), "0x%02X", config);
-                    snprintf(erase_size_str, sizeof(erase_size_str), "%ld kB", OSPI_GetSmallestEraseSize() / 1024);
-                    snprintf(dbgmcu_id_str, sizeof(dbgmcu_id_str), "0x%08lX", DBGMCU->IDCODE);
-                    snprintf(dbgmcu_cr_str, sizeof(dbgmcu_cr_str), "0x%08lX", DBGMCU->CR);
-
-                    odroid_dialog_choice_t debuginfo[] = {
-                        {0, "Flash JEDEC ID", (char *) jedec_id_str, 1, NULL},
-                        {0, "Flash Name", (char*) OSPI_GetFlashName(), 1, NULL},
-                        {0, "Flash SR", (char *) status_str, 1, NULL},
-                        {0, "Flash CR", (char *) config_str, 1, NULL},
-                        {0, "Smallest erase", erase_size_str, 1, NULL},
-                        {0, "------------------", "", 1, NULL},
-                        {0, "DBGMCU IDCODE", dbgmcu_id_str, 1, NULL},
-                        {1, "Enable DBGMCU CK", dbgmcu_cr_str, 1, NULL},
-                        {2, "Disable DBGMCU CK", "", 1, NULL},
-                        {0, "Close", "", 1, NULL},
-                        ODROID_DIALOG_CHOICE_LAST
-                    };
-
-                    int sel = odroid_overlay_dialog("Debug", debuginfo, -1);
-                    switch (sel) {
-                    case 1:
-                        // Enable debug clocks explicitly
-                        SET_BIT(DBGMCU->CR,
-                            DBGMCU_CR_DBG_SLEEPCD |
-                            DBGMCU_CR_DBG_STOPCD |
-                            DBGMCU_CR_DBG_STANDBYCD |
-                            DBGMCU_CR_DBG_TRACECKEN |
-                            DBGMCU_CR_DBG_CKCDEN |
-                            DBGMCU_CR_DBG_CKSRDEN
-                        );
-                    case 2:
-                        // Disable debug clocks explicitly
-                        CLEAR_BIT(DBGMCU->CR,
-                            DBGMCU_CR_DBG_SLEEPCD |
-                            DBGMCU_CR_DBG_STOPCD |
-                            DBGMCU_CR_DBG_STANDBYCD |
-                            DBGMCU_CR_DBG_TRACECKEN |
-                            DBGMCU_CR_DBG_CKCDEN |
-                            DBGMCU_CR_DBG_CKSRDEN
-                        );
-                        break;
-                    default:
-                        break;
-                    }
                 }
 
                 gui_redraw();
             }
             else if (last_key == ODROID_INPUT_VOLUME) {
                 char timeout_value[32];
+                char sp_value[32];
                 odroid_dialog_choice_t choices[] = {
                     {0, "---", "", -1, NULL},
                     {0, "Idle power off", timeout_value, 1, &main_menu_timeout_cb},
+                    {0, "Sound profile",  sp_value,      1, &main_menu_sound_profile_cb},
                     // {0, "Color theme", "1/10", 1, &color_shift_cb},
                     // {0, "Font size", "Small", 1, &font_size_cb},
                     // {0, "Show cover", "Yes", 1, &show_cover_cb},

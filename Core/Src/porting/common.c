@@ -33,7 +33,7 @@ int16_t audiobuffer_dma[AUDIO_BUFFER_LENGTH * 2] __attribute__((section (".audio
 dma_transfer_state_t dma_state;
 uint32_t dma_counter;
 
-const uint8_t volume_tbl[ODROID_AUDIO_VOLUME_MAX + 1] = {
+const uint8_t volume_tbl_normal[ODROID_AUDIO_VOLUME_MAX + 1] = {
     (uint8_t)(UINT8_MAX * 0.00f),
     (uint8_t)(UINT8_MAX * 0.06f),
     (uint8_t)(UINT8_MAX * 0.125f),
@@ -45,6 +45,34 @@ const uint8_t volume_tbl[ODROID_AUDIO_VOLUME_MAX + 1] = {
     (uint8_t)(UINT8_MAX * 0.80f),
     (uint8_t)(UINT8_MAX * 1.00f),
 };
+
+const uint8_t volume_tbl_low[ODROID_AUDIO_VOLUME_MAX + 1] = {
+    (uint8_t)(UINT8_MAX * 0.00f),
+    (uint8_t)(UINT8_MAX * 0.015f),
+    (uint8_t)(UINT8_MAX * 0.031f),
+    (uint8_t)(UINT8_MAX * 0.140f),
+    (uint8_t)(UINT8_MAX * 0.25f),
+    (uint8_t)(UINT8_MAX * 0.35f),
+    (uint8_t)(UINT8_MAX * 0.42f),
+    (uint8_t)(UINT8_MAX * 0.60f),
+    (uint8_t)(UINT8_MAX * 0.80f),
+    (uint8_t)(UINT8_MAX * 1.00f),
+};
+
+const uint8_t volume_tbl_very_low[ODROID_AUDIO_VOLUME_MAX + 1] = {
+    (uint8_t)(UINT8_MAX * 0.00f),
+    (uint8_t)(UINT8_MAX * 0.004f),
+    (uint8_t)(UINT8_MAX * 0.008f),
+    (uint8_t)(UINT8_MAX * 0.015f),
+    (uint8_t)(UINT8_MAX * 0.031f),
+    (uint8_t)(UINT8_MAX * 0.140f),
+    (uint8_t)(UINT8_MAX * 0.25f),
+    (uint8_t)(UINT8_MAX * 0.35f),
+    (uint8_t)(UINT8_MAX * 0.42f),
+    (uint8_t)(UINT8_MAX * 0.60f),
+};
+
+const uint8_t *volume_tbl = volume_tbl_normal;
 
 void HAL_SAI_TxHalfCpltCallback(SAI_HandleTypeDef *hsai)
 {
@@ -502,6 +530,15 @@ static void draw_darken_rectangle(pixel_t *fb, uint16_t x1, uint16_t y1, uint16_
 }
 
 __attribute__((optimize("unroll-loops")))
+static void draw_black_rectangle(pixel_t *fb, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2){
+    for(uint16_t i=y1; i < y2; i++){
+        for(uint16_t j=x1; j < x2; j++){
+            fb[j + GW_LCD_WIDTH * i] = 0;
+        }
+    }
+}
+
+__attribute__((optimize("unroll-loops")))
 static void draw_darken_rounded_rectangle(pixel_t *fb, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2){
     // *1 is inclusive, *2 is exclusive
     uint16_t h = y2 - y1;
@@ -594,6 +631,7 @@ static void draw_clear_rounded_rectangle(pixel_t *fb, uint16_t x1, uint16_t y1, 
         clear_pixel(&fb[ i + GW_LCD_WIDTH * (y2 - j - 1)]);
 }
 
+// TODO make those macros calling function which return proper dimensions
 #define INGAME_OVERLAY_X 265
 #define INGAME_OVERLAY_Y 10
 #define INGAME_OVERLAY_BARS_H 128
@@ -657,7 +695,7 @@ void common_ingame_overlay(void) {
                             INGAME_OVERLAY_BOX_X + INGAME_OVERLAY_BOX_W,
                             by + bh);
                 else
-                    draw_darken_rectangle(fb,
+                    draw_black_rectangle(fb,
                             INGAME_OVERLAY_BOX_X,
                             by,
                             INGAME_OVERLAY_BOX_X + INGAME_OVERLAY_BOX_W,
@@ -685,7 +723,7 @@ void common_ingame_overlay(void) {
                             INGAME_OVERLAY_BOX_X + INGAME_OVERLAY_BOX_W,
                             by + bh);
                 else
-                    draw_darken_rectangle(fb,
+                    draw_black_rectangle(fb,
                             INGAME_OVERLAY_BOX_X,
                             by,
                             INGAME_OVERLAY_BOX_X + INGAME_OVERLAY_BOX_W,
