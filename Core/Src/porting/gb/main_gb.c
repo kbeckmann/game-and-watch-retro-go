@@ -97,6 +97,7 @@ static inline void screen_blit_nn(int32_t dest_width, int32_t dest_height)
     printf("Blit: %d us\n", (1000000 * PROFILING_DIFF(t_blit)) / t_blit_t0.SecondFraction);
 #endif
 
+    common_ingame_overlay();
     lcd_swap();
 }
 
@@ -160,6 +161,7 @@ static void screen_blit_bilinear(int32_t dest_width)
     printf("Blit: %d us\n", (1000000 * PROFILING_DIFF(t_blit)) / t_blit_t0.SecondFraction);
 #endif
 
+    common_ingame_overlay();
     lcd_swap();
 }
 
@@ -304,6 +306,7 @@ static inline void screen_blit_jth(void) {
     printf("Blit: %d us\n", (1000000 * PROFILING_DIFF(t_blit)) / t_blit_t0.SecondFraction);
 #endif
 
+    common_ingame_overlay();
     lcd_swap();
 }
 
